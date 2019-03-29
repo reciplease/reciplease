@@ -1,0 +1,6 @@
+# Intellij folder
+**/.idea
+
+# Python junk
+**/venv
+**/*.pyc
