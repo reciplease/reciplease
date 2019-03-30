@@ -1,0 +1,3 @@
+[submodule "reciplease-inventory"]
+	path = reciplease-inventory
+	url = https://github.com/rhys-saldanha/reciplease-inventory
