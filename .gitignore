@@ -1,6 +1,18 @@
-# Intellij folder
-**/.idea
+HELP.md
+/target/
+!.mvn/wrapper/maven-wrapper.jar
 
-# Python junk
-**/venv
-**/*.pyc
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
