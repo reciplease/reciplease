@@ -11,12 +11,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import java.util.Calendar;
 
 @Entity
 @NoArgsConstructor
 @RequiredArgsConstructor
 @Data
-public class InventoryItem {
+public class PlannedRecipe {
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
     @Column(columnDefinition = "CHAR(32)")
@@ -25,7 +28,8 @@ public class InventoryItem {
     private String id;
     @ManyToOne
     @NonNull
-    private Ingredient ingredient;
+    private Recipe recipe;
+    @Temporal(TemporalType.DATE)
     @NonNull
-    private Integer amount;
+    private Calendar date;
 }
