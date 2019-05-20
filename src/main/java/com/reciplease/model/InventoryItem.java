@@ -11,6 +11,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import java.util.Calendar;
 
 @Entity
 @NoArgsConstructor
@@ -28,4 +31,7 @@ public class InventoryItem {
     private Ingredient ingredient;
     @NonNull
     private Integer amount;
+    @Temporal(TemporalType.DATE)
+    @NonNull
+    private Calendar expiration;
 }
