@@ -10,22 +10,18 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 
 @Entity
 @NoArgsConstructor
 @RequiredArgsConstructor
 @Data
-public class InventoryItem {
+public class Ingredient {
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
     @Column(columnDefinition = "CHAR(32)")
     @Id
     @NonNull
     private String id;
-    @ManyToOne
     @NonNull
-    private Ingredient ingredient;
-    @NonNull
-    private Integer amount;
+    private String name;
 }
