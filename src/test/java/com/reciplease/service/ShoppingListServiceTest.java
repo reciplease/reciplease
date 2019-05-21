@@ -21,11 +21,11 @@ import static org.mockito.Mockito.doReturn;
 
 public class ShoppingListServiceTest {
     @Mock
-    PlannedRecipeRepository plannedRecipeRepository;
+    private PlannedRecipeRepository plannedRecipeRepository;
     @Mock
-    Recipe recipe;
+    private Recipe recipe;
     @Mock
-    RecipeItem recipeItem;
+    private RecipeItem recipeItem;
 
     private ShoppingListService shoppingListService;
 
