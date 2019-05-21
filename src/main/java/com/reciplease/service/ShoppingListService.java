@@ -17,18 +17,18 @@ import java.util.stream.Collectors;
 public class ShoppingListService {
     final PlannedRecipeRepository plannedRecipeRepository;
 
-    public ShoppingList generateShoppingList(LocalDate start, LocalDate end) {
-        List<PlannedRecipe> plannedRecipes = plannedRecipeRepository.findByDateIsBetween(start, end);
-        List<Recipe> recipes = getRecipes(plannedRecipes);
-        List<RecipeItem> recipeItems = getItemsFromRecipes(recipes);
+    public ShoppingList generateShoppingList(final LocalDate start, final LocalDate end) {
+        final List<PlannedRecipe> plannedRecipes = plannedRecipeRepository.findByDateIsBetween(start, end);
+        final List<Recipe> recipes = getRecipes(plannedRecipes);
+        final List<RecipeItem> recipeItems = getItemsFromRecipes(recipes);
         return new ShoppingList(recipeItems);
     }
 
-    private List<Recipe> getRecipes(List<PlannedRecipe> plannedRecipes) {
+    private List<Recipe> getRecipes(final List<PlannedRecipe> plannedRecipes) {
         return plannedRecipes.stream().map(PlannedRecipe::getRecipe).collect(Collectors.toList());
     }
 
-    private List<RecipeItem> getItemsFromRecipes(List<Recipe> recipes) {
+    private List<RecipeItem> getItemsFromRecipes(final List<Recipe> recipes) {
         return recipes.stream().flatMap(recipe -> recipe.getRecipeItems().stream()).collect(Collectors.toList());
     }
 }
