@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 public class ShoppingListService {
-    final PlannedRecipeRepository plannedRecipeRepository;
+    private final PlannedRecipeRepository plannedRecipeRepository;
 
     public ShoppingList generateShoppingList(final LocalDate start, final LocalDate end) {
         final List<PlannedRecipe> plannedRecipes = plannedRecipeRepository.findByDateIsBetween(start, end);

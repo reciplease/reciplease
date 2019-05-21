@@ -6,5 +6,5 @@ import java.util.List;
 
 @Data
 public class ShoppingList {
-    final List<RecipeItem> items;
+    private final List<RecipeItem> items;
 }

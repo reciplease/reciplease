@@ -23,9 +23,9 @@ import static org.hamcrest.collection.IsEmptyCollection.empty;
 @DataJpaTest
 public class PlannedRecipeRepositoryTest {
     @Autowired
-    PlannedRecipeRepository plannedRecipeRepository;
+    private PlannedRecipeRepository plannedRecipeRepository;
     @Autowired
-    RecipeRepository recipeRepository;
+    private RecipeRepository recipeRepository;
 
     @Before
     public void setUp() {
