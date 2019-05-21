@@ -1,25 +1,22 @@
 package com.reciplease.model;
 
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
 @RequiredArgsConstructor
-@Data
-public class Recipe {
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid")
-    @Column(columnDefinition = "CHAR(32)")
-    @Id
+@Getter
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
+public class Recipe extends BaseEntity {
+    @ManyToMany
     @NonNull
-    private String id;
+    private List<RecipeItem> recipeItems;
 }
