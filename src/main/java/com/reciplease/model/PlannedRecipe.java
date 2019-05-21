@@ -19,7 +19,7 @@ import java.util.Calendar;
 @NoArgsConstructor
 @RequiredArgsConstructor
 @Data
-public class InventoryItem {
+public class PlannedRecipe {
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
     @Column(columnDefinition = "CHAR(32)")
@@ -28,10 +28,8 @@ public class InventoryItem {
     private String id;
     @ManyToOne
     @NonNull
-    private Ingredient ingredient;
-    @NonNull
-    private Integer amount;
+    private Recipe recipe;
     @Temporal(TemporalType.DATE)
     @NonNull
-    private Calendar expiration;
+    private Calendar date;
 }
