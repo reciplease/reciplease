@@ -17,9 +17,9 @@ jobs:
 
       - restore_cache:
           keys:
-            - dependencies-{{ checksum "yarn.lock" }}
+            - yarn-packages-{{ checksum "yarn.lock" }}
             # fallback to using the latest cache if no exact match is found
-            - dependencies-
+            - yarn-packages-
 
       - run:
           name: Install node-gyp
@@ -36,7 +36,7 @@ jobs:
 
       - run:
           name: Install JUnit coverage reporter
-          command: yan add --dev jest-junit
+          command: yarn add --dev jest-junit
 
       - run:
           name: Run tests with JUnit as reporter
