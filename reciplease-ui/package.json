@@ -12,7 +12,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "selenium-setup": "selenium-standalone install",
+    "selenium-start": "selenium-standalone start",
+    "e2e-tests": "wdio wdio.conf.js",
+    "e2e-tests-watch": "wdio wdio.conf.js --watch"
   },
   "proxy": "http://localhost:8080",
   "eslintConfig": {
@@ -31,11 +35,20 @@
     ]
   },
   "devDependencies": {
+    "@wdio/cli": "^5.10.4",
+    "@wdio/dot-reporter": "^5.9.3",
+    "@wdio/local-runner": "^5.10.4",
+    "@wdio/mocha-framework": "^5.10.1",
+    "@wdio/selenium-standalone-service": "^5.9.3",
+    "@wdio/sync": "^5.10.1",
+    "chai": "^4.2.0",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "eslint": "^5.16.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-react": "^7.13.0",
-    "react-test-renderer": "^16.8.6"
+    "react-test-renderer": "^16.8.6",
+    "selenium-standalone": "^6.16.0",
+    "webdriverio": "^5.10.4"
   }
 }
