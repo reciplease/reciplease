@@ -10,14 +10,11 @@ jobs:
     docker:
       - image: circleci/node
 
-    working_directory: ~/repo
+    working_directory: ~/repo/reciplease-ui
 
     steps:
-      - checkout
-
-      - run:
-          name: Change to UI directory
-          command: cd reciplease-ui
+      - checkout:
+          path: ~/repo
 
       - restore_cache:
           keys:
