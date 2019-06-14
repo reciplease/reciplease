@@ -11,7 +11,9 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "CI=true react-scripts test",
+    "junit": "CI=true react-scripts test --ci --reporters=default --reporters=jest-junit",
+    "watch-test": "react-scripts test",
     "eject": "react-scripts eject",
     "selenium-setup": "selenium-standalone install",
     "selenium-start": "selenium-standalone start",
@@ -47,6 +49,7 @@
     "eslint": "^5.16.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-react": "^7.13.0",
+    "jest-junit": "^6.4.0",
     "react-test-renderer": "^16.8.6",
     "selenium-standalone": "^6.16.0",
     "webdriverio": "^5.10.4"
