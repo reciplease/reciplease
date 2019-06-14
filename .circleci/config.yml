@@ -26,6 +26,10 @@ jobs:
           command: yarn global add node-gyp
 
       - run:
+          name: Install JUnit coverage reporter
+          command: yarn add --dev jest-junit
+
+      - run:
           name: Install dependencies
           command: yarn install --frozen -lockfile
       - save_cache:
@@ -33,10 +37,6 @@ jobs:
           key: yarn-packages-{{ checksum "yarn.lock" }}
           paths:
             - ~/.cache/yarn
-
-      - run:
-          name: Install JUnit coverage reporter
-          command: yarn add --dev jest-junit
 
       - run:
           name: Run tests with JUnit as reporter
