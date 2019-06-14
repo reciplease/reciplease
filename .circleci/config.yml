@@ -27,12 +27,12 @@ jobs:
           command: yarn global add node-gyp
 
       - run:
+          name: Install dependencies
+          command: yarn install --frozen -lockfile
+      - run:
           name: Install JUnit coverage reporter
           command: yarn add --dev jest-junit
 
-      - run:
-          name: Install dependencies
-          command: yarn install --frozen -lockfile
       - save_cache:
           name: Save yarn package cache
           key: yarn-packages-{{ checksum "yarn.lock" }}
@@ -41,9 +41,14 @@ jobs:
 
       - run:
           name: Run tests with JUnit as reporter
-          command: jest --ci --runInBand --reporter=default --reporters=jest-junit
+          command: yarn jest -- --ci --testResultsProcessor="jest-junit"
           environment:
             JEST_JUNIT_OUTPUT: "reports/junit/js-test-results.xml"
+
+      - store_test_results:
+          path: reports/junit
+      - store_artifacts:
+          path: reports/junit
   build:
     docker:
       # specify the version you desire here
