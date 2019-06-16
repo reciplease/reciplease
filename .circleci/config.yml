@@ -19,7 +19,6 @@ jobs:
       - restore_cache:
           keys:
             - yarn-packages-{{ checksum "yarn.lock" }}
-            # fallback to using the latest cache if no exact match is found
             - yarn-packages-
 
       - run:
@@ -69,8 +68,11 @@ jobs:
       - restore_cache:
           keys:
             - maven-{{ checksum "pom.xml" }}
-            # fallback to using the latest cache if no exact match is found
             - maven-
+      - restore_cache:
+          keys:
+            - yarn-packages-{{ checksum "reciplease-ui/yarn.lock" }}
+            - yarn-packages-
 
       - run: mvn dependency:go-offline
 
@@ -78,6 +80,11 @@ jobs:
           key: maven-{{ checksum "pom.xml" }}
           paths:
             - ~/.m2
+      - save_cache:
+          name: Save yarn package cache
+          key: yarn-packages-{{ checksum "reciplease-ui/yarn.lock" }}
+          paths:
+            - ~/.cache/yarn
 
       - run: mvn test
       - store_artifacts:
