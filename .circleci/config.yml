@@ -107,4 +107,6 @@ workflows:
   build:
     jobs:
       - test-ui
-      - build
+      - build:
+          requires:
+            - test-ui
