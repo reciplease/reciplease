@@ -6,6 +6,45 @@ version: 2.1
 orbs:
   codecov: codecov/codecov@1.0.2
 jobs:
+  test-ui:
+    docker:
+      - image: circleci/node
+
+    working_directory: ~/repo/reciplease-ui
+
+    steps:
+      - checkout:
+          path: ~/repo
+
+      - restore_cache:
+          keys:
+            - yarn-packages-{{ checksum "yarn.lock" }}
+            - yarn-packages-
+
+      - run:
+          name: Install node-gyp
+          command: yarn global add node-gyp
+
+      - run:
+          name: Install dependencies
+          command: yarn install --frozen -lockfile
+
+      - save_cache:
+          name: Save yarn package cache
+          key: yarn-packages-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/.cache/yarn
+
+      - run:
+          name: Run tests with JUnit as reporter
+          command: yarn run junit
+          environment:
+            JEST_JUNIT_OUTPUT: "reports/junit/js-test-results.xml"
+
+      - store_test_results:
+          path: reports/junit
+      - store_artifacts:
+          path: reports/junit
   build:
     docker:
       # specify the version you desire here
@@ -28,11 +67,24 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-            - dependencies-{{ checksum "pom.xml" }}
-            # fallback to using the latest cache if no exact match is found
-            - dependencies-
+            - maven-{{ checksum "pom.xml" }}
+            - maven-
+      - restore_cache:
+          keys:
+            - yarn-packages-{{ checksum "reciplease-ui/yarn.lock" }}
+            - yarn-packages-
 
       - run: mvn dependency:go-offline
+
+      - save_cache:
+          key: maven-{{ checksum "pom.xml" }}
+          paths:
+            - ~/.m2
+      - save_cache:
+          name: Save yarn package cache
+          key: yarn-packages-{{ checksum "reciplease-ui/yarn.lock" }}
+          paths:
+            - ~/.cache/yarn
 
       - run: mvn test
       - store_artifacts:
@@ -42,16 +94,19 @@ jobs:
       - run:
           name: Save test results
           command: |
-            mkdir -p ~/test-results/junit/
-            find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/test-results/junit/ \;
+            mkdir -p reports/junit/
+            find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} reports/junit/ \;
           when: always
       - store_test_results:
-          path: ~/test-results
+          path: reports/junit
       - store_artifacts:
-          path: ~/test-results/junit
+          path: reports/junit
 
 workflows:
   version: 2
   build:
     jobs:
-      - build
+      - test-ui
+      - build:
+          requires:
+            - test-ui
