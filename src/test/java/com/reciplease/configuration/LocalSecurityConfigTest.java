@@ -20,9 +20,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@Import(WebSecurityConfig.class)
-@ActiveProfiles("test")
-public class SecureTest {
+@Import(LocalSecurityConfig.class)
+@ActiveProfiles("local")
+public class LocalSecurityConfigTest {
 
     @Autowired
     private WebApplicationContext context;
@@ -38,18 +38,8 @@ public class SecureTest {
     }
 
     @Test
-    public void shouldNotRequireSSL() throws Exception {
+    public void shouldNotRequireLogin() throws Exception {
         mvc.perform(get("/")).andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void shouldRequireSSL_redirect() throws Exception {
-        mvc.perform(get("/").header("X-Forwarded-Proto", true)).andExpect(status().is3xxRedirection());
-    }
-
-    @Test
-    public void shouldRequireSSL() throws Exception {
-        mvc.perform(get("/").header("X-Forwarded-Proto", true).secure(true)).andExpect(status().isNotFound());
     }
 }
 
