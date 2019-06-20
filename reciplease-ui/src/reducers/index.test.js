@@ -4,7 +4,10 @@ import { initialState, reducer } from '.';
 import types from '../constants/';
 
 describe('Reducer', () => {
-  const ingredientName = 'ingredient name';
+  const ingredient = {
+    name: 'name',
+    measure: 'measure'
+  };
 
   it('should return the initial state when no action passed', () => {
     expect(reducer(undefined, {}))
@@ -15,16 +18,12 @@ describe('Reducer', () => {
     it('should return the correct state', () => {
       const action = {
         type: types.SUBMIT_INGREDIENT,
-        id: 1,
-        text: ingredientName,
+        ingredient,
       };
 
       const expectedState = {
         ingredients: [
-          {
-            id: 1,
-            text: ingredientName,
-          },
+          ingredient,
         ],
       };
 
