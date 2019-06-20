@@ -40,7 +40,9 @@
     "eslint": "^5.16.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-react": "^7.13.0",
+    "fetch-mock": "^7.3.3",
     "jest-junit": "^6.4.0",
+    "node-fetch": "^2.6.0",
     "prop-types": "^15.7.2"
   }
 }
