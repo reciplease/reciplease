@@ -11,10 +11,7 @@ export const reducer = (state = initialState, action) => {
         ...state,
         ingredients: [
           ...state.ingredients,
-          {
-            id: action.id,
-            text: action.text,
-          }
+          action.ingredient
         ]
       };
     default:
