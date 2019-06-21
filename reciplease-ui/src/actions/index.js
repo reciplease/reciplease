@@ -1,18 +1,10 @@
 import types from '../constants/';
 
-let ingredientId = 0;
-
-const nextId = () => {
-  ingredientId += 1;
-  return ingredientId;
-};
-
 const actions = {
-  submitIngredient(text) {
+  submitIngredient(ingredient) {
     return {
       type: types.SUBMIT_INGREDIENT,
-      id: nextId(),
-      text,
+      ingredient,
     };
   },
 };

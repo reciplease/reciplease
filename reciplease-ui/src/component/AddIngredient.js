@@ -39,10 +39,8 @@ class AddIngredient extends Component {
   handleSubmit(event) {
     event.preventDefault();
     this.props.submitIngredient({
-      ingredient: {
         name: this.state.name,
         measure: this.state.measure
-      }
     });
     this.setState({
       name: '',

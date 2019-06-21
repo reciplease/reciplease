@@ -66,10 +66,8 @@ describe('AddIngredient component', () => {
 
       expect(submitMock.mock.calls[0][0])
         .toEqual({
-          ingredient: {
             name: 'name',
             measure: 'measure'
-          }
         });
     });
   });
