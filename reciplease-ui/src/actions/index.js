@@ -8,11 +8,10 @@ const nextId = () => {
 };
 
 const actions = {
-  submitIngredient(text) {
+  submitIngredient(ingredient) {
     return {
       type: types.SUBMIT_INGREDIENT,
-      id: nextId(),
-      text,
+      ingredient,
     };
   },
 };
