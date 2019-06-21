@@ -20,9 +20,9 @@ const mapStateToProps = state => {
 };
 
 const mapDispatchToProps = dispatch => ({
-  submitIngredient: (text) => {
-    if (text) {
-      dispatch(actions.submitIngredient(text));
+  submitIngredient: (ingredient) => {
+    if (ingredient) {
+      dispatch(actions.submitIngredient(ingredient));
     }
   },
 });
