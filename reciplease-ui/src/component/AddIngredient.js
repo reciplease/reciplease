@@ -1,6 +1,18 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Button from '@material-ui/core/Button';
+import { Button, InputLabel, MenuItem, Select } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles(theme => ({
+  container: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+  },
+}));
 
 class AddIngredient extends Component {
   constructor(props) {
@@ -20,7 +32,7 @@ class AddIngredient extends Component {
       .then(res => res.json())
       .then((result) => {
         const measures = this.getMeasuresFromResult(result)
-          .map(measure => <option value={measure}>{measure}</option>);
+          .map(measure => <MenuItem value={measure}>{measure}</MenuItem>);
         this.setState({ measures });
       });
   }
@@ -54,27 +66,24 @@ class AddIngredient extends Component {
       <div>
         <form onSubmit={this.handleSubmit}>
           <div>
-            <label>
-              Name:
-              <input
-                className="ingredient-name-input"
-                value={this.state.name}
-                onChange={this.handleInputChange}
-              />
-            </label>
+            <InputLabel>Name</InputLabel>
+            <input
+              className="ingredient-name-input"
+              value={this.state.name}
+              onChange={this.handleInputChange}
+            />
           </div>
           <div>
-            <label>
-              Measure:
-              <select
-                className="ingredient-measure-select"
-                value={this.state.measure}
-                onChange={this.handleSelectChange}
+            <InputLabel>
+              Measure
+            </InputLabel>
+            <Select
+              value={this.state.measure}
+              onChange={this.handleSelectChange}
               >
-                <option value="default" disabled>Select...</option>
-                {this.state.measures}
-              </select>
-            </label>
+              <MenuItem value="default" disabled>Select...</MenuItem>
+              {this.state.measures}
+            </Select>
           </div>
           <Button variant="contained" color="primary" type="submit">
             Add Ingredient
