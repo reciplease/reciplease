@@ -4,7 +4,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import fetchMock from 'fetch-mock';
 import AddIngredient from './AddIngredient';
-import { Button } from '@material-ui/core';
+import { Button, MenuItem, Select } from '@material-ui/core';
 
 describe('AddIngredient component', () => {
   let component;
@@ -34,10 +34,11 @@ describe('AddIngredient component', () => {
       .toEqual('name');
   });
   it('should have measure select', () => {
-    expect(component.find('.ingredient-measure-select').length).toEqual(1);
+    expect(component.find(Select).length)
+      .toEqual(1);
   });
   it('should change state when select is changed', () => {
-    let measureSelect = component.find('.ingredient-measure-select');
+    let measureSelect = component.find(Select);
     measureSelect.prop('onChange')({ target: { value: 'measure' } });
     component.update();
     expect(component.state('measure'))
