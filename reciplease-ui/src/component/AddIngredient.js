@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import Button from '@material-ui/core/Button';
 
 class AddIngredient extends Component {
   constructor(props) {
@@ -75,9 +76,9 @@ class AddIngredient extends Component {
               </select>
             </label>
           </div>
-          <button type="submit" className="ingredient-submit">
+          <Button variant="contained" color="primary" type="submit">
             Add Ingredient
-          </button>
+          </Button>
         </form>
       </div>
     );
