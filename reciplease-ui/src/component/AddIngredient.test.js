@@ -4,6 +4,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import fetchMock from 'fetch-mock';
 import AddIngredient from './AddIngredient';
+import { Button } from '@material-ui/core';
 
 describe('AddIngredient component', () => {
   let component;
@@ -44,7 +45,7 @@ describe('AddIngredient component', () => {
   });
   describe('Add ingredient button', () => {
     it('should exist', () => {
-      expect(component.find('.ingredient-submit').length).toEqual(1);
+      expect(component.find(Button).length).toEqual(1);
     });
     it('should call function when clicked', () => {
       component = mount(<AddIngredient submitIngredient={submitMock} />);
