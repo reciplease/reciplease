@@ -11,7 +11,7 @@ jobs:
     docker:
       - image: circleci/node
 
-    working_directory: ~/repo/reciplease-ui
+    working_directory: ~/repo/web
 
     steps:
       - checkout:
@@ -73,18 +73,18 @@ jobs:
             - maven-
       - restore_cache:
           keys:
-            - yarn-packages-{{ checksum "reciplease-ui/yarn.lock" }}
+            - yarn-packages-{{ checksum "web/yarn.lock" }}
             - yarn-packages-
 
       - run: mvn dependency:go-offline
 
       - save_cache:
-          key: maven-{{ checksum "pom.xml" }}
+          key: maven-{{ checksum "core/pom.xml" }}
           paths:
             - ~/.m2
       - save_cache:
           name: Save yarn package cache
-          key: yarn-packages-{{ checksum "reciplease-ui/yarn.lock" }}
+          key: yarn-packages-{{ checksum "web/yarn.lock" }}
           paths:
             - ~/.cache/yarn
 
