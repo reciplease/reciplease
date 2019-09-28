@@ -7,7 +7,7 @@ orbs:
   codecov: codecov/codecov@1.0.2
 
 jobs:
-  test-ui:
+  web-test:
     docker:
       - image: circleci/node
 
@@ -47,7 +47,7 @@ jobs:
       - store_artifacts:
           path: reports/junit
 
-  build:
+  core-test:
     docker:
       # specify the version you desire here
       - image: circleci/openjdk:11-jdk
@@ -76,7 +76,7 @@ jobs:
             - yarn-packages-{{ checksum "web/yarn.lock" }}
             - yarn-packages-
 
-      - run: mvn dependency:go-offline
+      - run: mvn dependency:go-offline -pl core
 
       - save_cache:
           key: maven-{{ checksum "core/pom.xml" }}
@@ -88,7 +88,7 @@ jobs:
           paths:
             - ~/.cache/yarn
 
-      - run: mvn test
+      - run: mvn test -pl core
       - store_artifacts:
           path:  target
       - codecov/upload:
@@ -123,12 +123,12 @@ workflows:
   version: 2
   build:
     jobs:
-      - test-ui
-      - build
+      - web-test
+      - core-test
       - deploy:
           requires:
-            - test-ui
-            - build
+            - web-test
+            - core-test
           filters:
             branches:
               only: master
