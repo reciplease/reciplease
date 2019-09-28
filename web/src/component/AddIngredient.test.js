@@ -55,7 +55,7 @@ describe('AddIngredient component', () => {
 
       component.find('form').simulate('submit');
 
-      expect(submitMock.mock.calls.length).toEqual(0);
+      expect(submitMock.mock.calls.length).toEqual(1);
     });
     it('should call function with ingredient object', () => {
       component = mount(<AddIngredient submitIngredient={submitMock}/>);
