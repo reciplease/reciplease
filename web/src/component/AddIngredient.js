@@ -40,7 +40,7 @@ class AddIngredient extends Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    fetch('api/ingredients',
+    /*fetch('api/ingredients',
       {
         credentials: 'include',
         method: 'post',
@@ -57,7 +57,16 @@ class AddIngredient extends Component {
         console.log(result);
         this.setState({ successful: true });
       })
-      .catch(reason => console.log(reason));
+      .catch(reason => console.log(reason));*/
+
+    this.props.submitIngredient({
+      name: this.state.name,
+      measure: this.state.measure
+    });
+    this.setState({
+      name: '',
+      measure: 'default'
+    });
   }
 
   render() {
