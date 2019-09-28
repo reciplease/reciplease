@@ -13,6 +13,6 @@ HELP.md
 
 ### IntelliJ IDEA ###
 **/.idea
-*.iws
-*.iml
-*.ipr
+**/*.iws
+**/*.iml
+**/*.ipr
