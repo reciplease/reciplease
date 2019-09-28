@@ -9,8 +9,7 @@
     </parent>
 
     <artifactId>core</artifactId>
-    <version>${project.parent.version}</version>
-    <description>reciplease app</description>
+    <version>1.0.0-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
