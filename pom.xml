@@ -40,6 +40,16 @@
                     <tagNameFormat>@{project.version}</tagNameFormat>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.github.danielflower.mavenplugins</groupId>
+                <artifactId>multi-module-maven-release-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <releaseGoals>
+                        <releaseGoal>deploy</releaseGoal>
+                    </releaseGoals>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
