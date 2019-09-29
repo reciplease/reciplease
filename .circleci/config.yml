@@ -137,7 +137,7 @@ jobs:
             # commit and tag
             git add pom.xml
             git add **/pom.xml
-            git commit -m "Releasing: $NEW_VERSION"
+            git commit -m "[skip ci] Releasing: $NEW_VERSION"
             git tag "$NEW_VERSION"
 
             # publish
@@ -157,14 +157,12 @@ jobs:
             DEV_VERSION="${MAJ_VERSION}.${NEW_MINOR}-SNAPSHOT"
 
             # ready for development
-            git checkout verify
-            git merge --no-edit release
             mvn -s .circleci/settings.xml versions:set -DnewVersion="$DEV_VERSION" -DprocessAllModules
 
             git add pom.xml
             git add **/pom.xml
 
-            git commit -m "Preparing for development: $DEV_VERSION"
+            git commit -m "[skip ci]Preparing for development: $DEV_VERSION"
             git push
 
 workflows:
