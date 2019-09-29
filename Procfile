@@ -1,1 +1,1 @@
-web: java -jar dist/target/reciplease-dist.jar
+web: java -jar dist/target/reciplease-dist.jar --server.port=$PORT
