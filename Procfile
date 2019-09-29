@@ -1,0 +1,1 @@
+web: java -jar dist/target/reciplease-dist.jar
