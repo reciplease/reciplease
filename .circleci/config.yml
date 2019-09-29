@@ -115,10 +115,6 @@ jobs:
             chmod +x .circleci/setup-heroku.sh
             .circleci/setup-heroku.sh $HEROKU_APP $HEROKU_LOGIN $HEROKU_API_KEY
       - run:
-          name: Deploy master to Heroku
-          command: |
-            git push heroku master
-      - run:
           name: Cut new release
           command: |
             # assemble current and new version numbers
@@ -147,7 +143,13 @@ jobs:
             git checkout master
             git merge --no-edit release
             git push --tags
-
+      - run:
+          name: Deploy master to Heroku
+          command: |
+          git push heroku master
+      - run:
+          name: Prepare for next cycle
+          command: |
             # increment minor version number
             MAJ_VERSION=$(echo "$NEW_VERSION" | cut -d '.' -f 1)
             MIN_VERSION=$(echo "$NEW_VERSION" | cut -d '.' -f 2)
