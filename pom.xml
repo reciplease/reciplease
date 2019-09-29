@@ -12,7 +12,7 @@
 
     <groupId>org.reciplease</groupId>
     <artifactId>app</artifactId>
-    <version>1.0.0</version>
+    <version>.1-SNAPSHOT</version>
     <name>app</name>
     <url>https://app.reciplease.org</url>
 
