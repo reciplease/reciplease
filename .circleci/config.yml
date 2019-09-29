@@ -128,7 +128,7 @@ jobs:
             mvn -s .circleci/settings.xml versions:use-releases
 
             # write release version to POM
-            mvn -s .circleci/settings.xml versions:set -DnewVersion="$NEW_VERSION"
+            mvn -s .circleci/settings.xml versions:set -DnewVersion="$NEW_VERSION" -DprocessAllModules
 
             # setup git
             git config user.name "CircleCI"
@@ -158,7 +158,7 @@ jobs:
             # ready development branch
             git checkout verify
             git merge --no-edit release
-            mvn -s .circleci/settings.xml versions:set -DnewVersion="$DEV_VERSION"
+            mvn -s .circleci/settings.xml versions:set -DnewVersion="$DEV_VERSION" -DprocessAllModules
             git add pom.xml
             git commit -m "ready for development: $DEV_VERSION"
             git push origin verify
