@@ -115,7 +115,7 @@ jobs:
             chmod +x .circleci/setup-heroku.sh
             .circleci/setup-heroku.sh $HEROKU_APP $HEROKU_LOGIN $HEROKU_API_KEY
       - run:
-          name: Cut new release
+          name: Create new release
           command: |
             # assemble current and new version numbers
             OLD_VERSION=$(mvn -s .circleci/settings.xml -q \
@@ -136,7 +136,8 @@ jobs:
 
             # commit and tag
             git add pom.xml
-            git commit -m "release: $NEW_VERSION"
+            git add **/pom.xml
+            git commit -m "Releasing: $NEW_VERSION"
             git tag "$NEW_VERSION"
 
             # publish
@@ -155,15 +156,15 @@ jobs:
             NEW_MINOR=$(($MIN_VERSION + 1))
             DEV_VERSION="${MAJ_VERSION}.${NEW_MINOR}-SNAPSHOT"
 
-            # ready development branch
+            # ready for development
             git checkout verify
             git merge --no-edit release
             mvn -s .circleci/settings.xml versions:set -DnewVersion="$DEV_VERSION" -DprocessAllModules
-            git add pom.xml
-            git commit -m "ready for development: $DEV_VERSION"
-            git push origin verify
 
-            # clean up release branch
+            git add pom.xml
+            git add **/pom.xml
+
+            git commit -m "Preparing for development: $DEV_VERSION"
             git push
 
 workflows:
