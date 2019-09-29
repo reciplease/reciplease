@@ -153,7 +153,7 @@ jobs:
             MAJ_VERSION=$(echo "$NEW_VERSION" | cut -d '.' -f 1)
             MIN_VERSION=$(echo "$NEW_VERSION" | cut -d '.' -f 2)
             NEW_MINOR=$(($MIN_VERSION + 1))
-            DEV_VERSION="$MAJ_VERSION.$NEW_MINOR-SNAPSHOT"
+            DEV_VERSION="${MAJ_VERSION}.${NEW_MINOR}-SNAPSHOT"
 
             # ready development branch
             git checkout verify
