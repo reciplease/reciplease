@@ -106,7 +106,7 @@ jobs:
 
   deploy:
     docker:
-      - image: buildpack-deps:trusty
+      - image: circleci/openjdk:11-jdk
     steps:
       - checkout
       - run:
