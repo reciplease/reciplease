@@ -150,11 +150,17 @@ jobs:
       - run:
           name: Prepare for next cycle
           command: |
+            NEW_VERSION=$(mvn -s .circleci/settings.xml -q \
+              -Dexec.executable="echo" -Dexec.args='${project.version}' \
+              --non-recursive org.codehaus.mojo:exec-maven-plugin:1.3.1:exec)
+
             # increment minor version number
             MAJ_VERSION=$(echo "$NEW_VERSION" | cut -d '.' -f 1)
             MIN_VERSION=$(echo "$NEW_VERSION" | cut -d '.' -f 2)
-            NEW_MINOR=$(($MIN_VERSION + 1))
-            DEV_VERSION="${MAJ_VERSION}.${NEW_MINOR}-SNAPSHOT"
+            PATCH_VERSION=$(echo "$NEW_VERSION" | cut -d '.' -f 3)
+
+            NEW_PATCH=$((PATCH_VERSION + 1))
+            DEV_VERSION="${MAJ_VERSION}.${MIN_VERSION}.${NEW_PATCH}-SNAPSHOT"
 
             # ready for development
             mvn -s .circleci/settings.xml versions:set -DnewVersion="$DEV_VERSION" -DprocessAllModules
@@ -162,7 +168,7 @@ jobs:
             git add pom.xml
             git add **/pom.xml
 
-            git commit -m "[skip ci]Preparing for development: $DEV_VERSION"
+            git commit -m "[skip ci] Preparing for development: $DEV_VERSION"
             git push
 
 workflows:
