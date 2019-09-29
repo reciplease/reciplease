@@ -146,7 +146,7 @@ jobs:
       - run:
           name: Deploy master to Heroku
           command: |
-          git push heroku master
+            git push heroku master
       - run:
           name: Prepare for next cycle
           command: |
