@@ -139,9 +139,8 @@ jobs:
             git commit -m "release: $NEW_VERSION"
             git tag "$NEW_VERSION"
 
-            # land on master and publish
-            git checkout master
-            git merge --no-edit release
+            # publish
+            git push
             git push --tags
       - run:
           name: Deploy master to Heroku
