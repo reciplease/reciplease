@@ -7,11 +7,11 @@ orbs:
   codecov: codecov/codecov@1.0.2
 
 jobs:
-  test-ui:
+  web-test:
     docker:
       - image: circleci/node
 
-    working_directory: ~/repo/reciplease-ui
+    working_directory: ~/repo/web
 
     steps:
       - checkout:
@@ -47,7 +47,7 @@ jobs:
       - store_artifacts:
           path: reports/junit
 
-  build:
+  core-test:
     docker:
       # specify the version you desire here
       - image: circleci/openjdk:11-jdk
@@ -73,22 +73,22 @@ jobs:
             - maven-
       - restore_cache:
           keys:
-            - yarn-packages-{{ checksum "reciplease-ui/yarn.lock" }}
+            - yarn-packages-{{ checksum "web/yarn.lock" }}
             - yarn-packages-
 
-      - run: mvn dependency:go-offline
+      - run: mvn dependency:go-offline -pl core
 
       - save_cache:
-          key: maven-{{ checksum "pom.xml" }}
+          key: maven-{{ checksum "core/pom.xml" }}
           paths:
             - ~/.m2
       - save_cache:
           name: Save yarn package cache
-          key: yarn-packages-{{ checksum "reciplease-ui/yarn.lock" }}
+          key: yarn-packages-{{ checksum "web/yarn.lock" }}
           paths:
             - ~/.cache/yarn
 
-      - run: mvn test
+      - run: mvn test -pl core
       - store_artifacts:
           path:  target
       - codecov/upload:
@@ -118,17 +118,63 @@ jobs:
           name: Deploy master to Heroku
           command: |
             git push heroku master
+      - run:
+          name: Cut new release
+          command: |
+            # assemble current and new version numbers
+            OLD_VERSION=$(mvn -s .circleci/settings.xml -q \
+              -Dexec.executable="echo" -Dexec.args='${project.version}' \
+              --non-recursive org.codehaus.mojo:exec-maven-plugin:1.3.1:exec)
+            NEW_VERSION="${OLD_VERSION/-SNAPSHOT/}"
+            echo "Releasing $OLD_VERSION as $NEW_VERSION"
+
+            # ensure dependencies use release versions
+            mvn -s .circleci/settings.xml versions:use-releases
+
+            # write release version to POM
+            mvn -s .circleci/settings.xml versions:set -DnewVersion="$NEW_VERSION"
+
+            # setup git
+            git config user.name "CircleCI"
+            git config user.email "builds@doesnotexist.reciplease.org"
+
+            # commit and tag
+            git add pom.xml
+            git commit -m "release: $NEW_VERSION"
+            git tag "$NEW_VERSION"
+
+            # land on master and publish
+            git checkout master
+            git merge --no-edit release
+            git push --tags
+
+            # increment minor version number
+            MAJ_VERSION=$(echo "$NEW_VERSION" | cut -d '.' -f 1)
+            MIN_VERSION=$(echo "$NEW_VERSION" | cut -d '.' -f 2)
+            NEW_MINOR=$(($MIN_VERSION + 1))
+            DEV_VERSION="$MAJ_VERSION.$NEW_MINOR-SNAPSHOT"
+
+            # ready development branch
+            git checkout verify
+            git merge --no-edit release
+            mvn -s .circleci/settings.xml versions:set -DnewVersion="$DEV_VERSION"
+            git add pom.xml
+            git commit -m "ready for development: $DEV_VERSION"
+            git push origin verify
+
+            # clean up release branch
+            git push
 
 workflows:
   version: 2
   build:
     jobs:
-      - test-ui
-      - build
+      - web-test
+      - core-test
       - deploy:
           requires:
-            - test-ui
-            - build
+            - web-test
+            - core-test
           filters:
             branches:
               only: master
