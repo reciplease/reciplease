@@ -1,11 +1,11 @@
 package org.reciplease.service;
 
+import lombok.RequiredArgsConstructor;
 import org.reciplease.model.PlannedRecipe;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeItem;
 import org.reciplease.model.ShoppingList;
 import org.reciplease.repository.PlannedRecipeRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

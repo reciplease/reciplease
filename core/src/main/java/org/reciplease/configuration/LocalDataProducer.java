@@ -1,9 +1,9 @@
 package org.reciplease.configuration;
 
+import lombok.RequiredArgsConstructor;
 import org.reciplease.model.Ingredient;
 import org.reciplease.model.Measure;
 import org.reciplease.repository.IngredientRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;

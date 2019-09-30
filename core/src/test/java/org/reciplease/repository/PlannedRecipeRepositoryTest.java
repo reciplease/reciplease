@@ -1,11 +1,11 @@
 package org.reciplease.repository;
 
-import org.reciplease.model.PlannedRecipe;
-import org.reciplease.model.Recipe;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
+import org.reciplease.model.PlannedRecipe;
+import org.reciplease.model.Recipe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;

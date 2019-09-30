@@ -1,14 +1,14 @@
 package org.reciplease.service;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.reciplease.model.PlannedRecipe;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeItem;
 import org.reciplease.model.ShoppingList;
 import org.reciplease.repository.PlannedRecipeRepository;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
 import java.util.Collections;
