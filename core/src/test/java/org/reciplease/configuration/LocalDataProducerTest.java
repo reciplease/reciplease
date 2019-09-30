@@ -1,11 +1,11 @@
 package org.reciplease.configuration;
 
-import org.reciplease.model.Ingredient;
-import org.reciplease.repository.IngredientRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.reciplease.model.Ingredient;
+import org.reciplease.repository.IngredientRepository;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
