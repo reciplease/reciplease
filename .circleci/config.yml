@@ -76,7 +76,7 @@ jobs:
       - run: mvn dependency:go-offline
 
       - save_cache:
-          key: maven-{{ checksum "core/pom.xml" }}
+          key: maven-{{ checksum "pom.xml" }}
           paths:
             - ~/.m2
 
