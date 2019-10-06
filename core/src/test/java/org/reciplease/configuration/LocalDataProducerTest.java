@@ -4,11 +4,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.reciplease.model.Ingredient;
 import org.reciplease.repository.IngredientRepository;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 
 public class LocalDataProducerTest {
@@ -26,6 +24,6 @@ public class LocalDataProducerTest {
 
         localDataProducer.run(null);
 
-        verify(ingredientRepository, times(3)).save(any(Ingredient.class));
+        verify(ingredientRepository).saveAll(anyList());
     }
 }
