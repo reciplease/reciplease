@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { Button, InputLabel, MenuItem, Select } from '@material-ui/core';
 
 class AddIngredient extends Component {
@@ -17,17 +16,11 @@ class AddIngredient extends Component {
   }
 
   componentDidMount() {
-    fetch('api/profile/ingredients')
+    fetch('api/measures')
       .then(res => res.json())
-      .then((result) => {
-        const measures = this.getMeasuresFromResult(result)
-          .map(measure => <MenuItem value={measure}>{measure}</MenuItem>);
+      .then(measures => {
         this.setState({ measures });
       });
-  }
-
-  getMeasuresFromResult(result) {
-    return result.alps.descriptor[0].descriptor[1].doc.value.split(', ');
   }
 
   handleInputChange(event) {
@@ -40,10 +33,10 @@ class AddIngredient extends Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    /*fetch('api/ingredients',
+    fetch('api/ingredients',
       {
         credentials: 'include',
-        method: 'post',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
@@ -57,12 +50,8 @@ class AddIngredient extends Component {
         console.log(result);
         this.setState({ successful: true });
       })
-      .catch(reason => console.log(reason));*/
+      .catch(reason => console.log(reason));
 
-    this.props.submitIngredient({
-      name: this.state.name,
-      measure: this.state.measure
-    });
     this.setState({
       name: '',
       measure: 'default'
@@ -90,7 +79,7 @@ class AddIngredient extends Component {
               onChange={this.handleSelectChange}
               >
               <MenuItem value="default" disabled>Select...</MenuItem>
-              {this.state.measures}
+              {this.state.measures.map(measure => <MenuItem value={measure}>{measure.toLowerCase()}</MenuItem>)}
             </Select>
           </div>
           <Button variant="contained" color="primary" type="submit">
@@ -102,9 +91,6 @@ class AddIngredient extends Component {
   }
 }
 
-AddIngredient.propTypes = {
-  measures: PropTypes.arrayOf(PropTypes.string),
-  submitIngredient: PropTypes.func.isRequired
-};
+AddIngredient.propTypes = {};
 
 export default AddIngredient;
