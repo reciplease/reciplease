@@ -27,6 +27,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @WebMvcTest(IngredientController.class)
 public class IngredientControllerTest {
+
+    private static final String API_INGREDIENTS = "/api/ingredients";
+    private static final String ID = "ABC";
+    private static final String INGREDIENT_NAME = "ingredient name";
+    private static final Measure MEASURE = Measure.GRAMS;
+
     @MockBean
     IngredientRepository ingredientRepository;
     @Autowired
@@ -37,14 +43,14 @@ public class IngredientControllerTest {
     @Test
     public void shouldCreateIngredient() throws Exception {
         final Ingredient ingredient = Ingredient.builder()
-                .name("ingredient name")
+                .name(INGREDIENT_NAME)
                 .measure(Measure.KILOGRAMS)
                 .build();
 
         when(ingredientRepository.save(any(Ingredient.class))).then(invocation -> {
             final Ingredient ingredientArg = invocation.getArgument(0);
             return Ingredient.builder()
-                    .id("ABC")
+                    .id(ID)
                     .name(ingredientArg.getName())
                     .measure(ingredientArg.getMeasure())
                     .build();
@@ -52,12 +58,12 @@ public class IngredientControllerTest {
 
         String json = mapper.writeValueAsString(ingredient);
 
-        mockMvc.perform(post("/api/ingredients")
+        mockMvc.perform(post(API_INGREDIENTS)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", is("ABC")));
+                .andExpect(jsonPath("$.id", is(ID)));
     }
 
     @Test
@@ -69,7 +75,7 @@ public class IngredientControllerTest {
 
         String json = mapper.writeValueAsString(ingredient);
 
-        mockMvc.perform(post("/api/ingredients")
+        mockMvc.perform(post(API_INGREDIENTS)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
@@ -79,25 +85,25 @@ public class IngredientControllerTest {
     @Test
     public void shouldGetIngredientById() throws Exception {
         final Ingredient ingredient = Ingredient.builder()
-                .id("ABC")
-                .name("ingredient name")
-                .measure(Measure.GRAMS)
+                .id(ID)
+                .name(INGREDIENT_NAME)
+                .measure(MEASURE)
                 .build();
 
-        when(ingredientRepository.findById("ABC")).thenReturn(Optional.of(ingredient));
+        when(ingredientRepository.findById(ID)).thenReturn(Optional.of(ingredient));
 
-        mockMvc.perform(get("/api/ingredients/ABC"))
+        mockMvc.perform(get(API_INGREDIENTS + "/" + ID))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is("ABC")))
-                .andExpect(jsonPath("$.name", is("ingredient name")))
-                .andExpect(jsonPath("$.measure", is(Measure.GRAMS.toString())));
+                .andExpect(jsonPath("$.id", is(ID)))
+                .andExpect(jsonPath("$.name", is(INGREDIENT_NAME)))
+                .andExpect(jsonPath("$.measure", is(MEASURE.toString())));
     }
 
     @Test
     public void shouldNotGetIngredient_notFound() throws Exception {
-        when(ingredientRepository.findById("ABC")).thenReturn(Optional.empty());
+        when(ingredientRepository.findById(ID)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/ingredients/ABC"))
+        mockMvc.perform(get(API_INGREDIENTS + "/" + ID))
                 .andExpect(status().isNotFound());
     }
 }
