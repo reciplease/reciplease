@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -20,6 +21,13 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class IngredientController {
     final IngredientRepository ingredientRepository;
+
+    @PostMapping
+    public ResponseEntity<Ingredient> create(@Valid @RequestBody final Ingredient ingredient) {
+        final Ingredient savedIngredient = ingredientRepository.save(ingredient);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedIngredient);
+    }
 
     @GetMapping("{id}")
     public ResponseEntity<Ingredient> findById(@PathVariable final String id) {
@@ -32,10 +40,10 @@ public class IngredientController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<Ingredient> create(@Valid @RequestBody final Ingredient ingredient) {
-        final Ingredient savedIngredient = ingredientRepository.save(ingredient);
+    @GetMapping
+    public ResponseEntity<List<Ingredient>> findAll() {
+        final List<Ingredient> ingredients = ingredientRepository.findAll();
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedIngredient);
+        return ResponseEntity.status(HttpStatus.OK).body(ingredients);
     }
 }
