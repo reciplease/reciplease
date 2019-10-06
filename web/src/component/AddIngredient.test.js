@@ -4,20 +4,23 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import fetchMock from 'fetch-mock';
 import AddIngredient from './AddIngredient';
-import { Button, MenuItem, Select } from '@material-ui/core';
+import { Button, Select } from '@material-ui/core';
 
 describe('AddIngredient component', () => {
   let component;
-  let submitMock;
-  fetchMock.mock('api/profile/ingredients', {alps: {descriptor: [{descriptor: [{doc: {value: "measure1, measure2"}}]}]}});
-  fetchMock.mock('api/ingredients', {});
+  fetchMock.mock('api/measures', ['measure1', 'measure2']);
+
+  let ingredient = {
+    id: 'ABC',
+    name: 'ingredient name',
+    measure: 'measure1'
+  };
+
+  fetchMock.mock('api/ingredients', ingredient, { method: 'POST', name: 'INGREDIENT-POST'});
 
   beforeEach(() => {
-    submitMock = jest.fn();
     component = shallow(
-      <AddIngredient
-        submitIngredient={submitMock}
-      />,
+      <AddIngredient/>,
     );
   });
 
@@ -50,15 +53,16 @@ describe('AddIngredient component', () => {
       expect(component.find(Button).length).toEqual(1);
     });
     it('should call function when clicked', () => {
-      component = mount(<AddIngredient submitIngredient={submitMock} />);
-      expect(submitMock.mock.calls.length).toEqual(0);
+      component = mount(<AddIngredient />);
+      expect(fetchMock.lastCall('INGREDIENT-POST')).toBeUndefined();
 
       component.find('form').simulate('submit');
 
-      expect(submitMock.mock.calls.length).toEqual(1);
+      console.log(fetchMock.lastCall(true));
+      expect(fetchMock.lastCall('INGREDIENT-POST')).not.toBeUndefined();
     });
     it('should call function with ingredient object', () => {
-      component = mount(<AddIngredient submitIngredient={submitMock}/>);
+      component = mount(<AddIngredient />);
       component.setState({
         name: 'name',
         measure: 'measure'
@@ -67,11 +71,9 @@ describe('AddIngredient component', () => {
       component.find('form')
         .simulate('submit');
 
-      expect(submitMock.mock.calls[0][0])
-        .toEqual({
-            name: 'name',
-            measure: 'measure'
-        });
+      expect(fetchMock.lastCall('INGREDIENT-POST')).not.toBeUndefined();
+      expect(fetchMock.lastCall('INGREDIENT-POST')[1]['body']).not.toBeUndefined();
+      expect(fetchMock.lastCall('INGREDIENT-POST')[1]['body']).toBe(JSON.stringify({name: 'name', measure: 'measure'}));
     });
   });
 });
