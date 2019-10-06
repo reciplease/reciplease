@@ -25,7 +25,11 @@ public class IngredientController {
     public ResponseEntity<Ingredient> findById(@PathVariable final String id) {
         final Optional<Ingredient> foundIngredient = ingredientRepository.findById(id);
 
-        return ResponseEntity.status(HttpStatus.OK).body(foundIngredient.get());
+        if (foundIngredient.isPresent()) {
+            return ResponseEntity.status(HttpStatus.OK).body(foundIngredient.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PostMapping

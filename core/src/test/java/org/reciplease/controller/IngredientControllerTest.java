@@ -15,8 +15,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -93,5 +91,13 @@ public class IngredientControllerTest {
                 .andExpect(jsonPath("$.id", is("ABC")))
                 .andExpect(jsonPath("$.name", is("ingredient name")))
                 .andExpect(jsonPath("$.measure", is(Measure.GRAMS.toString())));
+    }
+
+    @Test
+    public void shouldNotGetIngredient_notFound() throws Exception {
+        when(ingredientRepository.findById("ABC")).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/ingredients/ABC"))
+                .andExpect(status().isNotFound());
     }
 }
