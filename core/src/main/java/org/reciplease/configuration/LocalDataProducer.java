@@ -9,6 +9,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @Profile("local")
 @RequiredArgsConstructor
@@ -17,8 +19,21 @@ public class LocalDataProducer implements ApplicationRunner {
 
     @Override
     public void run(final ApplicationArguments args) {
-        ingredientRepository.save(new Ingredient("milk", Measure.MILLILITRES));
-        ingredientRepository.save(new Ingredient("eggs", Measure.ITEMS));
-        ingredientRepository.save(new Ingredient("bread", Measure.ITEMS));
+        List<Ingredient> ingredients = List.of(
+                Ingredient.builder()
+                        .name("milk")
+                        .measure(Measure.MILLILITRES)
+                        .build(),
+                Ingredient.builder()
+                        .name("eggs")
+                        .measure(Measure.ITEMS)
+                        .build(),
+                Ingredient.builder()
+                        .name("bread")
+                        .measure(Measure.ITEMS)
+                        .build()
+        );
+
+        ingredientRepository.saveAll(ingredients);
     }
 }
