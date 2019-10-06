@@ -12,9 +12,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -98,5 +103,31 @@ public class IngredientControllerTest {
 
         mockMvc.perform(get(API_INGREDIENTS + "/" + ID))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void shouldGetAllIngredients() throws Exception {
+        final Ingredient ingredient = Ingredient.builder()
+                .id(ID)
+                .name(INGREDIENT_NAME)
+                .measure(MEASURE)
+                .build();
+
+        final Ingredient ingredient2 = Ingredient.builder()
+                .id(ID + "2")
+                .name(INGREDIENT_NAME + "2")
+                .measure(MEASURE)
+                .build();
+
+        when(ingredientRepository.findAll()).thenReturn(List.of(ingredient, ingredient2));
+
+        final MvcResult mvcResult = mockMvc.perform(get(API_INGREDIENTS))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final List<Ingredient> ingredients = List.of(mapper.readValue(mvcResult.getResponse().getContentAsString(), Ingredient[].class));
+
+        assertThat(ingredients, hasSize(2));
+        assertThat(ingredients, containsInAnyOrder(ingredient, ingredient2));
     }
 }
