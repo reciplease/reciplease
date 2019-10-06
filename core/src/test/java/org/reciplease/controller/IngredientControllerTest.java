@@ -75,11 +75,7 @@ public class IngredientControllerTest {
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors").isArray())
-                .andExpect(jsonPath("$.errors", hasSize(2)))
-                .andExpect(jsonPath("$.errors", hasItem("Name cannot be blank")))
-                .andExpect(jsonPath("$.errors", hasItem("Measure cannot be null")));
+                .andExpect(status().isBadRequest());
     }
 
     @Test
