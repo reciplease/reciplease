@@ -47,14 +47,7 @@ public class IngredientControllerTest {
                 .measure(Measure.KILOGRAMS)
                 .build();
 
-        when(ingredientRepository.save(any(Ingredient.class))).then(invocation -> {
-            final Ingredient ingredientArg = invocation.getArgument(0);
-            return Ingredient.builder()
-                    .id(ID)
-                    .name(ingredientArg.getName())
-                    .measure(ingredientArg.getMeasure())
-                    .build();
-        });
+        when(ingredientRepository.save(any(Ingredient.class))).then(invocation -> invocation.<Ingredient>getArgument(0).toBuilder().id(ID).build());
 
         String json = mapper.writeValueAsString(ingredient);
 

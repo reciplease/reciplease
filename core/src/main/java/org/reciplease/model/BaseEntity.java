@@ -2,6 +2,8 @@ package org.reciplease.model;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
@@ -13,6 +15,8 @@ import javax.persistence.InheritanceType;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@NoArgsConstructor
+@SuperBuilder(toBuilder = true)
 @Getter
 @EqualsAndHashCode
 abstract class BaseEntity {
