@@ -12,13 +12,14 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 
 @Entity
-@Getter
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@Getter
+@EqualsAndHashCode
 abstract class BaseEntity {
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
     @Column(columnDefinition = "CHAR(32)")
     @Id
     @EqualsAndHashCode.Include
-    private String id;
+    protected String id;
 }
