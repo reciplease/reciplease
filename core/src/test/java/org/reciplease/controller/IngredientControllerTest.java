@@ -23,7 +23,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -40,6 +39,7 @@ public class IngredientControllerTest {
 
     @MockBean
     IngredientRepository ingredientRepository;
+
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -57,7 +57,6 @@ public class IngredientControllerTest {
         String json = mapper.writeValueAsString(ingredient);
 
         mockMvc.perform(post(API_INGREDIENTS)
-                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(status().isCreated())
@@ -74,7 +73,6 @@ public class IngredientControllerTest {
         String json = mapper.writeValueAsString(ingredient);
 
         mockMvc.perform(post(API_INGREDIENTS)
-                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(status().isBadRequest());
