@@ -1,34 +1,17 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import AddIngredient from './component/AddIngredient';
-import actions from './actions';
-import PropTypes from 'prop-types';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import AddIngredient from './component/AddIngredient';
 import theme from './theme';
 
-export const App = ({ submitIngredient }) => (
+export const App = () => (
   <MuiThemeProvider theme={theme}>
     <div>
       <h1>Reciplease</h1>
-      <AddIngredient submitIngredient={submitIngredient}/>
+      <AddIngredient/>
     </div>
   </MuiThemeProvider>
 );
 
-App.propTypes = {
-  submitIngredient: PropTypes.func.isRequired,
-};
+App.propTypes = {};
 
-const mapStateToProps = state => {
-  return state.reducer
-};
-
-const mapDispatchToProps = dispatch => ({
-  submitIngredient: (ingredient) => {
-    if (ingredient) {
-      dispatch(actions.submitIngredient(ingredient));
-    }
-  },
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default App;
