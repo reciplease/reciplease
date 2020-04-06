@@ -54,7 +54,7 @@ public class IngredientControllerTest {
 
         when(ingredientRepository.save(any(Ingredient.class))).then(invocation -> invocation.<Ingredient>getArgument(0).toBuilder().id(ID).build());
 
-        String json = mapper.writeValueAsString(ingredient);
+        final String json = mapper.writeValueAsString(ingredient);
 
         mockMvc.perform(post(API_INGREDIENTS)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -70,7 +70,7 @@ public class IngredientControllerTest {
                 .measure(null)
                 .build();
 
-        String json = mapper.writeValueAsString(ingredient);
+        final String json = mapper.writeValueAsString(ingredient);
 
         mockMvc.perform(post(API_INGREDIENTS)
                 .contentType(MediaType.APPLICATION_JSON)
