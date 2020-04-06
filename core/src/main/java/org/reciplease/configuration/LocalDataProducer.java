@@ -19,7 +19,7 @@ public class LocalDataProducer implements ApplicationRunner {
 
     @Override
     public void run(final ApplicationArguments args) {
-        List<Ingredient> ingredients = List.of(
+        final List<Ingredient> ingredients = List.of(
                 Ingredient.builder()
                         .name("milk")
                         .measure(Measure.MILLILITRES)
