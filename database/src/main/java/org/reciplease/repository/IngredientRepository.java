@@ -8,9 +8,4 @@ import java.util.List;
 
 public interface IngredientRepository extends JpaRepository<Ingredient, String> {
     List<Ingredient> findByNameContains(String searchName);
-
-    @Override
-    default <S extends Ingredient> boolean exists(final Example<S> example) {
-        return false;
-    }
 }
