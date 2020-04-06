@@ -26,7 +26,7 @@ jobs:
             - maven-{{ checksum "pom.xml" }}
             - maven-
 
-      - run: mvn dependency:go-offline
+      - run: mvn package dependency:go-offline
 
       - save_cache:
           key: maven-{{ checksum "pom.xml" }}
