@@ -42,17 +42,17 @@
             <dependency>
                 <groupId>org.reciplease</groupId>
                 <artifactId>core</artifactId>
-                <version>1.0.9-SNAPSHOT</version>
+                <version>1.0.10-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.reciplease</groupId>
                 <artifactId>web</artifactId>
-                <version>1.0.9-SNAPSHOT</version>
+                <version>1.0.10-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.reciplease</groupId>
                 <artifactId>database</artifactId>
-                <version>1.0.9-SNAPSHOT</version>
+                <version>1.0.10-SNAPSHOT</version>
             </dependency>
 
             <dependency>
