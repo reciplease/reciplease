@@ -79,9 +79,6 @@
                             <dataFile>target/jacoco.exec</dataFile>
                             <!-- Sets the output directory for the code coverage report. -->
                             <outputDirectory>target/my-reports</outputDirectory>
-                            <excludes>
-                                <exclude>**/*RecipleaseApplication*</exclude>
-                            </excludes>
                         </configuration>
                     </execution>
                 </executions>
