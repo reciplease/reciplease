@@ -33,11 +33,7 @@ public class IngredientController {
     public ResponseEntity<Ingredient> findById(@PathVariable final String id) {
         final Optional<Ingredient> foundIngredient = ingredientRepository.findById(id);
 
-        if (foundIngredient.isPresent()) {
-            return ResponseEntity.status(HttpStatus.OK).body(foundIngredient.get());
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        return ResponseEntity.of(foundIngredient);
     }
 
     @GetMapping
@@ -45,5 +41,12 @@ public class IngredientController {
         final List<Ingredient> ingredients = ingredientRepository.findAll();
 
         return ResponseEntity.status(HttpStatus.OK).body(ingredients);
+    }
+
+    @GetMapping("/search/{searchName}")
+    public ResponseEntity<List<Ingredient>> searchByName(@PathVariable final String searchName) {
+        final List<Ingredient> matchingIngredients = ingredientRepository.findByNameContains(searchName);
+
+        return ResponseEntity.status(HttpStatus.OK).body(matchingIngredients);
     }
 }
