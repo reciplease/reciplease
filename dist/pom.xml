@@ -15,65 +15,26 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>org.reciplease</groupId>
             <artifactId>web</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.reciplease</groupId>
-            <artifactId>core</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
+            <artifactId>database</artifactId>
         </dependency>
     </dependencies>
 
     <build>
-        <finalName>reciplease-dist</finalName>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.1</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <artifactSet>
-                                <excludes>
-                                    <exclude>junit:junit</exclude>
-                                    <exclude>*:xml-apis</exclude>
-                                    <exclude>org.apache.maven:lib:tests</exclude>
-                                    <exclude>log4j:log4j:jar:</exclude>
-                                </excludes>
-                            </artifactSet>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <keepDependenciesWithProvidedScope>true</keepDependenciesWithProvidedScope>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <!--<executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                        <configuration>
-                            <mainClass>
-                                org.reciplease.RecipleaseApplication
-                            </mainClass>
-                        </configuration>
-                    </execution>
-                </executions>-->
+                <configuration>
+                    <finalName>reciplease-dist</finalName>
+                </configuration>
             </plugin>
         </plugins>
     </build>
