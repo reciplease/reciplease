@@ -7,61 +7,14 @@ orbs:
   codecov: codecov/codecov@1.0.2
 
 jobs:
-  web-test:
+  test:
     docker:
-      - image: circleci/node
-
-    working_directory: ~/repo/web
-
-    steps:
-      - checkout:
-          path: ~/repo
-
-      - restore_cache:
-          keys:
-            - yarn-packages-{{ checksum "yarn.lock" }}
-            - yarn-packages-
-
-      - run:
-          name: Install node-gyp
-          command: yarn global add node-gyp
-
-      - run:
-          name: Install dependencies
-          command: yarn install --frozen -lockfile
-
-      - save_cache:
-          name: Save yarn package cache
-          key: yarn-packages-{{ checksum "yarn.lock" }}
-          paths:
-            - ~/.cache/yarn
-
-      - run:
-          name: Run tests with JUnit as reporter
-          command: yarn run junit
-          environment:
-            JEST_JUNIT_OUTPUT: "reports/junit/js-test-results.xml"
-
-      - store_test_results:
-          path: reports/junit
-      - store_artifacts:
-          path: reports/junit
-
-  core-test:
-    docker:
-      # specify the version you desire here
       - image: circleci/openjdk:11-jdk
 
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
-
     environment:
-      # Customize the JVM maximum heap limit
       MAVEN_OPTS: -Xmx3200m
 
-    working_directory: ~/repo/core
+    working_directory: ~/repo
 
     steps:
       - checkout:
@@ -73,7 +26,7 @@ jobs:
             - maven-{{ checksum "pom.xml" }}
             - maven-
 
-      - run: mvn dependency:go-offline
+      - run: mvn package dependency:go-offline -DskipTests
 
       - save_cache:
           key: maven-{{ checksum "pom.xml" }}
@@ -82,9 +35,15 @@ jobs:
 
       - run: mvn test
       - store_artifacts:
-          path:  target
+          path:  dist/target
+
       - codecov/upload:
-          file: target/my-reports/jacoco.xml
+          file: core/target/my-reports/jacoco.xml
+      - codecov/upload:
+          file: database/target/my-reports/jacoco.xml
+      - codecov/upload:
+          file: web/target/my-reports/jacoco.xml
+
       - run:
           name: Save test results
           command: |
@@ -167,12 +126,10 @@ workflows:
   version: 2
   build:
     jobs:
-      - web-test
-      - core-test
+      - test
       - deploy:
           requires:
-            - web-test
-            - core-test
+            - test
           filters:
             branches:
               only: master
