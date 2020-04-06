@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -127,5 +128,24 @@ public class IngredientControllerTest {
 
         assertThat(ingredients, hasSize(2));
         assertThat(ingredients, containsInAnyOrder(ingredient, ingredient2));
+    }
+
+    @Test
+    public void shouldSearch() throws Exception {
+        final Ingredient ingredient = Ingredient.builder()
+                .id(ID)
+                .name(INGREDIENT_NAME)
+                .measure(MEASURE)
+                .build();
+        when(ingredientRepository.findByNameContains("abc")).thenReturn(List.of(ingredient));
+
+        final MvcResult mvcResult = mockMvc.perform(get(API_INGREDIENTS + "/search/abc"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final List<Ingredient> ingredients = List.of(mapper.readValue(mvcResult.getResponse().getContentAsString(), Ingredient[].class));
+
+        assertThat(ingredients, hasSize(1));
+        assertThat(ingredients, containsInAnyOrder(ingredient));
     }
 }
