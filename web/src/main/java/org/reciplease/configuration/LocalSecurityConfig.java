@@ -15,5 +15,7 @@ public class LocalSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(final HttpSecurity security) throws Exception {
         security.httpBasic().disable()
                 .csrf().disable();
+
+        security.headers().frameOptions().disable();
     }
 }
