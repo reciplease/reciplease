@@ -8,7 +8,7 @@ import org.reciplease.repository.PlannedRecipeRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -17,10 +17,10 @@ public class ShoppingListService {
     private final PlannedRecipeRepository plannedRecipeRepository;
 
     public ShoppingList generateShoppingList(final LocalDate start, final LocalDate end) {
-        final List<RecipeItem> recipeItems = plannedRecipeRepository.findByDateIsBetween(start, end).stream()
+        final Set<RecipeItem> recipeItems = plannedRecipeRepository.findByDateIsBetween(start, end).stream()
                 .map(PlannedRecipe::getRecipe)
                 .flatMap(recipe -> recipe.getRecipeItems().stream())
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
         return new ShoppingList(recipeItems);
     }
 }
