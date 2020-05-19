@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class IngredientControllerTest {
 
     private static final String API_INGREDIENTS = "/api/ingredients";
-    private static final UUID ID = UUID.fromString("ABC");
+    private static final UUID ID = UUID.randomUUID();
     private static final String INGREDIENT_NAME = "ingredient name";
     private static final Measure MEASURE = Measure.GRAMS;
 
@@ -61,7 +61,7 @@ public class IngredientControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", is(ID)));
+                .andExpect(jsonPath("$.uuid", is(ID.toString())));
     }
 
     @Test
@@ -91,7 +91,7 @@ public class IngredientControllerTest {
 
         mockMvc.perform(get(API_INGREDIENTS + "/" + ID))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(ID)))
+                .andExpect(jsonPath("$.uuid", is(ID.toString())))
                 .andExpect(jsonPath("$.name", is(INGREDIENT_NAME)))
                 .andExpect(jsonPath("$.measure", is(MEASURE.toString())));
     }
@@ -113,7 +113,7 @@ public class IngredientControllerTest {
                 .build();
 
         final Ingredient ingredient2 = Ingredient.builder()
-                .uuid(UUID.fromString("ABC2"))
+                .uuid(UUID.randomUUID())
                 .name(INGREDIENT_NAME + "2")
                 .measure(MEASURE)
                 .build();
