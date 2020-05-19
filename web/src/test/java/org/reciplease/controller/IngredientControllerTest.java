@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -33,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class IngredientControllerTest {
 
     private static final String API_INGREDIENTS = "/api/ingredients";
-    private static final String ID = "ABC";
+    private static final UUID ID = UUID.fromString("ABC");
     private static final String INGREDIENT_NAME = "ingredient name";
     private static final Measure MEASURE = Measure.GRAMS;
 
@@ -52,7 +53,7 @@ public class IngredientControllerTest {
                 .measure(Measure.KILOGRAMS)
                 .build();
 
-        when(ingredientRepository.save(any(Ingredient.class))).then(invocation -> invocation.<Ingredient>getArgument(0).toBuilder().id(ID).build());
+        when(ingredientRepository.save(any(Ingredient.class))).then(invocation -> invocation.<Ingredient>getArgument(0).toBuilder().uuid(ID).build());
 
         final String json = mapper.writeValueAsString(ingredient);
 
@@ -81,7 +82,7 @@ public class IngredientControllerTest {
     @Test
     public void shouldGetIngredientById() throws Exception {
         final Ingredient ingredient = Ingredient.builder()
-                .id(ID)
+                .uuid(ID)
                 .name(INGREDIENT_NAME)
                 .measure(MEASURE)
                 .build();
@@ -106,13 +107,13 @@ public class IngredientControllerTest {
     @Test
     public void shouldGetAllIngredients() throws Exception {
         final Ingredient ingredient = Ingredient.builder()
-                .id(ID)
+                .uuid(ID)
                 .name(INGREDIENT_NAME)
                 .measure(MEASURE)
                 .build();
 
         final Ingredient ingredient2 = Ingredient.builder()
-                .id(ID + "2")
+                .uuid(UUID.fromString("ABC2"))
                 .name(INGREDIENT_NAME + "2")
                 .measure(MEASURE)
                 .build();
@@ -132,7 +133,7 @@ public class IngredientControllerTest {
     @Test
     public void shouldSearch() throws Exception {
         final Ingredient ingredient = Ingredient.builder()
-                .id(ID)
+                .uuid(ID)
                 .name(INGREDIENT_NAME)
                 .measure(MEASURE)
                 .build();
