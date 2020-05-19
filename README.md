@@ -5,8 +5,11 @@
 [![codecov.io](https://codecov.io/gh/rhys-saldanha/reciplease/branch/master/graphs/badge.svg?token=lqPQFZZ3K5)](https://codecov.io/gh/rhys-saldanha/reciplease?branch=master)
 
 *core* - Business Logic/Core Functionality i.e models, interfaces, services
+
 *web* - Web Functionality i.e. endpoints + swagger docs, web security
+
 *database* - Database connection configuration and tests
+
 *dist* - Build jar for deployment
 
 
