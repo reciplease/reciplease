@@ -12,15 +12,15 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 @Profile("local")
 @Configuration
 @EnableWebSecurity
 public class LocalSecurityConfig extends WebSecurityConfigurerAdapter implements WebMvcConfigurer {
 
-	@Value("${RECIPLEASE_WEB_API_URL}")
-	private String webApiURL;
+    @Value("${RECIPLEASE_WEB_API_URL}")
+    private String webApiURL;
 
     @Override
     protected void configure(final HttpSecurity security) throws Exception {
@@ -31,11 +31,11 @@ public class LocalSecurityConfig extends WebSecurityConfigurerAdapter implements
     }
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(webApiURL));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+    public CorsConfigurationSource corsConfigurationSource() {
+        final CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Collections.singletonList(webApiURL));
+        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", configuration);
         return source;
     }
 }
