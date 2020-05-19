@@ -1,5 +1,6 @@
 package org.reciplease.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,7 @@ import javax.persistence.InheritanceType;
 @Getter
 @EqualsAndHashCode
 abstract class BaseEntity {
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
     @Column(columnDefinition = "CHAR(32)")
