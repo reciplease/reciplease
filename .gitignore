@@ -1,7 +1,6 @@
 .env*
 !.env.example
 Makefile
-.env.example
 HELP.md
 !.mvn/wrapper/maven-wrapper.jar
 
