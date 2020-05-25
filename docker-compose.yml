@@ -16,3 +16,18 @@ services:
     restart: always
     stdin_open: true
     tty: true
+
+  ngrok:
+    image: wernight/ngrok
+    container_name: reciplease_ngrok_4040
+    ports:
+      - 4040:4040
+    environment:
+      - NGROK_PROTOCOL=https
+      - NGROK_PORT=mysql:3306
+      - NGROK_AUTH=${NGROK_AUTH}
+    links:
+      - mysql
+    restart: always
+    stdin_open: true
+    tty: true
