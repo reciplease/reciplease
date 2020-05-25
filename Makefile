@@ -17,6 +17,10 @@ export
 help-backend:
 	@awk 'BEGIN {FS = " ?#?: "; print ""$(RECIPLEASE_NAME)" "$(RECIPLEASE_VERSION)"\n"$(RECIPLEASE_DESCRIPTION)"\n\nUsage: make \033[36m<command>\033[0m\n\nCommands:"} /^.PHONY: ?[a-zA-Z_-]/ { printf "  \033[36m%-10s\033[0m %s\n", $$2, $$3 }' $(MAKEFILE_LIST)
 
+.PHONY: init-backend
+init-backend:
+	@docker-compose up -d
+
 .PHONY: lint-backend #: Run static code analysis.
 lint-backend:
 	@false
