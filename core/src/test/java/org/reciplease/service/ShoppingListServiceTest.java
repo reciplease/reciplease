@@ -12,10 +12,11 @@ import org.reciplease.repository.PlannedRecipeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsEmptyCollection.empty;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 
 public class ShoppingListServiceTest {
@@ -50,7 +51,7 @@ public class ShoppingListServiceTest {
     public void shouldReturnShoppingList() {
         final LocalDate date = LocalDate.of(2019, 2, 2);
 
-        final List<RecipeItem> recipeItems = List.of(recipeItem);
+        final Set<RecipeItem> recipeItems = Set.of(recipeItem);
         final List<PlannedRecipe> plannedRecipes = List.of(new PlannedRecipe(recipe, date));
 
         when(recipe.getRecipeItems()).thenReturn(recipeItems);
