@@ -16,8 +16,8 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.collection.IsEmptyCollection.empty;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
@@ -34,7 +34,7 @@ public class PlannedRecipeRepositoryTest {
 
     @Test
     public void shouldReturnPlannedRecipesByDate() {
-        final Recipe recipe = recipeRepository.save(new Recipe(Collections.emptyList()));
+        final Recipe recipe = recipeRepository.save(new Recipe(Collections.emptySet()));
         final PlannedRecipe plannedRecipe = plannedRecipeRepository.save(new PlannedRecipe(recipe, LocalDate.of(2019, 2, 2)));
 
         final List<PlannedRecipe> plannedRecipes = plannedRecipeRepository.findByDateIsBetween(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
@@ -44,7 +44,7 @@ public class PlannedRecipeRepositoryTest {
 
     @Test
     public void shouldReturnEmptyList() {
-        final Recipe recipe = recipeRepository.save(new Recipe(Collections.emptyList()));
+        final Recipe recipe = recipeRepository.save(new Recipe(Collections.emptySet()));
         plannedRecipeRepository.save(new PlannedRecipe(recipe, LocalDate.of(2019, 2, 5)));
 
         final List<PlannedRecipe> plannedRecipes = plannedRecipeRepository.findByDateIsBetween(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));

@@ -5,11 +5,11 @@
     <parent>
         <artifactId>app</artifactId>
         <groupId>org.reciplease</groupId>
-        <version>1.0.13-SNAPSHOT</version>
+        <version>1.0.20-SNAPSHOT</version>
     </parent>
 
     <artifactId>core</artifactId>
-    <version>1.0.13-SNAPSHOT</version>
+    <version>1.0.20-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
@@ -19,6 +19,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-common</artifactId>
         </dependency>
         <!--TODO remove this-->
         <dependency>
