@@ -25,6 +25,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Release version
+        run: mvn -B versions:set -DremoveSnapshot -DgenerateBackupPoms=false --file pom.xml
+
       - name: Build with Maven
         run: mvn -B clean package -DskipTests --file pom.xml
 
@@ -39,6 +42,9 @@ jobs:
         with:
           name: Dockerfile
           path: Dockerfile
+
+      - name: Development version
+        run: mvn versions:set -DnextSnapshot=true -DgenerateBackupPoms=false
 
   image:
     needs: jar
