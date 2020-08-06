@@ -1,0 +1,101 @@
+name: Deploy to gcloud
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  jar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Cache maven repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('pom.xml') }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Release version
+        run: |
+          mvn -B versions:set -DremoveSnapshot -DgenerateBackupPoms=false --file pom.xml
+          RELEASE_VERSION=$(mvn -B help:evaluate -Dexpression=project.version -q -DforceStdout)
+          git config --global user.name 'Github Actions'
+          git config --global user.email 'github-actions@users.noreply.github.com'
+          git commit -am "[skip ci] Release version ${RELEASE_VERSION}"
+          git tag ${RELEASE_VERSION}
+          git push --follow-tags
+
+      - name: Build with Maven
+        run: mvn -B clean package -DskipTests --file pom.xml
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: dist-jar
+          path: dist/target/reciplease-dist.jar
+
+      - name: Upload Dockerfile
+        uses: actions/upload-artifact@v1
+        with:
+          name: Dockerfile
+          path: Dockerfile
+
+      - name: Development version
+        run: |
+          mvn versions:set -DnextSnapshot=true -DgenerateBackupPoms=false --file pom.xml
+          git config --global user.name 'Github Actions'
+          git config --global user.email 'github-actions@users.noreply.github.com'
+          git commit -am "[skip ci] Prepare for development"
+          git push
+
+  image:
+    needs: jar
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: dist-jar
+
+      - name: Download Dockerfile
+        uses: actions/download-artifact@v2
+        with:
+          name: Dockerfile
+
+      - name: Publish container
+        uses: mr-smithers-excellent/docker-build-push@v3
+        with:
+          image: ${{ secrets.GCP_PROJECT_ID }}/dist
+          registry: gcr.io
+          username: _json_key
+          password: ${{ secrets.GCP_SA_KEY }}
+
+  deploy:
+    needs: image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure gcloud
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '299.0.0'
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - run: gcloud config set run/platform managed
+      - run: gcloud config set run/region ${{ secrets.GCP_REGION }}
+
+      - name: Deploy container
+        run: gcloud run deploy dist --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/dist
