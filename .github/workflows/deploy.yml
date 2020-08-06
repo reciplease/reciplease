@@ -26,7 +26,14 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Release version
-        run: mvn -B versions:set -DremoveSnapshot -DgenerateBackupPoms=false --file pom.xml
+        run: |
+          mvn -B versions:set -DremoveSnapshot -DgenerateBackupPoms=false --file pom.xml
+          RELEASE_VERSION=$(mvn -B help:evaluate -Dexpression=project.version -q -DforceStdout)
+          git config --global user.name 'Github Actions'
+          git config --global user.email 'github-actions@users.noreply.github.com'
+          git commit -am "[skip ci] Release version ${RELEASE_VERSION}"
+          git tag ${RELEASE_VERSION}
+          git push --follow-tags
 
       - name: Build with Maven
         run: mvn -B clean package -DskipTests --file pom.xml
@@ -44,7 +51,12 @@ jobs:
           path: Dockerfile
 
       - name: Development version
-        run: mvn versions:set -DnextSnapshot=true -DgenerateBackupPoms=false
+        run: |
+          mvn versions:set -DnextSnapshot=true -DgenerateBackupPoms=false --file pom.xml
+          git config --global user.name 'Github Actions'
+          git config --global user.email 'github-actions@users.noreply.github.com'
+          git commit -am "[skip ci] Prepare for development"
+          git push
 
   image:
     needs: jar
