@@ -29,10 +29,16 @@ jobs:
         run: mvn -B clean package --file pom.xml
 
       - name: Upload JAR artifact
-          uses: actions/upload-artifact@v1
-          with:
-            name: dist-jar
-            path: dist/target/reciplease-dist.jar
+        uses: actions/upload-artifact@v1
+        with:
+          name: dist-jar
+          path: dist/target/reciplease-dist.jar
+
+      - name: Upload Dockerfile
+        uses: actions/upload-artifact@v1
+        with:
+          name: Dockerfile
+          path: Dockerfile
 
   image:
     needs: jar
@@ -43,6 +49,11 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: dist-jar
+
+      - name: Download Dockerfile
+        uses: actions/download-artifact@v2
+        with:
+          name: Dockerfile
 
       - name: Publish container
         uses: mr-smithers-excellent/docker-build-push@v3
