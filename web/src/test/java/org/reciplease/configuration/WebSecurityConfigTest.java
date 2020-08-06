@@ -41,15 +41,5 @@ public class WebSecurityConfigTest {
     public void shouldNotRequireSSL() throws Exception {
         mvc.perform(get("/")).andExpect(status().isNotFound());
     }
-
-    @Test
-    public void shouldRequireSSL_redirect() throws Exception {
-        mvc.perform(get("/").header("X-Forwarded-Proto", true)).andExpect(status().is3xxRedirection());
-    }
-
-    @Test
-    public void shouldRequireSSL() throws Exception {
-        mvc.perform(get("/").header("X-Forwarded-Proto", true).secure(true)).andExpect(status().isNotFound());
-    }
 }
 
