@@ -31,10 +31,10 @@ jobs:
           RELEASE_VERSION=$(mvn -B help:evaluate -Dexpression=project.version -q -DforceStdout)
           git config --global user.name 'Github Actions'
           git config --global user.email 'github-actions@users.noreply.github.com'
-          git pull
           git commit -am "[skip ci] Release version ${RELEASE_VERSION}"
-          git tag ${RELEASE_VERSION}
-          git push --follow-tags
+          git tag "v${RELEASE_VERSION}"
+          git push --tags
+          git push
 
       - name: Build with Maven
         run: mvn -B clean package -DskipTests --file pom.xml
