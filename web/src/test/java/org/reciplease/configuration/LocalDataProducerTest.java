@@ -4,14 +4,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.reciplease.model.InventoryItem;
 import org.reciplease.repository.IngredientRepository;
+import org.reciplease.repository.InventoryRepository;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 
 public class LocalDataProducerTest {
     @Mock
     private IngredientRepository ingredientRepository;
+    @Mock
+    private InventoryRepository inventoryRepository;
 
     @BeforeEach
     public void setUp() {
@@ -20,10 +25,11 @@ public class LocalDataProducerTest {
 
     @Test
     public void shouldSaveIngredients() {
-        final LocalDataProducer localDataProducer = new LocalDataProducer(ingredientRepository);
+        final LocalDataProducer localDataProducer = new LocalDataProducer(ingredientRepository, inventoryRepository);
 
         localDataProducer.run(null);
 
         verify(ingredientRepository).saveAll(anyList());
+        verify(inventoryRepository).save(any(InventoryItem.class));
     }
 }
