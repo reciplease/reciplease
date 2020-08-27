@@ -31,7 +31,7 @@ jobs:
         run: mvn -B clean test --file pom.xml
 
       - name: Upload code coverage
-        uses: codecov/codecov-action@v1.0.6
+        uses: codecov/codecov-action@v1.0.13
         with:
           files: |
             core/target/my-reports/jacoco.xml,
