@@ -27,7 +27,7 @@ class InventoryItemDtoTest {
 
         final var itemDto = InventoryItemDto.from(item);
 
-        assertThat(itemDto.getUuid(), is(item.getUuid()));
+        assertThat(itemDto.getId(), is(item.getUuid()));
         assertThat(itemDto.getIngredientId(), is(ingredient.getUuid()));
         assertThat(itemDto.getAmount(), is(item.getAmount()));
         assertThat(itemDto.getExpiration(), is(item.getExpiration()));
