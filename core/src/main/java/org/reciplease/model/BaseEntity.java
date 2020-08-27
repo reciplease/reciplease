@@ -5,14 +5,13 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import java.util.UUID;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
@@ -22,10 +21,8 @@ import javax.persistence.InheritanceType;
 @EqualsAndHashCode
 abstract class BaseEntity {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid")
-    @Column(columnDefinition = "CHAR(32)")
+    @GeneratedValue
     @Id
     @EqualsAndHashCode.Include
-    protected String id;
+    protected UUID uuid;
 }

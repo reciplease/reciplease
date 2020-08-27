@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("api/ingredients")
@@ -29,9 +30,9 @@ public class IngredientController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedIngredient);
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<Ingredient> findById(@PathVariable final String id) {
-        final Optional<Ingredient> foundIngredient = ingredientRepository.findById(id);
+    @GetMapping("{uuid}")
+    public ResponseEntity<Ingredient> findById(@PathVariable final UUID uuid) {
+        final Optional<Ingredient> foundIngredient = ingredientRepository.findById(uuid);
 
         return ResponseEntity.of(foundIngredient);
     }
