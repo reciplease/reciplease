@@ -19,7 +19,7 @@ public class InventoryService {
     private final IngredientRepository ingredientRepository;
 
     public InventoryItemDto save(final InventoryItemDto itemDto) {
-        final var ingredient = ingredientRepository.findById(itemDto.getIngredientUuid())
+        final var ingredient = ingredientRepository.findById(itemDto.getIngredientId())
                 .orElseThrow(() -> new IllegalArgumentException("Ingredient does not exist"));
 
         final InventoryItem item = InventoryItem.builder()
