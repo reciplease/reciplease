@@ -9,10 +9,10 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Value
-@Builder
+@Builder(toBuilder = true)
 public class InventoryItemDto {
     UUID uuid;
-    UUID ingredientUuid;
+    UUID ingredientId;
     Double amount;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate expiration;
@@ -20,7 +20,7 @@ public class InventoryItemDto {
     public static InventoryItemDto from(final InventoryItem inventoryItem) {
         return InventoryItemDto.builder()
                 .uuid(inventoryItem.getUuid())
-                .ingredientUuid(inventoryItem.getIngredient().getUuid())
+                .ingredientId(inventoryItem.getIngredient().getUuid())
                 .amount(inventoryItem.getAmount())
                 .expiration(inventoryItem.getExpiration())
                 .build();

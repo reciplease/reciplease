@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.reciplease.model.Ingredient;
 import org.reciplease.model.InventoryItem;
 
-import javax.persistence.DiscriminatorColumn;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -29,7 +28,7 @@ class InventoryItemDtoTest {
         final var itemDto = InventoryItemDto.from(item);
 
         assertThat(itemDto.getUuid(), is(item.getUuid()));
-        assertThat(itemDto.getIngredientUuid(), is(ingredient.getUuid()));
+        assertThat(itemDto.getIngredientId(), is(ingredient.getUuid()));
         assertThat(itemDto.getAmount(), is(item.getAmount()));
         assertThat(itemDto.getExpiration(), is(item.getExpiration()));
     }
