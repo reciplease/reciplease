@@ -11,7 +11,7 @@ import java.util.UUID;
 @Value
 @Builder(toBuilder = true)
 public class InventoryItemDto {
-    UUID uuid;
+    UUID id;
     UUID ingredientId;
     Double amount;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -19,7 +19,7 @@ public class InventoryItemDto {
 
     public static InventoryItemDto from(final InventoryItem inventoryItem) {
         return InventoryItemDto.builder()
-                .uuid(inventoryItem.getUuid())
+                .id(inventoryItem.getUuid())
                 .ingredientId(inventoryItem.getIngredient().getUuid())
                 .amount(inventoryItem.getAmount())
                 .expiration(inventoryItem.getExpiration())

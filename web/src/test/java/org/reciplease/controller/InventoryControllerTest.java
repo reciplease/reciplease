@@ -1,6 +1,9 @@
 package org.reciplease.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.reciplease.dto.InventoryItemDto;
@@ -14,9 +17,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -35,17 +41,14 @@ class InventoryControllerTest {
 
     @Test
     void shouldCreateInventoryItem() throws Exception {
-        final UUID ingredientId = UUID.randomUUID();
-        final UUID itemId = UUID.randomUUID();
-
         final var item = InventoryItemDto.builder()
-                .ingredientId(ingredientId)
+                .ingredientId(UUID.randomUUID())
                 .amount(20d)
                 .expiration(LocalDate.of(2020, Month.JANUARY, 1))
                 .build();
 
         final var savedItem = item.toBuilder()
-                .uuid(itemId)
+                .id(UUID.randomUUID())
                 .build();
 
         when(inventoryService.save(item)).thenReturn(savedItem);
@@ -55,5 +58,43 @@ class InventoryControllerTest {
                 .content(mapper.writeValueAsString(item)))
                 .andExpect(status().isCreated())
                 .andExpect(content().json(mapper.writeValueAsString(savedItem)));
+    }
+
+    @Nested
+    class WithItem {
+        private UUID itemId;
+        private InventoryItemDto item;
+
+        @BeforeEach
+        void setUp() {
+            itemId = UUID.randomUUID();
+            item = InventoryItemDto.builder()
+                    .id(itemId)
+                    .ingredientId(UUID.randomUUID())
+                    .amount(20d)
+                    .expiration(LocalDate.of(2020, Month.JANUARY, 1))
+                    .build();
+        }
+
+        @Test
+        @DisplayName("should find item by ID")
+        void findById() throws Exception {
+            when(inventoryService.findById(itemId)).thenReturn(Optional.of(item));
+
+            mockMvc.perform(get("/api/inventory/" + itemId))
+                    .andExpect(status().isOk())
+                    .andExpect(content().json(mapper.writeValueAsString(item)));
+        }
+
+        @Test
+        @DisplayName("should return all items")
+        void findAll() throws Exception {
+            final var items = List.of(item);
+            when(inventoryService.findAll()).thenReturn(items);
+
+            mockMvc.perform(get("/api/inventory"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().json(mapper.writeValueAsString(items)));
+        }
     }
 }
