@@ -1,8 +1,8 @@
 package org.reciplease.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.reciplease.model.InventoryItem;
-import org.reciplease.repository.InventoryRepository;
+import org.reciplease.dto.InventoryItemDto;
+import org.reciplease.service.InventoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,25 +21,25 @@ import java.util.UUID;
 @RequestMapping("api/inventory")
 @RequiredArgsConstructor
 public class InventoryController {
-    final InventoryRepository inventoryRepository;
+    final InventoryService inventoryService;
 
     @PostMapping
-    public ResponseEntity<InventoryItem> create(@Valid @RequestBody final InventoryItem item) {
-        final InventoryItem savedItem = inventoryRepository.save(item);
+    public ResponseEntity<InventoryItemDto> create(@Valid @RequestBody final InventoryItemDto item) {
+        final InventoryItemDto savedItem = inventoryService.save(item);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(savedItem);
     }
 
     @GetMapping("{uuid}")
-    public ResponseEntity<InventoryItem> findById(@PathVariable final UUID uuid) {
-        final Optional<InventoryItem> foundItem = inventoryRepository.findById(uuid);
+    public ResponseEntity<InventoryItemDto> findById(@PathVariable final UUID uuid) {
+        final Optional<InventoryItemDto> foundItem = inventoryService.findById(uuid);
 
         return ResponseEntity.of(foundItem);
     }
 
     @GetMapping
-    public ResponseEntity<List<InventoryItem>> findAll() {
-        final List<InventoryItem> items = inventoryRepository.findAll();
+    public ResponseEntity<List<InventoryItemDto>> findAll() {
+        final List<InventoryItemDto> items = inventoryService.findAll();
 
         return ResponseEntity.status(HttpStatus.OK).body(items);
     }
