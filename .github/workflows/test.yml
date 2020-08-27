@@ -3,6 +3,8 @@ name: Testing
 on:
   pull_request:
     branches: [ master ]
+  push:
+    branches: [ feature/* ]
 
 jobs:
   test:
