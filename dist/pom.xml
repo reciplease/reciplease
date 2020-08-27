@@ -19,6 +19,10 @@
         </dependency>
         <dependency>
             <groupId>org.reciplease</groupId>
+            <artifactId>core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.reciplease</groupId>
             <artifactId>web</artifactId>
         </dependency>
         <dependency>
