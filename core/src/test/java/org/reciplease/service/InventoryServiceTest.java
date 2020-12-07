@@ -41,13 +41,12 @@ class InventoryServiceTest {
     @Test
     @DisplayName("should save item")
     void save() {
-        final var ingredientId = UUID.randomUUID();
         final var ingredient = Ingredient.builder()
-                .uuid(ingredientId)
+                .randomUUID()
                 .build();
 
         final var itemDto = InventoryItemDto.builder()
-                .ingredientId(ingredientId)
+                .ingredientId(ingredient.getUuid())
                 .amount(10d)
                 .expiration(LocalDate.now())
                 .build();
@@ -59,12 +58,12 @@ class InventoryServiceTest {
                 .build();
 
         final var savedItem = item.toBuilder()
-                .uuid(UUID.randomUUID())
+                .randomUUID()
                 .build();
 
         final var savedItemDto = InventoryItemDto.from(savedItem);
 
-        when(ingredientRepository.findById(ingredientId)).thenReturn(Optional.of(ingredient));
+        when(ingredientRepository.findById(ingredient.getUuid())).thenReturn(Optional.of(ingredient));
         when(inventoryRepository.save(item)).thenReturn(savedItem);
 
         final var actual = inventoryService.save(itemDto);
@@ -101,17 +100,15 @@ class InventoryServiceTest {
     @Nested
     class WithItem {
 
-        private UUID itemId;
         private InventoryItem item;
         private InventoryItemDto itemDto;
 
         @BeforeEach
         void setUp() {
-            itemId = UUID.randomUUID();
             item = InventoryItem.builder()
-                    .uuid(itemId)
+                    .randomUUID()
                     .ingredient(Ingredient.builder()
-                            .uuid(UUID.randomUUID())
+                            .randomUUID()
                             .build())
                     .amount(10d)
                     .expiration(LocalDate.now())
@@ -123,9 +120,9 @@ class InventoryServiceTest {
         @Test
         @DisplayName("should find item by ID")
         void findById() {
-            when(inventoryRepository.findById(itemId)).thenReturn(Optional.of(item));
+            when(inventoryRepository.findById(item.getUuid())).thenReturn(Optional.of(item));
 
-            final var actual = inventoryService.findById(itemId);
+            final var actual = inventoryService.findById(item.getUuid());
 
             assertThat(actual.isPresent(), is(true));
             assertThat(actual.get(), is(itemDto));
