@@ -11,8 +11,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -34,7 +34,9 @@ public class PlannedRecipeRepositoryTest {
 
     @Test
     public void shouldReturnPlannedRecipesByDate() {
-        final Recipe recipe = recipeRepository.save(new Recipe(Collections.emptySet()));
+        final Recipe recipe = recipeRepository.save(Recipe.builder()
+                .recipeItems(Set.of())
+                .build());
         final PlannedRecipe plannedRecipe = plannedRecipeRepository.save(new PlannedRecipe(recipe, LocalDate.of(2019, 2, 2)));
 
         final List<PlannedRecipe> plannedRecipes = plannedRecipeRepository.findByDateIsBetween(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
@@ -44,7 +46,9 @@ public class PlannedRecipeRepositoryTest {
 
     @Test
     public void shouldReturnEmptyList() {
-        final Recipe recipe = recipeRepository.save(new Recipe(Collections.emptySet()));
+        final Recipe recipe = recipeRepository.save(Recipe.builder()
+                .recipeItems(Set.of())
+                .build());
         plannedRecipeRepository.save(new PlannedRecipe(recipe, LocalDate.of(2019, 2, 5)));
 
         final List<PlannedRecipe> plannedRecipes = plannedRecipeRepository.findByDateIsBetween(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));

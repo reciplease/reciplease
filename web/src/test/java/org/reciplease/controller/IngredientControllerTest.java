@@ -31,7 +31,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(IngredientController.class)
-@ActiveProfiles("local")
 public class IngredientControllerTest {
 
     private static final String API_INGREDIENTS = "/api/ingredients";
@@ -114,7 +113,7 @@ public class IngredientControllerTest {
                 .build();
 
         final Ingredient ingredient2 = Ingredient.builder()
-                .uuid(UUID.randomUUID())
+                .randomUUID()
                 .name(INGREDIENT_NAME + "2")
                 .measure(MEASURE)
                 .build();

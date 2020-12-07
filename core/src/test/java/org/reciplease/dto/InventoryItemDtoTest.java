@@ -16,7 +16,7 @@ class InventoryItemDtoTest {
     @DisplayName("should create DTO from model")
     void factory() {
         final var ingredient = Ingredient.builder()
-                .uuid(UUID.randomUUID())
+                .randomUUID()
                 .build();
 
         final var item = InventoryItem.builder()
