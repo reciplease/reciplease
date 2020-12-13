@@ -19,7 +19,7 @@ import java.util.UUID;
 @SuperBuilder(toBuilder = true)
 @Getter
 @EqualsAndHashCode
-abstract class BaseEntity {
+public abstract class BaseEntity {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     @GeneratedValue
     @Id

@@ -3,6 +3,7 @@ package org.reciplease.model;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.Entity;
@@ -16,6 +17,7 @@ import javax.validation.constraints.NotNull;
 @SuperBuilder(toBuilder = true)
 @Getter
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
+@ToString
 public class Ingredient extends BaseEntity {
     @NotNull
     @NotBlank
