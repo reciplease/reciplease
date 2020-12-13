@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.stream.Collectors.toList;
+
 @RestController
 @RequestMapping("api/inventory")
 @RequiredArgsConstructor
@@ -24,22 +26,24 @@ public class InventoryController {
     final InventoryService inventoryService;
 
     @PostMapping
-    public ResponseEntity<InventoryItemDto> create(@Valid @RequestBody final InventoryItemDto item) {
-        final InventoryItemDto savedItem = inventoryService.save(item);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedItem);
+    public ResponseEntity<InventoryItemDto> create(@Valid @RequestBody final InventoryItemDto itemDto) {
+        final var savedItemDto = InventoryItemDto.from(inventoryService.save(itemDto.toEntity()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedItemDto);
     }
 
     @GetMapping("{uuid}")
     public ResponseEntity<InventoryItemDto> findById(@PathVariable final UUID uuid) {
-        final Optional<InventoryItemDto> foundItem = inventoryService.findById(uuid);
+        final Optional<InventoryItemDto> foundItem = inventoryService.findById(uuid)
+                .map(InventoryItemDto::from);
 
         return ResponseEntity.of(foundItem);
     }
 
     @GetMapping
     public ResponseEntity<List<InventoryItemDto>> findAll() {
-        final List<InventoryItemDto> items = inventoryService.findAll();
+        final List<InventoryItemDto> items = inventoryService.findAll().stream()
+                .map(InventoryItemDto::from)
+                .collect(toList());
 
         return ResponseEntity.status(HttpStatus.OK).body(items);
     }
