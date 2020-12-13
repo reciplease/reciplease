@@ -1,13 +1,15 @@
 package org.reciplease.configuration;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.reciplease.model.Ingredient;
 import org.reciplease.model.InventoryItem;
+import org.reciplease.model.Recipe;
 import org.reciplease.repository.IngredientRepository;
 import org.reciplease.repository.InventoryRepository;
+import org.reciplease.repository.RecipeRepository;
 
 import java.util.List;
 
@@ -16,25 +18,24 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@MockitoSettings
 public class LocalDataProducerTest {
     @Mock
     private IngredientRepository ingredientRepository;
     @Mock
     private InventoryRepository inventoryRepository;
-
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
+    @Mock
+    private RecipeRepository recipeRepository;
+    @InjectMocks
+    private LocalDataProducer localDataProducer;
 
     @Test
     public void shouldSaveIngredients() {
-        final LocalDataProducer localDataProducer = new LocalDataProducer(ingredientRepository, inventoryRepository);
         when(ingredientRepository.saveAll(anyList())).thenReturn(List.of(new Ingredient(), new Ingredient(), new Ingredient()));
+        when(recipeRepository.save(any())).thenReturn(new Recipe());
 
         localDataProducer.run(null);
 
-        verify(ingredientRepository).saveAll(anyList());
         verify(inventoryRepository).save(any(InventoryItem.class));
     }
 }
