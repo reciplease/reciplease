@@ -2,7 +2,7 @@ package org.reciplease.service;
 
 import lombok.RequiredArgsConstructor;
 import org.reciplease.model.PlannedRecipe;
-import org.reciplease.model.RecipeItem;
+import org.reciplease.model.RecipeIngredient;
 import org.reciplease.model.ShoppingList;
 import org.reciplease.repository.PlannedRecipeRepository;
 import org.springframework.stereotype.Service;
@@ -17,10 +17,10 @@ public class ShoppingListService {
     private final PlannedRecipeRepository plannedRecipeRepository;
 
     public ShoppingList generateShoppingList(final LocalDate start, final LocalDate end) {
-        final Set<RecipeItem> recipeItems = plannedRecipeRepository.findByDateIsBetween(start, end).stream()
+        final Set<RecipeIngredient> recipeIngredients = plannedRecipeRepository.findByDateIsBetween(start, end).stream()
                 .map(PlannedRecipe::getRecipe)
-                .flatMap(recipe -> recipe.getRecipeItems().stream())
+                .flatMap(recipe -> recipe.getRecipeIngredients().stream())
                 .collect(Collectors.toSet());
-        return new ShoppingList(recipeItems);
+        return new ShoppingList(recipeIngredients);
     }
 }

@@ -6,7 +6,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.reciplease.model.PlannedRecipe;
 import org.reciplease.model.Recipe;
-import org.reciplease.model.RecipeItem;
+import org.reciplease.model.RecipeIngredient;
 import org.reciplease.model.ShoppingList;
 import org.reciplease.repository.PlannedRecipeRepository;
 
@@ -29,7 +29,7 @@ public class ShoppingListServiceTest {
     @Mock
     private Recipe recipe;
     @Mock
-    private RecipeItem recipeItem;
+    private RecipeIngredient recipeIngredient;
 
     private ShoppingListService shoppingListService;
 
@@ -51,14 +51,14 @@ public class ShoppingListServiceTest {
     public void shouldReturnShoppingList() {
         final LocalDate date = LocalDate.of(2019, 2, 2);
 
-        final Set<RecipeItem> recipeItems = Set.of(recipeItem);
+        final Set<RecipeIngredient> recipeIngredients = Set.of(recipeIngredient);
         final List<PlannedRecipe> plannedRecipes = List.of(new PlannedRecipe(recipe, date));
 
-        when(recipe.getRecipeItems()).thenReturn(recipeItems);
+        when(recipe.getRecipeIngredients()).thenReturn(recipeIngredients);
         when(plannedRecipeRepository.findByDateIsBetween(startDate, endDate)).thenReturn(plannedRecipes);
 
         final ShoppingList shoppingList = shoppingListService.generateShoppingList(startDate, endDate);
 
-        assertThat(shoppingList.getItems(), is(recipeItems));
+        assertThat(shoppingList.getItems(), is(recipeIngredients));
     }
 }
