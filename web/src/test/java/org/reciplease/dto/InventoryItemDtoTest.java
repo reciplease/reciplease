@@ -13,8 +13,8 @@ import static org.hamcrest.Matchers.is;
 
 class InventoryItemDtoTest {
     @Test
-    @DisplayName("should create DTO from model")
-    void factory() {
+    @DisplayName("create DTO from entity")
+    void from() {
         final var ingredient = Ingredient.builder()
                 .randomUUID()
                 .build();
@@ -27,9 +27,27 @@ class InventoryItemDtoTest {
 
         final var itemDto = InventoryItemDto.from(item);
 
-        assertThat(itemDto.getId(), is(item.getUuid()));
-        assertThat(itemDto.getIngredientId(), is(ingredient.getUuid()));
+        assertThat(itemDto.getUuid(), is(item.getUuid()));
+        assertThat(itemDto.getIngredientUuid(), is(ingredient.getUuid()));
         assertThat(itemDto.getAmount(), is(item.getAmount()));
         assertThat(itemDto.getExpiration(), is(item.getExpiration()));
     }
+
+    @Test
+    @DisplayName("create entity from DTO")
+    void toEntity() {
+        final var itemDto = InventoryItemDto.builder()
+                .uuid(UUID.randomUUID())
+                .ingredientUuid(UUID.randomUUID())
+                .amount(10d)
+                .expiration(LocalDate.now())
+                .build();
+
+        final var item = itemDto.toEntity();
+
+        assertThat(item.getUuid(), is(itemDto.getUuid()));
+        assertThat(item.getIngredient().getUuid(), is(itemDto.getIngredientUuid()));
+        assertThat(item.getAmount(), is(itemDto.getAmount()));
+        assertThat(item.getExpiration(), is(itemDto.getExpiration()));
+     }
 }
