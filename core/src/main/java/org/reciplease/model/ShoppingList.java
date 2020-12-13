@@ -6,5 +6,5 @@ import java.util.Set;
 
 @Data
 public class ShoppingList {
-    private final Set<RecipeItem> items;
+    private final Set<RecipeIngredient> items;
 }
