@@ -19,10 +19,19 @@ import java.util.UUID;
 @SuperBuilder(toBuilder = true)
 @Getter
 @EqualsAndHashCode
-abstract class BaseEntity {
+public abstract class BaseEntity {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     @GeneratedValue
     @Id
     @EqualsAndHashCode.Include
-    protected UUID uuid;
+    private UUID uuid;
+
+    public abstract static class BaseEntityBuilder<C extends BaseEntity, B extends BaseEntity.BaseEntityBuilder<C, B>> {
+        protected UUID uuid;
+
+        public B randomUUID() {
+            this.uuid = UUID.randomUUID();
+            return this.self();
+        }
+    }
 }

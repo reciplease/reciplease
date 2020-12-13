@@ -19,15 +19,14 @@ import java.util.Collections;
 @EnableWebSecurity
 public class LocalSecurityConfig extends WebSecurityConfigurerAdapter implements WebMvcConfigurer {
 
-    @Value("${RECIPLEASE_WEB_API_URL}")
+    @Value("${RECIPLEASE_WEB_API_URL:localhost:3000}")
     private String webApiURL;
 
     @Override
     protected void configure(final HttpSecurity security) throws Exception {
         security.httpBasic().disable()
-                .csrf().disable().cors();
-
-        security.headers().frameOptions().disable();
+                .csrf().disable().cors().and()
+                .headers().frameOptions().disable();
     }
 
     @Bean

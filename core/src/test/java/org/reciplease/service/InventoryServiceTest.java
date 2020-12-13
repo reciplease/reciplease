@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.reciplease.dto.InventoryItemDto;
 import org.reciplease.model.Ingredient;
 import org.reciplease.model.InventoryItem;
 import org.reciplease.repository.IngredientRepository;
@@ -41,49 +40,40 @@ class InventoryServiceTest {
     @Test
     @DisplayName("should save item")
     void save() {
-        final var ingredientId = UUID.randomUUID();
         final var ingredient = Ingredient.builder()
-                .uuid(ingredientId)
-                .build();
-
-        final var itemDto = InventoryItemDto.builder()
-                .ingredientId(ingredientId)
-                .amount(10d)
-                .expiration(LocalDate.now())
+                .randomUUID()
                 .build();
 
         final var item = InventoryItem.builder()
                 .ingredient(ingredient)
-                .amount(itemDto.getAmount())
-                .expiration(itemDto.getExpiration())
-                .build();
-
-        final var savedItem = item.toBuilder()
-                .uuid(UUID.randomUUID())
-                .build();
-
-        final var savedItemDto = InventoryItemDto.from(savedItem);
-
-        when(ingredientRepository.findById(ingredientId)).thenReturn(Optional.of(ingredient));
-        when(inventoryRepository.save(item)).thenReturn(savedItem);
-
-        final var actual = inventoryService.save(itemDto);
-
-        assertThat(actual, is(savedItemDto));
-    }
-
-    @Test
-    void noIngredient() {
-        final var ingredientId = UUID.randomUUID();
-        final var itemDto = InventoryItemDto.builder()
-                .ingredientId(ingredientId)
                 .amount(10d)
                 .expiration(LocalDate.now())
                 .build();
 
-        when(ingredientRepository.findById(ingredientId)).thenReturn(Optional.empty());
+        final var savedItem = item.toBuilder()
+                .randomUUID()
+                .build();
 
-        final var illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> inventoryService.save(itemDto));
+        when(ingredientRepository.findById(ingredient.getUuid())).thenReturn(Optional.of(ingredient));
+        when(inventoryRepository.save(item)).thenReturn(savedItem);
+
+        final var actual = inventoryService.save(item);
+
+        assertThat(actual, is(savedItem));
+    }
+
+    @Test
+    void noIngredient() {
+        final Ingredient ingredient = Ingredient.builder().randomUUID().build();
+        final var item = InventoryItem.builder()
+                .ingredient(ingredient)
+                .amount(10d)
+                .expiration(LocalDate.now())
+                .build();
+
+        when(ingredientRepository.findById(ingredient.getUuid())).thenReturn(Optional.empty());
+
+        final var illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> inventoryService.save(item));
 
         assertThat(illegalArgumentException.getMessage(), is("Ingredient does not exist"));
     }
@@ -101,34 +91,29 @@ class InventoryServiceTest {
     @Nested
     class WithItem {
 
-        private UUID itemId;
         private InventoryItem item;
-        private InventoryItemDto itemDto;
 
         @BeforeEach
         void setUp() {
-            itemId = UUID.randomUUID();
             item = InventoryItem.builder()
-                    .uuid(itemId)
+                    .randomUUID()
                     .ingredient(Ingredient.builder()
-                            .uuid(UUID.randomUUID())
+                            .randomUUID()
                             .build())
                     .amount(10d)
                     .expiration(LocalDate.now())
                     .build();
-
-            itemDto = InventoryItemDto.from(item);
         }
 
         @Test
         @DisplayName("should find item by ID")
         void findById() {
-            when(inventoryRepository.findById(itemId)).thenReturn(Optional.of(item));
+            when(inventoryRepository.findById(item.getUuid())).thenReturn(Optional.of(item));
 
-            final var actual = inventoryService.findById(itemId);
+            final var actual = inventoryService.findById(item.getUuid());
 
             assertThat(actual.isPresent(), is(true));
-            assertThat(actual.get(), is(itemDto));
+            assertThat(actual.get(), is(item));
         }
 
         @Test
@@ -137,7 +122,7 @@ class InventoryServiceTest {
 
             final var actual = inventoryService.findAll();
 
-            assertThat(actual, contains(itemDto));
+            assertThat(actual, contains(item));
         }
     }
 }
