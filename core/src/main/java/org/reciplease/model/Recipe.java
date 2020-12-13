@@ -4,39 +4,41 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import java.util.ArrayList;
+import javax.persistence.OneToMany;
 import java.util.HashSet;
 import java.util.Set;
 
 import static java.util.function.Predicate.not;
-import static java.util.stream.Collectors.toUnmodifiableSet;
+import static java.util.stream.Collectors.toSet;
 
 @Entity
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
 @Getter
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
+@ToString
 public class Recipe extends BaseEntity {
-    @ManyToMany
-    @JoinTable(name = "RECIPE_TO_ITEM")
+    private String name;
+
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     @Builder.Default
-    private Set<RecipeItem> recipeItems = new HashSet<>();
+    private Set<RecipeIngredient> recipeIngredients = new HashSet<>();
 
     public Recipe addIngredient(final Ingredient ingredient, final Double amount) {
-        final var recipeItem = new RecipeItem(this, ingredient, amount);
-        recipeItems.add(recipeItem);
+        final var recipeItem = new RecipeIngredient(this, ingredient, amount);
+        recipeIngredients.add(recipeItem);
         return this;
     }
 
     public Recipe removeIngredient(final Ingredient ingredient) {
-        recipeItems = recipeItems.stream()
+        recipeIngredients = recipeIngredients.stream()
                 .filter(not(item -> item.getIngredient().equals(ingredient)))
-                .collect(toUnmodifiableSet());
+                .collect(toSet());
         return this;
     }
 }

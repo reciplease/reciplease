@@ -19,7 +19,7 @@ class RecipeTest {
                 .randomUUID()
                 .build();
 
-        assertThat(recipe.getRecipeItems(), is(empty()));
+        assertThat(recipe.getRecipeIngredients(), is(empty()));
     }
 
     @Test
@@ -37,8 +37,8 @@ class RecipeTest {
 
         recipe.addIngredient(ingredient, 5d);
 
-        assertThat(recipe.getRecipeItems(), hasSize(1));
-        assertThat(recipe.getRecipeItems(), contains(allOf(
+        assertThat(recipe.getRecipeIngredients(), hasSize(1));
+        assertThat(recipe.getRecipeIngredients(), contains(allOf(
                 hasProperty("recipe", is(recipe)),
                 hasProperty("ingredient", is(ingredient)),
                 hasProperty("amount", is(5d))
@@ -61,7 +61,7 @@ class RecipeTest {
         recipe.addIngredient(ingredient, 5d);
         recipe.removeIngredient(ingredient);
 
-        assertThat(recipe.getRecipeItems(), is(empty()));
+        assertThat(recipe.getRecipeIngredients(), is(empty()));
     }
 
     @Test

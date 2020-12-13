@@ -16,7 +16,7 @@ import java.util.UUID;
 @Getter
 @Builder(toBuilder = true)
 @EqualsAndHashCode
-public class RecipeItemId implements Serializable {
+public class RecipeIngredientId implements Serializable {
     private UUID recipeUuid;
     private UUID ingredientUuid;
 }
