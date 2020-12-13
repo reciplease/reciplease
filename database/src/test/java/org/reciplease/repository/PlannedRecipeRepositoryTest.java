@@ -35,7 +35,7 @@ public class PlannedRecipeRepositoryTest {
     @Test
     public void shouldReturnPlannedRecipesByDate() {
         final Recipe recipe = recipeRepository.save(Recipe.builder()
-                .recipeItems(Set.of())
+                .recipeIngredients(Set.of())
                 .build());
         final PlannedRecipe plannedRecipe = plannedRecipeRepository.save(new PlannedRecipe(recipe, LocalDate.of(2019, 2, 2)));
 
@@ -47,7 +47,7 @@ public class PlannedRecipeRepositoryTest {
     @Test
     public void shouldReturnEmptyList() {
         final Recipe recipe = recipeRepository.save(Recipe.builder()
-                .recipeItems(Set.of())
+                .recipeIngredients(Set.of())
                 .build());
         plannedRecipeRepository.save(new PlannedRecipe(recipe, LocalDate.of(2019, 2, 5)));
 
