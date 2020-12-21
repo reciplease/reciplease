@@ -1,2 +1,7 @@
+springdoc:
+  swagger-ui:
+    path: /
+  default-produces-media-type: application/json
+
 reciplease:
   version: @project.version@
