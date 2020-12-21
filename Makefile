@@ -2,7 +2,7 @@
 
 SHELL := /bin/bash
 RECIPLEASE_NAME ?= "Reciplease"
-RECIPLEASE_VERSION ?= "1.0.13-SNAPSHOT"
+RECIPLEASE_VERSION ?= $(shell date +%Y.%m.%d)-$(shell git rev-parse --short HEAD)
 RECIPLEASE_DESCRIPTION ?= "Making the world a better place through recipe and inventory management."
 ENV := local
 
@@ -26,24 +26,28 @@ build-backend:
 	@mvn clean package -DskipTests
 # 	@if [[ "${ENV}"="prod" ]]; then mvn clean package dependency:go-offline -DskipTests; fi
 
-.PHONY: tests-backend
-tests-backend:
+.PHONY: test-backend #: Run tests
+test-backend:
 	@mvn clean test
 # 	mkdir -p reports/junit/ && \
 # 	find . -type f -regex ".*/target/surefire-reports/.*xml" -print0 | xargs -0 -I{} cp {} reports/junit/
 
-.PHONY: run-backend
+.PHONY: run-backend #: Run application
 run-backend: build-backend
 	@java -jar -Dspring.profiles.active=${ENV} dist/target/reciplease-dist.jar --server.port=${RECIPLEASE_PORT}
 
-.PHONY: release-backend
-release-backend:
-	@false
+.PHONY: version-backend #: Update version
+version-backend:
+	@mvn versions:set -DnewVersion=$(RECIPLEASE_VERSION) -DgenerateBackupPoms=false
+
+.PHONY: release-backend #: Update version, create commit and tag
+release-backend: version
+	@git commit -am "[skip ci] Release version $(RECIPLEASE_VERSION)"
+	@git tag "v$(RECIPLEASE_VERSION)"
 
 .PHONY: deploy-backend
 deploy-backend:
 	@false
-
 
 .PHONY: clean-backend
 clean-backend:

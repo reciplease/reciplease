@@ -27,17 +27,14 @@ jobs:
 
       - name: Release version
         run: |
-          mvn -B versions:set -DremoveSnapshot -DgenerateBackupPoms=false --file pom.xml
-          RELEASE_VERSION=$(mvn -B help:evaluate -Dexpression=project.version -q -DforceStdout)
           git config --global user.name 'Github Actions'
           git config --global user.email 'github-actions@users.noreply.github.com'
-          git commit -am "[skip ci] Release version ${RELEASE_VERSION}"
-          git tag "v${RELEASE_VERSION}"
+          make release
           git push --tags
           git push
 
       - name: Build with Maven
-        run: mvn -B clean package -DskipTests --file pom.xml
+        run: mvn clean package -DskipTests
 
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v1
@@ -50,14 +47,6 @@ jobs:
         with:
           name: Dockerfile
           path: Dockerfile
-
-      - name: Development version
-        run: |
-          mvn versions:set -DnextSnapshot=true -DgenerateBackupPoms=false --file pom.xml
-          git config --global user.name 'Github Actions'
-          git config --global user.email 'github-actions@users.noreply.github.com'
-          git commit -am "[skip ci] Prepare for development"
-          git push
 
   image:
     needs: jar
