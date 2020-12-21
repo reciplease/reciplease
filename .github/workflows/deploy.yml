@@ -27,7 +27,7 @@ jobs:
 
       - name: Release version
         run: |
-          RELEASE_VERSION=$(date +%Y.%m.$(git rev-parse --short HEAD))
+          RELEASE_VERSION=$(date +%Y.%m.%d-$(git rev-parse --short HEAD))
           mvn versions:set -DnewVersion=$RELEASE_VERSION -DgenerateBackupPoms=false
           git config --global user.name 'Github Actions'
           git config --global user.email 'github-actions@users.noreply.github.com'
