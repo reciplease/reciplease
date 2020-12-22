@@ -37,6 +37,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <layout>LAYERED_JAR</layout>
                     <finalName>reciplease-dist</finalName>
                 </configuration>
             </plugin>
