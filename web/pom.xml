@@ -7,11 +7,11 @@
     <parent>
         <groupId>org.reciplease</groupId>
         <artifactId>app</artifactId>
-        <version>2020.12.30-458e806</version>
+        <version>2020.12.30-243db9c</version>
     </parent>
 
     <artifactId>web</artifactId>
-    <version>2020.12.30-458e806</version>
+    <version>2020.12.30-243db9c</version>
 
     <dependencies>
         <dependency>
