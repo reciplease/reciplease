@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toSet;
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
 @Getter
-@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(callSuper = true)
 @ToString
 public class Recipe extends BaseEntity {
     private String name;
