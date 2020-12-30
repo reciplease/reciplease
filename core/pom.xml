@@ -5,11 +5,11 @@
     <parent>
         <artifactId>app</artifactId>
         <groupId>org.reciplease</groupId>
-        <version>2020.12.21-968a9d8</version>
+        <version>2020.12.30-458e806</version>
     </parent>
 
     <artifactId>core</artifactId>
-    <version>2020.12.21-968a9d8</version>
+    <version>2020.12.30-458e806</version>
 
     <dependencies>
         <dependency>
