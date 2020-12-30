@@ -23,7 +23,6 @@ public abstract class BaseEntity {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     @GeneratedValue
     @Id
-    @EqualsAndHashCode.Include
     private UUID uuid;
 
     public abstract static class BaseEntityBuilder<C extends BaseEntity, B extends BaseEntity.BaseEntityBuilder<C, B>> {
