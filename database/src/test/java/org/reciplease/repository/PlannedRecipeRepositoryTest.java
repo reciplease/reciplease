@@ -19,7 +19,6 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 
-@ExtendWith(SpringExtension.class)
 @DataJpaTest
 public class PlannedRecipeRepositoryTest {
     @Autowired
