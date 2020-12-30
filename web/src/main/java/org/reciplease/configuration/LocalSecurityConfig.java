@@ -1,6 +1,5 @@
 package org.reciplease.configuration;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -19,9 +18,6 @@ import java.util.Collections;
 @EnableWebSecurity
 public class LocalSecurityConfig extends WebSecurityConfigurerAdapter implements WebMvcConfigurer {
 
-    @Value("${RECIPLEASE_WEB_API_URL:localhost:3000}")
-    private String webApiURL;
-
     @Override
     protected void configure(final HttpSecurity security) throws Exception {
         security.httpBasic().disable()
@@ -32,7 +28,7 @@ public class LocalSecurityConfig extends WebSecurityConfigurerAdapter implements
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         final CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Collections.singletonList(webApiURL));
+        configuration.setAllowedOrigins(Collections.singletonList("*"));
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", configuration);
         return source;
