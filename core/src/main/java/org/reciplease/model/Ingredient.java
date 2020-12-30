@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
 @Getter
-@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(callSuper = true)
 @ToString
 public class Ingredient extends BaseEntity {
     @NotNull

@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
 @Getter
-@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(callSuper = true)
 public class InventoryItem extends BaseEntity {
     @ManyToOne
     @NonNull
