@@ -25,6 +25,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Download dependencies
+        run: make init
+
       - name: Release version
         run: |
           git config --global user.name 'Github Actions'
@@ -34,9 +37,7 @@ jobs:
           git push
 
       - name: Build with Maven
-        run: |
-          make init
-          make build
+        run: make build
 
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v1
