@@ -9,6 +9,8 @@ ENV := local
 -include .env
 export
 
+.ONESHELL:
+
 %: %-backend
 	@true
 
@@ -21,33 +23,43 @@ help-backend:
 lint-backend:
 	@false
 
-.PHONY: build-backend #: Build project.
-build-backend:
-	@mvn clean package -DskipTests
-# 	@if [[ "${ENV}"="prod" ]]; then mvn clean package dependency:go-offline -DskipTests; fi
+.PHONY: jar-backend #: Build executable JAR
+jar-backend:
+	@mvn package -DskipTests
 
 .PHONY: test-backend #: Run tests
 test-backend:
-	@mvn clean test
-# 	mkdir -p reports/junit/ && \
-# 	find . -type f -regex ".*/target/surefire-reports/.*xml" -print0 | xargs -0 -I{} cp {} reports/junit/
+	@mvn test
 
 .PHONY: run-backend #: Run application
-run-backend: build-backend
-	@java -jar -Dspring.profiles.active=${ENV} dist/target/reciplease-dist.jar --server.port=${RECIPLEASE_PORT}
+run-backend:
+	@$(MAKE) build
+	java -jar -Dspring.profiles.active=${ENV} dist/target/reciplease-dist.jar --server.port=${RECIPLEASE_PORT}
 
 .PHONY: version-backend #: Update version
 version-backend:
 	@mvn versions:set -DnewVersion=$(RECIPLEASE_VERSION) -DgenerateBackupPoms=false
 
 .PHONY: release-backend #: Update version, create commit and tag
-release-backend: version
-	@git commit -am "[skip ci] Release version $(RECIPLEASE_VERSION)"
-	@git tag "v$(RECIPLEASE_VERSION)"
+release-backend:
+	@$(MAKE) version
+	git commit -am "[skip ci] Release version $(RECIPLEASE_VERSION)"
+	git tag "v$(RECIPLEASE_VERSION)"
 
-.PHONY: deploy-backend
-deploy-backend:
-	@false
+.PHONY: image-backend
+image-backend:
+	@$(MAKE) jar
+ifeq (,$(wildcard ./reciplease-dist.jar))
+	cp dist/target/reciplease-dist.jar .
+	echo "Copied jar to root"
+endif
+	function tearDown {
+		echo "Removing jar"
+		rm reciplease-dist.jar
+	}
+	trap tearDown EXIT
+	docker build -t gcr.io/$(PROJECT_ID)/dist:latest .
+#	mvn -pl dist -am spring-boot:build-image -D"spring-boot.build-image.imageName"=gcr.io/$(PROJECT_ID)/dist:latest -DskipTests
 
 .PHONY: clean-backend
 clean-backend:
