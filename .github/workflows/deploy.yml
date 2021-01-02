@@ -34,7 +34,7 @@ jobs:
           git push
 
       - name: Build with Maven
-        run: mvn clean package -DskipTests
+        run: make build
 
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v1

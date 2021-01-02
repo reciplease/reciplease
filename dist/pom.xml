@@ -37,7 +37,12 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <fork>true</fork>
+                    <skip>false</skip>
                     <finalName>reciplease-dist</finalName>
+                    <layers>
+                        <configuration>${project.basedir}/src/layers.xml</configuration>
+                    </layers>
                 </configuration>
             </plugin>
         </plugins>
