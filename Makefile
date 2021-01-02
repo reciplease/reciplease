@@ -26,6 +26,12 @@ lint: lint-backend # alias for quick access
 lint-backend:
 	@false
 
+.PHONY: init-backend #: Initialise maven
+init: init-backend # alias for quick access
+init-backend:
+	@cd ${RECIPLEASE_PATH} && \
+	${MVN} dependency:go-offline
+
 .PHONY: test-backend #: Run tests
 test: test-backend # alias for quick access
 test-backend:
