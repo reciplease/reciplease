@@ -46,46 +46,20 @@ jobs:
       - name: Upload JAR
         uses: actions/upload-artifact@v1
         with:
-          name: jar-artifacts
+          name: jar-artifact
           path: dist/target/reciplease-dist.jar
-
-      - name: Upload Dockerfile
-        uses: actions/upload-artifact@v1
-        with:
-          name: jar-artifacts
-          path: Dockerfile
-
-      - name: Upload Makefile
-        uses: actions/upload-artifact@v1
-        with:
-          name: Makefile
-          path: Makefile
-
-      - name: Upload scripts
-        uses: actions/upload-artifact@v1
-        with:
-          name: scripts
-          path: scripts
   image:
     needs: jar
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
       - name: Download JAR artifacts
         uses: actions/download-artifact@v2
         with:
-          name: jar-artifacts
-
-      - name: Download Makefile
-        uses: actions/download-artifact@v2
-        with:
-          name: Makefile
-
-      - name: Download scripts
-        uses: actions/download-artifact@v2
-        with:
-          name: scripts
-          path: scripts
+          name: jar-artifact
 
       - name: Publish image
         run: make image
@@ -99,16 +73,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download Makefile
-        uses: actions/download-artifact@v2
-        with:
-          name: Makefile
-
-      - name: Download scripts
-        uses: actions/download-artifact@v2
-        with:
-          name: scripts
-          path: scripts
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Configure gcloud
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
