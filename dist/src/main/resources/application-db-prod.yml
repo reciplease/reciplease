@@ -1,4 +1,6 @@
 spring:
+  liquibase:
+    enabled: true
   datasource:
     hikari:
       username: root
