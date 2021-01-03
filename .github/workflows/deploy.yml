@@ -60,6 +60,12 @@ jobs:
         with:
           name: Makefile
           path: Makefile
+
+      - name: Upload scripts
+        uses: actions/upload-artifact@v1
+        with:
+          name: Makefile
+          path: scripts
   image:
     needs: jar
     runs-on: ubuntu-latest
