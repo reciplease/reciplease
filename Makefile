@@ -48,7 +48,7 @@ run-backend:
 %:
 	@cd ${RECIPLEASE_PATH} && \
 	if [[ -f "scripts/${*}.sh" ]]; then \
-	${SHELL} "scripts/${*}.sh"; fi
+	./scripts/${*}.sh; fi
 
 .PHONY: build-backend #: Build executable JAR
 build: build-backend # alias for quick access
@@ -60,19 +60,19 @@ build-backend:
 release: release-backend # alias for quick access
 release-backend:
 	@cd ${RECIPLEASE_PATH} && \
-	${SHELL} scripts/release-backend.sh
+	./scripts/release-backend.sh
 
 .PHONY: image-backend #: Create Docker image.
 image: image-backend # alias for quick access
 image-backend:
 	@cd ${RECIPLEASE_PATH} && \
-	${SHELL} scripts/image-backend.sh
+	./scripts/image-backend.sh
 
 .PHONY: deploy-backend #: Deploy Docker image.
 deploy: deploy-backend # alias for quick access
 deploy-backend:
 	@cd ${RECIPLEASE_PATH} && \
-	${SHELL} scripts/deploy-backend.sh
+	./scripts/deploy-backend.sh
 
 .PHONY: open-backend
 open: open-backend # alias for quick access
