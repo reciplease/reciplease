@@ -43,32 +43,33 @@ jobs:
       - name: Build with Maven
         run: make build
 
-      - name: Upload JAR artifact
+      - name: Upload JAR artifacts
         uses: actions/upload-artifact@v1
         with:
-          name: dist-jar
-          path: dist/target/reciplease-dist.jar
+          name: jar-artifacts
+          path: |
+            dist/target/reciplease-dist.jar
+            Dockerfile
 
-      - name: Upload Dockerfile
+      - name: Upload Makefile
         uses: actions/upload-artifact@v1
         with:
-          name: Dockerfile
-          path: Dockerfile
-
+          name: Makefile
+          path: Makefile
   image:
     needs: jar
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download JAR artifact
+      - name: Download JAR artifacts
         uses: actions/download-artifact@v2
         with:
-          name: dist-jar
+          name: jar-artifacts
 
-      - name: Download Dockerfile
+      - name: Download Makefile
         uses: actions/download-artifact@v2
         with:
-          name: Dockerfile
+          name: Makefile
 
       - name: Publish image
         run: make image
@@ -82,6 +83,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Download Makefile
+        uses: actions/download-artifact@v2
+        with:
+          name: Makefile
+
       - name: Configure gcloud
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
