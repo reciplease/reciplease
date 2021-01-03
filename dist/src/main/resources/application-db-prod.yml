@@ -3,7 +3,8 @@ spring:
     enabled: true
   datasource:
     hikari:
-      username: root
-      password: not-this
-      jdbc-url: jdbc:mysql://localhost:3306/reciplease-sql
-      driver-class-name: com.mysql.cj.jdbc.Driver
+      username: ${env.DATABASE_USERNAME}
+      password: ${env.DATABASE_PASSWORD}
+      jdbc-url: ${env.DATABASE_URL}
+      # driver-class-name: com.mysql.cj.jdbc.Driver
+
