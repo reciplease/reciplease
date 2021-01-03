@@ -3,13 +3,13 @@
 # description: Deploy Docker image to GCP.
 
 if [[ -z "${GCP_REGION}" ]]; then
-	echo '${PROJECT_ID} is not set.'
-	exit 1
+  echo '${PROJECT_ID} is not set.'
+  exit 1
 fi
 
 if [[ -z "${PROJECT_ID}" ]]; then
-	echo '${PROJECT_ID} is not set.'
-	exit 1
+  echo '${PROJECT_ID} is not set.'
+  exit 1
 fi
 
 ${GCLOUD} config set run/platform managed
