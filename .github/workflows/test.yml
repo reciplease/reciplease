@@ -30,6 +30,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Download dependencies
+        run: make init
+
       - name: Run tests
         run: make test
 
