@@ -43,13 +43,17 @@ jobs:
       - name: Build with Maven
         run: make build
 
-      - name: Upload JAR artifacts
+      - name: Upload JAR
         uses: actions/upload-artifact@v1
         with:
           name: jar-artifacts
-          path: |
-            dist/target/reciplease-dist.jar
-            Dockerfile
+          path: dist/target/reciplease-dist.jar
+
+      - name: Upload Dockerfile
+        uses: actions/upload-artifact@v1
+        with:
+          name: jar-artifacts
+          path: Dockerfile
 
       - name: Upload Makefile
         uses: actions/upload-artifact@v1
