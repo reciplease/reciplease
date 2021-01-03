@@ -3,21 +3,38 @@
 # description: Build Docker image.
 
 if [[ -z "${PROJECT_ID}" ]]; then
-	echo '${PROJECT_ID} is not set.'
-	exit 1
+  echo '${PROJECT_ID} is not set.'
+  exit 1
 fi
 
-JAR_FILE="./dist/target/reciplease-dist.jar"
+if [[ -z "${JAR_FILE}" ]]; then
+  echo '${JAR_FILE} is not set.'
+  exit 1
+fi
+
 if [[ ! -f "${JAR_FILE}" ]]; then
-	echo "${JAR_FILE} does not exist."
-	exit 1
+  echo "${JAR_FILE} does not exist."
+  exit 1
 fi
 
-docker build \
-	--build-arg JAR_FILE="./dist/target/reciplease-dist.jar" \
-	-t gcr.io/${PROJECT_ID}/dist:latest .
-	
-# ${MVN} -pl dist \
-# 	-am spring-boot:build-image \
-# 	-D"spring-boot.build-image.imageName"=gcr.io/$(PROJECT_ID)/dist:latest \
-# 	-DskipTests
+echo "Building gcr.io/${PROJECT_ID}/dist:latest"
+
+# Use Docker build kit to fix multiple COPYs in the Dockerfile
+DOCKER_BUILDKIT=1
+
+${DOCKER} build \
+  --build-arg JAR_FILE="${JAR_FILE}" \
+  -t "gcr.io/${PROJECT_ID}/dist:latest" .
+
+if [[ "${CI}" = true ]]; then
+  if [[ -z "${DOCKER_TOKEN}" ]]; then
+    echo '${DOCKER_TOKEN} is not set.'
+    exit 1
+  fi
+
+  echo "${DOCKER_TOKEN}" | ${DOCKER} login -u _json_key --password-stdin https://gcr.io
+
+  ${DOCKER} push gcr.io/${PROJECT_ID}/dist
+fi
+
+echo
