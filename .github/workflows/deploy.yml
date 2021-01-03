@@ -4,11 +4,15 @@ on:
   push:
     branches: [ master ]
 
+env:
+  MVN: mvn
+  GIT: git
+  DOCKER: docker
+  GCLOUD: gcloud
+
 jobs:
   jar:
     runs-on: ubuntu-latest
-    env:
-      MVN: mvn
 
     steps:
       - name: Checkout code
@@ -35,8 +39,6 @@ jobs:
           git config --global user.name 'Github Actions'
           git config --global user.email 'github-actions@users.noreply.github.com'
           make release
-          git push --tags
-          git push
 
       - name: Build with Maven
         run: make build
@@ -68,14 +70,12 @@ jobs:
         with:
           name: Dockerfile
 
-      - name: Publish container
-        uses: mr-smithers-excellent/docker-build-push@v3
-        with:
-          image: ${{ secrets.GCP_PROJECT_ID }}/dist
-          tag: latest
-          registry: gcr.io
-          username: _json_key
-          password: ${{ secrets.GCP_SA_KEY }}
+      - name: Publish image
+        run: make image
+        env:
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          JAR_FILE: reciplease-dist.jar
+          DOCKER_TOKEN: ${{ secrets.GCP_SA_KEY }}
 
   deploy:
     needs: image
@@ -90,8 +90,7 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
 
-      - run: gcloud config set run/platform managed
-      - run: gcloud config set run/region ${{ secrets.GCP_REGION }}
-
-      - name: Deploy container
-        run: gcloud run deploy dist --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/dist
+      - run: make deploy
+        env:
+          GCP_REGION: ${{ secrets.GCP_REGION }}
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
