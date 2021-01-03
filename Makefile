@@ -68,15 +68,6 @@ image-backend:
 	@cd ${RECIPLEASE_PATH} && \
 	./scripts/image-backend.sh
 
-.PHONY: db-diff-backend #: Generate DB changelog
-db-diff: db-diff-backend # alias for quick access
-db-diff-backend:
-	@cd ${RECIPLEASE_PATH} && \
-	${MVN} install -DskipTests
-	${MVN} -pl dist liquibase:diff \
-		-Dliquibase.verbose=true \
-		-Dliquibase.password=${DATABASE_PASSWORD}
-
 .PHONY: deploy-backend #: Deploy Docker image.
 deploy: deploy-backend # alias for quick access
 deploy-backend:
