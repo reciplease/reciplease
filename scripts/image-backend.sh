@@ -13,12 +13,11 @@ if [[ ! -f "${JAR_FILE}" ]]; then
 	exit 1
 fi
 
-# Use Docker Buildkit to support multipe COPYs in the Dockerfile
+# Use Docker build kit to fix multiple COPYs in the Dockerfile
 DOCKER_BUILDKIT=1
 docker build \
 	--build-arg JAR_FILE="./dist/target/reciplease-dist.jar" \
 	-t gcr.io/${PROJECT_ID}/dist:latest .
-	
 # ${MVN} -pl dist \
 # 	-am spring-boot:build-image \
 # 	-D"spring-boot.build-image.imageName"=gcr.io/$(PROJECT_ID)/dist:latest \
