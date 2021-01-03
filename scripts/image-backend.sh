@@ -13,6 +13,8 @@ if [[ ! -f "${JAR_FILE}" ]]; then
 	exit 1
 fi
 
+# Use Docker Buildkit to support multipe COPYs in the Dockerfile
+DOCKER_BUILDKIT=1
 docker build \
 	--build-arg JAR_FILE="./dist/target/reciplease-dist.jar" \
 	-t gcr.io/${PROJECT_ID}/dist:latest .
