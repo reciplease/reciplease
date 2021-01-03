@@ -9,7 +9,6 @@
     </parent>
 
     <artifactId>core</artifactId>
-    <version>2021.01.03-5c475de</version>
 
     <dependencies>
         <dependency>
