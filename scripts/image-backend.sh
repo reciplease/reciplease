@@ -19,14 +19,7 @@ fi
 
 echo "Building gcr.io/${PROJECT_ID}/dist:latest"
 
-# Use Docker build kit to fix multiple COPYs in the Dockerfile
-DOCKER_BUILDKIT=1
-
-${DOCKER} build \
-  --build-arg JAR_FILE="${JAR_FILE}" \
-  -t "gcr.io/${PROJECT_ID}/dist:latest" .
-
-if [[ "${CI}" = true ]]; then
+if [[ "${CI}" == true ]]; then
   if [[ -z "${DOCKER_TOKEN}" ]]; then
     echo '${DOCKER_TOKEN} is not set.'
     exit 1
@@ -34,7 +27,17 @@ if [[ "${CI}" = true ]]; then
 
   echo "${DOCKER_TOKEN}" | ${DOCKER} login -u _json_key --password-stdin https://gcr.io
 
-  ${DOCKER} push gcr.io/${PROJECT_ID}/dist
+  ${DOCKER} build \
+    --build-arg JAR_FILE="${JAR_FILE}" \
+    -t "gcr.io/${PROJECT_ID}/dist:latest" . --push
+
+else
+  # Use Docker build kit to fix multiple COPYs in the Dockerfile
+  DOCKER_BUILDKIT=1
+
+  ${DOCKER} build \
+    --build-arg JAR_FILE="${JAR_FILE}" \
+    -t "gcr.io/${PROJECT_ID}/dist:latest" .
 fi
 
 echo

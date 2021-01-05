@@ -11,6 +11,17 @@ env:
   GCLOUD: gcloud
 
 jobs:
+  waiting:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Turnstyle
+        uses: softprops/turnstyle@v1
+        with:
+          abort-after-seconds: 300
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   jar:
     runs-on: ubuntu-latest
 
@@ -48,6 +59,7 @@ jobs:
         with:
           name: jar-artifact
           path: dist/target/reciplease-dist.jar
+
   image:
     needs: jar
     runs-on: ubuntu-latest
