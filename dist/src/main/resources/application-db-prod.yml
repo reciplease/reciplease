@@ -3,8 +3,8 @@ spring:
     enabled: true
   datasource:
     hikari:
-      username: ${env.DATABASE_USERNAME}
-      password: ${env.DATABASE_PASSWORD}
-      jdbc-url: ${env.DATABASE_URL}
+      username: ${DATABASE_USERNAME}
+      password: ${DATABASE_PASSWORD}
+      jdbc-url: ${DATABASE_URL}
       # driver-class-name: com.mysql.cj.jdbc.Driver
 
