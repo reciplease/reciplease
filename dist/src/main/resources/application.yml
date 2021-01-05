@@ -3,5 +3,9 @@ springdoc:
     path: /
   default-produces-media-type: application/json
 
+spring:
+  liquibase:
+    enabled: false
+
 reciplease:
   version: @project.version@
