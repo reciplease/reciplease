@@ -23,6 +23,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   jar:
+    needs: waiting
     runs-on: ubuntu-latest
 
     steps:
