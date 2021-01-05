@@ -6,5 +6,5 @@ spring:
       username: ${DATABASE_USERNAME}
       password: ${DATABASE_PASSWORD}
       jdbc-url: ${DATABASE_URL}
-      # driver-class-name: com.mysql.cj.jdbc.Driver
+      driver-class-name: ${DATABASE_DRIVER:com.mysql.cj.jdbc.Driver}
 
