@@ -4,7 +4,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
       naming-stategy: org.hibernate.cfg.ImprovedNamingStrategy
     properties:
       hibernate:
