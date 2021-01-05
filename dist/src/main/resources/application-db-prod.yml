@@ -1,10 +1,19 @@
 spring:
   liquibase:
-    enabled: true
+    enabled: false
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+      naming-stategy: org.hibernate.cfg.ImprovedNamingStrategy
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5Dialect
   datasource:
+    testWhileIdle: true
+    validationQuery: SELECT 1
     hikari:
       username: ${DATABASE_USERNAME}
       password: ${DATABASE_PASSWORD}
       jdbc-url: ${DATABASE_URL}
       driver-class-name: ${DATABASE_DRIVER:com.mysql.cj.jdbc.Driver}
-
