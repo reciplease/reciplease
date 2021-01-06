@@ -6,6 +6,10 @@ springdoc:
 spring:
   liquibase:
     enabled: false
+  cloud:
+    gcp:
+      secretmanager:
+        enabled: false
 
 reciplease:
   version: @project.version@
