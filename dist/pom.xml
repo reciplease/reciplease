@@ -68,6 +68,7 @@
                     <skip>false</skip>
                     <finalName>reciplease-dist</finalName>
                     <layers>
+                        <enabled>true</enabled>
                         <configuration>${project.basedir}/src/layers.xml</configuration>
                     </layers>
                 </configuration>
