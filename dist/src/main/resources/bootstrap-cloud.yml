@@ -1,0 +1,11 @@
+spring:
+  cloud:
+    gcp:
+      core:
+        enabled: true
+      secretmanager:
+        enabled: true
+
+DATABASE_USERNAME: ${sm://reciplease-database-username}
+DATABASE_PASSWORD: ${sm://reciplease-database-password}
+DATABASE_URL: ${sm://reciplease-database-url}

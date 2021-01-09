@@ -9,10 +9,6 @@ spring:
   jpa:
     hibernate:
       naming-stategy: org.hibernate.cfg.ImprovedNamingStrategy
-  cloud:
-    gcp:
-      secretmanager:
-        enabled: false
 
 reciplease:
   version: @project.version@
