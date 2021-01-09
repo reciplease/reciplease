@@ -40,4 +40,4 @@ else
     -t "gcr.io/${PROJECT_ID}/dist:latest" .
 fi
 
-echo
+exit $?

@@ -36,7 +36,7 @@ init-backend:
 test: test-backend # alias for quick access
 test-backend:
 	@cd ${RECIPLEASE_PATH} && \
-	${MVN} test
+	./scripts/test-backend.sh
 
 .PHONY: run-backend #: Run application
 run: run-backend # alias for quick access
