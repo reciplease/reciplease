@@ -16,21 +16,12 @@ import java.util.Collections;
 @Profile("local")
 @Configuration
 @EnableWebSecurity
-public class LocalSecurityConfig extends WebSecurityConfigurerAdapter implements WebMvcConfigurer {
+public class LocalSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(final HttpSecurity security) throws Exception {
         security.httpBasic().disable()
-                .csrf().disable().cors().and()
+                .csrf().disable().cors().disable()
                 .headers().frameOptions().disable();
-    }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        final CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Collections.singletonList("*"));
-        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration);
-        return source;
     }
 }
