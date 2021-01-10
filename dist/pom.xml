@@ -69,7 +69,7 @@
                     <finalName>reciplease-dist</finalName>
                     <layers>
                         <enabled>true</enabled>
-                        <configuration>${projecgit t.basedir}/src/layers.xml</configuration>
+                        <configuration>${project.basedir}/src/layers.xml</configuration>
                     </layers>
                 </configuration>
             </plugin>
