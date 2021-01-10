@@ -16,7 +16,8 @@ public class LocalSecurityConfig extends WebSecurityConfigurerAdapter implements
     @Override
     protected void configure(final HttpSecurity security) throws Exception {
         security.httpBasic().disable()
-                .csrf().disable().cors().and()
+                .csrf().disable()
+                .cors().and()
                 .headers().frameOptions().disable();
     }
 
