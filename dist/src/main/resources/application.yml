@@ -6,6 +6,9 @@ springdoc:
 spring:
   liquibase:
     enabled: false
+  jpa:
+    hibernate:
+      naming-stategy: org.hibernate.cfg.ImprovedNamingStrategy
 
 reciplease:
   version: @project.version@
