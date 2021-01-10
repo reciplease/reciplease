@@ -15,7 +15,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
-        http.csrf().disable().cors();
+        http.csrf().disable()
+                .cors().and()
+                .headers().frameOptions().disable();
     }
 
     @Override
