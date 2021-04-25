@@ -10,7 +10,4 @@ COPY --from=builder snapshot-dependencies/ ./
 COPY --from=builder reciplease-dependencies/ ./
 COPY --from=builder application/ ./
 
-ENV PORT 8080
-EXPOSE ${PORT}
-
-ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher", "-Djava.security.egd=file:/dev/./urandom", "--server.port=${PORT}"]
+ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher", "-Djava.security.egd=file:/dev/./urandom"]
