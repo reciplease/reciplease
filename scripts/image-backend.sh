@@ -33,7 +33,7 @@ if [[ "${CI}" == true ]]; then
 
 else
   # Use Docker build kit to fix multiple COPYs in the Dockerfile
-  DOCKER_BUILDKIT=1
+  export DOCKER_BUILDKIT=1
 
   ${DOCKER} build \
     --build-arg JAR_FILE="${JAR_FILE}" \
