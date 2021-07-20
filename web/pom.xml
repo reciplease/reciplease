@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.reciplease</groupId>
         <artifactId>app</artifactId>
-        <version>2021.04.25-c508680</version>
+        <version>2021.07.20-af2deb3</version>
     </parent>
 
     <artifactId>web</artifactId>
