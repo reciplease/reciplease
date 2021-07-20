@@ -2,11 +2,14 @@ package org.reciplease.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.reciplease.dto.RecipeDto;
+import org.reciplease.model.Recipe;
 import org.reciplease.service.RecipeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,5 +37,11 @@ public class RecipeController {
                 .map(RecipeDto::from)
                 .collect(toList());
         return ResponseEntity.status(HttpStatus.OK).body(recipes);
+    }
+
+    @PostMapping
+    public ResponseEntity<RecipeDto> create(@RequestBody final RecipeDto recipeDto) {
+        Recipe recipe = recipeService.create(recipeDto.toEntity());
+        return ResponseEntity.status(HttpStatus.CREATED).body(RecipeDto.from(recipe));
     }
 }

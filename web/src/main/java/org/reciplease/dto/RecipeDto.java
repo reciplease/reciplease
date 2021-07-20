@@ -14,16 +14,18 @@ import static java.util.stream.Collectors.toList;
 public class RecipeDto {
     UUID uuid;
     String name;
-    List<RecipeIngredientDto> ingredients;
 
     public static RecipeDto from(final Recipe recipe) {
-        final var ingredients = recipe.getRecipeIngredients().stream()
-                .map(RecipeIngredientDto::from)
-                .collect(toList());
         return RecipeDto.builder()
                 .uuid(recipe.getUuid())
                 .name(recipe.getName())
-                .ingredients(ingredients)
+                .build();
+    }
+
+    public Recipe toEntity() {
+        return Recipe.builder()
+                .uuid(this.uuid)
+                .name(this.name)
                 .build();
     }
 }

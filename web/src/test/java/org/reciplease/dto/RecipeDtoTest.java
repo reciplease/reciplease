@@ -17,24 +17,14 @@ class RecipeDtoTest {
     @Test
     @DisplayName("create DTO from entity")
     void fromEntity() {
-        final var ingredient = Ingredient.builder()
-                .randomUUID()
-                .name("Bread")
-                .measure(Measure.ITEMS)
-                .build();
         final var recipe = Recipe.builder()
                 .randomUUID()
                 .name("Toast")
-                .build()
-                .addIngredient(ingredient, 1d);
+                .build();
 
         final var recipeDto = RecipeDto.from(recipe);
-        final List<RecipeIngredientDto> ingredientDtoList = recipe.getRecipeIngredients().stream()
-                .map(RecipeIngredientDto::from)
-                .collect(toList());
 
         assertThat(recipeDto.getUuid(), is(recipe.getUuid()));
         assertThat(recipeDto.getName(), is(recipe.getName()));
-        assertThat(recipeDto.getIngredients(), is(ingredientDtoList));
     }
 }

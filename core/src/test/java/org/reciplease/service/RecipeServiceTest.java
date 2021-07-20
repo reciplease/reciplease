@@ -72,4 +72,20 @@ class RecipeServiceTest {
 
         assertThat(actualRecipes, is(recipes));
     }
+
+    @Test
+    void createRecipe() {
+        final var newRecipe = Recipe.builder()
+                .name("toast")
+                .build();
+        final var savedRecipe = newRecipe.toBuilder()
+                .randomUUID()
+                .build();
+
+        when(recipeRepository.save(newRecipe)).thenReturn(savedRecipe);
+
+        final Recipe actualRecipe = recipeService.create(newRecipe);
+
+        assertThat(actualRecipe, is(savedRecipe));
+    }
 }

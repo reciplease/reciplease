@@ -25,4 +25,8 @@ public class RecipeService {
         log.info("Recipes: {}", all);
         return all;
     }
+
+    public Recipe create(final Recipe recipe) {
+        return recipeRepository.save(recipe);
+    }
 }
