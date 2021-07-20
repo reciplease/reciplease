@@ -20,7 +20,6 @@ public class RecipeIngredientDto {
         return RecipeIngredientDto.builder()
                 .uuid(ingredient.getUuid())
                 .name(ingredient.getName())
-                .name(ingredient.getName())
                 .measure(ingredient.getMeasure())
                 .amount(recipeIngredient.getAmount())
                 .build();

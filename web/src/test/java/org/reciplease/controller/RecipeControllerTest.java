@@ -11,6 +11,7 @@ import org.reciplease.service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -20,7 +21,9 @@ import java.util.UUID;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RecipeController.class)
@@ -57,6 +60,52 @@ class RecipeControllerTest {
                 .andExpect(content().json(mapper.writeValueAsString(soupDto), true));
     }
 
+    @Test
+    @DisplayName("get all recipes")
+    void allRecipes() throws Exception {
+        final var recipes = List.of(getToast(), getSoup());
+        final var recipeDtoList = recipes.stream()
+                .map(RecipeDto::from)
+                .collect(toList());
+
+        when(recipeService.findAll()).thenReturn(recipes);
+
+        mockMvc.perform(get("/api/recipes"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(recipeDtoList), true));
+    }
+
+    @Test
+    @DisplayName("create new recipe")
+    void createRecipe() throws Exception {
+        final var newSoupDto = getNewSoupDto();
+        final var savedSoup = getSavedSoup();
+        final var savedSoupDto = RecipeDto.from(savedSoup);
+
+        when(recipeService.create(newSoupDto.toEntity())).thenReturn(savedSoup);
+
+        final var json = mapper.writeValueAsString(newSoupDto);
+
+        mockMvc.perform(post("/api/recipes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(status().isCreated())
+                .andExpect(content().json(mapper.writeValueAsString(savedSoupDto), true));
+    }
+
+    private RecipeDto getNewSoupDto() {
+        return RecipeDto.builder()
+                .name("soup")
+                .build();
+    }
+
+    private Recipe getSavedSoup() {
+        return Recipe.builder()
+                .randomUUID()
+                .name("soup")
+                .build();
+    }
+
     private Recipe getSoup() {
         return Recipe.builder()
                 .randomUUID()
@@ -71,21 +120,6 @@ class RecipeControllerTest {
                 .name("tomato")
                 .measure(Measure.ITEMS)
                 .build();
-    }
-
-    @Test
-    @DisplayName("get all recipes")
-    void allRecipes() throws Exception {
-        final var recipes = List.of(getToast(), getSoup());
-        final var recipeDtoList = recipes.stream()
-                .map(RecipeDto::from)
-                .collect(toList());
-
-        when(recipeService.findAll()).thenReturn(recipes);
-
-        mockMvc.perform(get("/api/recipes"))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(recipeDtoList), true));
     }
 
     private Recipe getToast() {
