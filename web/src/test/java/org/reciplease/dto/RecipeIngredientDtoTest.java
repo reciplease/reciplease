@@ -27,7 +27,7 @@ class RecipeIngredientDtoTest {
 
         final var recipeIngredientDto = RecipeIngredientDto.from(recipeIngredient);
 
-        assertThat(recipeIngredientDto.getUuid(), is(ingredient.getUuid()));
+        assertThat(recipeIngredientDto.getIngredientUuid(), is(ingredient.getUuid()));
         assertThat(recipeIngredientDto.getName(), is(ingredient.getName()));
         assertThat(recipeIngredientDto.getMeasure(), is(ingredient.getMeasure()));
         assertThat(recipeIngredientDto.getAmount(), is(recipeIngredient.getAmount()));

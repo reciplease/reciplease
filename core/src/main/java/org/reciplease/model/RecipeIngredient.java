@@ -13,6 +13,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
+import java.util.UUID;
 
 @Entity
 @NoArgsConstructor
@@ -46,6 +47,11 @@ public class RecipeIngredient {
         this.id = new RecipeIngredientId(recipe.getUuid(), ingredient.getUuid());
         this.ingredient = ingredient;
         this.recipe = recipe;
+        this.amount = amount;
+    }
+
+    public RecipeIngredient(final UUID ingredientUuid, final Double amount) {
+        this.id = new RecipeIngredientId(null, ingredientUuid);
         this.amount = amount;
     }
 }
