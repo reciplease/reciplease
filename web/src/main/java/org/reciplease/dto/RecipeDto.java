@@ -1,24 +1,30 @@
 package org.reciplease.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Value;
 import org.reciplease.model.Recipe;
 
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
-
-import static java.util.stream.Collectors.toList;
+import java.util.stream.Collectors;
 
 @Value
 @Builder
 public class RecipeDto {
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     UUID uuid;
     String name;
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    Set<RecipeIngredientDto> ingredients;
 
     public static RecipeDto from(final Recipe recipe) {
         return RecipeDto.builder()
                 .uuid(recipe.getUuid())
                 .name(recipe.getName())
+                .ingredients(recipe.getRecipeIngredients().stream()
+                        .map(RecipeIngredientDto::from)
+                        .collect(Collectors.toSet()))
                 .build();
     }
 
