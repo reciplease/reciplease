@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reciplease.dto.RecipeDto;
+import org.reciplease.dto.RecipeIngredientDto;
 import org.reciplease.model.Ingredient;
 import org.reciplease.model.Measure;
 import org.reciplease.model.Recipe;
+import org.reciplease.model.RecipeIngredient;
 import org.reciplease.service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -16,14 +18,15 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RecipeController.class)
@@ -87,10 +90,38 @@ class RecipeControllerTest {
         final var json = mapper.writeValueAsString(newSoupDto);
 
         mockMvc.perform(post("/api/recipes")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
                 .andExpect(status().isCreated())
                 .andExpect(content().json(mapper.writeValueAsString(savedSoupDto), true));
+    }
+
+    @Test
+    void addRecipeIngredient() throws Exception {
+        final var ingredient = Ingredient.builder()
+                .uuid(UUID.fromString("70991766-7944-40c2-be90-20065af3d02b"))
+                .name("tomato")
+                .measure(Measure.ITEMS)
+                .build();
+        final var recipe = Recipe.builder()
+                .randomUUID()
+                .name("soup")
+                .build();
+        final var amount = 10d;
+
+        final var recipeIngredient = new RecipeIngredient(ingredient.getUuid(), amount);
+        final var savedRecipeIngredient = new RecipeIngredient(recipe, ingredient, amount);
+
+        when(recipeService.addIngredient(recipe.getUuid(), recipeIngredient)).thenReturn(Set.of(savedRecipeIngredient));
+
+        final var data = "{\"ingredientUuid\": \"70991766-7944-40c2-be90-20065af3d02b\", \"amount\": 10.0}";
+        final var expectedJson = "[{\"ingredientUuid\": \"70991766-7944-40c2-be90-20065af3d02b\", \"name\": \"tomato\", \"measure\": \"ITEMS\", \"amount\": 10.0}]";
+
+        mockMvc.perform(put("/api/recipes/{uuid}/ingredients", recipe.getUuid())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(data))
+                .andExpect(status().isCreated())
+                .andExpect(content().json(expectedJson, true));
     }
 
     private RecipeDto getNewSoupDto() {
