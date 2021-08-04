@@ -1,14 +1,13 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb
-    driverClassName: org.h2.Driver
-    username: sa
-    password:
-  h2:
-    console:
-      enabled: true
+    hikari:
+      username: ${DATABASE_USERNAME}
+      password: ${DATABASE_PASSWORD}
+      jdbc-url: ${DATABASE_URL}
+      driver-class-name: ${DATABASE_DRIVER:com.mysql.cj.jdbc.Driver}
+      connection-test-query: SELECT 1 FROM DUAL
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.MySQL8Dialect
     hibernate.ddl-auto: create
     generate-ddl: true
     show-sql: true
