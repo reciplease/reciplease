@@ -4,6 +4,12 @@
 
 echo "New Release Version: ${RECIPLEASE_VERSION}"
 
+# If release already exists
+if [ $(git tag -l "v${RECIPLEASE_VERSION}") ]; then
+    echo "Release Already Exists. SKIPPING."
+    exit 0
+fi
+
 ${MVN} versions:set \
   -DnewVersion=${RECIPLEASE_VERSION} \
   -DgenerateBackupPoms=false
