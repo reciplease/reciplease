@@ -57,8 +57,8 @@ class InventoryControllerTest {
         when(inventoryService.save(item)).thenReturn(savedItem);
 
         mockMvc.perform(post("/api/inventory")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(itemDto)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(itemDto)))
                 .andExpect(status().isCreated())
                 .andExpect(content().json(mapper.writeValueAsString(savedItemDto)));
     }
@@ -97,6 +97,26 @@ class InventoryControllerTest {
             when(inventoryService.findAll()).thenReturn(List.of(item));
 
             mockMvc.perform(get("/api/inventory"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().json(mapper.writeValueAsString(List.of(itemDto))));
+        }
+
+        @Test
+        @DisplayName("should return expired items")
+        void expiredItems() throws Exception {
+            when(inventoryService.findAllExpired()).thenReturn(List.of(item));
+
+            mockMvc.perform(get("/api/inventory/expired"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().json(mapper.writeValueAsString(List.of(itemDto))));
+        }
+
+        @Test
+        @DisplayName("should return unexpired items")
+        void unexpiredItems() throws Exception {
+            when(inventoryService.findAllUnexpired()).thenReturn(List.of(item));
+
+            mockMvc.perform(get("/api/inventory/unexpired"))
                     .andExpect(status().isOk())
                     .andExpect(content().json(mapper.writeValueAsString(List.of(itemDto))));
         }
