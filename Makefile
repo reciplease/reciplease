@@ -30,7 +30,7 @@ lint-backend:
 init: init-backend # alias for quick access
 init-backend:
 	@cd ${RECIPLEASE_PATH} && \
-	${MVN} dependency:go-offline
+	${MVN} test-compile
 
 .PHONY: test-backend #: Run tests
 test: test-backend # alias for quick access
