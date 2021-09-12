@@ -1,0 +1,10 @@
+[
+  {
+    "uuid": "b465af6e-2465-4436-84c1-14f35db68dbf",
+    "ingredientUuid": "f3aa25a0-5716-4c7d-add5-164396f192fa",
+    "name": "bread",
+    "measure": "ITEMS",
+    "expiration": "2020-01-01",
+    "amount": 20.0
+  }
+]
