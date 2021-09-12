@@ -5,13 +5,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.reciplease.model.Ingredient;
 import org.reciplease.model.InventoryItem;
 import org.reciplease.repository.IngredientRepository;
 import org.reciplease.repository.InventoryRepository;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,19 +25,20 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+@MockitoSettings
 class InventoryServiceTest {
     @Mock
     private InventoryRepository inventoryRepository;
     @Mock
     private IngredientRepository ingredientRepository;
+    private Instant now;
 
     private InventoryService inventoryService;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
-
-        inventoryService = new InventoryService(inventoryRepository, ingredientRepository);
+        now = Instant.now();
+        inventoryService = new InventoryService(inventoryRepository, ingredientRepository, Clock.fixed(now, ZoneOffset.UTC));
     }
 
     @Test
@@ -123,6 +127,26 @@ class InventoryServiceTest {
             final var actual = inventoryService.findAll();
 
             assertThat(actual, contains(item));
+        }
+
+        @Test
+        void shouldFindExpiredInventory() {
+            when((inventoryRepository.findByExpirationIsBefore(now.atOffset(ZoneOffset.UTC).toLocalDate())))
+                    .thenReturn(List.of(item));
+
+            final var allExpired = inventoryService.findAllExpired();
+
+            assertThat(allExpired, contains(item));
+        }
+
+        @Test
+        void shouldFindUnexpiredInventory() {
+            when(inventoryRepository.findByExpirationIsGreaterThanEqual(now.atOffset(ZoneOffset.UTC).toLocalDate()))
+                    .thenReturn(List.of(item));
+
+            final var allUnexpired = inventoryService.findAllUnexpired();
+
+            assertThat(allUnexpired, contains(item));
         }
     }
 }

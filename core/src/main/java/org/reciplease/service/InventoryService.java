@@ -6,6 +6,8 @@ import org.reciplease.repository.IngredientRepository;
 import org.reciplease.repository.InventoryRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,6 +17,7 @@ import java.util.UUID;
 public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final IngredientRepository ingredientRepository;
+    private final Clock clock;
 
     public InventoryItem save(final InventoryItem item) {
         final var ingredient = ingredientRepository.findById(item.getIngredient().getUuid())
@@ -33,5 +36,13 @@ public class InventoryService {
 
     public List<InventoryItem> findAll() {
         return inventoryRepository.findAll();
+    }
+
+    public List<InventoryItem> findAllUnexpired() {
+        return inventoryRepository.findByExpirationIsGreaterThanEqual(LocalDate.now(clock));
+    }
+
+    public List<InventoryItem> findAllExpired() {
+        return inventoryRepository.findByExpirationIsBefore(LocalDate.now(clock));
     }
 }
