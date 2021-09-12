@@ -1,14 +1,10 @@
 package org.reciplease.repository;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.MockitoAnnotations;
 import org.reciplease.model.PlannedRecipe;
 import org.reciplease.model.Recipe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,11 +21,6 @@ public class PlannedRecipeRepositoryTest {
     private PlannedRecipeRepository plannedRecipeRepository;
     @Autowired
     private RecipeRepository recipeRepository;
-
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void shouldReturnPlannedRecipesByDate() {

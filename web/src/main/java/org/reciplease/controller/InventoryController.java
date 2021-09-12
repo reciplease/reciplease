@@ -45,6 +45,24 @@ public class InventoryController {
                 .map(InventoryItemDto::from)
                 .collect(toList());
 
-        return ResponseEntity.status(HttpStatus.OK).body(items);
+        return ResponseEntity.ok(items);
+    }
+
+    @GetMapping("/unexpired")
+    public ResponseEntity<List<InventoryItemDto>> findAllUnexpired() {
+        final List<InventoryItemDto> items = inventoryService.findAllUnexpired().stream()
+                .map(InventoryItemDto::from)
+                .collect(toList());
+
+        return ResponseEntity.ok(items);
+    }
+
+    @GetMapping("/expired")
+    public ResponseEntity<List<InventoryItemDto>> findAllExpired() {
+        final List<InventoryItemDto> items = inventoryService.findAllExpired().stream()
+                .map(InventoryItemDto::from)
+                .collect(toList());
+
+        return ResponseEntity.ok(items);
     }
 }
