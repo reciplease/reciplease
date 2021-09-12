@@ -12,7 +12,7 @@
 
     <groupId>org.reciplease</groupId>
     <artifactId>app</artifactId>
-    <version>2021.08.10-c48d192</version>
+    <version>2021.09.12-f02cfc3</version>
     <name>app</name>
     <url>https://app.reciplease.org</url>
 
@@ -36,22 +36,22 @@
             <dependency>
                 <groupId>org.reciplease</groupId>
                 <artifactId>utils</artifactId>
-                <version>2021.08.10-c48d192</version>
+                <version>2021.09.12-f02cfc3</version>
             </dependency>
             <dependency>
                 <groupId>org.reciplease</groupId>
                 <artifactId>core</artifactId>
-                <version>2021.08.10-c48d192</version>
+                <version>2021.09.12-f02cfc3</version>
             </dependency>
             <dependency>
                 <groupId>org.reciplease</groupId>
                 <artifactId>web</artifactId>
-                <version>2021.08.10-c48d192</version>
+                <version>2021.09.12-f02cfc3</version>
             </dependency>
             <dependency>
                 <groupId>org.reciplease</groupId>
                 <artifactId>database</artifactId>
-                <version>2021.08.10-c48d192</version>
+                <version>2021.09.12-f02cfc3</version>
             </dependency>
 
             <dependency>
