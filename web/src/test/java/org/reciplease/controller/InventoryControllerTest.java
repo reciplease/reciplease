@@ -8,7 +8,6 @@ import org.reciplease.model.Ingredient;
 import org.reciplease.model.InventoryItem;
 import org.reciplease.model.Measure;
 import org.reciplease.service.InventoryService;
-import org.reciplease.utils.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -22,6 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.Mockito.when;
+import static org.reciplease.utils.ResourceUtils.readTestResource;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -54,8 +54,8 @@ class InventoryControllerTest {
                 .build();
 
         when(inventoryService.save(item)).thenReturn(savedItem);
-        final String createJson = ResourceUtils.readTestResource(this.getClass(), "createItem.json");
-        final String savedJson = ResourceUtils.readTestResource(this.getClass(), "savedItem.json");
+        final String createJson = readTestResource(InventoryControllerTest.class, "createItem.json");
+        final String savedJson = readTestResource(InventoryControllerTest.class, "savedItem.json");
 
         mockMvc.perform(post("/api/inventory")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -86,7 +86,7 @@ class InventoryControllerTest {
         @Test
         @DisplayName("should find item by ID")
         void findById() throws Exception {
-            final String itemJson = ResourceUtils.readTestResource(this.getClass(), "item.json");
+            final String itemJson = readTestResource(WithItem.class, "item.json");
 
             when(inventoryService.findById(item.getUuid())).thenReturn(Optional.of(item));
 
@@ -98,7 +98,7 @@ class InventoryControllerTest {
         @Test
         @DisplayName("should return all items")
         void findAll() throws Exception {
-            final String itemsJson = ResourceUtils.readTestResource(this.getClass(), "items.json");
+            final String itemsJson = readTestResource(WithItem.class, "items.json");
 
             when(inventoryService.findAll()).thenReturn(List.of(item));
 
@@ -110,7 +110,7 @@ class InventoryControllerTest {
         @Test
         @DisplayName("should return expired items")
         void expiredItems() throws Exception {
-            final String itemsJson = ResourceUtils.readTestResource(this.getClass(), "items.json");
+            final String itemsJson = readTestResource(WithItem.class, "items.json");
 
             when(inventoryService.findAllExpired()).thenReturn(List.of(item));
 
@@ -122,7 +122,7 @@ class InventoryControllerTest {
         @Test
         @DisplayName("should return unexpired items")
         void unexpiredItems() throws Exception {
-            final String itemsJson = ResourceUtils.readTestResource(this.getClass(), "items.json");
+            final String itemsJson = readTestResource(WithItem.class, "items.json");
 
             when(inventoryService.findAllUnexpired()).thenReturn(List.of(item));
 
