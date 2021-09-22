@@ -6,8 +6,9 @@
 
     <parent>
         <groupId>org.reciplease</groupId>
-        <artifactId>app</artifactId>
+        <artifactId>parent</artifactId>
         <version>2021.09.22-9a1d196</version>
+        <relativePath>../modules/parent</relativePath>
     </parent>
 
     <artifactId>database</artifactId>
