@@ -2,10 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <parent>
-        <artifactId>app</artifactId>
         <groupId>org.reciplease</groupId>
+        <artifactId>parent</artifactId>
         <version>2021.09.22-9a1d196</version>
+        <relativePath>../modules/parent</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
