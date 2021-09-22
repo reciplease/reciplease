@@ -12,7 +12,7 @@
 
     <groupId>org.reciplease</groupId>
     <artifactId>app</artifactId>
-    <version>2021.09.12-f02cfc3</version>
+    <version>2021.09.22-9a1d196</version>
     <packaging>pom</packaging>
     
     <name>Reciplease</name>
