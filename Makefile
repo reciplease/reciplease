@@ -26,12 +26,6 @@ lint: lint-backend # alias for quick access
 lint-backend:
 	@false
 
-.PHONY: init-backend #: Initialise maven
-init: init-backend # alias for quick access
-init-backend:
-	@cd ${RECIPLEASE_PATH} && \
-	${MVN} dependency:go-offline
-
 .PHONY: test-backend #: Run tests
 test: test-backend # alias for quick access
 test-backend:
@@ -49,6 +43,17 @@ run-backend:
 	@cd ${RECIPLEASE_PATH} && \
 	if [[ -f "scripts/${*}.sh" ]]; then \
 	./scripts/${*}.sh; fi
+
+.PHONY: config #: Create config file based on ENV variable.
+config: config/.env.${ENV}
+config/.env.%:
+	@cp -n config/.env.example config/.env.${ENV}
+
+.PHONY: init-backend #: Initialise maven
+init: init-backend # alias for quick access
+init-backend:
+	@cd ${RECIPLEASE_PATH} && \
+	${MVN} dependency:go-offline
 
 .PHONY: build-backend #: Build executable JAR
 build: build-backend # alias for quick access
