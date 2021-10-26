@@ -36,7 +36,7 @@ test-backend:
 run: run-backend # alias for quick access
 run-backend:
 	@cd ${RECIPLEASE_PATH} && \
-	${MVN} -pl dist -am spring-boot:run
+	${MVN} -pl modules/dist -am spring-boot:run
 
 # Run scripts using make
 %:
