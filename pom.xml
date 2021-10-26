@@ -24,7 +24,7 @@
         <module>modules/utils</module>
         <module>modules/core</module>
         <module>modules/database</module>
-        <module>web</module>
+        <module>modules/web</module>
         <module>dist</module>
     </modules>
 
