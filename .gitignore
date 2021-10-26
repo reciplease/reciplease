@@ -4,7 +4,9 @@ Makefile
 HELP.md
 !.mvn/wrapper/maven-wrapper.jar
 
-instances/
+/config/*
+!/config/.env.example
+/instances/
 
 ### STS ###
 .apt_generated
