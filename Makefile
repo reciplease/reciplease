@@ -19,7 +19,7 @@ help-backend:
 .PHONY: docs-backend #: Run documentation.
 docs: docs-backend # alias for quick access
 docs-backend:
-	@false
+	@${MVN} -pl docs site:run
 
 .PHONY: lint-backend #: Run static code analysis.
 lint: lint-backend # alias for quick access

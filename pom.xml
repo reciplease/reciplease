@@ -20,6 +20,7 @@
     <url>https://app.reciplease.org\</url>
 
     <modules>
+        <module>docs</module>
         <module>modules/parent</module>
         <module>utils</module>
         <module>core</module>
