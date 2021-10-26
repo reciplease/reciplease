@@ -22,7 +22,7 @@
     <modules>
         <module>docs</module>
         <module>modules/utils</module>
-        <module>core</module>
+        <module>modules/core</module>
         <module>database</module>
         <module>web</module>
         <module>dist</module>
