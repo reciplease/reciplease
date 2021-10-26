@@ -47,10 +47,7 @@ jobs:
         run: make init
 
       - name: Release version
-        run: |
-          git config --global user.name 'Github Actions'
-          git config --global user.email 'github-actions@users.noreply.github.com'
-          make release
+        run: make git-init release
 
       - name: Build with Maven
         run: make build
