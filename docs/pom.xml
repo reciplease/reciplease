@@ -3,9 +3,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     
-    <groupId>org.reciplease</groupId>
+    <parent>
+        <groupId>org.reciplease</groupId>
+        <artifactId>parent</artifactId>
+        <version>2021.09.22-eb7972b</version>
+        <relativePath>../modules/parent/pom.xml</relativePath>
+    </parent>
+
     <artifactId>docs</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
     
     <name>Reciplease - Docs</name>
     <description>Documentation for Reciplease.</description>
