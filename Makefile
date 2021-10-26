@@ -1,90 +1,71 @@
-#/bin/make
+#!/usr/bin/env make
 
-SHELL := /bin/bash
 RECIPLEASE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-RECIPLEASE_NAME ?= "Reciplease (Backend)"
-RECIPLEASE_VERSION ?= $(shell date +%Y.%m.%d)-$(shell git rev-parse --short HEAD)
-RECIPLEASE_DESCRIPTION ?= "Making the world a better place through recipe and inventory management."
+RECIPLEASE_NAME := "Reciplease (Backend)"
+RECIPLEASE_VERSION := "$(shell date +%Y.%m.%d)-$(shell git rev-parse --short HEAD)"
+RECIPLEASE_DESCRIPTION := "Making the world a better place through recipe and inventory management."
 
 ENV := local
 -include config/.env.${ENV}
+-include config/secrets/.env.${ENV}
 export
 
-.DEFAULT_GOAL := help-backend
-.PHONY: help-backend #: Display a list of commands and exit.
-help: help-backend # alias for quick access
-help-backend:
-	@cd ${RECIPLEASE_PATH} && awk 'BEGIN {FS = " ?#?: "; print ""$(RECIPLEASE_NAME)" "$(RECIPLEASE_VERSION)"\n"$(RECIPLEASE_DESCRIPTION)"\n\nUsage: make \033[36m<command>\033[0m\n\nCommands:"} /^.PHONY: ?[a-zA-Z_-]/ { printf "  \033[36m%-10s\033[0m %s\n", $$2, $$3 }' $(MAKEFILE_LIST)
+.DEFAULT_GOAL := help
+.PHONY: help #: Display a list of commands and exit.
+help:
+	@${AWK} 'BEGIN {FS = " ?#?: "; print ""$(RECIPLEASE_NAME)" "$(RECIPLEASE_VERSION)"\n"$(RECIPLEASE_DESCRIPTION)"\n\nUsage: make \033[36m<command>\033[0m\n\nCommands:"} /^.PHONY: ?[a-zA-Z_-]/ { printf "  \033[36m%-10s\033[0m %s\n", $$2, $$3 }' $(MAKEFILE_LIST)
 
-.PHONY: docs-backend #: Run documentation.
-docs: docs-backend # alias for quick access
-docs-backend:
+.PHONY: docs #: Run documentation.
+docs:
 	@${MVN} -pl docs site:run
 
-.PHONY: lint-backend #: Run static code analysis.
-lint: lint-backend # alias for quick access
-lint-backend:
+.PHONY: lint #: Run static code analysis.
+lint:
 	@false
 
-.PHONY: test-backend #: Run tests
-test: test-backend # alias for quick access
-test-backend:
-	@cd ${RECIPLEASE_PATH} && \
-	${MVN} test
+.PHONY: tests #: Run tests
+test: tests # alias for quick access
+tests:
+	@${MVN} test
 
-.PHONY: run-backend #: Run application
-run: run-backend # alias for quick access
-run-backend:
-	@cd ${RECIPLEASE_PATH} && \
-	${MVN} -pl modules/dist -am spring-boot:run
+.PHONY: run #: Run application
+run:
+	@${MVN} -pl modules/dist -am spring-boot:run
 
 # Run scripts using make
 %:
-	@cd ${RECIPLEASE_PATH} && \
-	if [[ -f "scripts/${*}.sh" ]]; then \
-	./scripts/${*}.sh; fi
+	@if [[ -f "scripts/${*}.sh" ]]; then \
+	${BASH} "scripts/${*}.sh"; fi
 
 .PHONY: config #: Create config file based on ENV variable.
 config: config/.env.${ENV}
 config/.env.%:
 	@cp -n config/.env.example config/.env.${ENV}
 
-.PHONY: init-backend #: Initialise maven
-init: init-backend # alias for quick access
-init-backend:
-	@cd ${RECIPLEASE_PATH} && \
-	${MVN} dependency:go-offline
+.PHONY: init #: Download Maven dependencies.
+init:
+	@${MVN} initialize dependency:go-offline
 
-.PHONY: build-backend #: Build executable JAR
-build: build-backend # alias for quick access
-build-backend:
-	@cd ${RECIPLEASE_PATH} && \
-	${MVN} package -DskipTests
+.PHONY: build #: Build application JAR.
+build:
+	@${MVN} package -DskipTests
 
-.PHONY: release-backend #: Update version, create commit and tag
-release: release-backend # alias for quick access
-release-backend:
-	@cd ${RECIPLEASE_PATH} && \
-	./scripts/release-backend.sh
+.PHONY: release #: Update version, create commit and tag
+release:
+	@${BASH} scripts/release-backend.sh
 
-.PHONY: image-backend #: Create Docker image.
-image: image-backend # alias for quick access
-image-backend:
-	@cd ${RECIPLEASE_PATH} && \
-	./scripts/image-backend.sh
+.PHONY: image #: Create Docker image.
+image:
+	@${BASH} scripts/image-backend.sh
 
-.PHONY: deploy-backend #: Deploy Docker image.
-deploy: deploy-backend # alias for quick access
-deploy-backend:
-	@cd ${RECIPLEASE_PATH} && \
-	./scripts/deploy-backend.sh
+.PHONY: deploy #: Deploy Docker image.
+deploy:
+	@${BASH} scripts/deploy-backend.sh
 
-.PHONY: open-backend
-open: open-backend # alias for quick access
-open-backend:
+.PHONY: open #: Open application.
+open:
 	@${OPEN} ${RECIPLEASE_URL}
 
-.PHONY: clean-backend #: Clear build files.
-clean: clean-backend # alias for quick access
-clean-backend:
+.PHONY: clean #: Clear build files.
+clean:
 	@${MVN} clean
