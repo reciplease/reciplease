@@ -61,7 +61,7 @@ image:
 
 .PHONY: deploy #: Deploy Docker image.
 deploy:
-	@${BASH} scripts/deploy-backend.sh
+	@${BASH} scripts/gcp-docker-deploy.sh
 
 .PHONY: open #: Open application.
 open:
