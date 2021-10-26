@@ -49,6 +49,7 @@ init:
 .PHONY: build #: Build application JAR.
 build:
 	@${MVN} package -DskipTests
+	@mkdir build && cp modules/dist/target/reciplease-dist.jar build/.
 
 .PHONY: release #: Update version, create commit and tag
 release:
