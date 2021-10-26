@@ -22,7 +22,9 @@ echo "Building gcr.io/${GCP_PROJECT_ID}/dist:latest"
 export DOCKER_BUILDKIT=1
 
 # Build Docker image.
-${DOCKER} build -t "gcr.io/${GCP_PROJECT_ID}/dist:latest" .
+${DOCKER} build \
+  --build-arg JAR_FILE="${JAR_FILE}" \
+  -t "gcr.io/${GCP_PROJECT_ID}/dist:latest" .
 
 if [[ "${CI}" != true ]]; then
   echo "Images can only be pushed in CI environments. STOPPING."
@@ -41,6 +43,6 @@ echo "Logging into GCP Docker Registry: ${GCP_DOCKER_REGISTRY}"
 echo "${GCP_DOCKER_TOKEN}" | ${DOCKER} login -u ${GCP_DOCKER_USERNAME} --password-stdin ${GCP_DOCKER_REGISTRY}
 
 # Push image to Docker registry.
-docker push "gcr.io/${GCP_PROJECT_ID}/dist:latest"
+${DOCKER} push "gcr.io/${GCP_PROJECT_ID}/dist:latest"
 
 echo
