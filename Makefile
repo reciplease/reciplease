@@ -57,7 +57,7 @@ release:
 
 .PHONY: image #: Create Docker image.
 image:
-	@${BASH} scripts/image-backend.sh
+	@${BASH} scripts/gcp-docker-build.sh
 
 .PHONY: deploy #: Deploy Docker image.
 deploy:

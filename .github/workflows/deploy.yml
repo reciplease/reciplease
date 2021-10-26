@@ -79,9 +79,9 @@ jobs:
       - name: Publish image
         run: make image
         env:
-          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           JAR_FILE: reciplease-dist.jar
-          DOCKER_TOKEN: ${{ secrets.GCP_SA_KEY }}
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_DOCKER_TOKEN: ${{ secrets.GCP_SA_KEY }}
 
   deploy:
     needs: image
