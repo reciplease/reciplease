@@ -53,7 +53,7 @@ build:
 
 .PHONY: release #: Update version, create commit and tag
 release:
-	@${BASH} scripts/release-backend.sh
+	@${BASH} scripts/git-release.sh
 
 .PHONY: image #: Create Docker image.
 image:
