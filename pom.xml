@@ -4,10 +4,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.4.5</version>
-        <relativePath/>
+        <groupId>org.reciplease</groupId>
+        <artifactId>parent</artifactId>
+        <version>2021.09.22-eb7972b</version>
+        <relativePath>./modules/parent/pom.xml</relativePath>
     </parent>
 
     <groupId>org.reciplease</groupId>
@@ -17,11 +17,10 @@
     
     <name>Reciplease</name>
     <description>Making the world a better place through recipe and inventory management.</description>
-    <url>https://app.reciplease.org\</url>
+    <url>https://app.reciplease.org/</url>
 
     <modules>
         <module>docs</module>
-        <module>modules/parent</module>
         <module>utils</module>
         <module>core</module>
         <module>database</module>
