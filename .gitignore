@@ -1,7 +1,3 @@
-.env*
-!.env.example
-Makefile
-HELP.md
 !.mvn/wrapper/maven-wrapper.jar
 
 /config/*
