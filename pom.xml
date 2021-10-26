@@ -21,7 +21,7 @@
 
     <modules>
         <module>docs</module>
-        <module>utils</module>
+        <module>modules/utils</module>
         <module>core</module>
         <module>database</module>
         <module>web</module>
