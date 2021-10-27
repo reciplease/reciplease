@@ -42,7 +42,7 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           files: |
-            core/target/my-reports/jacoco.xml,
-            database/target/my-reports/jacoco.xml,
-            web/target/my-reports/jacoco.xml
+            modules/core/target/my-reports/jacoco.xml,
+            modules/database/target/my-reports/jacoco.xml,
+            modules/web/target/my-reports/jacoco.xml
           fail_ci_if_error: true
