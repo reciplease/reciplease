@@ -1,5 +1,5 @@
-#!/bin/bash
-# file: db-changelog.sh
+#!/usr/bin/env bash
+# file: liquibase-changelog.sh
 # description: Generate DB changelog using Liquibase.
 
 ${MVN} install -DskipTests
