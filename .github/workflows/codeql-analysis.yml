@@ -19,6 +19,8 @@ env:
   GIT: git
   DOCKER: docker
   GCLOUD: gcloud
+  BASH: bash
+  SHELL: ${env.BASH}
 
 jobs:
   analyze:

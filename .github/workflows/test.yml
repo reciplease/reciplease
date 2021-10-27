@@ -8,6 +8,8 @@ on:
 
 env:
   MVN: mvn
+  BASH: bash
+  SHELL: ${env.BASH}
 
 jobs:
   test:
