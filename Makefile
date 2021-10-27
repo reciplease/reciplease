@@ -44,7 +44,7 @@ config/.env.%:
 
 .PHONY: init #: Download Maven dependencies.
 init:
-	@${MVN} initialize dependency:go-offline
+	@${MVN} dependency:go-offline
 
 .PHONY: build #: Build application JAR.
 build:
