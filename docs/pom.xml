@@ -24,7 +24,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.7.1</version>
                 <configuration>
                     <port>${docs.site.port}</port>
                     <tempWebappDirectory>${basedir}/target/site/tempdir</tempWebappDirectory>
