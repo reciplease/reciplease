@@ -16,7 +16,7 @@
 - Supper
 - Snacks
 
-## Tables
+## Tables
 
 ### BaseEntity
 - uuid
@@ -40,9 +40,9 @@
 
 
 
-#### RecipeIngredient (RecipeItem)
+#### RecipeIngredient (RecipeItem)
 
-#### InventoryIngredient (InvetoryItem)
+#### InventoryIngredient (InventoryItem)
 
 ## Joins
 
