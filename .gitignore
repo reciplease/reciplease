@@ -3,6 +3,7 @@
 /build/
 /config/*
 !/config/.env.example
+!/config/.env.dry
 /instances/
 
 ### STS ###
