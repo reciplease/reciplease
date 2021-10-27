@@ -4,17 +4,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.reciplease</groupId>
-        <artifactId>app</artifactId>
-        <version>2021.09.22-eb7972b</version>
-        <relativePath>../../pom.xml</relativePath>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.4.5</version>
+        <relativePath/>
     </parent>
 
+    <groupId>org.reciplease</groupId>
     <artifactId>parent</artifactId>
     <version>2021.09.22-eb7972b</version>
     <packaging>pom</packaging>
         
-    <name>app</name>
+    <name>parent</name>
     <description>Making the world a better place through recipe and inventory management.</description>
     <url>https://app.reciplease.org</url>
 
@@ -177,6 +178,11 @@
                             </configuration>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.9.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>

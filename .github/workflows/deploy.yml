@@ -9,6 +9,8 @@ env:
   GIT: git
   DOCKER: docker
   GCLOUD: gcloud
+  BASH: bash
+  SHELL: ${env.BASH}
 
 jobs:
   waiting:
@@ -47,10 +49,7 @@ jobs:
         run: make init
 
       - name: Release version
-        run: |
-          git config --global user.name 'Github Actions'
-          git config --global user.email 'github-actions@users.noreply.github.com'
-          make release
+        run: make git-init release
 
       - name: Build with Maven
         run: make build
@@ -82,9 +81,9 @@ jobs:
       - name: Publish image
         run: make image
         env:
-          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           JAR_FILE: reciplease-dist.jar
-          DOCKER_TOKEN: ${{ secrets.GCP_SA_KEY }}
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_DOCKER_TOKEN: ${{ secrets.GCP_SA_KEY }}
 
   deploy:
     needs: image
@@ -105,4 +104,4 @@ jobs:
       - run: make deploy
         env:
           GCP_REGION: ${{ secrets.GCP_REGION }}
-          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}

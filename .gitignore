@@ -1,10 +1,10 @@
-.env*
-!.env.example
-Makefile
-HELP.md
 !.mvn/wrapper/maven-wrapper.jar
 
-instances/
+/build/
+/config/*
+!/config/.env.example
+!/config/.env.dry
+/instances/
 
 ### STS ###
 .apt_generated
