@@ -9,33 +9,25 @@ set -e
 
 RELEASE_VERSION=${RECIPLEASE_VERSION//\"}
 
-echo "Creating a git tag for the version: ${RELEASE_VERSION}"
-# Version Format:  yyyy.mm.dd-abcdef
-
 # If release already exists
 if [[ $(git tag -l "v${RELEASE_VERSION}") ]]; then
-    echo "Release Already Exists. STOPPING."
+    echo "Release ${RELEASE_VERSION} already exists. STOPPING."
     exit 0
 fi
 
+echo "Creating a git tag for the version: ${RELEASE_VERSION}"
+# Version Format:  yyyy.mm.dd-abcdef
+
 MVN_VERSIONS_GENERATE_BACKUP_POMS=false
 
-# Update parent version to match all modules
-${MVN} -f modules/parent/pom.xml versions:set \
+${MVN} -f modules/parent/pom.xml versions:set-property \
+  -Dproperty="revision"  \
   -DnewVersion=${RELEASE_VERSION} \
   -DgenerateBackupPoms=${MVN_VERSIONS_GENERATE_BACKUP_POMS}
 
-${MVN} -f modules/parent/pom.xml clean install
-
-# Update all modules to use new parent
-${MVN} versions:update-parent \
-  -DparentVersion=${RELEASE_VERSION} \
-  -DgenerateBackupPoms=${MVN_VERSIONS_GENERATE_BACKUP_POMS} 
-
-
 
 if [[ "${CI}" != true ]]; then
-    echo "Release can only be created from a CI. STOPPING."
+    echo "Releases can only be created from a CI. STOPPING."
     exit 0  
 fi
 
