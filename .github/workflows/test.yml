@@ -9,7 +9,7 @@ on:
 env:
   MVN: mvn
   BASH: bash
-  SHELL: ${env.BASH}
+  SHELL: bash
 
 jobs:
   test:
