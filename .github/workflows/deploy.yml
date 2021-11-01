@@ -58,7 +58,7 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: jar-artifact
-          path: dist/target/reciplease-dist.jar
+          path: build/reciplease-dist.jar
 
   image:
     needs: jar
