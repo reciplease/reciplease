@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.reciplease</groupId>
         <artifactId>parent</artifactId>
-        <version>2021.10.26-92190d4</version>
+        <version>${revision}</version>
         <relativePath>../modules/parent/pom.xml</relativePath>
     </parent>
 
