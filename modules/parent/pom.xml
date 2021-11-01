@@ -29,22 +29,22 @@
             <dependency>
                 <groupId>org.reciplease</groupId>
                 <artifactId>utils</artifactId>
-                <version>2021.09.22-eb7972b</version>
+                <version>2021.10.26-92190d4</version>
             </dependency>
             <dependency>
                 <groupId>org.reciplease</groupId>
                 <artifactId>core</artifactId>
-                <version>2021.09.22-eb7972b</version>
+                <version>2021.10.26-92190d4</version>
             </dependency>
             <dependency>
                 <groupId>org.reciplease</groupId>
                 <artifactId>web</artifactId>
-                <version>2021.09.22-eb7972b</version>
+                <version>2021.10.26-92190d4</version>
             </dependency>
             <dependency>
                 <groupId>org.reciplease</groupId>
                 <artifactId>database</artifactId>
-                <version>2021.09.22-eb7972b</version>
+                <version>2021.10.26-92190d4</version>
             </dependency>
 
             <dependency>
