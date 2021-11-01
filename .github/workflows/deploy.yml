@@ -10,7 +10,7 @@ env:
   DOCKER: docker
   GCLOUD: gcloud
   BASH: bash
-  SHELL: ${env.BASH}
+  SHELL: bash
 
 jobs:
   waiting:
