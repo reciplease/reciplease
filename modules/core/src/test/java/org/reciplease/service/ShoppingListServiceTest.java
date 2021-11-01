@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.reciplease.model.PlannedRecipe;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
@@ -19,6 +20,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 
+@MockitoSettings
 public class ShoppingListServiceTest {
     private final LocalDate startDate = LocalDate.of(2019, 2, 1);
     private final LocalDate endDate = LocalDate.of(2019, 2, 3);
@@ -35,8 +37,6 @@ public class ShoppingListServiceTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
         shoppingListService = new ShoppingListService(plannedRecipeRepository);
     }
 
