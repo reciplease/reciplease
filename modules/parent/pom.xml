@@ -23,6 +23,7 @@
         <revision>2021.11.04-387a993</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>11</java.version>
+        <springdoc.version>1.5.12</springdoc.version>
     </properties>
 
     <dependencyManagement>
@@ -57,22 +58,22 @@
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-common</artifactId>
-                <version>1.5.2</version>
+                <version>${springdoc.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-ui</artifactId>
-                <version>1.5.2</version>
+                <version>${springdoc.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-security</artifactId>
-                <version>1.5.2</version>
+                <version>${springdoc.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-data-rest</artifactId>
-                <version>1.5.2</version>
+                <version>${springdoc.version}</version>
             </dependency>
 
             <dependency>

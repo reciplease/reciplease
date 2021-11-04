@@ -2,6 +2,12 @@ springdoc:
   swagger-ui:
     path: /
   default-produces-media-type: application/json
+  api-docs:
+    path: /openapi
+
+hibernate:
+  hbm2ddl:
+    auto: create
 
 spring:
   liquibase:

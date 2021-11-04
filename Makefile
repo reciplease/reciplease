@@ -1,9 +1,9 @@
 #!/usr/bin/env make
 
 RECIPLEASE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-RECIPLEASE_NAME := "Reciplease (Backend)"
-RECIPLEASE_VERSION := "$(shell date +%Y.%m.%d)-$(shell git rev-parse --short HEAD)"
-RECIPLEASE_DESCRIPTION := "Making the world a better place through recipe and inventory management."
+RECIPLEASE_NAME := Reciplease (Backend)
+RECIPLEASE_VERSION := $(shell date +%Y.%m.%d)-$(shell git rev-parse --short HEAD)
+RECIPLEASE_DESCRIPTION := Making the world a better place through recipe and inventory management.
 
 ENV := local
 -include config/.env.${ENV}
@@ -13,7 +13,7 @@ export
 .DEFAULT_GOAL := help
 .PHONY: help #: Display a list of commands and exit.
 help:
-	@${AWK} 'BEGIN {FS = " ?#?: "; print ""$(RECIPLEASE_NAME)" "$(RECIPLEASE_VERSION)"\n"$(RECIPLEASE_DESCRIPTION)"\n\nUsage: make \033[36m<command>\033[0m\n\nCommands:"} /^.PHONY: ?[a-zA-Z_-]/ { printf "  \033[36m%-10s\033[0m %s\n", $$2, $$3 }' $(MAKEFILE_LIST)
+	@${AWK} 'BEGIN {FS = " ?#?: "; print "${RECIPLEASE_NAME} ${RECIPLEASE_VERSION}\n${RECIPLEASE_DESCRIPTION}\n\nUsage: make \033[36m<command>\033[0m\n\nCommands:"} /^.PHONY: ?[a-zA-Z_-]/ { printf "  \033[36m%-10s\033[0m %s\n", $$2, $$3 }' $(MAKEFILE_LIST)
 
 .PHONY: docs #: Run documentation.
 docs:
