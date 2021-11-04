@@ -5,6 +5,10 @@ springdoc:
   api-docs:
     path: /openapi
 
+hibernate:
+  hbm2ddl:
+    auto: create
+
 spring:
   liquibase:
     enabled: false
