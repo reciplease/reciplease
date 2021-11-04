@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -23,7 +24,7 @@ import java.util.UUID;
 public abstract class BaseEntity {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     @Id
-    @Column(columnDefinition = "BINARY(16)")
+    @Type(type="pg-uuid")
     @GeneratedValue
     private UUID uuid;
 
