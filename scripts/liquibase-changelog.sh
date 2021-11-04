@@ -2,5 +2,4 @@
 # file: liquibase-changelog.sh
 # description: Generate DB changelog using Liquibase.
 
-${MVN} install -DskipTests
-${MVN} -pl dist liquibase:diff
+${MVN} -pl modules/dist liquibase:diff
