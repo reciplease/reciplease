@@ -29,7 +29,7 @@ tests:
 	@${MVN} test
 
 .PHONY: run #: Run application
-run:
+run: postgres
 	@${MVN} -pl modules/dist -am spring-boot:run
 
 # Run scripts using make

@@ -1,0 +1,37 @@
+---
+# file: docker-compose.yml
+version: '3.7'
+services:
+
+  reciplease:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: reciplease:latest
+    container_name: reciplease_${PORT-4000}
+    ports:
+      - ${PORT-4000}:${SERVER_PORT-4000}
+    environment:
+      - PORT=${PORT-4000}
+      - SERVER_PORT=${SERVER_PORT-4000}
+      - DATABASE_URL=${DATABASE_URL}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - JDBC_DATABASE_URL=${JDBC_DATABASE_URL}
+    # volumes:
+    #   - ./instances/reciplease:/opt/reciplease
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+
+  postgres:
+    image: postgres
+    container_name: reciplease_postgres_${POSTGRES_PORT-5432}
+    ports:
+      - ${POSTGRES_PORT-5432}:5432
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    # volumes:
+    #   - ./instances/postgres_${POSTGRES_PORT-5432}:/var/lib/postgresql
+    restart: unless-stopped
