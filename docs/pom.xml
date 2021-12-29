@@ -16,7 +16,7 @@
     <description>Documentation for Reciplease.</description>
 
     <properties>
-        <docs.site.port>40080</docs.site.port>
+        <docs.site.port>4000</docs.site.port>
     </properties>
 
     <build>
