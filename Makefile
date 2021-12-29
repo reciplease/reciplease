@@ -7,7 +7,7 @@ RECIPLEASE_DESCRIPTION := Making the world a better place through recipe and inv
 
 ENV := local
 -include config/.env.${ENV}
--include config/secrets/.env.${ENV}
+-include config/secrets/.env.*.${ENV}
 export
 
 .DEFAULT_GOAL := help
