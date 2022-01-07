@@ -7,7 +7,7 @@ RECIPLEASE_DESCRIPTION := Making the world a better place through recipe and inv
 
 ENV := local
 -include config/.env.${ENV}
--include config/secrets/.env.${ENV}
+-include config/secrets/.env.*.${ENV}
 export
 
 .DEFAULT_GOAL := help
@@ -29,7 +29,7 @@ tests:
 	@${MVN} test
 
 .PHONY: run #: Run application
-run:
+run: postgres
 	@${MVN} -pl modules/dist -am spring-boot:run
 
 # Run scripts using make
@@ -70,3 +70,4 @@ open:
 .PHONY: clean #: Clear build files.
 clean:
 	@${MVN} clean
+	@rm -r build
