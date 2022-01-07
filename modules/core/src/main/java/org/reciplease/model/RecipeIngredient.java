@@ -36,7 +36,6 @@ public class RecipeIngredient {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("ingredientUuid")
-    @ToString.Include
     @NonNull
     private Ingredient ingredient;
 
@@ -61,12 +60,11 @@ public class RecipeIngredient {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         final RecipeIngredient that = (RecipeIngredient) o;
-
-        return Objects.equals(id, that.id);
+        return id != null && Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hash(id);
     }
 }

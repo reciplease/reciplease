@@ -8,9 +8,16 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.Hibernate;
 
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.OrderColumn;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -27,7 +34,13 @@ public class Recipe extends BaseEntity {
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     @Builder.Default
+    @ToString.Exclude
     private Set<RecipeIngredient> recipeIngredients = new HashSet<>();
+
+    @ElementCollection
+    @Builder.Default
+    @ToString.Exclude
+    private List<String> steps = new LinkedList<>();
 
     public Recipe addIngredient(final Ingredient ingredient, final Double amount) {
         final var recipeItem = new RecipeIngredient(this, ingredient, amount);
@@ -42,17 +55,16 @@ public class Recipe extends BaseEntity {
         return this;
     }
 
+    public Recipe addStep(final String content) {
+        steps.add(content);
+        return this;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         final Recipe recipe = (Recipe) o;
-
-        return Objects.equals(getUuid(), recipe.getUuid());
-    }
-
-    @Override
-    public int hashCode() {
-        return 1629938687;
+        return getUuid() != null && Objects.equals(getUuid(), recipe.getUuid());
     }
 }

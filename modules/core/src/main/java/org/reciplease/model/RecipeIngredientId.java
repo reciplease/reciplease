@@ -25,15 +25,12 @@ public class RecipeIngredientId implements Serializable {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         final RecipeIngredientId that = (RecipeIngredientId) o;
-
-        if (!Objects.equals(recipeUuid, that.recipeUuid)) return false;
-        return Objects.equals(ingredientUuid, that.ingredientUuid);
+        return recipeUuid != null && Objects.equals(recipeUuid, that.recipeUuid)
+                && ingredientUuid != null && Objects.equals(ingredientUuid, that.ingredientUuid);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hashCode(recipeUuid);
-        result = 31 * result + (Objects.hashCode(ingredientUuid));
-        return result;
+        return Objects.hash(recipeUuid, ingredientUuid);
     }
 }

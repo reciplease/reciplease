@@ -24,9 +24,21 @@ import java.util.UUID;
 public abstract class BaseEntity {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     @Id
-    @Type(type="pg-uuid")
     @GeneratedValue
     private UUID uuid;
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        final BaseEntity that = (BaseEntity) o;
+        return uuid != null && Objects.equals(uuid, that.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uuid);
+    }
 
     public abstract static class BaseEntityBuilder<C extends BaseEntity, B extends BaseEntity.BaseEntityBuilder<C, B>> {
         protected UUID uuid;
@@ -35,19 +47,5 @@ public abstract class BaseEntity {
             this.uuid = UUID.randomUUID();
             return this.self();
         }
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        final BaseEntity that = (BaseEntity) o;
-
-        return Objects.equals(uuid, that.uuid);
-    }
-
-    @Override
-    public int hashCode() {
-        return 699169739;
     }
 }

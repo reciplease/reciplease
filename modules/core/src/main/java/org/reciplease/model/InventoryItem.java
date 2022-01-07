@@ -29,12 +29,6 @@ public class InventoryItem extends BaseEntity {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         final InventoryItem that = (InventoryItem) o;
-
-        return Objects.equals(getUuid(), that.getUuid());
-    }
-
-    @Override
-    public int hashCode() {
-        return 20328338;
+        return getUuid() != null && Objects.equals(getUuid(), that.getUuid());
     }
 }
