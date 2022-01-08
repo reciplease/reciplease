@@ -9,7 +9,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
-class BaseEntityTest {
+class BaseModelTest {
 
     @Test
     @DisplayName("can be built with random UUID")
@@ -22,6 +22,6 @@ class BaseEntityTest {
     }
 
     @SuperBuilder
-    static class SomeEntity extends BaseEntity {
+    static class SomeEntity extends BaseModel {
     }
 }
