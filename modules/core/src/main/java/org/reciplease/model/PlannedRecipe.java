@@ -15,7 +15,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @RequiredArgsConstructor
 @Getter
-public class PlannedRecipe extends BaseEntity {
+public class PlannedRecipe extends BaseModel {
     @ManyToOne
     @NonNull
     private Recipe recipe;

@@ -11,7 +11,7 @@ import static java.util.function.Predicate.not;
 @Value
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder(toBuilder = true)
-public class Recipe extends BaseEntity {
+public class Recipe extends BaseModel {
     String name;
 
     Set<RecipeIngredient> recipeIngredients;

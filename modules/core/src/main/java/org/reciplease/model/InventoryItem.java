@@ -17,7 +17,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @SuperBuilder(toBuilder = true)
 @Getter
-public class InventoryItem extends BaseEntity {
+public class InventoryItem extends BaseModel {
     @ManyToOne
     @NonNull
     private Ingredient ingredient;

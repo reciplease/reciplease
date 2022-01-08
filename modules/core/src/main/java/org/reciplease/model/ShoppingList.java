@@ -5,6 +5,6 @@ import lombok.Value;
 import java.util.Set;
 
 @Value
-public class ShoppingList {
+public class ShoppingList extends BaseModel {
     Set<RecipeIngredient> items;
 }
