@@ -27,8 +27,4 @@ public class RecipeIngredientDto {
                 .amount(recipeIngredient.getAmount())
                 .build();
     }
-
-    public RecipeIngredient toEntity() {
-        return new RecipeIngredient(ingredientUuid, amount);
-    }
 }

@@ -1,13 +1,13 @@
 package org.reciplease.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -19,12 +19,13 @@ import java.util.UUID;
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @NoArgsConstructor
+@AllArgsConstructor
 @SuperBuilder(toBuilder = true)
 @Getter
 public abstract class BaseEntity {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     @Id
-    @Type(type="pg-uuid")
+    @Type(type = "org.reciplease.hibernate.types.UUIDCustomType")
     @GeneratedValue
     private UUID uuid;
 
