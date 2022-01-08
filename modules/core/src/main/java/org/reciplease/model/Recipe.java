@@ -1,33 +1,21 @@
 package org.reciplease.model;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.Hibernate;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import static java.util.function.Predicate.not;
-import static java.util.stream.Collectors.toSet;
 
-@Entity
-@NoArgsConstructor
+
+@Value
+@EqualsAndHashCode(callSuper = true)
 @SuperBuilder(toBuilder = true)
-@Getter
-@ToString
 public class Recipe extends BaseEntity {
-    private String name;
+    String name;
 
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
-    @Builder.Default
-    private Set<RecipeIngredient> recipeIngredients = new HashSet<>();
+    Set<RecipeIngredient> recipeIngredients;
 
     public Recipe addIngredient(final Ingredient ingredient, final Double amount) {
         final var recipeItem = new RecipeIngredient(this, ingredient, amount);
@@ -36,23 +24,7 @@ public class Recipe extends BaseEntity {
     }
 
     public Recipe removeIngredient(final Ingredient ingredient) {
-        recipeIngredients = recipeIngredients.stream()
-                .filter(not(item -> item.getIngredient().equals(ingredient)))
-                .collect(toSet());
+        recipeIngredients.removeIf(not(item -> item.getIngredient().equals(ingredient)));
         return this;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        final Recipe recipe = (Recipe) o;
-
-        return Objects.equals(getUuid(), recipe.getUuid());
-    }
-
-    @Override
-    public int hashCode() {
-        return 1629938687;
     }
 }

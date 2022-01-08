@@ -12,10 +12,10 @@ import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
 import org.reciplease.repository.IngredientRepository;
 import org.reciplease.repository.RecipeRepository;
+import org.reciplease.service.request.AddIngredient;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -43,7 +43,7 @@ class RecipeServiceTest {
                 .name("toast")
                 .build();
 
-        when(recipeRepository.findById(toast.getUuid())).thenReturn(Optional.of(toast));
+        when(recipeRepository.findByUuid(toast.getUuid())).thenReturn(Optional.of(toast));
 
         final var optionalRecipe = recipeService.findById(toast.getUuid());
 
@@ -106,30 +106,30 @@ class RecipeServiceTest {
 
         @Test
         void shouldAddIngredientToRecipe() {
-            when(recipeRepository.findById(recipe.getUuid())).thenReturn(Optional.of(recipe));
+            when(recipeRepository.findByUuid(recipe.getUuid())).thenReturn(Optional.of(recipe));
             when(ingredientRepository.findById(ingredient.getUuid())).thenReturn(Optional.of(ingredient));
             when(recipeRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-            final var recipeIngredients = recipeService.addIngredient(recipe.getUuid(), new RecipeIngredient(ingredient.getUuid(), 10d));
+            final var recipeIngredients = recipeService.addIngredient(recipe.getUuid(), new AddIngredient(ingredient.getUuid(), 10d));
 
             assertThat(recipeIngredients, contains(new RecipeIngredient(recipe, ingredient, 10d)));
         }
 
         @Test
         void shouldFail_recipeNotFound() {
-            when(recipeRepository.findById(recipe.getUuid())).thenReturn(Optional.empty());
+            when(recipeRepository.findByUuid(recipe.getUuid())).thenReturn(Optional.empty());
 
-            final var exception = assertThrows(IllegalArgumentException.class, () -> recipeService.addIngredient(recipe.getUuid(), new RecipeIngredient(ingredient.getUuid(), 10d)));
+            final var exception = assertThrows(IllegalArgumentException.class, () -> recipeService.addIngredient(recipe.getUuid(), new AddIngredient(ingredient.getUuid(), 10d)));
 
             assertThat(exception.getMessage(), is("Recipe does not exist"));
         }
 
         @Test
         void shouldFail_ingredientNotFound() {
-            when(recipeRepository.findById(recipe.getUuid())).thenReturn(Optional.of(recipe));
+            when(recipeRepository.findByUuid(recipe.getUuid())).thenReturn(Optional.of(recipe));
             when(ingredientRepository.findById(ingredient.getUuid())).thenReturn(Optional.empty());
 
-            final var exception = assertThrows(IllegalArgumentException.class, () -> recipeService.addIngredient(recipe.getUuid(), new RecipeIngredient(ingredient.getUuid(), 10d)));
+            final var exception = assertThrows(IllegalArgumentException.class, () -> recipeService.addIngredient(recipe.getUuid(), new AddIngredient(ingredient.getUuid(), 10d)));
 
             assertThat(exception.getMessage(), is("Ingredient does not exist"));
         }

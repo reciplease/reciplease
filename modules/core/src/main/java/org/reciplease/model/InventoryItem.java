@@ -1,5 +1,6 @@
 package org.reciplease.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -13,6 +14,7 @@ import java.util.Objects;
 
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 @SuperBuilder(toBuilder = true)
 @Getter
 public class InventoryItem extends BaseEntity {

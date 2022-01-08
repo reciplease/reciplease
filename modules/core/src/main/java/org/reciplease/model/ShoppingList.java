@@ -1,10 +1,11 @@
 package org.reciplease.model;
 
 import lombok.Data;
+import lombok.Value;
 
 import java.util.Set;
 
-@Data
+@Value
 public class ShoppingList {
-    private final Set<RecipeIngredient> items;
+    Set<RecipeIngredient> items;
 }

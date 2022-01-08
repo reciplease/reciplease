@@ -32,7 +32,7 @@ public class LocalDataProducerTest {
     @Test
     public void shouldSaveIngredients() {
         when(ingredientRepository.saveAll(anyList())).thenReturn(List.of(new Ingredient(), new Ingredient(), new Ingredient()));
-        when(recipeRepository.save(any())).thenReturn(new Recipe());
+        when(recipeRepository.save(any())).thenReturn(Recipe.builder().build());
 
         localDataProducer.run(null);
 

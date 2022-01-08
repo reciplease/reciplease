@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reciplease.dto.RecipeDto;
-import org.reciplease.dto.RecipeIngredientDto;
 import org.reciplease.model.Ingredient;
 import org.reciplease.model.Measure;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
+import org.reciplease.service.request.AddIngredient;
 import org.reciplease.service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -109,10 +109,10 @@ class RecipeControllerTest {
                 .build();
         final var amount = 10d;
 
-        final var recipeIngredient = new RecipeIngredient(ingredient.getUuid(), amount);
+        final var addIngredientRequest = new AddIngredient(ingredient.getUuid(), amount);
         final var savedRecipeIngredient = new RecipeIngredient(recipe, ingredient, amount);
 
-        when(recipeService.addIngredient(recipe.getUuid(), recipeIngredient)).thenReturn(Set.of(savedRecipeIngredient));
+        when(recipeService.addIngredient(recipe.getUuid(), addIngredientRequest)).thenReturn(Set.of(savedRecipeIngredient));
 
         final var data = "{\"ingredientUuid\": \"70991766-7944-40c2-be90-20065af3d02b\", \"amount\": 10.0}";
         final var expectedJson = "[{\"ingredientUuid\": \"70991766-7944-40c2-be90-20065af3d02b\", \"name\": \"tomato\", \"measure\": \"ITEMS\", \"amount\": 10.0}]";
