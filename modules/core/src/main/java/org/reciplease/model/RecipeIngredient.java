@@ -5,7 +5,7 @@ import lombok.ToString;
 import lombok.Value;
 
 @Value
-public class RecipeIngredient {
+public class RecipeIngredient extends BaseModel {
     @NonNull
     Recipe recipe;
 

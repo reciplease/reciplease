@@ -20,7 +20,7 @@ import java.util.Objects;
 @SuperBuilder(toBuilder = true)
 @Getter
 @ToString
-public class Ingredient extends BaseEntity {
+public class Ingredient extends BaseModel {
     @NotNull
     @NotBlank
     private String name;
