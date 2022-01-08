@@ -8,7 +8,6 @@ import java.util.Set;
 
 import static java.util.function.Predicate.not;
 
-
 @Value
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder(toBuilder = true)
