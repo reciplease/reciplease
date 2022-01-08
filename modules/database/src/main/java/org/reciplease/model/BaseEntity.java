@@ -30,7 +30,7 @@ public abstract class BaseEntity {
     private UUID uuid;
 
     public abstract static class BaseEntityBuilder<C extends BaseEntity, B extends BaseEntity.BaseEntityBuilder<C, B>> {
-        protected UUID uuid;
+        private UUID uuid;
 
         public B randomUUID() {
             this.uuid = UUID.randomUUID();
