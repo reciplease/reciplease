@@ -21,7 +21,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class RecipeIngredientJpa {
+public class RecipeIngredientJpa extends BaseEntity {
     @EmbeddedId
     @JsonIgnore
     @EqualsAndHashCode.Include
