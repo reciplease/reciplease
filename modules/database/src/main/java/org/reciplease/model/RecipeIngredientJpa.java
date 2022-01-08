@@ -15,7 +15,6 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
 import java.util.Objects;
-import java.util.UUID;
 
 @Entity
 @NoArgsConstructor
@@ -36,15 +35,15 @@ public class RecipeIngredientJpa extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("ingredientUuid")
     @NonNull
-    private Ingredient ingredient;
+    private IngredientJpa ingredientJpa;
 
     @ToString.Include
     @NonNull
     private Double amount;
 
-    public RecipeIngredientJpa(final RecipeJpa recipe, final Ingredient ingredient, final Double amount) {
-        this.id = new RecipeIngredientId(recipe.getUuid(), ingredient.getUuid());
-        this.ingredient = ingredient;
+    public RecipeIngredientJpa(final RecipeJpa recipe, final IngredientJpa ingredientJpa, final Double amount) {
+        this.id = new RecipeIngredientId(recipe.getUuid(), ingredientJpa.getUuid());
+        this.ingredientJpa = ingredientJpa;
         this.recipe = recipe;
         this.amount = amount;
     }
@@ -68,6 +67,6 @@ public class RecipeIngredientJpa extends BaseEntity {
     }
 
     public RecipeIngredient toModel() {
-        return new RecipeIngredient(this.getRecipe().toModel(), this.getIngredient(), this.getAmount());
+        return new RecipeIngredient(this.getRecipe().toModel(), this.getIngredientJpa(), this.getAmount());
     }
 }

@@ -1,7 +1,7 @@
 package org.reciplease.repository;
 
 import org.junit.jupiter.api.Test;
-import org.reciplease.model.PlannedRecipe;
+import org.reciplease.model.PlannedRecipeJpa;
 import org.reciplease.model.Recipe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 
 @DataJpaTest
-public class PlannedRecipeRepositoryTest {
+public class PlannedRecipeJpaRepositoryTest {
     @Autowired
     private PlannedRecipeRepository plannedRecipeRepository;
     @Autowired
@@ -27,11 +27,11 @@ public class PlannedRecipeRepositoryTest {
         final Recipe recipe = recipeRepository.save(Recipe.builder()
                 .recipeIngredients(Set.of())
                 .build());
-        final PlannedRecipe plannedRecipe = plannedRecipeRepository.save(new PlannedRecipe(recipe, LocalDate.of(2019, 2, 2)));
+        final PlannedRecipeJpa plannedRecipeJpa = plannedRecipeRepository.save(new PlannedRecipeJpa(recipe, LocalDate.of(2019, 2, 2)));
 
-        final List<PlannedRecipe> plannedRecipes = plannedRecipeRepository.findByDateIsBetween(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
+        final List<PlannedRecipeJpa> plannedRecipes = plannedRecipeRepository.findByDateIsBetween(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
 
-        assertThat(plannedRecipes, contains(plannedRecipe));
+        assertThat(plannedRecipes, contains(plannedRecipeJpa));
     }
 
     @Test
@@ -39,9 +39,9 @@ public class PlannedRecipeRepositoryTest {
         final Recipe recipe = recipeRepository.save(Recipe.builder()
                 .recipeIngredients(Set.of())
                 .build());
-        plannedRecipeRepository.save(new PlannedRecipe(recipe, LocalDate.of(2019, 2, 5)));
+        plannedRecipeRepository.save(new PlannedRecipeJpa(recipe, LocalDate.of(2019, 2, 5)));
 
-        final List<PlannedRecipe> plannedRecipes = plannedRecipeRepository.findByDateIsBetween(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
+        final List<PlannedRecipeJpa> plannedRecipes = plannedRecipeRepository.findByDateIsBetween(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
 
         assertThat(plannedRecipes, is(empty()));
     }

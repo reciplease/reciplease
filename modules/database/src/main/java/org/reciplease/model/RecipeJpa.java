@@ -13,7 +13,6 @@ import javax.persistence.OneToMany;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toSet;
@@ -30,15 +29,15 @@ public class RecipeJpa extends BaseEntity {
     @Builder.Default
     private Set<RecipeIngredientJpa> recipeIngredients = new HashSet<>();
 
-    public RecipeJpa addIngredient(final Ingredient ingredient, final Double amount) {
-        final var recipeItem = new RecipeIngredientJpa(this, ingredient, amount);
+    public RecipeJpa addIngredient(final IngredientJpa ingredientJpa, final Double amount) {
+        final var recipeItem = new RecipeIngredientJpa(this, ingredientJpa, amount);
         recipeIngredients.add(recipeItem);
         return this;
     }
 
-    public RecipeJpa removeIngredient(final Ingredient ingredient) {
+    public RecipeJpa removeIngredient(final IngredientJpa ingredientJpa) {
         recipeIngredients = recipeIngredients.stream()
-                .filter(not(item -> item.getIngredient().equals(ingredient)))
+                .filter(not(item -> item.getIngredientJpa().equals(ingredientJpa)))
                 .collect(toSet());
         return this;
     }

@@ -3,13 +3,15 @@ package org.reciplease.model;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.Hibernate;
 
 import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import java.time.LocalDate;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 @Entity
@@ -17,26 +19,26 @@ import java.util.Objects;
 @AllArgsConstructor
 @SuperBuilder(toBuilder = true)
 @Getter
-public class InventoryItem extends BaseModel {
-    @ManyToOne
-    @NonNull
-    private Ingredient ingredient;
-    @NonNull
-    private Double amount;
-    @NonNull
-    private LocalDate expiration;
+@ToString
+public class IngredientJpa extends BaseEntity {
+    @NotNull
+    @NotBlank
+    private String name;
+    @NotNull
+    @Enumerated(value = EnumType.STRING)
+    private Measure measure;
 
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        final InventoryItem that = (InventoryItem) o;
+        final IngredientJpa that = (IngredientJpa) o;
 
         return Objects.equals(getUuid(), that.getUuid());
     }
 
     @Override
     public int hashCode() {
-        return 20328338;
+        return 1847634289;
     }
 }
