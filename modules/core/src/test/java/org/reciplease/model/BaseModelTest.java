@@ -11,17 +11,18 @@ import static org.hamcrest.Matchers.nullValue;
 
 class BaseModelTest {
 
+    @SuperBuilder
+    static class TestModel extends BaseModel {
+    }
+
     @Test
     @DisplayName("can be built with random UUID")
     void withRandomUuid() {
-        final var entity = SomeEntity.builder()
+        final var model = TestModel.builder()
                 .randomUUID()
                 .build();
 
-        assertThat(entity.getUuid(), is(not(nullValue())));
+        assertThat(model.getUuid(), is(not(nullValue())));
     }
 
-    @SuperBuilder
-    static class SomeEntity extends BaseModel {
-    }
 }
