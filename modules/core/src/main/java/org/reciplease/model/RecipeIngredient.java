@@ -1,6 +1,5 @@
 package org.reciplease.model;
 
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
 import lombok.Value;
