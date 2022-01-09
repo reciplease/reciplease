@@ -70,4 +70,4 @@ open:
 .PHONY: clean #: Clear build files.
 clean:
 	@${MVN} clean
-	@rm -r build
+	@[[ ! -d build ]] || rm -r build
