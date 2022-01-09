@@ -2,7 +2,7 @@ package org.reciplease.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.reciplease.model.Recipe;
-import org.reciplease.model.RecipeJpa;
+import org.reciplease.model.RecipeEntity;
 import org.reciplease.repository.jpa.RecipeJpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -19,17 +19,17 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     @Override
     public List<Recipe> findAll() {
         return recipeJpaRepository.findAll().stream()
-                .map(RecipeJpa::toModel)
+                .map(RecipeEntity::toModel)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Recipe save(final Recipe recipe) {
-        return recipeJpaRepository.save(RecipeJpa.from(recipe)).toModel();
+        return recipeJpaRepository.save(RecipeEntity.from(recipe)).toModel();
     }
 
     @Override
     public Optional<Recipe> findByUuid(final UUID uuid) {
-        return recipeJpaRepository.findById(uuid).map(RecipeJpa::toModel);
+        return recipeJpaRepository.findById(uuid).map(RecipeEntity::toModel);
     }
 }

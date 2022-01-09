@@ -20,30 +20,30 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class RecipeIngredientJpa extends BaseEntity {
+public class RecipeIngredientEntity extends BaseEntity {
     @EmbeddedId
     @JsonIgnore
     @EqualsAndHashCode.Include
-    private RecipeIngredientId id;
+    private RecipeIngredientIdEntity id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("recipeUuid")
     @JsonIgnore
     @NonNull
-    private RecipeJpa recipe;
+    private RecipeEntity recipe;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("ingredientUuid")
     @NonNull
-    private IngredientJpa ingredientJpa;
+    private IngredientEntity ingredientEntity;
 
     @ToString.Include
     @NonNull
     private Double amount;
 
-    public RecipeIngredientJpa(final RecipeJpa recipe, final IngredientJpa ingredientJpa, final Double amount) {
-        this.id = new RecipeIngredientId(recipe.getUuid(), ingredientJpa.getUuid());
-        this.ingredientJpa = ingredientJpa;
+    public RecipeIngredientEntity(final RecipeEntity recipe, final IngredientEntity ingredientEntity, final Double amount) {
+        this.id = new RecipeIngredientIdEntity(recipe.getUuid(), ingredientEntity.getUuid());
+        this.ingredientEntity = ingredientEntity;
         this.recipe = recipe;
         this.amount = amount;
     }
@@ -52,7 +52,7 @@ public class RecipeIngredientJpa extends BaseEntity {
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        final RecipeIngredientJpa that = (RecipeIngredientJpa) o;
+        final RecipeIngredientEntity that = (RecipeIngredientEntity) o;
 
         return Objects.equals(id, that.id);
     }
@@ -62,11 +62,11 @@ public class RecipeIngredientJpa extends BaseEntity {
         return Objects.hashCode(id);
     }
 
-    public static RecipeIngredientJpa from(final RecipeIngredient recipeIngredient) {
-        return new RecipeIngredientJpa(RecipeJpa.from(recipeIngredient.getRecipe()), recipeIngredient.getIngredient(), recipeIngredient.getAmount());
+    public static RecipeIngredientEntity from(final RecipeIngredient recipeIngredient) {
+        return new RecipeIngredientEntity(RecipeEntity.from(recipeIngredient.getRecipe()), recipeIngredient.getIngredient(), recipeIngredient.getAmount());
     }
 
     public RecipeIngredient toModel() {
-        return new RecipeIngredient(this.getRecipe().toModel(), this.getIngredientJpa(), this.getAmount());
+        return new RecipeIngredient(this.getRecipe().toModel(), this.getIngredientEntity(), this.getAmount());
     }
 }
