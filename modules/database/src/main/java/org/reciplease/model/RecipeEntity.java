@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toSet;
 
 @Entity
@@ -28,19 +27,6 @@ public class RecipeEntity extends BaseEntity {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     @Builder.Default
     private Set<RecipeIngredientEntity> recipeIngredientEntities = new HashSet<>();
-
-    public RecipeEntity addIngredient(final IngredientEntity ingredientEntity, final Double amount) {
-        final var recipeItem = new RecipeIngredientEntity(this, ingredientEntity, amount);
-        recipeIngredientEntities.add(recipeItem);
-        return this;
-    }
-
-    public RecipeEntity removeIngredient(final IngredientEntity ingredientEntity) {
-        recipeIngredientEntities = recipeIngredientEntities.stream()
-                .filter(not(item -> item.getIngredientEntity().equals(ingredientEntity)))
-                .collect(toSet());
-        return this;
-    }
 
     @Override
     public boolean equals(final Object o) {
