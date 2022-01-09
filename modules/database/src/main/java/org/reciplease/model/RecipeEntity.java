@@ -24,7 +24,7 @@ import static java.util.stream.Collectors.toSet;
 public class RecipeEntity extends BaseEntity {
     private String name;
 
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "recipeEntity", cascade = CascadeType.ALL)
     @Builder.Default
     private Set<RecipeIngredientEntity> recipeIngredientEntities = new HashSet<>();
 
