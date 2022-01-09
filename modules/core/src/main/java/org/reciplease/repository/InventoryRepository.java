@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-// extends JpaRepository<InventoryItem, UUID>
 public interface InventoryRepository {
     Optional<InventoryItem> findById(final UUID uuid);
     InventoryItem save(final InventoryItem item);

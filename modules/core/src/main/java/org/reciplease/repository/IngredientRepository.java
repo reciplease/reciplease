@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-// extends JpaRepository<Ingredient, UUID>
 public interface IngredientRepository {
     List<Ingredient> findAll();
     Optional<Ingredient> findById(final UUID uuid);
