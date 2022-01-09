@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -18,7 +19,7 @@ public class InventoryRepositoryImpl implements InventoryRepository {
 
     @Override
     public Optional<InventoryItem> findById(UUID uuid) {
-        return Optional.empty();
+        return inventoryJpaRepository.findById(uuid).map(InventoryItemEntity::toModel);
     }
 
     @Override
@@ -28,16 +29,22 @@ public class InventoryRepositoryImpl implements InventoryRepository {
 
     @Override
     public List<InventoryItem> findAll() {
-        return null;
+        return inventoryJpaRepository.findAll().stream()
+            .map(InventoryItemEntity::toModel)
+            .collect(Collectors.toList());
     }
 
     @Override
     public List<InventoryItem> findByExpirationIsGreaterThanEqual(LocalDate now) {
-        return null;
+        return inventoryJpaRepository.findByExpirationIsGreaterThanEqual(now).stream()
+            .map(InventoryItemEntity::toModel)
+            .collect(Collectors.toList());
     }
 
     @Override
     public List<InventoryItem> findByExpirationIsBefore(LocalDate now) {
-        return inventoryJpaRepository.findB;
+        return inventoryJpaRepository.findByExpirationIsBefore(now).stream()
+            .map(InventoryItemEntity::toModel)
+            .collect(Collectors.toList());
     }
 }
