@@ -18,7 +18,7 @@ import java.util.Objects;
 public class PlannedRecipeEntity extends BaseEntity {
     @ManyToOne
     @NonNull
-    private Recipe recipe;
+    private RecipeEntity recipe;
     @NonNull
     private LocalDate date;
 
