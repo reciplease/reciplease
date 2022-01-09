@@ -7,5 +7,6 @@ import java.util.List;
 
 // extends JpaRepository<PlannedRecipe, UUID>
 public interface PlannedRecipeRepository {
+    PlannedRecipe save(PlannedRecipe plannedRecipe);
     List<PlannedRecipe> findByDateIsBetween(LocalDate start, LocalDate end);
 }
