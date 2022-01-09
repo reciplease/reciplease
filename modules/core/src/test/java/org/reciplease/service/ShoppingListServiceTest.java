@@ -3,17 +3,15 @@ package org.reciplease.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoSettings;
+import org.reciplease.model.Ingredient;
 import org.reciplease.model.PlannedRecipe;
 import org.reciplease.model.Recipe;
-import org.reciplease.model.RecipeIngredient;
 import org.reciplease.model.ShoppingList;
 import org.reciplease.repository.PlannedRecipeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -27,11 +25,6 @@ public class ShoppingListServiceTest {
 
     @Mock
     private PlannedRecipeRepository plannedRecipeRepository;
-
-    @Mock
-    private Recipe recipe;
-    @Mock
-    private RecipeIngredient recipeIngredient;
 
     private ShoppingListService shoppingListService;
 
@@ -51,14 +44,20 @@ public class ShoppingListServiceTest {
     public void shouldReturnShoppingList() {
         final LocalDate date = LocalDate.of(2019, 2, 2);
 
-        final Set<RecipeIngredient> recipeIngredients = Set.of(recipeIngredient);
-        final List<PlannedRecipe> plannedRecipes = List.of(new PlannedRecipe(recipe, date));
-
-        when(recipe.getRecipeIngredients()).thenReturn(recipeIngredients);
+        final var bread = Ingredient.builder()
+            .name("bread").build();
+        final var recipe = Recipe.builder()
+            .name("toast")
+            .build()
+            .addIngredient(bread, 10d);
+        PlannedRecipe plannedRecipe = PlannedRecipe.builder()
+            .recipe(recipe)
+            .date(date).build();
+        final List<PlannedRecipe> plannedRecipes = List.of(plannedRecipe);
         when(plannedRecipeRepository.findByDateIsBetween(startDate, endDate)).thenReturn(plannedRecipes);
 
         final ShoppingList shoppingList = shoppingListService.generateShoppingList(startDate, endDate);
 
-        assertThat(shoppingList.getItems(), is(recipeIngredients));
+        assertThat(shoppingList.getItems(), is(recipe.getRecipeIngredients()));
     }
 }

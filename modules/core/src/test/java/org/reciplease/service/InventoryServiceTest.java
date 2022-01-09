@@ -45,7 +45,7 @@ class InventoryServiceTest {
     @DisplayName("should save item")
     void save() {
         final var ingredient = Ingredient.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .build();
 
         final var item = InventoryItem.builder()
@@ -55,7 +55,7 @@ class InventoryServiceTest {
                 .build();
 
         final var savedItem = item.toBuilder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .build();
 
         when(ingredientRepository.findById(ingredient.getUuid())).thenReturn(Optional.of(ingredient));
@@ -68,7 +68,7 @@ class InventoryServiceTest {
 
     @Test
     void noIngredient() {
-        final Ingredient ingredient = Ingredient.builder().randomUUID().build();
+        final Ingredient ingredient = Ingredient.builder().uuid(UUID.randomUUID()).build();
         final var item = InventoryItem.builder()
                 .ingredient(ingredient)
                 .amount(10d)
@@ -100,9 +100,9 @@ class InventoryServiceTest {
         @BeforeEach
         void setUp() {
             item = InventoryItem.builder()
-                    .randomUUID()
+                    .uuid(UUID.randomUUID())
                     .ingredient(Ingredient.builder()
-                            .randomUUID()
+                            .uuid(UUID.randomUUID())
                             .build())
                     .amount(10d)
                     .expiration(LocalDate.now())
