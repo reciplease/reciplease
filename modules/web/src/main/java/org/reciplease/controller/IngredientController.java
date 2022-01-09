@@ -1,6 +1,7 @@
 package org.reciplease.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.reciplease.dto.IngredientRequest;
 import org.reciplease.model.Ingredient;
 import org.reciplease.repository.IngredientRepository;
 import org.springframework.http.HttpStatus;
@@ -24,8 +25,8 @@ public class IngredientController {
     final IngredientRepository ingredientRepository;
 
     @PostMapping
-    public ResponseEntity<Ingredient> create(@Valid @RequestBody final Ingredient ingredient) {
-        final Ingredient savedIngredient = ingredientRepository.save(ingredient);
+    public ResponseEntity<Ingredient> create(@Valid @RequestBody final IngredientRequest ingredientRequest) {
+        final Ingredient savedIngredient = ingredientRepository.save(ingredientRequest.toModel());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(savedIngredient);
     }
