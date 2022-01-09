@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.Hibernate;
 
 import javax.persistence.EmbeddedId;
@@ -19,6 +20,7 @@ import java.util.Objects;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder(toBuilder = true)
 @Getter
 public class RecipeIngredientEntity extends BaseEntity {
     @EmbeddedId
@@ -30,7 +32,7 @@ public class RecipeIngredientEntity extends BaseEntity {
     @MapsId("recipeUuid")
     @JsonIgnore
     @NonNull
-    private RecipeEntity recipe;
+    private RecipeEntity recipeEntity;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("ingredientUuid")
@@ -40,13 +42,6 @@ public class RecipeIngredientEntity extends BaseEntity {
     @ToString.Include
     @NonNull
     private Double amount;
-
-    public RecipeIngredientEntity(final RecipeEntity recipe, final IngredientEntity ingredientEntity, final Double amount) {
-        this.id = new RecipeIngredientIdEntity(recipe.getUuid(), ingredientEntity.getUuid());
-        this.ingredientEntity = ingredientEntity;
-        this.recipe = recipe;
-        this.amount = amount;
-    }
 
     @Override
     public boolean equals(final Object o) {
@@ -63,13 +58,21 @@ public class RecipeIngredientEntity extends BaseEntity {
     }
 
     public static RecipeIngredientEntity from(final RecipeIngredient recipeIngredient) {
-        return new RecipeIngredientEntity(RecipeEntity.from(recipeIngredient.getRecipe()), recipeIngredient.getIngredient(), recipeIngredient.getAmount());
+        final var recipeEntity = RecipeEntity.from(recipeIngredient.getRecipe());
+        final var ingredientEntity = IngredientEntity.from(recipeIngredient.getIngredient());
+        final var recipeIngredientId = new RecipeIngredientIdEntity(recipeEntity.getUuid(), ingredientEntity.getUuid());
+        return RecipeIngredientEntity.builder()
+            .id(recipeIngredientId)
+            .recipeEntity(recipeEntity)
+            .ingredientEntity(ingredientEntity)
+            .amount(recipeIngredient.getAmount())
+            .build();
     }
 
     public RecipeIngredient toModel() {
         return RecipeIngredient.builder()
             .uuid(getUuid())
-            .recipe(getRecipe().toModel())
+            .recipe(getRecipeEntity().toModel())
             .ingredient(getIngredientEntity().toModel())
             .amount(getAmount())
             .build();
