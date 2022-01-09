@@ -3,21 +3,22 @@ package org.reciplease.repository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.reciplease.model.IngredientEntity;
-import org.reciplease.model.InventoryItemEntity;
+import org.reciplease.model.Ingredient;
+import org.reciplease.model.InventoryItem;
 import org.reciplease.model.Measure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
 import java.time.LocalDate;
 import java.time.Month;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
 
 @DataJpaTest
-public class InventoryRepositoryTest {
+@Import({IngredientRepositoryImpl.class, InventoryRepositoryImpl.class})
+class InventoryRepositoryTest {
     @Autowired
     private IngredientRepository ingredientRepository;
     @Autowired
@@ -27,21 +28,21 @@ public class InventoryRepositoryTest {
     class WithSlicesOfBread {
 
         private LocalDate today;
-        private InventoryItemEntity slice_Jan1;
-        private InventoryItemEntity slice_Jan2;
-        private InventoryItemEntity slice_Jan3;
+        private InventoryItem slice_Jan1;
+        private InventoryItem slice_Jan2;
+        private InventoryItem slice_Jan3;
 
         @BeforeEach
         void setUp() {
             today = LocalDate.of(2020, Month.JANUARY, 2);
 
-            final IngredientEntity bread = ingredientRepository.save(IngredientEntity.builder()
+            final Ingredient bread = ingredientRepository.save(Ingredient.builder()
                     .name("bread")
                     .measure(Measure.ITEMS)
                     .build());
 
-            final var sliceOfBreadBuilder = InventoryItemEntity.builder()
-                    .ingredientJpa(bread)
+            final var sliceOfBreadBuilder = InventoryItem.builder()
+                    .ingredient(bread)
                     .amount(1d);
 
             slice_Jan1 = inventoryRepository.save(sliceOfBreadBuilder
