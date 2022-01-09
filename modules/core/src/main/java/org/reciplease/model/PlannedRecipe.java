@@ -1,16 +1,18 @@
 package org.reciplease.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
-import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 
 @Value
-@SuperBuilder(toBuilder = true)
-public class PlannedRecipe extends BaseModel {
+@AllArgsConstructor
+@Builder
+public class PlannedRecipe {
     @NonNull
-    private Recipe recipe;
+    Recipe recipe;
     @NonNull
-    private LocalDate date;
+    LocalDate date;
 }

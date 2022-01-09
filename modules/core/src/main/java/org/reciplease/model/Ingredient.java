@@ -8,11 +8,11 @@ import javax.validation.constraints.NotNull;
 
 @Value
 @SuperBuilder(toBuilder = true)
-public class Ingredient extends BaseModel {
+public class Ingredient extends Identifiable {
     @NotNull
     @NotBlank
-    private String name;
+    String name;
 
     @NotNull
-    private Measure measure;
+    Measure measure;
 }
