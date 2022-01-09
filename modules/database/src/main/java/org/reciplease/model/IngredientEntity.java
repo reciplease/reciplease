@@ -38,7 +38,13 @@ public class IngredientEntity extends BaseEntity {
     }
 
     @Override
-    public int hashCode() {
-        return 1847634289;
+    public int hashCode() { return 1847634289; }
+
+    public Ingredient toModel() {
+        return Ingredient.builder()
+            .uuid(getUuid())
+            .name(getName())
+            .measure(getMeasure())
+            .build();
     }
 }

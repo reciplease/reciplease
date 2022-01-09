@@ -39,4 +39,13 @@ public class InventoryItemEntity extends BaseEntity {
     public int hashCode() {
         return 20328338;
     }
+
+    public InventoryItem toModel() {
+        return InventoryItem.builder()
+            .uuid(getUuid())
+            .ingredient(getIngredientEntity().toModel())
+            .amount(getAmount())
+            .expiration(getExpiration())
+            .build();
+    }
 }

@@ -67,6 +67,11 @@ public class RecipeIngredientEntity extends BaseEntity {
     }
 
     public RecipeIngredient toModel() {
-        return new RecipeIngredient(this.getRecipe().toModel(), this.getIngredientEntity(), this.getAmount());
+        return RecipeIngredient.builder()
+            .uuid(getUuid())
+            .recipe(getRecipe().toModel())
+            .ingredient(getIngredientEntity().toModel())
+            .amount(getAmount())
+            .build();
     }
 }
