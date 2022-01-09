@@ -16,6 +16,7 @@ import org.reciplease.service.request.AddIngredient;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -39,7 +40,7 @@ class RecipeServiceTest {
     @DisplayName("get recipe by UUID")
     void getRecipe() {
         final var toast = Recipe.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("toast")
                 .build();
 
@@ -55,11 +56,11 @@ class RecipeServiceTest {
     @DisplayName("get all recipes")
     void findAll() {
         final var recipe1 = Recipe.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("toast")
                 .build();
         final var recipe2 = Recipe.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("soup")
                 .build();
         final var recipes = List.of(recipe1, recipe2);
@@ -77,7 +78,7 @@ class RecipeServiceTest {
                 .name("toast")
                 .build();
         final var savedRecipe = newRecipe.toBuilder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .build();
 
         when(recipeRepository.save(newRecipe)).thenReturn(savedRecipe);
@@ -95,11 +96,11 @@ class RecipeServiceTest {
         @BeforeEach
         void setUp() {
             recipe = Recipe.builder()
-                    .randomUUID()
+                    .uuid(UUID.randomUUID())
                     .name("toast")
                     .build();
             ingredient = Ingredient.builder()
-                    .randomUUID()
+                    .uuid(UUID.randomUUID())
                     .name("bread")
                     .build();
         }
@@ -112,7 +113,7 @@ class RecipeServiceTest {
 
             final var recipeIngredients = recipeService.addIngredient(recipe.getUuid(), new AddIngredient(ingredient.getUuid(), 10d));
 
-            assertThat(recipeIngredients, contains(new RecipeIngredient(recipe, ingredient, 10d)));
+            assertThat(recipeIngredients, contains(new RecipeIngredient(ingredient, 10d)));
         }
 
         @Test
