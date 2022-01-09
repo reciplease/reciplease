@@ -22,7 +22,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @SuperBuilder(toBuilder = true)
 @Getter
-public class RecipeIngredientEntity extends BaseEntity {
+public class RecipeIngredientEntity {
     @EmbeddedId
     @JsonIgnore
     @EqualsAndHashCode.Include
@@ -57,8 +57,8 @@ public class RecipeIngredientEntity extends BaseEntity {
         return Objects.hashCode(id);
     }
 
-    public static RecipeIngredientEntity from(final RecipeIngredient recipeIngredient) {
-        final var recipeEntity = RecipeEntity.from(recipeIngredient.getRecipe());
+    public static RecipeIngredientEntity from(final Recipe recipe, final RecipeIngredient recipeIngredient) {
+        final var recipeEntity = RecipeEntity.from(recipe);
         final var ingredientEntity = IngredientEntity.from(recipeIngredient.getIngredient());
         final var recipeIngredientId = new RecipeIngredientIdEntity(recipeEntity.getUuid(), ingredientEntity.getUuid());
         return RecipeIngredientEntity.builder()
@@ -70,11 +70,6 @@ public class RecipeIngredientEntity extends BaseEntity {
     }
 
     public RecipeIngredient toModel() {
-        return RecipeIngredient.builder()
-            .uuid(getUuid())
-            .recipe(getRecipeEntity().toModel())
-            .ingredient(getIngredientEntity().toModel())
-            .amount(getAmount())
-            .build();
+        return new RecipeIngredient(getIngredientEntity().toModel(), getAmount());
     }
 }

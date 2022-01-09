@@ -1,7 +1,6 @@
 package org.reciplease.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.Hibernate;
@@ -15,7 +14,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@Builder(toBuilder = true)
 public class RecipeIngredientIdEntity implements Serializable {
     private UUID recipeUuid;
     private UUID ingredientUuid;

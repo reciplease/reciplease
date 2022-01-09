@@ -40,7 +40,6 @@ public class PlannedRecipeEntity extends BaseEntity {
 
     public static PlannedRecipeEntity from(final PlannedRecipe plannedRecipe) {
         return PlannedRecipeEntity.builder()
-            .uuid(plannedRecipe.getUuid())
             .recipeEntity(RecipeEntity.from(plannedRecipe.getRecipe()))
             .date(plannedRecipe.getDate())
             .build();
@@ -48,7 +47,6 @@ public class PlannedRecipeEntity extends BaseEntity {
 
     public PlannedRecipe toModel() {
         return PlannedRecipe.builder()
-            .uuid(getUuid())
             .recipe(getRecipeEntity().toModel())
             .date(getDate())
             .build();
