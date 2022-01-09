@@ -40,6 +40,15 @@ public class InventoryItemEntity extends BaseEntity {
         return 20328338;
     }
 
+    public static InventoryItemEntity from(final InventoryItem inventoryItem) {
+        return InventoryItemEntity.builder()
+            .uuid(inventoryItem.getUuid())
+            .ingredientEntity(IngredientEntity.from(inventoryItem.getIngredient()))
+            .amount(inventoryItem.getAmount())
+            .expiration(inventoryItem.getExpiration())
+            .build();
+    }
+
     public InventoryItem toModel() {
         return InventoryItem.builder()
             .uuid(getUuid())

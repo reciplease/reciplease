@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.Hibernate;
 
 import javax.persistence.Entity;
@@ -14,11 +15,12 @@ import java.util.Objects;
 @Entity
 @NoArgsConstructor
 @RequiredArgsConstructor
+@SuperBuilder(toBuilder = true)
 @Getter
 public class PlannedRecipeEntity extends BaseEntity {
     @ManyToOne
     @NonNull
-    private RecipeEntity recipe;
+    private RecipeEntity recipeEntity;
     @NonNull
     private LocalDate date;
 
@@ -36,10 +38,18 @@ public class PlannedRecipeEntity extends BaseEntity {
         return 914579680;
     }
 
+    public static PlannedRecipeEntity from(final PlannedRecipe plannedRecipe) {
+        return PlannedRecipeEntity.builder()
+            .uuid(plannedRecipe.getUuid())
+            .recipeEntity(RecipeEntity.from(plannedRecipe.getRecipe()))
+            .date(plannedRecipe.getDate())
+            .build();
+    }
+
     public PlannedRecipe toModel() {
         return PlannedRecipe.builder()
             .uuid(getUuid())
-            .recipe(getRecipe().toModel())
+            .recipe(getRecipeEntity().toModel())
             .date(getDate())
             .build();
     }

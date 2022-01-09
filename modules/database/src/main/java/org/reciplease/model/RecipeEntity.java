@@ -27,16 +27,16 @@ public class RecipeEntity extends BaseEntity {
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     @Builder.Default
-    private Set<RecipeIngredientEntity> recipeIngredients = new HashSet<>();
+    private Set<RecipeIngredientEntity> recipeIngredientEntities = new HashSet<>();
 
     public RecipeEntity addIngredient(final IngredientEntity ingredientEntity, final Double amount) {
         final var recipeItem = new RecipeIngredientEntity(this, ingredientEntity, amount);
-        recipeIngredients.add(recipeItem);
+        recipeIngredientEntities.add(recipeItem);
         return this;
     }
 
     public RecipeEntity removeIngredient(final IngredientEntity ingredientEntity) {
-        recipeIngredients = recipeIngredients.stream()
+        recipeIngredientEntities = recipeIngredientEntities.stream()
                 .filter(not(item -> item.getIngredientEntity().equals(ingredientEntity)))
                 .collect(toSet());
         return this;
@@ -64,18 +64,24 @@ public class RecipeEntity extends BaseEntity {
     }
 
     public static RecipeEntity from(final Recipe recipe) {
+        final var recipeIngredientEntities = recipe.getRecipeIngredients().stream()
+            .map(RecipeIngredientEntity::from)
+            .collect(toSet());
         return RecipeEntity.builder()
                 .uuid(recipe.getUuid())
                 .name(recipe.getName())
-                .recipeIngredients(recipe.getRecipeIngredients().stream().map(RecipeIngredientEntity::from).collect(toSet()))
+                .recipeIngredientEntities(recipeIngredientEntities)
                 .build();
     }
 
     public Recipe toModel() {
+        final var recipeIngredients = getRecipeIngredientEntities().stream()
+            .map(RecipeIngredientEntity::toModel)
+            .collect(toSet());
         return Recipe.builder()
                 .uuid(getUuid())
                 .name(getName())
-                .recipeIngredients(getRecipeIngredients().stream().map(RecipeIngredientEntity::toModel).collect(toSet()))
+                .recipeIngredients(recipeIngredients)
                 .build();
     }
 }
