@@ -22,22 +22,22 @@ import static java.util.stream.Collectors.toSet;
 @AllArgsConstructor
 @SuperBuilder(toBuilder = true)
 @Getter
-public class RecipeJpa extends BaseEntity {
+public class RecipeEntity extends BaseEntity {
     private String name;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     @Builder.Default
-    private Set<RecipeIngredientJpa> recipeIngredients = new HashSet<>();
+    private Set<RecipeIngredientEntity> recipeIngredients = new HashSet<>();
 
-    public RecipeJpa addIngredient(final IngredientJpa ingredientJpa, final Double amount) {
-        final var recipeItem = new RecipeIngredientJpa(this, ingredientJpa, amount);
+    public RecipeEntity addIngredient(final IngredientEntity ingredientEntity, final Double amount) {
+        final var recipeItem = new RecipeIngredientEntity(this, ingredientEntity, amount);
         recipeIngredients.add(recipeItem);
         return this;
     }
 
-    public RecipeJpa removeIngredient(final IngredientJpa ingredientJpa) {
+    public RecipeEntity removeIngredient(final IngredientEntity ingredientEntity) {
         recipeIngredients = recipeIngredients.stream()
-                .filter(not(item -> item.getIngredientJpa().equals(ingredientJpa)))
+                .filter(not(item -> item.getIngredientEntity().equals(ingredientEntity)))
                 .collect(toSet());
         return this;
     }
@@ -46,7 +46,7 @@ public class RecipeJpa extends BaseEntity {
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        final RecipeJpa recipe = (RecipeJpa) o;
+        final RecipeEntity recipe = (RecipeEntity) o;
 
         return Objects.equals(getUuid(), recipe.getUuid());
     }
@@ -63,11 +63,11 @@ public class RecipeJpa extends BaseEntity {
                 "name = " + getName() + ")";
     }
 
-    public static RecipeJpa from(final Recipe recipe) {
-        return RecipeJpa.builder()
+    public static RecipeEntity from(final Recipe recipe) {
+        return RecipeEntity.builder()
                 .uuid(recipe.getUuid())
                 .name(recipe.getName())
-                .recipeIngredients(recipe.getRecipeIngredients().stream().map(RecipeIngredientJpa::from).collect(toSet()))
+                .recipeIngredients(recipe.getRecipeIngredients().stream().map(RecipeIngredientEntity::from).collect(toSet()))
                 .build();
     }
 
@@ -75,7 +75,7 @@ public class RecipeJpa extends BaseEntity {
         return Recipe.builder()
                 .uuid(this.getUuid())
                 .name(this.getName())
-                .recipeIngredients(this.getRecipeIngredients().stream().map(RecipeIngredientJpa::toModel).collect(toSet()))
+                .recipeIngredients(this.getRecipeIngredients().stream().map(RecipeIngredientEntity::toModel).collect(toSet()))
                 .build();
     }
 }

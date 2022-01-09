@@ -1,9 +1,10 @@
 package org.reciplease.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.Hibernate;
 
 import javax.persistence.Entity;
@@ -13,26 +14,29 @@ import java.util.Objects;
 
 @Entity
 @NoArgsConstructor
-@RequiredArgsConstructor
+@AllArgsConstructor
+@SuperBuilder(toBuilder = true)
 @Getter
-public class PlannedRecipeJpa extends BaseEntity {
+public class InventoryItemEntity extends BaseEntity {
     @ManyToOne
     @NonNull
-    private Recipe recipe;
+    private IngredientEntity ingredientEntity;
     @NonNull
-    private LocalDate date;
+    private Double amount;
+    @NonNull
+    private LocalDate expiration;
 
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        final PlannedRecipeJpa that = (PlannedRecipeJpa) o;
+        final InventoryItemEntity that = (InventoryItemEntity) o;
 
         return Objects.equals(getUuid(), that.getUuid());
     }
 
     @Override
     public int hashCode() {
-        return 914579680;
+        return 20328338;
     }
 }
