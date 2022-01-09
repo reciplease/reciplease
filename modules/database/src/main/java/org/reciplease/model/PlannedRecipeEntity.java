@@ -35,4 +35,12 @@ public class PlannedRecipeEntity extends BaseEntity {
     public int hashCode() {
         return 914579680;
     }
+
+    public PlannedRecipe toModel() {
+        return PlannedRecipe.builder()
+            .uuid(getUuid())
+            .recipe(getRecipe().toModel())
+            .date(getDate())
+            .build();
+    }
 }

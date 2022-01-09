@@ -73,9 +73,9 @@ public class RecipeEntity extends BaseEntity {
 
     public Recipe toModel() {
         return Recipe.builder()
-                .uuid(this.getUuid())
-                .name(this.getName())
-                .recipeIngredients(this.getRecipeIngredients().stream().map(RecipeIngredientEntity::toModel).collect(toSet()))
+                .uuid(getUuid())
+                .name(getName())
+                .recipeIngredients(getRecipeIngredients().stream().map(RecipeIngredientEntity::toModel).collect(toSet()))
                 .build();
     }
 }
