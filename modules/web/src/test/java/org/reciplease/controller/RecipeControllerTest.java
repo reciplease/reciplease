@@ -104,13 +104,13 @@ class RecipeControllerTest {
                 .measure(Measure.ITEMS)
                 .build();
         final var recipe = Recipe.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("soup")
                 .build();
         final var amount = 10d;
 
         final var addIngredientRequest = new AddIngredient(ingredient.getUuid(), amount);
-        final var savedRecipeIngredient = new RecipeIngredient(recipe, ingredient, amount);
+        final var savedRecipeIngredient = new RecipeIngredient(ingredient, amount);
 
         when(recipeService.addIngredient(recipe.getUuid(), addIngredientRequest)).thenReturn(Set.of(savedRecipeIngredient));
 
@@ -132,14 +132,14 @@ class RecipeControllerTest {
 
     private Recipe getSavedSoup() {
         return Recipe.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("soup")
                 .build();
     }
 
     private Recipe getSoup() {
         return Recipe.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("soup")
                 .build()
                 .addIngredient(getTomato(), 5d);
@@ -147,7 +147,7 @@ class RecipeControllerTest {
 
     private Ingredient getTomato() {
         return Ingredient.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("tomato")
                 .measure(Measure.ITEMS)
                 .build();
@@ -155,7 +155,7 @@ class RecipeControllerTest {
 
     private Recipe getToast() {
         return Recipe.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("toast")
                 .build()
                 .addIngredient(getBread(), 1d);
@@ -163,7 +163,7 @@ class RecipeControllerTest {
 
     private Ingredient getBread() {
         return Ingredient.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("bread")
                 .measure(Measure.ITEMS)
                 .build();

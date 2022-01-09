@@ -16,7 +16,7 @@ class InventoryItemDtoTest {
     @DisplayName("create DTO from entity")
     void from() {
         final var ingredient = Ingredient.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .build();
 
         final var item = InventoryItem.builder()

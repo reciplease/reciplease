@@ -7,6 +7,8 @@ import org.reciplease.model.Measure;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
 
+import java.util.UUID;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -16,14 +18,14 @@ class RecipeIngredientDtoTest {
     @DisplayName("create DTO from entity")
     void fromEntity() {
         final var recipe = Recipe.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .build();
         final var ingredient = Ingredient.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("Bread")
                 .measure(Measure.ITEMS)
                 .build();
-        final var recipeIngredient = new RecipeIngredient(recipe, ingredient, 1d);
+        final var recipeIngredient = new RecipeIngredient(ingredient, 1d);
 
         final var recipeIngredientDto = RecipeIngredientDto.from(recipeIngredient);
 
