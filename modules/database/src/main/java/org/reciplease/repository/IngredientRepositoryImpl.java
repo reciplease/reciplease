@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -17,12 +18,14 @@ public class IngredientRepositoryImpl implements IngredientRepository {
 
     @Override
     public List<Ingredient> findAll() {
-        return null;
+        return ingredientJpaRepository.findAll().stream()
+            .map(IngredientEntity::toModel)
+            .collect(Collectors.toList());
     }
 
     @Override
     public Optional<Ingredient> findById(UUID uuid) {
-        return Optional.empty();
+        return ingredientJpaRepository.findById(uuid).map(IngredientEntity::toModel);
     }
 
     @Override
@@ -32,11 +35,18 @@ public class IngredientRepositoryImpl implements IngredientRepository {
 
     @Override
     public List<Ingredient> saveAll(List<Ingredient> ingredients) {
-        return null;
+        final var ingredientEntities = ingredients.stream()
+            .map(IngredientEntity::from)
+            .collect(Collectors.toList());
+        return ingredientJpaRepository.saveAll(ingredientEntities).stream()
+            .map(IngredientEntity::toModel)
+            .collect(Collectors.toList());
     }
 
     @Override
     public List<Ingredient> findByNameContains(String searchName) {
-        return null;
+        return ingredientJpaRepository.findByNameContains(searchName).stream()
+            .map(IngredientEntity::toModel)
+            .collect(Collectors.toList());
     }
 }
