@@ -2,6 +2,7 @@ package org.reciplease.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.reciplease.dto.IngredientDto;
 import org.reciplease.model.Ingredient;
 import org.reciplease.model.Measure;
 import org.reciplease.repository.IngredientRepository;
@@ -18,6 +19,7 @@ import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -103,28 +105,28 @@ public class IngredientControllerTest {
 
     @Test
     public void shouldGetAllIngredients() throws Exception {
-        final Ingredient ingredient = Ingredient.builder()
-                .uuid(ID)
+        final var ingredientDto = IngredientDto.builder()
+                .uuid(UUID.randomUUID())
                 .name(INGREDIENT_NAME)
                 .measure(MEASURE)
                 .build();
-
-        final Ingredient ingredient2 = Ingredient.builder()
+        final var ingredientDto2 = IngredientDto.builder()
                 .uuid(UUID.randomUUID())
                 .name(INGREDIENT_NAME + "2")
                 .measure(MEASURE)
                 .build();
+        final var expected = List.of(ingredientDto, ingredientDto2);
+        final var mockResult = List.of(ingredientDto.toModel(), ingredientDto2.toModel());
+        when(ingredientRepository.findAll()).thenReturn(mockResult);
 
-        when(ingredientRepository.findAll()).thenReturn(List.of(ingredient, ingredient2));
-
-        final MvcResult mvcResult = mockMvc.perform(get(API_INGREDIENTS))
+        final var result = mockMvc.perform(get(API_INGREDIENTS))
                 .andExpect(status().isOk())
-                .andReturn();
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        final var actual = List.of(mapper.readValue(result, IngredientDto[].class));
 
-        final List<Ingredient> ingredients = List.of(mapper.readValue(mvcResult.getResponse().getContentAsString(), Ingredient[].class));
-
-        assertThat(ingredients, hasSize(2));
-        assertThat(ingredients, containsInAnyOrder(ingredient, ingredient2));
+        assertThat(actual, equalTo(expected));
     }
 
     @Test
@@ -140,7 +142,7 @@ public class IngredientControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        final List<Ingredient> ingredients = List.of(mapper.readValue(mvcResult.getResponse().getContentAsString(), Ingredient[].class));
+        final List<IngredientDto> ingredients = List.of(mapper.readValue(mvcResult.getResponse().getContentAsString(), IngredientDto[].class));
 
         assertThat(ingredients, hasSize(1));
         assertThat(ingredients, containsInAnyOrder(ingredient));
