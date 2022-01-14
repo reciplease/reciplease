@@ -1,6 +1,7 @@
 package org.reciplease.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.reciplease.dto.IngredientDto;
 import org.reciplease.dto.IngredientRequest;
 import org.reciplease.model.Ingredient;
 import org.reciplease.repository.IngredientRepository;
@@ -17,6 +18,7 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/ingredients")
@@ -39,8 +41,10 @@ public class IngredientController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Ingredient>> findAll() {
-        final List<Ingredient> ingredients = ingredientRepository.findAll();
+    public ResponseEntity<List<IngredientDto>> findAll() {
+        final List<IngredientDto> ingredients = ingredientRepository.findAll().stream()
+            .map(IngredientDto::from)
+            .collect(Collectors.toList());
 
         return ResponseEntity.status(HttpStatus.OK).body(ingredients);
     }
