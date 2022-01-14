@@ -11,16 +11,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -131,20 +128,22 @@ public class IngredientControllerTest {
 
     @Test
     public void shouldSearch() throws Exception {
-        final Ingredient ingredient = Ingredient.builder()
+        final var ingredientDto = IngredientDto.builder()
                 .uuid(ID)
                 .name(INGREDIENT_NAME)
                 .measure(MEASURE)
                 .build();
-        when(ingredientRepository.findByNameContains("abc")).thenReturn(List.of(ingredient));
+        final var expected = List.of(ingredientDto);
+        final var mockResult = List.of(ingredientDto.toModel());
+        when(ingredientRepository.findByNameContains("abc")).thenReturn(mockResult);
 
-        final MvcResult mvcResult = mockMvc.perform(get(API_INGREDIENTS + "/search/abc"))
+        final var result = mockMvc.perform(get(API_INGREDIENTS + "/search/abc"))
                 .andExpect(status().isOk())
-                .andReturn();
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        final var actual = List.of(mapper.readValue(result, IngredientDto[].class));
 
-        final List<IngredientDto> ingredients = List.of(mapper.readValue(mvcResult.getResponse().getContentAsString(), IngredientDto[].class));
-
-        assertThat(ingredients, hasSize(1));
-        assertThat(ingredients, containsInAnyOrder(ingredient));
+        assertThat(actual, equalTo(expected));
     }
 }
