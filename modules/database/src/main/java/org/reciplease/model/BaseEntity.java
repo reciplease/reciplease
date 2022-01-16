@@ -1,6 +1,5 @@
 package org.reciplease.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,7 +22,6 @@ import java.util.UUID;
 @SuperBuilder(toBuilder = true)
 @Getter
 public abstract class BaseEntity {
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     @Id
     @Type(type = "org.reciplease.hibernate.types.UUIDCustomType")
     @GeneratedValue
