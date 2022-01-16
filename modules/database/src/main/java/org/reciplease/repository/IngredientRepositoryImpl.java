@@ -44,7 +44,7 @@ public class IngredientRepositoryImpl implements IngredientRepository {
     }
 
     @Override
-    public List<Ingredient> findByNameContains(String searchName) {
+    public List<Ingredient> searchByName(String searchName) {
         return ingredientJpaRepository.findByNameContains(searchName).stream()
             .map(IngredientEntity::toModel)
             .collect(Collectors.toList());

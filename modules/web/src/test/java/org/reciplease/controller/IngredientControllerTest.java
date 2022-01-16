@@ -135,7 +135,7 @@ public class IngredientControllerTest {
                 .build();
         final var expected = List.of(ingredientDto);
         final var mockResult = List.of(ingredientDto.toModel());
-        when(ingredientRepository.findByNameContains("abc")).thenReturn(mockResult);
+        when(ingredientRepository.searchByName("abc")).thenReturn(mockResult);
 
         final var result = mockMvc.perform(get(API_INGREDIENTS + "/search/abc"))
                 .andExpect(status().isOk())
