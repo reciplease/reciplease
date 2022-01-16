@@ -11,5 +11,5 @@ public interface IngredientRepository {
     Optional<Ingredient> findById(final UUID uuid);
     Ingredient save(final Ingredient ingredient);
     List<Ingredient> saveAll(final List<Ingredient> ingredients);
-    List<Ingredient> findByNameContains(String searchName);
+    List<Ingredient> searchByName(String searchName);
 }

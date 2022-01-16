@@ -51,7 +51,7 @@ public class IngredientController {
 
     @GetMapping("/search/{searchName}")
     public ResponseEntity<List<IngredientDto>> searchByName(@PathVariable final String searchName) {
-        final List<IngredientDto> matchingIngredients = ingredientRepository.findByNameContains(searchName).stream()
+        final List<IngredientDto> matchingIngredients = ingredientRepository.searchByName(searchName).stream()
             .map(IngredientDto::from)
             .collect(Collectors.toList());
 
