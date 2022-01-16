@@ -18,7 +18,7 @@ public class InventoryRepositoryImpl implements InventoryRepository {
     private final InventoryJpaRepository inventoryJpaRepository;
 
     @Override
-    public Optional<InventoryItem> findById(UUID uuid) {
+    public Optional<InventoryItem> findByUuid(UUID uuid) {
         return inventoryJpaRepository.findById(uuid).map(InventoryItemEntity::toModel);
     }
 

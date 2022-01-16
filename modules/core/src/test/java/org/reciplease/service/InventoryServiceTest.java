@@ -58,7 +58,7 @@ class InventoryServiceTest {
                 .uuid(UUID.randomUUID())
                 .build();
 
-        when(ingredientRepository.findById(ingredient.getUuid())).thenReturn(Optional.of(ingredient));
+        when(ingredientRepository.findByUuid(ingredient.getUuid())).thenReturn(Optional.of(ingredient));
         when(inventoryRepository.save(item)).thenReturn(savedItem);
 
         final var actual = inventoryService.save(item);
@@ -75,7 +75,7 @@ class InventoryServiceTest {
                 .expiration(LocalDate.now())
                 .build();
 
-        when(ingredientRepository.findById(ingredient.getUuid())).thenReturn(Optional.empty());
+        when(ingredientRepository.findByUuid(ingredient.getUuid())).thenReturn(Optional.empty());
 
         final var illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> inventoryService.save(item));
 
@@ -85,7 +85,7 @@ class InventoryServiceTest {
     @Test
     void noItem() {
         final var itemId = UUID.randomUUID();
-        when(inventoryRepository.findById(itemId)).thenReturn(Optional.empty());
+        when(inventoryRepository.findByUuid(itemId)).thenReturn(Optional.empty());
 
         final var item = inventoryService.findById(itemId);
 
@@ -112,7 +112,7 @@ class InventoryServiceTest {
         @Test
         @DisplayName("should find item by ID")
         void findById() {
-            when(inventoryRepository.findById(item.getUuid())).thenReturn(Optional.of(item));
+            when(inventoryRepository.findByUuid(item.getUuid())).thenReturn(Optional.of(item));
 
             final var actual = inventoryService.findById(item.getUuid());
 

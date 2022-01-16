@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface InventoryRepository {
-    Optional<InventoryItem> findById(final UUID uuid);
+    Optional<InventoryItem> findByUuid(final UUID uuid);
     InventoryItem save(final InventoryItem item);
     List<InventoryItem> findAll();
     List<InventoryItem> expiresAfter(LocalDate now);
