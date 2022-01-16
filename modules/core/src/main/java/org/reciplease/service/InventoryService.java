@@ -39,10 +39,10 @@ public class InventoryService {
     }
 
     public List<InventoryItem> findAllUnexpired() {
-        return inventoryRepository.findByExpirationIsGreaterThanEqual(LocalDate.now(clock));
+        return inventoryRepository.expiresAfter(LocalDate.now(clock));
     }
 
     public List<InventoryItem> findAllExpired() {
-        return inventoryRepository.findByExpirationIsBefore(LocalDate.now(clock));
+        return inventoryRepository.betweenDates(LocalDate.now(clock));
     }
 }

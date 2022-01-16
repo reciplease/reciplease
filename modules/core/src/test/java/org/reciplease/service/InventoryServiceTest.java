@@ -131,7 +131,7 @@ class InventoryServiceTest {
 
         @Test
         void shouldFindExpiredInventory() {
-            when((inventoryRepository.findByExpirationIsBefore(now.atOffset(ZoneOffset.UTC).toLocalDate())))
+            when((inventoryRepository.betweenDates(now.atOffset(ZoneOffset.UTC).toLocalDate())))
                     .thenReturn(List.of(item));
 
             final var allExpired = inventoryService.findAllExpired();
@@ -141,7 +141,7 @@ class InventoryServiceTest {
 
         @Test
         void shouldFindUnexpiredInventory() {
-            when(inventoryRepository.findByExpirationIsGreaterThanEqual(now.atOffset(ZoneOffset.UTC).toLocalDate()))
+            when(inventoryRepository.expiresAfter(now.atOffset(ZoneOffset.UTC).toLocalDate()))
                     .thenReturn(List.of(item));
 
             final var allUnexpired = inventoryService.findAllUnexpired();
