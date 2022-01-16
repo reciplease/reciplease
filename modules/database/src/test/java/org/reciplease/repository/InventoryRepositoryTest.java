@@ -58,14 +58,14 @@ class InventoryRepositoryTest {
 
         @Test
         void shouldGetExpiredInventory() {
-            final var expired = inventoryRepository.findByExpirationIsBefore(today);
+            final var expired = inventoryRepository.betweenDates(today);
 
             assertThat(expired, contains(slice_Jan1));
         }
 
         @Test
         void shouldGetUnexpiredInventory() {
-            final var unexpired = inventoryRepository.findByExpirationIsGreaterThanEqual(today);
+            final var unexpired = inventoryRepository.expiresAfter(today);
 
             assertThat(unexpired, contains(slice_Jan2, slice_Jan3));
         }

@@ -11,6 +11,6 @@ public interface InventoryRepository {
     Optional<InventoryItem> findById(final UUID uuid);
     InventoryItem save(final InventoryItem item);
     List<InventoryItem> findAll();
-    List<InventoryItem> findByExpirationIsGreaterThanEqual(LocalDate now);
-    List<InventoryItem> findByExpirationIsBefore(LocalDate now);
+    List<InventoryItem> expiresAfter(LocalDate now);
+    List<InventoryItem> betweenDates(LocalDate now);
 }
