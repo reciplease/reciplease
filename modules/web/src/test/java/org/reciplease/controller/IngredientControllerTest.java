@@ -2,7 +2,7 @@ package org.reciplease.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.reciplease.dto.IngredientDto;
 import org.reciplease.model.Ingredient;
 import org.reciplease.model.Measure;
 import org.reciplease.repository.IngredientRepository;
@@ -10,18 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -87,7 +83,7 @@ public class IngredientControllerTest {
                 .measure(MEASURE)
                 .build();
 
-        when(ingredientRepository.findById(ID)).thenReturn(Optional.of(ingredient));
+        when(ingredientRepository.findByUuid(ID)).thenReturn(Optional.of(ingredient));
 
         mockMvc.perform(get(API_INGREDIENTS + "/" + ID))
                 .andExpect(status().isOk())
@@ -98,7 +94,7 @@ public class IngredientControllerTest {
 
     @Test
     public void shouldNotGetIngredient_notFound() throws Exception {
-        when(ingredientRepository.findById(ID)).thenReturn(Optional.empty());
+        when(ingredientRepository.findByUuid(ID)).thenReturn(Optional.empty());
 
         mockMvc.perform(get(API_INGREDIENTS + "/" + ID))
                 .andExpect(status().isNotFound());
@@ -106,46 +102,48 @@ public class IngredientControllerTest {
 
     @Test
     public void shouldGetAllIngredients() throws Exception {
-        final Ingredient ingredient = Ingredient.builder()
-                .uuid(ID)
+        final var ingredientDto = IngredientDto.builder()
+                .uuid(UUID.randomUUID())
                 .name(INGREDIENT_NAME)
                 .measure(MEASURE)
                 .build();
-
-        final Ingredient ingredient2 = Ingredient.builder()
-                .randomUUID()
+        final var ingredientDto2 = IngredientDto.builder()
+                .uuid(UUID.randomUUID())
                 .name(INGREDIENT_NAME + "2")
                 .measure(MEASURE)
                 .build();
+        final var expected = List.of(ingredientDto, ingredientDto2);
+        final var mockResult = List.of(ingredientDto.toModel(), ingredientDto2.toModel());
+        when(ingredientRepository.findAll()).thenReturn(mockResult);
 
-        when(ingredientRepository.findAll()).thenReturn(List.of(ingredient, ingredient2));
-
-        final MvcResult mvcResult = mockMvc.perform(get(API_INGREDIENTS))
+        final var result = mockMvc.perform(get(API_INGREDIENTS))
                 .andExpect(status().isOk())
-                .andReturn();
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        final var actual = List.of(mapper.readValue(result, IngredientDto[].class));
 
-        final List<Ingredient> ingredients = List.of(mapper.readValue(mvcResult.getResponse().getContentAsString(), Ingredient[].class));
-
-        assertThat(ingredients, hasSize(2));
-        assertThat(ingredients, containsInAnyOrder(ingredient, ingredient2));
+        assertThat(actual, equalTo(expected));
     }
 
     @Test
     public void shouldSearch() throws Exception {
-        final Ingredient ingredient = Ingredient.builder()
+        final var ingredientDto = IngredientDto.builder()
                 .uuid(ID)
                 .name(INGREDIENT_NAME)
                 .measure(MEASURE)
                 .build();
-        when(ingredientRepository.findByNameContains("abc")).thenReturn(List.of(ingredient));
+        final var expected = List.of(ingredientDto);
+        final var mockResult = List.of(ingredientDto.toModel());
+        when(ingredientRepository.searchByName("abc")).thenReturn(mockResult);
 
-        final MvcResult mvcResult = mockMvc.perform(get(API_INGREDIENTS + "/search/abc"))
+        final var result = mockMvc.perform(get(API_INGREDIENTS + "/search/abc"))
                 .andExpect(status().isOk())
-                .andReturn();
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        final var actual = List.of(mapper.readValue(result, IngredientDto[].class));
 
-        final List<Ingredient> ingredients = List.of(mapper.readValue(mvcResult.getResponse().getContentAsString(), Ingredient[].class));
-
-        assertThat(ingredients, hasSize(1));
-        assertThat(ingredients, containsInAnyOrder(ingredient));
+        assertThat(actual, equalTo(expected));
     }
 }

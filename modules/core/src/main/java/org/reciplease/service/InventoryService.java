@@ -20,7 +20,7 @@ public class InventoryService {
     private final Clock clock;
 
     public InventoryItem save(final InventoryItem item) {
-        final var ingredient = ingredientRepository.findById(item.getIngredient().getUuid())
+        final var ingredient = ingredientRepository.findByUuid(item.getIngredient().getUuid())
                 .orElseThrow(() -> new IllegalArgumentException("Ingredient does not exist"));
 
         final InventoryItem updatedItem = item.toBuilder()
@@ -31,7 +31,7 @@ public class InventoryService {
     }
 
     public Optional<InventoryItem> findById(final UUID uuid) {
-        return inventoryRepository.findById(uuid);
+        return inventoryRepository.findByUuid(uuid);
     }
 
     public List<InventoryItem> findAll() {
@@ -39,10 +39,10 @@ public class InventoryService {
     }
 
     public List<InventoryItem> findAllUnexpired() {
-        return inventoryRepository.findByExpirationIsGreaterThanEqual(LocalDate.now(clock));
+        return inventoryRepository.expiresAfter(LocalDate.now(clock));
     }
 
     public List<InventoryItem> findAllExpired() {
-        return inventoryRepository.findByExpirationIsBefore(LocalDate.now(clock));
+        return inventoryRepository.betweenDates(LocalDate.now(clock));
     }
 }

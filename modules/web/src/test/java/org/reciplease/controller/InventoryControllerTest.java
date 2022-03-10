@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.reciplease.utils.ResourceUtils.readTestResource;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -39,21 +40,24 @@ class InventoryControllerTest {
     @Test
     @DisplayName("should create inventory item")
     void shouldCreateInventoryItem() throws Exception {
-        final var item = InventoryItem.builder()
-                .ingredient(Ingredient.builder()
-                        .uuid(UUID.fromString("f3aa25a0-5716-4c7d-add5-164396f192fa"))
-                        .name("bread")
-                        .measure(Measure.ITEMS)
-                        .build())
-                .amount(20d)
-                .expiration(LocalDate.of(2020, Month.JANUARY, 1))
-                .build();
+        final var mockRequestIngredient = Ingredient.builder()
+            .uuid(UUID.fromString("f3aa25a0-5716-4c7d-add5-164396f192fa"))
+            .build();
+        final var mockRequestItem = InventoryItem.builder()
+            .ingredient(mockRequestIngredient)
+            .amount(20d)
+            .expiration(LocalDate.of(2020, Month.JANUARY, 1))
+            .build();
+        final var mockResponseIngredient = mockRequestIngredient.toBuilder()
+            .name("bread")
+            .measure(Measure.ITEMS)
+            .build();
+        final var mockResponseItem = mockRequestItem.toBuilder()
+            .uuid(UUID.fromString("b465af6e-2465-4436-84c1-14f35db68dbf"))
+            .ingredient(mockResponseIngredient)
+            .build();
 
-        final var savedItem = item.toBuilder()
-                .uuid(UUID.fromString("b465af6e-2465-4436-84c1-14f35db68dbf"))
-                .build();
-
-        when(inventoryService.save(item)).thenReturn(savedItem);
+        when(inventoryService.save(mockRequestItem)).thenReturn(mockResponseItem);
         final String createJson = readTestResource(InventoryControllerTest.class, "createItem.json");
         final String savedJson = readTestResource(InventoryControllerTest.class, "savedItem.json");
 
@@ -62,6 +66,8 @@ class InventoryControllerTest {
                         .content(createJson))
                 .andExpect(status().isCreated())
                 .andExpect(content().json(savedJson, true));
+
+        verify(inventoryService).save(mockRequestItem);
     }
 
     @Nested

@@ -1,7 +1,6 @@
 package org.reciplease.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.Hibernate;
@@ -15,8 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@Builder(toBuilder = true)
-public class RecipeIngredientId implements Serializable {
+public class RecipeIngredientIdEntity implements Serializable {
     private UUID recipeUuid;
     private UUID ingredientUuid;
 
@@ -24,7 +22,7 @@ public class RecipeIngredientId implements Serializable {
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        final RecipeIngredientId that = (RecipeIngredientId) o;
+        final RecipeIngredientIdEntity that = (RecipeIngredientIdEntity) o;
 
         if (!Objects.equals(recipeUuid, that.recipeUuid)) return false;
         return Objects.equals(ingredientUuid, that.ingredientUuid);

@@ -12,6 +12,7 @@ import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
 import org.reciplease.repository.IngredientRepository;
 import org.reciplease.repository.RecipeRepository;
+import org.reciplease.service.request.AddIngredient;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,11 +40,11 @@ class RecipeServiceTest {
     @DisplayName("get recipe by UUID")
     void getRecipe() {
         final var toast = Recipe.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("toast")
                 .build();
 
-        when(recipeRepository.findById(toast.getUuid())).thenReturn(Optional.of(toast));
+        when(recipeRepository.findByUuid(toast.getUuid())).thenReturn(Optional.of(toast));
 
         final var optionalRecipe = recipeService.findById(toast.getUuid());
 
@@ -55,11 +56,11 @@ class RecipeServiceTest {
     @DisplayName("get all recipes")
     void findAll() {
         final var recipe1 = Recipe.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("toast")
                 .build();
         final var recipe2 = Recipe.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("soup")
                 .build();
         final var recipes = List.of(recipe1, recipe2);
@@ -77,7 +78,7 @@ class RecipeServiceTest {
                 .name("toast")
                 .build();
         final var savedRecipe = newRecipe.toBuilder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .build();
 
         when(recipeRepository.save(newRecipe)).thenReturn(savedRecipe);
@@ -95,41 +96,41 @@ class RecipeServiceTest {
         @BeforeEach
         void setUp() {
             recipe = Recipe.builder()
-                    .randomUUID()
+                    .uuid(UUID.randomUUID())
                     .name("toast")
                     .build();
             ingredient = Ingredient.builder()
-                    .randomUUID()
+                    .uuid(UUID.randomUUID())
                     .name("bread")
                     .build();
         }
 
         @Test
         void shouldAddIngredientToRecipe() {
-            when(recipeRepository.findById(recipe.getUuid())).thenReturn(Optional.of(recipe));
-            when(ingredientRepository.findById(ingredient.getUuid())).thenReturn(Optional.of(ingredient));
+            when(recipeRepository.findByUuid(recipe.getUuid())).thenReturn(Optional.of(recipe));
+            when(ingredientRepository.findByUuid(ingredient.getUuid())).thenReturn(Optional.of(ingredient));
             when(recipeRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-            final var recipeIngredients = recipeService.addIngredient(recipe.getUuid(), new RecipeIngredient(ingredient.getUuid(), 10d));
+            final var recipeIngredients = recipeService.addIngredient(recipe.getUuid(), new AddIngredient(ingredient.getUuid(), 10d));
 
-            assertThat(recipeIngredients, contains(new RecipeIngredient(recipe, ingredient, 10d)));
+            assertThat(recipeIngredients, contains(new RecipeIngredient(ingredient, 10d)));
         }
 
         @Test
         void shouldFail_recipeNotFound() {
-            when(recipeRepository.findById(recipe.getUuid())).thenReturn(Optional.empty());
+            when(recipeRepository.findByUuid(recipe.getUuid())).thenReturn(Optional.empty());
 
-            final var exception = assertThrows(IllegalArgumentException.class, () -> recipeService.addIngredient(recipe.getUuid(), new RecipeIngredient(ingredient.getUuid(), 10d)));
+            final var exception = assertThrows(IllegalArgumentException.class, () -> recipeService.addIngredient(recipe.getUuid(), new AddIngredient(ingredient.getUuid(), 10d)));
 
             assertThat(exception.getMessage(), is("Recipe does not exist"));
         }
 
         @Test
         void shouldFail_ingredientNotFound() {
-            when(recipeRepository.findById(recipe.getUuid())).thenReturn(Optional.of(recipe));
-            when(ingredientRepository.findById(ingredient.getUuid())).thenReturn(Optional.empty());
+            when(recipeRepository.findByUuid(recipe.getUuid())).thenReturn(Optional.of(recipe));
+            when(ingredientRepository.findByUuid(ingredient.getUuid())).thenReturn(Optional.empty());
 
-            final var exception = assertThrows(IllegalArgumentException.class, () -> recipeService.addIngredient(recipe.getUuid(), new RecipeIngredient(ingredient.getUuid(), 10d)));
+            final var exception = assertThrows(IllegalArgumentException.class, () -> recipeService.addIngredient(recipe.getUuid(), new AddIngredient(ingredient.getUuid(), 10d)));
 
             assertThat(exception.getMessage(), is("Ingredient does not exist"));
         }
