@@ -1,6 +1,8 @@
 package org.reciplease.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.reciplease.dto.IngredientDto;
+import org.reciplease.dto.IngredientRequest;
 import org.reciplease.model.Ingredient;
 import org.reciplease.repository.IngredientRepository;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,7 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/ingredients")
@@ -24,29 +27,33 @@ public class IngredientController {
     final IngredientRepository ingredientRepository;
 
     @PostMapping
-    public ResponseEntity<Ingredient> create(@Valid @RequestBody final Ingredient ingredient) {
-        final Ingredient savedIngredient = ingredientRepository.save(ingredient);
+    public ResponseEntity<Ingredient> create(@Valid @RequestBody final IngredientRequest ingredientRequest) {
+        final Ingredient savedIngredient = ingredientRepository.save(ingredientRequest.toModel());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(savedIngredient);
     }
 
     @GetMapping("{uuid}")
     public ResponseEntity<Ingredient> findById(@PathVariable final UUID uuid) {
-        final Optional<Ingredient> foundIngredient = ingredientRepository.findById(uuid);
+        final Optional<Ingredient> foundIngredient = ingredientRepository.findByUuid(uuid);
 
         return ResponseEntity.of(foundIngredient);
     }
 
     @GetMapping
-    public ResponseEntity<List<Ingredient>> findAll() {
-        final List<Ingredient> ingredients = ingredientRepository.findAll();
+    public ResponseEntity<List<IngredientDto>> findAll() {
+        final List<IngredientDto> ingredients = ingredientRepository.findAll().stream()
+            .map(IngredientDto::from)
+            .collect(Collectors.toList());
 
         return ResponseEntity.status(HttpStatus.OK).body(ingredients);
     }
 
     @GetMapping("/search/{searchName}")
-    public ResponseEntity<List<Ingredient>> searchByName(@PathVariable final String searchName) {
-        final List<Ingredient> matchingIngredients = ingredientRepository.findByNameContains(searchName);
+    public ResponseEntity<List<IngredientDto>> searchByName(@PathVariable final String searchName) {
+        final List<IngredientDto> matchingIngredients = ingredientRepository.searchByName(searchName).stream()
+            .map(IngredientDto::from)
+            .collect(Collectors.toList());
 
         return ResponseEntity.status(HttpStatus.OK).body(matchingIngredients);
     }

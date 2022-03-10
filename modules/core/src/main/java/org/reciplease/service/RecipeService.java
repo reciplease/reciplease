@@ -6,6 +6,7 @@ import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
 import org.reciplease.repository.IngredientRepository;
 import org.reciplease.repository.RecipeRepository;
+import org.reciplease.service.request.AddIngredient;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class RecipeService {
     private final IngredientRepository ingredientRepository;
 
     public Optional<Recipe> findById(final UUID uuid) {
-        return recipeRepository.findById(uuid);
+        return recipeRepository.findByUuid(uuid);
     }
 
     public List<Recipe> findAll() {
@@ -34,13 +35,13 @@ public class RecipeService {
         return recipeRepository.save(recipe);
     }
 
-    public Set<RecipeIngredient> addIngredient(final UUID uuid, final RecipeIngredient recipeIngredient) {
-        final var recipe = recipeRepository.findById(uuid)
+    public Set<RecipeIngredient> addIngredient(final UUID recipeUuid, final AddIngredient addIngredient) {
+        final var recipe = recipeRepository.findByUuid(recipeUuid)
                 .orElseThrow(() -> new IllegalArgumentException("Recipe does not exist"));
-        final var ingredient = ingredientRepository.findById(recipeIngredient.getId().getIngredientUuid())
+        final var ingredient = ingredientRepository.findByUuid(addIngredient.getIngredientUuid())
                 .orElseThrow(() -> new IllegalArgumentException("Ingredient does not exist"));
 
-        recipe.addIngredient(ingredient, recipeIngredient.getAmount());
+        recipe.addIngredient(ingredient, addIngredient.getAmount());
 
         final var savedRecipe = recipeRepository.save(recipe);
 

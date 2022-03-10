@@ -27,7 +27,8 @@ public class InventoryController {
 
     @PostMapping
     public ResponseEntity<InventoryItemDto> create(@Valid @RequestBody final InventoryItemDto itemDto) {
-        final var savedItemDto = InventoryItemDto.from(inventoryService.save(itemDto.toEntity()));
+        final var savedItem = inventoryService.save(itemDto.toEntity());
+        final var savedItemDto = InventoryItemDto.from(savedItem);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedItemDto);
     }
 

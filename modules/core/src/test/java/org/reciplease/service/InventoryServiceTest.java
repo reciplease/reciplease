@@ -45,7 +45,7 @@ class InventoryServiceTest {
     @DisplayName("should save item")
     void save() {
         final var ingredient = Ingredient.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .build();
 
         final var item = InventoryItem.builder()
@@ -55,10 +55,10 @@ class InventoryServiceTest {
                 .build();
 
         final var savedItem = item.toBuilder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .build();
 
-        when(ingredientRepository.findById(ingredient.getUuid())).thenReturn(Optional.of(ingredient));
+        when(ingredientRepository.findByUuid(ingredient.getUuid())).thenReturn(Optional.of(ingredient));
         when(inventoryRepository.save(item)).thenReturn(savedItem);
 
         final var actual = inventoryService.save(item);
@@ -68,14 +68,14 @@ class InventoryServiceTest {
 
     @Test
     void noIngredient() {
-        final Ingredient ingredient = Ingredient.builder().randomUUID().build();
+        final Ingredient ingredient = Ingredient.builder().uuid(UUID.randomUUID()).build();
         final var item = InventoryItem.builder()
                 .ingredient(ingredient)
                 .amount(10d)
                 .expiration(LocalDate.now())
                 .build();
 
-        when(ingredientRepository.findById(ingredient.getUuid())).thenReturn(Optional.empty());
+        when(ingredientRepository.findByUuid(ingredient.getUuid())).thenReturn(Optional.empty());
 
         final var illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> inventoryService.save(item));
 
@@ -85,7 +85,7 @@ class InventoryServiceTest {
     @Test
     void noItem() {
         final var itemId = UUID.randomUUID();
-        when(inventoryRepository.findById(itemId)).thenReturn(Optional.empty());
+        when(inventoryRepository.findByUuid(itemId)).thenReturn(Optional.empty());
 
         final var item = inventoryService.findById(itemId);
 
@@ -100,9 +100,9 @@ class InventoryServiceTest {
         @BeforeEach
         void setUp() {
             item = InventoryItem.builder()
-                    .randomUUID()
+                    .uuid(UUID.randomUUID())
                     .ingredient(Ingredient.builder()
-                            .randomUUID()
+                            .uuid(UUID.randomUUID())
                             .build())
                     .amount(10d)
                     .expiration(LocalDate.now())
@@ -112,7 +112,7 @@ class InventoryServiceTest {
         @Test
         @DisplayName("should find item by ID")
         void findById() {
-            when(inventoryRepository.findById(item.getUuid())).thenReturn(Optional.of(item));
+            when(inventoryRepository.findByUuid(item.getUuid())).thenReturn(Optional.of(item));
 
             final var actual = inventoryService.findById(item.getUuid());
 
@@ -131,7 +131,7 @@ class InventoryServiceTest {
 
         @Test
         void shouldFindExpiredInventory() {
-            when((inventoryRepository.findByExpirationIsBefore(now.atOffset(ZoneOffset.UTC).toLocalDate())))
+            when((inventoryRepository.betweenDates(now.atOffset(ZoneOffset.UTC).toLocalDate())))
                     .thenReturn(List.of(item));
 
             final var allExpired = inventoryService.findAllExpired();
@@ -141,7 +141,7 @@ class InventoryServiceTest {
 
         @Test
         void shouldFindUnexpiredInventory() {
-            when(inventoryRepository.findByExpirationIsGreaterThanEqual(now.atOffset(ZoneOffset.UTC).toLocalDate()))
+            when(inventoryRepository.expiresAfter(now.atOffset(ZoneOffset.UTC).toLocalDate()))
                     .thenReturn(List.of(item));
 
             final var allUnexpired = inventoryService.findAllUnexpired();

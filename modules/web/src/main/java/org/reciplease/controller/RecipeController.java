@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.reciplease.dto.RecipeDto;
 import org.reciplease.dto.RecipeIngredientDto;
 import org.reciplease.model.Recipe;
+import org.reciplease.service.request.AddIngredient;
 import org.reciplease.service.RecipeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,8 +51,8 @@ public class RecipeController {
     }
 
     @PutMapping("{uuid}/ingredients")
-    public ResponseEntity<Set<RecipeIngredientDto>> addIngredient(@PathVariable final UUID uuid, @RequestBody final RecipeIngredientDto recipeIngredientDto) {
-        final var recipeIngredients = recipeService.addIngredient(uuid, recipeIngredientDto.toEntity()).stream()
+    public ResponseEntity<Set<RecipeIngredientDto>> addIngredient(@PathVariable final UUID uuid, @RequestBody final AddIngredient addIngredient) {
+        final var recipeIngredients = recipeService.addIngredient(uuid, addIngredient).stream()
                 .map(RecipeIngredientDto::from)
                 .collect(Collectors.toSet());
 

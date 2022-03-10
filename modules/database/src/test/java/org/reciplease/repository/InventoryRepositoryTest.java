@@ -8,16 +8,17 @@ import org.reciplease.model.InventoryItem;
 import org.reciplease.model.Measure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
 import java.time.LocalDate;
 import java.time.Month;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
 
 @DataJpaTest
-public class InventoryRepositoryTest {
+@Import({IngredientRepositoryImpl.class, InventoryRepositoryImpl.class})
+class InventoryRepositoryTest {
     @Autowired
     private IngredientRepository ingredientRepository;
     @Autowired
@@ -57,14 +58,14 @@ public class InventoryRepositoryTest {
 
         @Test
         void shouldGetExpiredInventory() {
-            final var expired = inventoryRepository.findByExpirationIsBefore(today);
+            final var expired = inventoryRepository.betweenDates(today);
 
             assertThat(expired, contains(slice_Jan1));
         }
 
         @Test
         void shouldGetUnexpiredInventory() {
-            final var unexpired = inventoryRepository.findByExpirationIsGreaterThanEqual(today);
+            final var unexpired = inventoryRepository.expiresAfter(today);
 
             assertThat(unexpired, contains(slice_Jan2, slice_Jan3));
         }

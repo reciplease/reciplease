@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reciplease.dto.RecipeDto;
-import org.reciplease.dto.RecipeIngredientDto;
 import org.reciplease.model.Ingredient;
 import org.reciplease.model.Measure;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
+import org.reciplease.service.request.AddIngredient;
 import org.reciplease.service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -104,15 +104,15 @@ class RecipeControllerTest {
                 .measure(Measure.ITEMS)
                 .build();
         final var recipe = Recipe.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("soup")
                 .build();
         final var amount = 10d;
 
-        final var recipeIngredient = new RecipeIngredient(ingredient.getUuid(), amount);
-        final var savedRecipeIngredient = new RecipeIngredient(recipe, ingredient, amount);
+        final var addIngredientRequest = new AddIngredient(ingredient.getUuid(), amount);
+        final var savedRecipeIngredient = new RecipeIngredient(ingredient, amount);
 
-        when(recipeService.addIngredient(recipe.getUuid(), recipeIngredient)).thenReturn(Set.of(savedRecipeIngredient));
+        when(recipeService.addIngredient(recipe.getUuid(), addIngredientRequest)).thenReturn(Set.of(savedRecipeIngredient));
 
         final var data = "{\"ingredientUuid\": \"70991766-7944-40c2-be90-20065af3d02b\", \"amount\": 10.0}";
         final var expectedJson = "[{\"ingredientUuid\": \"70991766-7944-40c2-be90-20065af3d02b\", \"name\": \"tomato\", \"measure\": \"ITEMS\", \"amount\": 10.0}]";
@@ -132,14 +132,14 @@ class RecipeControllerTest {
 
     private Recipe getSavedSoup() {
         return Recipe.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("soup")
                 .build();
     }
 
     private Recipe getSoup() {
         return Recipe.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("soup")
                 .build()
                 .addIngredient(getTomato(), 5d);
@@ -147,7 +147,7 @@ class RecipeControllerTest {
 
     private Ingredient getTomato() {
         return Ingredient.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("tomato")
                 .measure(Measure.ITEMS)
                 .build();
@@ -155,7 +155,7 @@ class RecipeControllerTest {
 
     private Recipe getToast() {
         return Recipe.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("toast")
                 .build()
                 .addIngredient(getBread(), 1d);
@@ -163,7 +163,7 @@ class RecipeControllerTest {
 
     private Ingredient getBread() {
         return Ingredient.builder()
-                .randomUUID()
+                .uuid(UUID.randomUUID())
                 .name("bread")
                 .measure(Measure.ITEMS)
                 .build();

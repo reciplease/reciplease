@@ -5,10 +5,10 @@ import org.reciplease.model.PlannedRecipe;
 import org.reciplease.model.Recipe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 
 @DataJpaTest
+@Import({PlannedRecipeRepositoryImpl.class, RecipeRepositoryImpl.class})
 public class PlannedRecipeRepositoryTest {
     @Autowired
     private PlannedRecipeRepository plannedRecipeRepository;
@@ -25,7 +26,6 @@ public class PlannedRecipeRepositoryTest {
     @Test
     public void shouldReturnPlannedRecipesByDate() {
         final Recipe recipe = recipeRepository.save(Recipe.builder()
-                .recipeIngredients(Set.of())
                 .build());
         final PlannedRecipe plannedRecipe = plannedRecipeRepository.save(new PlannedRecipe(recipe, LocalDate.of(2019, 2, 2)));
 
@@ -37,7 +37,6 @@ public class PlannedRecipeRepositoryTest {
     @Test
     public void shouldReturnEmptyList() {
         final Recipe recipe = recipeRepository.save(Recipe.builder()
-                .recipeIngredients(Set.of())
                 .build());
         plannedRecipeRepository.save(new PlannedRecipe(recipe, LocalDate.of(2019, 2, 5)));
 
