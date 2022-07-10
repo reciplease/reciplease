@@ -10,9 +10,11 @@ hibernate:
     auto: create
 
 spring:
+  main:
+    allow-circular-references: true
   liquibase:
     enabled: false
   jpa:
     hibernate:
       ddl-auto: update
-      naming-stategy: org.hibernate.cfg.ImprovedNamingStrategy
+      naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy

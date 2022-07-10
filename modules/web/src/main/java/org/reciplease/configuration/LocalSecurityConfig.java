@@ -1,5 +1,6 @@
 package org.reciplease.configuration;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,7 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Profile("local")
 @Configuration
 @EnableWebSecurity
-public class LocalSecurityConfig extends WebSecurityConfigurerAdapter implements WebMvcConfigurer {
+public class LocalSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(final HttpSecurity security) throws Exception {
@@ -21,9 +22,14 @@ public class LocalSecurityConfig extends WebSecurityConfigurerAdapter implements
                 .headers().frameOptions().disable();
     }
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**")
-                .allowedMethods("*");
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(final CorsRegistry registry) {
+                registry.addMapping("/api/**")
+                        .allowedMethods("*");
+            }
+        };
     }
 }
