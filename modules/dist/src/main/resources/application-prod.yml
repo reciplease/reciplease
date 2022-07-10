@@ -1,2 +1,2 @@
 reciplease:
-  version: @project.version@
+  version: @revision@
