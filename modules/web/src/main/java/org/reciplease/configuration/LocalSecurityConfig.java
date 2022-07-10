@@ -12,7 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Profile("local")
 @Configuration
 @EnableWebSecurity
-public class LocalSecurityConfig extends WebSecurityConfigurerAdapter implements WebMvcConfigurer {
+public class LocalSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(final HttpSecurity security) throws Exception {
