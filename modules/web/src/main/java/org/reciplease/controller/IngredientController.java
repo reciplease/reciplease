@@ -43,8 +43,8 @@ public class IngredientController {
     @GetMapping
     public ResponseEntity<List<IngredientDto>> findAll() {
         final List<IngredientDto> ingredients = ingredientRepository.findAll().stream()
-            .map(IngredientDto::from)
-            .collect(Collectors.toList());
+                .map(IngredientDto::from)
+                .collect(Collectors.toList());
 
         return ResponseEntity.status(HttpStatus.OK).body(ingredients);
     }
@@ -52,8 +52,8 @@ public class IngredientController {
     @GetMapping("/search/{searchName}")
     public ResponseEntity<List<IngredientDto>> searchByName(@PathVariable final String searchName) {
         final List<IngredientDto> matchingIngredients = ingredientRepository.searchByName(searchName).stream()
-            .map(IngredientDto::from)
-            .collect(Collectors.toList());
+                .map(IngredientDto::from)
+                .collect(Collectors.toList());
 
         return ResponseEntity.status(HttpStatus.OK).body(matchingIngredients);
     }

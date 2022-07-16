@@ -45,14 +45,14 @@ public class ShoppingListServiceTest {
         final LocalDate date = LocalDate.of(2019, 2, 2);
 
         final var bread = Ingredient.builder()
-            .name("bread").build();
+                .name("bread").build();
         final var recipe = Recipe.builder()
-            .name("toast")
-            .build()
-            .addIngredient(bread, 10d);
+                .name("toast")
+                .build()
+                .addIngredient(bread, 10d);
         PlannedRecipe plannedRecipe = PlannedRecipe.builder()
-            .recipe(recipe)
-            .date(date).build();
+                .recipe(recipe)
+                .date(date).build();
         final List<PlannedRecipe> plannedRecipes = List.of(plannedRecipe);
         when(plannedRecipeRepository.findByDateIsBetween(startDate, endDate)).thenReturn(plannedRecipes);
 

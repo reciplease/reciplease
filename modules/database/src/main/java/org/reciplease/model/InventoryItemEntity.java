@@ -42,19 +42,19 @@ public class InventoryItemEntity extends BaseEntity {
 
     public static InventoryItemEntity from(final InventoryItem inventoryItem) {
         return InventoryItemEntity.builder()
-            .uuid(inventoryItem.getUuid())
-            .ingredientEntity(IngredientEntity.from(inventoryItem.getIngredient()))
-            .amount(inventoryItem.getAmount())
-            .expiration(inventoryItem.getExpiration())
-            .build();
+                .uuid(inventoryItem.getUuid())
+                .ingredientEntity(IngredientEntity.from(inventoryItem.getIngredient()))
+                .amount(inventoryItem.getAmount())
+                .expiration(inventoryItem.getExpiration())
+                .build();
     }
 
     public InventoryItem toModel() {
         return InventoryItem.builder()
-            .uuid(getUuid())
-            .ingredient(getIngredientEntity().toModel())
-            .amount(getAmount())
-            .expiration(getExpiration())
-            .build();
+                .uuid(getUuid())
+                .ingredient(getIngredientEntity().toModel())
+                .amount(getAmount())
+                .expiration(getExpiration())
+                .build();
     }
 }

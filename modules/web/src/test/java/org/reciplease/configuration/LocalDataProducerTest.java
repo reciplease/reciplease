@@ -32,9 +32,9 @@ public class LocalDataProducerTest {
     @Test
     public void shouldSaveIngredients() {
         final var mockIngredients = List.of(
-            Ingredient.builder().build(),
-            Ingredient.builder().build(),
-            Ingredient.builder().build()
+                Ingredient.builder().build(),
+                Ingredient.builder().build(),
+                Ingredient.builder().build()
         );
         when(ingredientRepository.saveAll(anyList())).thenReturn(mockIngredients);
         when(recipeRepository.save(any())).thenReturn(Recipe.builder().build());
