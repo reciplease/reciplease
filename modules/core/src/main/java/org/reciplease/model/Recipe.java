@@ -16,8 +16,11 @@ public class Recipe extends Identifiable {
     Set<RecipeIngredient> recipeIngredients = new HashSet<>();
 
     public Recipe addIngredient(final Ingredient ingredient, final Double amount) {
-        final var recipeItem = new RecipeIngredient(ingredient, amount);
-        recipeIngredients.add(recipeItem);
+        return addIngredient(new RecipeIngredient(ingredient, amount));
+    }
+
+    public Recipe addIngredient(final RecipeIngredient recipeIngredient) {
+        recipeIngredients.add(recipeIngredient);
         return this;
     }
 

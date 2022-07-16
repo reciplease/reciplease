@@ -57,16 +57,15 @@ public class RecipeIngredientEntity {
         return Objects.hashCode(id);
     }
 
-    public static RecipeIngredientEntity from(final Recipe recipe, final RecipeIngredient recipeIngredient) {
-        final var recipeEntity = RecipeEntity.from(recipe);
+    public static RecipeIngredientEntity from(final RecipeEntity recipeEntity, final RecipeIngredient recipeIngredient) {
         final var ingredientEntity = IngredientEntity.from(recipeIngredient.getIngredient());
         final var recipeIngredientId = new RecipeIngredientIdEntity(recipeEntity.getUuid(), ingredientEntity.getUuid());
         return RecipeIngredientEntity.builder()
-            .id(recipeIngredientId)
-            .recipeEntity(recipeEntity)
-            .ingredientEntity(ingredientEntity)
-            .amount(recipeIngredient.getAmount())
-            .build();
+                .id(recipeIngredientId)
+                .recipeEntity(recipeEntity)
+                .ingredientEntity(ingredientEntity)
+                .amount(recipeIngredient.getAmount())
+                .build();
     }
 
     public RecipeIngredient toModel() {

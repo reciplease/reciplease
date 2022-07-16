@@ -40,15 +40,15 @@ public class PlannedRecipeEntity extends BaseEntity {
 
     public static PlannedRecipeEntity from(final PlannedRecipe plannedRecipe) {
         return PlannedRecipeEntity.builder()
-            .recipeEntity(RecipeEntity.from(plannedRecipe.getRecipe()))
-            .date(plannedRecipe.getDate())
-            .build();
+                .recipeEntity(RecipeEntity.from(plannedRecipe.getRecipe()))
+                .date(plannedRecipe.getDate())
+                .build();
     }
 
     public PlannedRecipe toModel() {
         return PlannedRecipe.builder()
-            .recipe(getRecipeEntity().toModel())
-            .date(getDate())
-            .build();
+                .recipe(getRecipeEntity().toModel())
+                .date(getDate())
+                .build();
     }
 }

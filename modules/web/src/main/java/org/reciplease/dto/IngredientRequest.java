@@ -20,8 +20,8 @@ public class IngredientRequest {
 
     public Ingredient toModel() {
         return Ingredient.builder()
-            .name(getName())
-            .measure(getMeasure())
-            .build();
+                .name(getName())
+                .measure(getMeasure())
+                .build();
     }
 }

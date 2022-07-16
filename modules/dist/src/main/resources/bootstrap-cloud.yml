@@ -5,7 +5,7 @@ spring:
         enabled: true
       secretmanager:
         enabled: true
-
-DATABASE_USERNAME: ${sm://reciplease-database-username}
-DATABASE_PASSWORD: ${sm://reciplease-database-password}
-DATABASE_URL: ${sm://reciplease-database-url}
+  datasource:
+    url: ${sm://reciplease-database-url}
+    username: ${sm://reciplease-database-username}
+    password: ${sm://reciplease-database-password}

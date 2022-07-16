@@ -49,5 +49,5 @@ class InventoryItemDtoTest {
         assertThat(item.getIngredient().getUuid(), is(itemDto.getIngredientUuid()));
         assertThat(item.getAmount(), is(itemDto.getAmount()));
         assertThat(item.getExpiration(), is(itemDto.getExpiration()));
-     }
+    }
 }

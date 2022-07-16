@@ -8,6 +8,8 @@ import java.util.UUID;
 
 public interface RecipeRepository {
     List<Recipe> findAll();
+
     Recipe save(final Recipe recipe);
+
     Optional<Recipe> findByUuid(final UUID uuid);
 }

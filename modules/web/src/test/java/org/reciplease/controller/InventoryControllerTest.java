@@ -41,21 +41,21 @@ class InventoryControllerTest {
     @DisplayName("should create inventory item")
     void shouldCreateInventoryItem() throws Exception {
         final var mockRequestIngredient = Ingredient.builder()
-            .uuid(UUID.fromString("f3aa25a0-5716-4c7d-add5-164396f192fa"))
-            .build();
+                .uuid(UUID.fromString("f3aa25a0-5716-4c7d-add5-164396f192fa"))
+                .build();
         final var mockRequestItem = InventoryItem.builder()
-            .ingredient(mockRequestIngredient)
-            .amount(20d)
-            .expiration(LocalDate.of(2020, Month.JANUARY, 1))
-            .build();
+                .ingredient(mockRequestIngredient)
+                .amount(20d)
+                .expiration(LocalDate.of(2020, Month.JANUARY, 1))
+                .build();
         final var mockResponseIngredient = mockRequestIngredient.toBuilder()
-            .name("bread")
-            .measure(Measure.ITEMS)
-            .build();
+                .name("bread")
+                .measure(Measure.ITEMS)
+                .build();
         final var mockResponseItem = mockRequestItem.toBuilder()
-            .uuid(UUID.fromString("b465af6e-2465-4436-84c1-14f35db68dbf"))
-            .ingredient(mockResponseIngredient)
-            .build();
+                .uuid(UUID.fromString("b465af6e-2465-4436-84c1-14f35db68dbf"))
+                .ingredient(mockResponseIngredient)
+                .build();
 
         when(inventoryService.save(mockRequestItem)).thenReturn(mockResponseItem);
         final String createJson = readTestResource(InventoryControllerTest.class, "createItem.json");
