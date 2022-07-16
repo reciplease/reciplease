@@ -30,21 +30,21 @@ public class InventoryRepositoryImpl implements InventoryRepository {
     @Override
     public List<InventoryItem> findAll() {
         return inventoryJpaRepository.findAll().stream()
-            .map(InventoryItemEntity::toModel)
-            .collect(Collectors.toList());
+                .map(InventoryItemEntity::toModel)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<InventoryItem> expiresAfter(LocalDate now) {
         return inventoryJpaRepository.findByExpirationIsGreaterThanEqual(now).stream()
-            .map(InventoryItemEntity::toModel)
-            .collect(Collectors.toList());
+                .map(InventoryItemEntity::toModel)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<InventoryItem> betweenDates(LocalDate now) {
         return inventoryJpaRepository.findByExpirationIsBefore(now).stream()
-            .map(InventoryItemEntity::toModel)
-            .collect(Collectors.toList());
+                .map(InventoryItemEntity::toModel)
+                .collect(Collectors.toList());
     }
 }

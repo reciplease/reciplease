@@ -23,7 +23,7 @@ public class PlannedRecipeRepositoryImpl implements PlannedRecipeRepository {
     @Override
     public List<PlannedRecipe> findByDateIsBetween(LocalDate start, LocalDate end) {
         return plannedRecipeJpaRepository.findByDateIsBetween(start, end).stream()
-            .map(PlannedRecipeEntity::toModel)
-            .collect(Collectors.toList());
+                .map(PlannedRecipeEntity::toModel)
+                .collect(Collectors.toList());
     }
 }
