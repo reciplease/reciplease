@@ -50,25 +50,27 @@ public class RecipeEntity extends BaseEntity {
     }
 
     public static RecipeEntity from(final Recipe recipe) {
-        final var recipeIngredientEntities = recipe.getRecipeIngredients().stream()
-            .map((RecipeIngredient recipeIngredient) -> RecipeIngredientEntity.from(recipe, recipeIngredient))
-            .collect(toSet());
-        return RecipeEntity.builder()
+        final RecipeEntity recipeEntity = RecipeEntity.builder()
                 .uuid(recipe.getUuid())
                 .name(recipe.getName())
+                .build();
+        final var recipeIngredientEntities = recipe.getRecipeIngredients().stream()
+                .map(recipeIngredient -> RecipeIngredientEntity.from(recipeEntity, recipeIngredient))
+                .collect(toSet());
+        recipeEntity.toBuilder()
                 .recipeIngredientEntities(recipeIngredientEntities)
                 .build();
+        return recipeEntity;
     }
 
     public Recipe toModel() {
         Recipe recipe = Recipe.builder()
-            .uuid(getUuid())
-            .name(getName())
-            .build();
-        getRecipeIngredientEntities().forEach(recipeIngredientEntity -> {
-            RecipeIngredient recipeIngredient = recipeIngredientEntity.toModel();
-            recipe.addIngredient(recipeIngredient.getIngredient(), recipeIngredient.getAmount());
-        });
+                .uuid(getUuid())
+                .name(getName())
+                .build();
+        getRecipeIngredientEntities().stream()
+                .map(RecipeIngredientEntity::toModel)
+                .forEach(recipe::addIngredient);
         return recipe;
     }
 }

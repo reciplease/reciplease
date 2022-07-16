@@ -54,8 +54,8 @@ public class IngredientControllerTest {
         final String json = mapper.writeValueAsString(ingredient);
 
         mockMvc.perform(post(API_INGREDIENTS)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.uuid", is(ID.toString())));
     }
@@ -70,8 +70,8 @@ public class IngredientControllerTest {
         final String json = mapper.writeValueAsString(ingredient);
 
         mockMvc.perform(post(API_INGREDIENTS)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
                 .andExpect(status().isBadRequest());
     }
 

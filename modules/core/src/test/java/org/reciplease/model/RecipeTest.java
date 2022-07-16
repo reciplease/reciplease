@@ -48,9 +48,9 @@ class RecipeTest {
                 .measure(Measure.ITEMS)
                 .build();
         final Ingredient bread = Ingredient.builder()
-            .name("bread")
-            .measure(Measure.ITEMS)
-            .build();
+                .name("bread")
+                .measure(Measure.ITEMS)
+                .build();
 
         final Recipe recipe = Recipe.builder()
                 .build();

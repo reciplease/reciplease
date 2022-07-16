@@ -30,17 +30,17 @@ public class IngredientDto {
 
     public static IngredientDto from(Ingredient ingredient) {
         return IngredientDto.builder()
-            .uuid(ingredient.getUuid())
-            .name(ingredient.getName())
-            .measure(ingredient.getMeasure())
-            .build();
+                .uuid(ingredient.getUuid())
+                .name(ingredient.getName())
+                .measure(ingredient.getMeasure())
+                .build();
     }
 
     public Ingredient toModel() {
         return Ingredient.builder()
-            .uuid(getUuid())
-            .name(getName())
-            .measure(getMeasure())
-            .build();
+                .uuid(getUuid())
+                .name(getName())
+                .measure(getMeasure())
+                .build();
     }
 }

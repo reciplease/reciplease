@@ -19,8 +19,8 @@ public class IngredientRepositoryImpl implements IngredientRepository {
     @Override
     public List<Ingredient> findAll() {
         return ingredientJpaRepository.findAll().stream()
-            .map(IngredientEntity::toModel)
-            .collect(Collectors.toList());
+                .map(IngredientEntity::toModel)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -36,17 +36,17 @@ public class IngredientRepositoryImpl implements IngredientRepository {
     @Override
     public List<Ingredient> saveAll(List<Ingredient> ingredients) {
         final var ingredientEntities = ingredients.stream()
-            .map(IngredientEntity::from)
-            .collect(Collectors.toList());
+                .map(IngredientEntity::from)
+                .collect(Collectors.toList());
         return ingredientJpaRepository.saveAll(ingredientEntities).stream()
-            .map(IngredientEntity::toModel)
-            .collect(Collectors.toList());
+                .map(IngredientEntity::toModel)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Ingredient> searchByName(String searchName) {
         return ingredientJpaRepository.findByNameContains(searchName).stream()
-            .map(IngredientEntity::toModel)
-            .collect(Collectors.toList());
+                .map(IngredientEntity::toModel)
+                .collect(Collectors.toList());
     }
 }
