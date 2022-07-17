@@ -5,12 +5,7 @@ springdoc:
   api-docs:
     path: /openapi
 
-hibernate:
-  hbm2ddl:
-    auto: create
-
 spring:
   jpa:
     hibernate:
-      ddl-auto: update
       naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
