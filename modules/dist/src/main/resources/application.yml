@@ -5,16 +5,9 @@ springdoc:
   api-docs:
     path: /openapi
 
-hibernate:
-  hbm2ddl:
-    auto: create
-
 spring:
   main:
     allow-circular-references: true
-  liquibase:
-    enabled: false
   jpa:
     hibernate:
-      ddl-auto: update
       naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
