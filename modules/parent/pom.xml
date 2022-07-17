@@ -23,7 +23,7 @@
         <revision>2022.07.16-ccb6d30</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>11</java.version>
-        <springdoc.version>1.5.12</springdoc.version>
+        <springdoc.version>1.6.9</springdoc.version>
         <jacoco.version>0.8.7</jacoco.version>
         <surefire.version>3.0.0-M7</surefire.version>
     </properties>
