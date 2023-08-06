@@ -18,4 +18,4 @@
 
 ## Usage
 
-> Requires Java 11 or higher.
+> Requires Java 17 or higher.
