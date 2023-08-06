@@ -19,7 +19,6 @@
   <url>https://app.reciplease.org/</url>
 
   <modules>
-    <module>docs</module>
     <module>modules/utils</module>
     <module>modules/core</module>
     <module>modules/database</module>
