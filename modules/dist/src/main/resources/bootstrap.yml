@@ -3,5 +3,5 @@ spring:
     gcp:
       core:
         enabled: false
-      secret-manager:
+      secretmanager:
         enabled: false
