@@ -1,5 +1,7 @@
 package org.reciplease.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,8 +9,6 @@ import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.Hibernate;
 
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -18,11 +18,14 @@ import java.util.Objects;
 @SuperBuilder(toBuilder = true)
 @Getter
 public class InventoryItemEntity extends BaseEntity {
+
     @ManyToOne
     @NonNull
     private IngredientEntity ingredientEntity;
+
     @NonNull
     private Double amount;
+
     @NonNull
     private LocalDate expiration;
 

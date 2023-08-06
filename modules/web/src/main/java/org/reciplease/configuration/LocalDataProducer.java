@@ -21,6 +21,7 @@ import java.util.List;
 @Profile("local")
 @RequiredArgsConstructor
 public class LocalDataProducer implements ApplicationRunner {
+
     final IngredientRepository ingredientRepository;
     final InventoryRepository inventoryRepository;
     final RecipeRepository recipeRepository;

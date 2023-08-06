@@ -1,17 +1,16 @@
 package org.reciplease.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.Type;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -22,8 +21,8 @@ import java.util.UUID;
 @SuperBuilder(toBuilder = true)
 @Getter
 public abstract class BaseEntity {
+
     @Id
-    @Type(type = "org.reciplease.hibernate.types.UUIDCustomType")
     @GeneratedValue
     private UUID uuid;
 

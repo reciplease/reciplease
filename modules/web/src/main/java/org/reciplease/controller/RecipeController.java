@@ -27,6 +27,7 @@ import static java.util.stream.Collectors.toList;
 @RequestMapping("api/recipes")
 @RequiredArgsConstructor
 public class RecipeController {
+
     private final RecipeService recipeService;
 
     @GetMapping("{uuid}")

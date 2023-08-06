@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SwaggerConfig {
+
     @Bean
     public OpenAPI springShopOpenAPI(@Value("${reciplease.version}") final String version) {
         return new OpenAPI()

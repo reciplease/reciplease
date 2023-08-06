@@ -1,6 +1,11 @@
 package org.reciplease.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -10,11 +15,6 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.Hibernate;
 
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapsId;
 import java.util.Objects;
 
 @Entity
@@ -23,6 +23,7 @@ import java.util.Objects;
 @SuperBuilder(toBuilder = true)
 @Getter
 public class RecipeIngredientEntity {
+
     @EmbeddedId
     @JsonIgnore
     @EqualsAndHashCode.Include
