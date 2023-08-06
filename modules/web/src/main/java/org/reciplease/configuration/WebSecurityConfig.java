@@ -18,7 +18,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
         return http
                 .sessionManagement().sessionCreationPolicy(STATELESS).and()
-                .authorizeRequests().anyRequest().permitAll().and()
+                .authorizeHttpRequests().anyRequest().permitAll().and()
                 .csrf().disable()
                 .cors().and()
                 .headers().frameOptions().disable()
