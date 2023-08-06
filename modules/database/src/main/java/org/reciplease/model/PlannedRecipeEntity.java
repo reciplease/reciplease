@@ -1,5 +1,7 @@
 package org.reciplease.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -7,8 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.Hibernate;
 
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -18,6 +18,7 @@ import java.util.Objects;
 @SuperBuilder(toBuilder = true)
 @Getter
 public class PlannedRecipeEntity extends BaseEntity {
+
     @ManyToOne
     @NonNull
     private RecipeEntity recipeEntity;

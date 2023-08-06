@@ -11,6 +11,7 @@ import java.util.UUID;
 @Value
 @Builder
 public class RecipeIngredientDto {
+
     UUID ingredientId;
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     String name;

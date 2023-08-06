@@ -12,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("api/measures")
 public class MeasureController {
+
     @GetMapping
     public ResponseEntity<List<Measure>> findAll() {
         return ResponseEntity.status(HttpStatus.OK).body(List.of(Measure.values()));

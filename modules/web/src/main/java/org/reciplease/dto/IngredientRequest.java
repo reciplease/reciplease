@@ -1,16 +1,17 @@
 package org.reciplease.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
 import org.reciplease.model.Ingredient;
 import org.reciplease.model.Measure;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 @Value
 @Builder
 public class IngredientRequest {
+
     @NotNull
     @NotBlank
     String name;

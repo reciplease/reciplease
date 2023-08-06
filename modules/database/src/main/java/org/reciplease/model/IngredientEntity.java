@@ -1,5 +1,10 @@
 package org.reciplease.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,11 +12,6 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.Hibernate;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 @Entity
@@ -21,9 +21,11 @@ import java.util.Objects;
 @Getter
 @ToString
 public class IngredientEntity extends BaseEntity {
+
     @NotNull
     @NotBlank
     private String name;
+
     @NotNull
     @Enumerated(value = EnumType.STRING)
     private Measure measure;
