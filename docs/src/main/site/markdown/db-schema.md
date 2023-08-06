@@ -3,6 +3,7 @@
 ## Enums
 
 ### Measure
+
 - ITEMS
 - KILOGRAMS
 - GRAMS
@@ -10,6 +11,7 @@
 - MILLILITRES
 
 ### Mealtime
+
 - Breakfast
 - Lunch
 - Dinner
@@ -19,6 +21,7 @@
 ## Tables
 
 ### BaseEntity
+
 - uuid
 
 ### Recipe
@@ -28,17 +31,13 @@
 
 ### Inventory (ShoppingList)
 
-
 #### ShoppingInventory
-
 
 ### Ingredient
 
 - ingredient_uuid
 - ingredient_name
 - baseMeasure
-
-
 
 #### RecipeIngredient (RecipeItem)
 

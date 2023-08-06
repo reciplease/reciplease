@@ -10,10 +10,6 @@ hibernate:
     auto: create
 
 spring:
-  main:
-    allow-circular-references: true
-  liquibase:
-    enabled: false
   jpa:
     hibernate:
       ddl-auto: update

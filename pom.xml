@@ -1,30 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.reciplease</groupId>
-        <artifactId>parent</artifactId>
-        <version>${revision}</version>
-        <relativePath>./modules/parent/pom.xml</relativePath>
-    </parent>
+  <parent>
+    <groupId>org.reciplease</groupId>
+    <artifactId>parent</artifactId>
+    <version>${revision}</version>
+    <relativePath>./modules/parent/pom.xml</relativePath>
+  </parent>
 
-    <packaging>pom</packaging>
-    
-    <artifactId>app</artifactId>
-    
-    <name>Reciplease</name>
-    <description>Making the world a better place through recipe and inventory management.</description>
-    <url>https://app.reciplease.org/</url>
+  <packaging>pom</packaging>
 
-    <modules>
-        <module>docs</module>
-        <module>modules/utils</module>
-        <module>modules/core</module>
-        <module>modules/database</module>
-        <module>modules/web</module>
-        <module>modules/dist</module>
-    </modules>
+  <artifactId>app</artifactId>
+
+  <name>Reciplease</name>
+  <description>Making the world a better place through recipe and inventory management.</description>
+  <url>https://app.reciplease.org/</url>
+
+  <modules>
+    <module>docs</module>
+    <module>modules/utils</module>
+    <module>modules/core</module>
+    <module>modules/database</module>
+    <module>modules/web</module>
+    <module>modules/dist</module>
+    <module>modules/webflux</module>
+  </modules>
 
 </project>

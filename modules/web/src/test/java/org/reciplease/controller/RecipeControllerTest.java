@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -30,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RecipeController.class)
+@WithMockUser
 class RecipeControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -114,8 +116,8 @@ class RecipeControllerTest {
 
         when(recipeService.addIngredient(recipe.getUuid(), addIngredientRequest)).thenReturn(Set.of(savedRecipeIngredient));
 
-        final var data = "{\"ingredientUuid\": \"70991766-7944-40c2-be90-20065af3d02b\", \"amount\": 10.0}";
-        final var expectedJson = "[{\"ingredientUuid\": \"70991766-7944-40c2-be90-20065af3d02b\", \"name\": \"tomato\", \"measure\": \"ITEMS\", \"amount\": 10.0}]";
+        final var data = "{\"ingredientId\": \"70991766-7944-40c2-be90-20065af3d02b\", \"amount\": 10.0}";
+        final var expectedJson = "[{\"ingredientId\": \"70991766-7944-40c2-be90-20065af3d02b\", \"name\": \"tomato\", \"measure\": \"ITEMS\", \"amount\": 10.0}]";
 
         mockMvc.perform(put("/api/recipes/{uuid}/ingredients", recipe.getUuid())
                         .contentType(MediaType.APPLICATION_JSON)
