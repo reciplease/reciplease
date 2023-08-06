@@ -3,7 +3,7 @@ spring:
     gcp:
       core:
         enabled: true
-      secretmanager:
+      secret-manager:
         enabled: true
   datasource:
     url: ${sm://reciplease-database-url}

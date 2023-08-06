@@ -1,5 +1,6 @@
 package org.reciplease.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.dto.InventoryItemDto;
 import org.reciplease.service.InventoryService;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,6 +23,7 @@ import static java.util.stream.Collectors.toList;
 @RequestMapping("api/inventory")
 @RequiredArgsConstructor
 public class InventoryController {
+
     final InventoryService inventoryService;
 
     @PostMapping

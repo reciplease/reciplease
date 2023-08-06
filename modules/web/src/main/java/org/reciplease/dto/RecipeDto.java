@@ -12,15 +12,16 @@ import java.util.stream.Collectors;
 @Value
 @Builder
 public class RecipeDto {
+
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-    UUID uuid;
+    UUID recipeId;
     String name;
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     Set<RecipeIngredientDto> ingredients;
 
     public static RecipeDto from(final Recipe recipe) {
         return RecipeDto.builder()
-                .uuid(recipe.getUuid())
+                .recipeId(recipe.getUuid())
                 .name(recipe.getName())
                 .ingredients(recipe.getRecipeIngredients().stream()
                         .map(RecipeIngredientDto::from)
@@ -30,7 +31,7 @@ public class RecipeDto {
 
     public Recipe toEntity() {
         return Recipe.builder()
-                .uuid(this.uuid)
+                .uuid(this.recipeId)
                 .name(this.name)
                 .build();
     }

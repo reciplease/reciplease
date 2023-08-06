@@ -1,11 +1,11 @@
 package org.reciplease.model;
 
+import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.Hibernate;
 
-import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
@@ -15,6 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 public class RecipeIngredientIdEntity implements Serializable {
+
     private UUID recipeUuid;
     private UUID ingredientUuid;
 

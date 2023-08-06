@@ -21,7 +21,7 @@ class RecipeDtoTest {
 
         final var recipeDto = RecipeDto.from(recipe);
 
-        assertThat(recipeDto.getUuid(), is(recipe.getUuid()));
+        assertThat(recipeDto.getRecipeId(), is(recipe.getUuid()));
         assertThat(recipeDto.getName(), is(recipe.getName()));
     }
 }

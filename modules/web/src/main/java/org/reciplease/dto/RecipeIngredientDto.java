@@ -11,7 +11,8 @@ import java.util.UUID;
 @Value
 @Builder
 public class RecipeIngredientDto {
-    UUID ingredientUuid;
+
+    UUID ingredientId;
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     String name;
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
@@ -21,7 +22,7 @@ public class RecipeIngredientDto {
     public static RecipeIngredientDto from(final RecipeIngredient recipeIngredient) {
         final var ingredient = recipeIngredient.getIngredient();
         return RecipeIngredientDto.builder()
-                .ingredientUuid(ingredient.getUuid())
+                .ingredientId(ingredient.getUuid())
                 .name(ingredient.getName())
                 .measure(ingredient.getMeasure())
                 .amount(recipeIngredient.getAmount())

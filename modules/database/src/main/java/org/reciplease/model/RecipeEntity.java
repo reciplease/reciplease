@@ -1,5 +1,8 @@
 package org.reciplease.model;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -7,9 +10,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.Hibernate;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.toSet;
 @SuperBuilder(toBuilder = true)
 @Getter
 public class RecipeEntity extends BaseEntity {
+    
     private String name;
 
     @OneToMany(mappedBy = "recipeEntity", cascade = CascadeType.ALL)
