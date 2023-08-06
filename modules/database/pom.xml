@@ -28,11 +28,6 @@
       <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-core</artifactId>
-    </dependency>
-
     <!--runtime dependencies-->
     <dependency>
       <groupId>org.springframework.boot</groupId>

@@ -14,6 +14,7 @@ import java.util.UUID;
 @Value
 @Builder(toBuilder = true)
 public class InventoryItemDto {
+
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     UUID uuid;
     UUID ingredientUuid;

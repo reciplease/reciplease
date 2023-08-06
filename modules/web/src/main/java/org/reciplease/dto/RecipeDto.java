@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 @Value
 @Builder
 public class RecipeDto {
+
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     UUID recipeId;
     String name;

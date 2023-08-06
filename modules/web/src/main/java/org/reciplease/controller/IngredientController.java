@@ -1,5 +1,6 @@
 package org.reciplease.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.dto.IngredientDto;
 import org.reciplease.dto.IngredientRequest;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 @RequestMapping("api/ingredients")
 @RequiredArgsConstructor
 public class IngredientController {
+
     final IngredientRepository ingredientRepository;
 
     @PostMapping

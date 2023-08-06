@@ -2,6 +2,8 @@ package org.reciplease.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,8 +11,6 @@ import lombok.NoArgsConstructor;
 import org.reciplease.model.Ingredient;
 import org.reciplease.model.Measure;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
 @Builder
@@ -19,6 +19,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @JsonInclude(Include.NON_EMPTY)
 public class IngredientDto {
+
     UUID uuid;
 
     @NotNull
