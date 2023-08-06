@@ -6,6 +6,6 @@ import java.util.UUID;
 
 @Value
 public class AddIngredient {
-    UUID ingredientUuid;
+    UUID ingredientId;
     Double amount;
 }
