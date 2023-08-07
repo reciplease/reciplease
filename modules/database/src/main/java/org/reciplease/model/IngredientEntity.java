@@ -46,7 +46,7 @@ public class IngredientEntity extends BaseEntity {
 
     public static IngredientEntity from(final Ingredient ingredient) {
         return IngredientEntity.builder()
-                .id(ingredient.getUuid())
+                .id(ingredient.getId())
                 .name(ingredient.getName())
                 .measure(ingredient.getMeasure())
                 .build();
@@ -54,7 +54,7 @@ public class IngredientEntity extends BaseEntity {
 
     public Ingredient toModel() {
         return Ingredient.builder()
-                .uuid(getId())
+                .id(getId())
                 .name(getName())
                 .measure(getMeasure())
                 .build();

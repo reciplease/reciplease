@@ -28,8 +28,8 @@ public class InventoryItemDto {
 
     public static InventoryItemDto from(final InventoryItem inventoryItem) {
         return InventoryItemDto.builder()
-                .uuid(inventoryItem.getUuid())
-                .ingredientUuid(inventoryItem.getIngredient().getUuid())
+                .uuid(inventoryItem.getId())
+                .ingredientUuid(inventoryItem.getIngredient().getId())
                 .name(inventoryItem.getIngredient().getName())
                 .measure(inventoryItem.getIngredient().getMeasure())
                 .amount(inventoryItem.getAmount())
@@ -39,9 +39,9 @@ public class InventoryItemDto {
 
     public InventoryItem toEntity() {
         return InventoryItem.builder()
-                .uuid(uuid)
+                .id(uuid)
                 .ingredient(Ingredient.builder()
-                        .uuid(ingredientUuid)
+                        .id(ingredientUuid)
                         .name(name)
                         .measure(measure)
                         .build())

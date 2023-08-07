@@ -45,7 +45,7 @@ class InventoryServiceTest {
     @DisplayName("should save item")
     void save() {
         final var ingredient = Ingredient.builder()
-                .uuid(UUID.randomUUID())
+                .id(UUID.randomUUID())
                 .build();
 
         final var item = InventoryItem.builder()
@@ -55,10 +55,10 @@ class InventoryServiceTest {
                 .build();
 
         final var savedItem = item.toBuilder()
-                .uuid(UUID.randomUUID())
+                .id(UUID.randomUUID())
                 .build();
 
-        when(ingredientRepository.findById(ingredient.getUuid())).thenReturn(Optional.of(ingredient));
+        when(ingredientRepository.findById(ingredient.getId())).thenReturn(Optional.of(ingredient));
         when(inventoryRepository.save(item)).thenReturn(savedItem);
 
         final var actual = inventoryService.save(item);
@@ -68,14 +68,14 @@ class InventoryServiceTest {
 
     @Test
     void noIngredient() {
-        final Ingredient ingredient = Ingredient.builder().uuid(UUID.randomUUID()).build();
+        final Ingredient ingredient = Ingredient.builder().id(UUID.randomUUID()).build();
         final var item = InventoryItem.builder()
                 .ingredient(ingredient)
                 .amount(10d)
                 .expiration(LocalDate.now())
                 .build();
 
-        when(ingredientRepository.findById(ingredient.getUuid())).thenReturn(Optional.empty());
+        when(ingredientRepository.findById(ingredient.getId())).thenReturn(Optional.empty());
 
         final var illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> inventoryService.save(item));
 
@@ -100,9 +100,9 @@ class InventoryServiceTest {
         @BeforeEach
         void setUp() {
             item = InventoryItem.builder()
-                    .uuid(UUID.randomUUID())
+                    .id(UUID.randomUUID())
                     .ingredient(Ingredient.builder()
-                            .uuid(UUID.randomUUID())
+                            .id(UUID.randomUUID())
                             .build())
                     .amount(10d)
                     .expiration(LocalDate.now())
@@ -112,9 +112,9 @@ class InventoryServiceTest {
         @Test
         @DisplayName("should find item by ID")
         void findById() {
-            when(inventoryRepository.findById(item.getUuid())).thenReturn(Optional.of(item));
+            when(inventoryRepository.findById(item.getId())).thenReturn(Optional.of(item));
 
-            final var actual = inventoryService.findById(item.getUuid());
+            final var actual = inventoryService.findById(item.getId());
 
             assertThat(actual.isPresent(), is(true));
             assertThat(actual.get(), is(item));

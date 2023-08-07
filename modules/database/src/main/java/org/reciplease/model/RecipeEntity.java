@@ -52,7 +52,7 @@ public class RecipeEntity extends BaseEntity {
 
     public static RecipeEntity from(final Recipe recipe) {
         final RecipeEntity recipeEntity = RecipeEntity.builder()
-                .id(recipe.getUuid())
+                .id(recipe.getId())
                 .name(recipe.getName())
                 .build();
         final var recipeIngredientEntities = recipe.getRecipeIngredients().stream()
@@ -66,7 +66,7 @@ public class RecipeEntity extends BaseEntity {
 
     public Recipe toModel() {
         Recipe recipe = Recipe.builder()
-                .uuid(getId())
+                .id(getId())
                 .name(getName())
                 .build();
         getRecipeIngredientEntities().stream()

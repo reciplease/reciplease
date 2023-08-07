@@ -31,7 +31,7 @@ public class IngredientDto {
 
     public static IngredientDto from(Ingredient ingredient) {
         return IngredientDto.builder()
-                .uuid(ingredient.getUuid())
+                .uuid(ingredient.getId())
                 .name(ingredient.getName())
                 .measure(ingredient.getMeasure())
                 .build();
@@ -39,7 +39,7 @@ public class IngredientDto {
 
     public Ingredient toModel() {
         return Ingredient.builder()
-                .uuid(getUuid())
+                .id(getUuid())
                 .name(getName())
                 .measure(getMeasure())
                 .build();

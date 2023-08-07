@@ -21,9 +21,9 @@ class IdentifiableTest {
         final UUID uuid = UUID.randomUUID();
 
         final TestModel model = TestModel.builder()
-                .uuid(uuid)
+                .id(uuid)
                 .build();
 
-        assertThat(model.getUuid(), is(uuid));
+        assertThat(model.getId(), is(uuid));
     }
 }

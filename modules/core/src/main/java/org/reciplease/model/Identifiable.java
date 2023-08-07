@@ -13,5 +13,5 @@ import java.util.UUID;
 public abstract class Identifiable {
 
     @NotNull
-    private UUID uuid;
+    private UUID id;
 }

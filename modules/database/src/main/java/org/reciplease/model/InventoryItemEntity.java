@@ -45,7 +45,7 @@ public class InventoryItemEntity extends BaseEntity {
 
     public static InventoryItemEntity from(final InventoryItem inventoryItem) {
         return InventoryItemEntity.builder()
-                .id(inventoryItem.getUuid())
+                .id(inventoryItem.getId())
                 .ingredientEntity(IngredientEntity.from(inventoryItem.getIngredient()))
                 .amount(inventoryItem.getAmount())
                 .expiration(inventoryItem.getExpiration())
@@ -54,7 +54,7 @@ public class InventoryItemEntity extends BaseEntity {
 
     public InventoryItem toModel() {
         return InventoryItem.builder()
-                .uuid(getId())
+                .id(getId())
                 .ingredient(getIngredientEntity().toModel())
                 .amount(getAmount())
                 .expiration(getExpiration())

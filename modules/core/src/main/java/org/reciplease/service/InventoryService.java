@@ -20,7 +20,7 @@ public class InventoryService {
     private final Clock clock;
 
     public InventoryItem save(final InventoryItem item) {
-        final var ingredient = ingredientRepository.findById(item.getIngredient().getUuid())
+        final var ingredient = ingredientRepository.findById(item.getIngredient().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Ingredient does not exist"));
 
         final InventoryItem updatedItem = item.toBuilder()
