@@ -30,9 +30,9 @@ public class RecipeController {
 
     private final RecipeService recipeService;
 
-    @GetMapping("{uuid}")
-    public ResponseEntity<RecipeDto> findById(@PathVariable final UUID uuid) {
-        final var optionalRecipe = recipeService.findById(uuid)
+    @GetMapping("{recipeId}")
+    public ResponseEntity<RecipeDto> findById(@PathVariable final UUID recipeId) {
+        final var optionalRecipe = recipeService.findById(recipeId)
                 .map(RecipeDto::from);
         return ResponseEntity.of(optionalRecipe);
     }
@@ -51,9 +51,9 @@ public class RecipeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(RecipeDto.from(recipe));
     }
 
-    @PutMapping("{uuid}/ingredients")
-    public ResponseEntity<Set<RecipeIngredientDto>> addIngredient(@PathVariable final UUID uuid, @RequestBody final AddIngredient addIngredient) {
-        final var recipeIngredients = recipeService.addIngredient(uuid, addIngredient).stream()
+    @PutMapping("{recipeId}/ingredients")
+    public ResponseEntity<Set<RecipeIngredientDto>> addIngredient(@PathVariable final UUID recipeId, @RequestBody final AddIngredient addIngredient) {
+        final var recipeIngredients = recipeService.addIngredient(recipeId, addIngredient).stream()
                 .map(RecipeIngredientDto::from)
                 .collect(Collectors.toSet());
 
