@@ -105,12 +105,12 @@ public class IngredientControllerTest {
     @Test
     public void shouldGetAllIngredients() throws Exception {
         final var ingredientDto = IngredientDto.builder()
-                .uuid(UUID.randomUUID())
+                .ingredientId(UUID.randomUUID())
                 .name(INGREDIENT_NAME)
                 .measure(MEASURE)
                 .build();
         final var ingredientDto2 = IngredientDto.builder()
-                .uuid(UUID.randomUUID())
+                .ingredientId(UUID.randomUUID())
                 .name(INGREDIENT_NAME + "2")
                 .measure(MEASURE)
                 .build();
@@ -131,7 +131,7 @@ public class IngredientControllerTest {
     @Test
     public void shouldSearch() throws Exception {
         final var ingredientDto = IngredientDto.builder()
-                .uuid(ID)
+                .ingredientId(ID)
                 .name(INGREDIENT_NAME)
                 .measure(MEASURE)
                 .build();

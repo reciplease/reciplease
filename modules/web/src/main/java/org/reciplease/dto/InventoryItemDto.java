@@ -16,7 +16,7 @@ import java.util.UUID;
 public class InventoryItemDto {
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-    UUID uuid;
+    UUID inventoryItemId;
     UUID ingredientUuid;
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     String name;
@@ -28,7 +28,7 @@ public class InventoryItemDto {
 
     public static InventoryItemDto from(final InventoryItem inventoryItem) {
         return InventoryItemDto.builder()
-                .uuid(inventoryItem.getId())
+                .inventoryItemId(inventoryItem.getId())
                 .ingredientUuid(inventoryItem.getIngredient().getId())
                 .name(inventoryItem.getIngredient().getName())
                 .measure(inventoryItem.getIngredient().getMeasure())
@@ -39,7 +39,7 @@ public class InventoryItemDto {
 
     public InventoryItem toEntity() {
         return InventoryItem.builder()
-                .id(uuid)
+                .id(inventoryItemId)
                 .ingredient(Ingredient.builder()
                         .id(ingredientUuid)
                         .name(name)
