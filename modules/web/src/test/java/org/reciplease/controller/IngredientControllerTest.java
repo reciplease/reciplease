@@ -85,7 +85,7 @@ public class IngredientControllerTest {
                 .measure(MEASURE)
                 .build();
 
-        when(ingredientRepository.findByUuid(ID)).thenReturn(Optional.of(ingredient));
+        when(ingredientRepository.findById(ID)).thenReturn(Optional.of(ingredient));
 
         mockMvc.perform(get(API_INGREDIENTS + "/" + ID))
                 .andExpect(status().isOk())
@@ -96,7 +96,7 @@ public class IngredientControllerTest {
 
     @Test
     public void shouldNotGetIngredient_notFound() throws Exception {
-        when(ingredientRepository.findByUuid(ID)).thenReturn(Optional.empty());
+        when(ingredientRepository.findById(ID)).thenReturn(Optional.empty());
 
         mockMvc.perform(get(API_INGREDIENTS + "/" + ID))
                 .andExpect(status().isNotFound());

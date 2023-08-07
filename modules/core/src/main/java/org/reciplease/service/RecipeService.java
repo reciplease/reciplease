@@ -38,7 +38,7 @@ public class RecipeService {
     public Set<RecipeIngredient> addIngredient(final UUID recipeUuid, final AddIngredient addIngredient) {
         final var recipe = recipeRepository.findByUuid(recipeUuid)
                 .orElseThrow(() -> new IllegalArgumentException("Recipe does not exist"));
-        final var ingredient = ingredientRepository.findByUuid(addIngredient.getIngredientId())
+        final var ingredient = ingredientRepository.findById(addIngredient.getIngredientId())
                 .orElseThrow(() -> new IllegalArgumentException("Ingredient does not exist"));
 
         recipe.addIngredient(ingredient, addIngredient.getAmount());

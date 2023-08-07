@@ -24,8 +24,8 @@ public class IngredientRepositoryImpl implements IngredientRepository {
     }
 
     @Override
-    public Optional<Ingredient> findByUuid(UUID uuid) {
-        return ingredientJpaRepository.findById(uuid).map(IngredientEntity::toModel);
+    public Optional<Ingredient> findById(UUID ingredientId) {
+        return ingredientJpaRepository.findById(ingredientId).map(IngredientEntity::toModel);
     }
 
     @Override

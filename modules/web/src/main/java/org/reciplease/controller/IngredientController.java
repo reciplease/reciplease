@@ -36,7 +36,7 @@ public class IngredientController {
 
     @GetMapping("{uuid}")
     public ResponseEntity<Ingredient> findById(@PathVariable final UUID uuid) {
-        final Optional<Ingredient> foundIngredient = ingredientRepository.findByUuid(uuid);
+        final Optional<Ingredient> foundIngredient = ingredientRepository.findById(uuid);
 
         return ResponseEntity.of(foundIngredient);
     }

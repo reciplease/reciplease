@@ -58,7 +58,7 @@ class InventoryServiceTest {
                 .uuid(UUID.randomUUID())
                 .build();
 
-        when(ingredientRepository.findByUuid(ingredient.getUuid())).thenReturn(Optional.of(ingredient));
+        when(ingredientRepository.findById(ingredient.getUuid())).thenReturn(Optional.of(ingredient));
         when(inventoryRepository.save(item)).thenReturn(savedItem);
 
         final var actual = inventoryService.save(item);
@@ -75,7 +75,7 @@ class InventoryServiceTest {
                 .expiration(LocalDate.now())
                 .build();
 
-        when(ingredientRepository.findByUuid(ingredient.getUuid())).thenReturn(Optional.empty());
+        when(ingredientRepository.findById(ingredient.getUuid())).thenReturn(Optional.empty());
 
         final var illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> inventoryService.save(item));
 
