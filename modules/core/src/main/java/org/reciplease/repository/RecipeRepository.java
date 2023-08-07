@@ -11,5 +11,5 @@ public interface RecipeRepository {
 
     Recipe save(final Recipe recipe);
 
-    Optional<Recipe> findByUuid(final UUID uuid);
+    Optional<Recipe> findById(final UUID recipeId);
 }

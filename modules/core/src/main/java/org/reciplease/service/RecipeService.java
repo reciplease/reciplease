@@ -22,7 +22,7 @@ public class RecipeService {
     private final IngredientRepository ingredientRepository;
 
     public Optional<Recipe> findById(final UUID uuid) {
-        return recipeRepository.findByUuid(uuid);
+        return recipeRepository.findById(uuid);
     }
 
     public List<Recipe> findAll() {
@@ -36,7 +36,7 @@ public class RecipeService {
     }
 
     public Set<RecipeIngredient> addIngredient(final UUID recipeUuid, final AddIngredient addIngredient) {
-        final var recipe = recipeRepository.findByUuid(recipeUuid)
+        final var recipe = recipeRepository.findById(recipeUuid)
                 .orElseThrow(() -> new IllegalArgumentException("Recipe does not exist"));
         final var ingredient = ingredientRepository.findById(addIngredient.getIngredientId())
                 .orElseThrow(() -> new IllegalArgumentException("Ingredient does not exist"));

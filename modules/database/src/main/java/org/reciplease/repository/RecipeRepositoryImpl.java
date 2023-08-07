@@ -29,7 +29,7 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
-    public Optional<Recipe> findByUuid(final UUID uuid) {
-        return recipeJpaRepository.findById(uuid).map(RecipeEntity::toModel);
+    public Optional<Recipe> findById(final UUID recipeId) {
+        return recipeJpaRepository.findById(recipeId).map(RecipeEntity::toModel);
     }
 }

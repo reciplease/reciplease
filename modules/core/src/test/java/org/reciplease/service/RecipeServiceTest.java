@@ -44,7 +44,7 @@ class RecipeServiceTest {
                 .name("toast")
                 .build();
 
-        when(recipeRepository.findByUuid(toast.getUuid())).thenReturn(Optional.of(toast));
+        when(recipeRepository.findById(toast.getUuid())).thenReturn(Optional.of(toast));
 
         final var optionalRecipe = recipeService.findById(toast.getUuid());
 
@@ -107,7 +107,7 @@ class RecipeServiceTest {
 
         @Test
         void shouldAddIngredientToRecipe() {
-            when(recipeRepository.findByUuid(recipe.getUuid())).thenReturn(Optional.of(recipe));
+            when(recipeRepository.findById(recipe.getUuid())).thenReturn(Optional.of(recipe));
             when(ingredientRepository.findById(ingredient.getUuid())).thenReturn(Optional.of(ingredient));
             when(recipeRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -118,7 +118,7 @@ class RecipeServiceTest {
 
         @Test
         void shouldFail_recipeNotFound() {
-            when(recipeRepository.findByUuid(recipe.getUuid())).thenReturn(Optional.empty());
+            when(recipeRepository.findById(recipe.getUuid())).thenReturn(Optional.empty());
 
             final var exception = assertThrows(IllegalArgumentException.class, () -> recipeService.addIngredient(recipe.getUuid(), new AddIngredient(ingredient.getUuid(), 10d)));
 
@@ -127,7 +127,7 @@ class RecipeServiceTest {
 
         @Test
         void shouldFail_ingredientNotFound() {
-            when(recipeRepository.findByUuid(recipe.getUuid())).thenReturn(Optional.of(recipe));
+            when(recipeRepository.findById(recipe.getUuid())).thenReturn(Optional.of(recipe));
             when(ingredientRepository.findById(ingredient.getUuid())).thenReturn(Optional.empty());
 
             final var exception = assertThrows(IllegalArgumentException.class, () -> recipeService.addIngredient(recipe.getUuid(), new AddIngredient(ingredient.getUuid(), 10d)));
