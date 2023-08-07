@@ -85,7 +85,7 @@ class InventoryServiceTest {
     @Test
     void noItem() {
         final var itemId = UUID.randomUUID();
-        when(inventoryRepository.findByUuid(itemId)).thenReturn(Optional.empty());
+        when(inventoryRepository.findById(itemId)).thenReturn(Optional.empty());
 
         final var item = inventoryService.findById(itemId);
 
@@ -112,7 +112,7 @@ class InventoryServiceTest {
         @Test
         @DisplayName("should find item by ID")
         void findById() {
-            when(inventoryRepository.findByUuid(item.getUuid())).thenReturn(Optional.of(item));
+            when(inventoryRepository.findById(item.getUuid())).thenReturn(Optional.of(item));
 
             final var actual = inventoryService.findById(item.getUuid());
 

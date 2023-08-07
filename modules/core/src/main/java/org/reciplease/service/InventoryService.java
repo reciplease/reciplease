@@ -31,7 +31,7 @@ public class InventoryService {
     }
 
     public Optional<InventoryItem> findById(final UUID uuid) {
-        return inventoryRepository.findByUuid(uuid);
+        return inventoryRepository.findById(uuid);
     }
 
     public List<InventoryItem> findAll() {
