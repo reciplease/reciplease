@@ -36,7 +36,7 @@ public class IngredientEntity extends BaseEntity {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         final IngredientEntity that = (IngredientEntity) o;
 
-        return Objects.equals(getUuid(), that.getUuid());
+        return Objects.equals(getId(), that.getId());
     }
 
     @Override
@@ -46,7 +46,7 @@ public class IngredientEntity extends BaseEntity {
 
     public static IngredientEntity from(final Ingredient ingredient) {
         return IngredientEntity.builder()
-                .uuid(ingredient.getUuid())
+                .id(ingredient.getUuid())
                 .name(ingredient.getName())
                 .measure(ingredient.getMeasure())
                 .build();
@@ -54,7 +54,7 @@ public class IngredientEntity extends BaseEntity {
 
     public Ingredient toModel() {
         return Ingredient.builder()
-                .uuid(getUuid())
+                .uuid(getId())
                 .name(getName())
                 .measure(getMeasure())
                 .build();

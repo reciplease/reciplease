@@ -24,13 +24,13 @@ public abstract class BaseEntity {
 
     @Id
     @GeneratedValue
-    private UUID uuid;
+    private UUID id;
 
     public abstract static class BaseEntityBuilder<C extends BaseEntity, B extends BaseEntity.BaseEntityBuilder<C, B>> {
-        protected UUID uuid;
+        protected UUID id;
 
         public B randomUUID() {
-            this.uuid = UUID.randomUUID();
+            this.id = UUID.randomUUID();
             return this.self();
         }
     }
@@ -41,7 +41,7 @@ public abstract class BaseEntity {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         final BaseEntity that = (BaseEntity) o;
 
-        return Objects.equals(uuid, that.uuid);
+        return Objects.equals(id, that.id);
     }
 
     @Override

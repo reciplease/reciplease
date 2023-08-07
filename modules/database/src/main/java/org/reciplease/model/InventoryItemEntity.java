@@ -35,7 +35,7 @@ public class InventoryItemEntity extends BaseEntity {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         final InventoryItemEntity that = (InventoryItemEntity) o;
 
-        return Objects.equals(getUuid(), that.getUuid());
+        return Objects.equals(getId(), that.getId());
     }
 
     @Override
@@ -45,7 +45,7 @@ public class InventoryItemEntity extends BaseEntity {
 
     public static InventoryItemEntity from(final InventoryItem inventoryItem) {
         return InventoryItemEntity.builder()
-                .uuid(inventoryItem.getUuid())
+                .id(inventoryItem.getUuid())
                 .ingredientEntity(IngredientEntity.from(inventoryItem.getIngredient()))
                 .amount(inventoryItem.getAmount())
                 .expiration(inventoryItem.getExpiration())
@@ -54,7 +54,7 @@ public class InventoryItemEntity extends BaseEntity {
 
     public InventoryItem toModel() {
         return InventoryItem.builder()
-                .uuid(getUuid())
+                .uuid(getId())
                 .ingredient(getIngredientEntity().toModel())
                 .amount(getAmount())
                 .expiration(getExpiration())
