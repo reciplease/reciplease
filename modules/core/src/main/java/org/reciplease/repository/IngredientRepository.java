@@ -9,7 +9,7 @@ import java.util.UUID;
 public interface IngredientRepository {
     List<Ingredient> findAll();
 
-    Optional<Ingredient> findByUuid(final UUID uuid);
+    Optional<Ingredient> findById(final UUID ingredientId);
 
     Ingredient save(final Ingredient ingredient);
 

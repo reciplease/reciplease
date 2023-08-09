@@ -18,12 +18,12 @@ class IdentifiableTest {
     @Test
     @DisplayName("should set UUID through builder")
     void setUuid() {
-        final UUID uuid = UUID.randomUUID();
+        final UUID randomId = UUID.randomUUID();
 
         final TestModel model = TestModel.builder()
-                .uuid(uuid)
+                .id(randomId)
                 .build();
 
-        assertThat(model.getUuid(), is(uuid));
+        assertThat(model.getId(), is(randomId));
     }
 }

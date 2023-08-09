@@ -51,7 +51,7 @@ public class IngredientControllerTest {
                 .measure(Measure.KILOGRAMS)
                 .build();
 
-        when(ingredientRepository.save(any(Ingredient.class))).then(invocation -> invocation.getArgument(0, Ingredient.class).toBuilder().uuid(ID).build());
+        when(ingredientRepository.save(any(Ingredient.class))).then(invocation -> invocation.getArgument(0, Ingredient.class).toBuilder().id(ID).build());
 
         final String json = mapper.writeValueAsString(ingredient);
 
@@ -59,7 +59,7 @@ public class IngredientControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.uuid", is(ID.toString())));
+                .andExpect(jsonPath("$.id", is(ID.toString())));
     }
 
     @Test
@@ -80,23 +80,23 @@ public class IngredientControllerTest {
     @Test
     public void shouldGetIngredientById() throws Exception {
         final Ingredient ingredient = Ingredient.builder()
-                .uuid(ID)
+                .id(ID)
                 .name(INGREDIENT_NAME)
                 .measure(MEASURE)
                 .build();
 
-        when(ingredientRepository.findByUuid(ID)).thenReturn(Optional.of(ingredient));
+        when(ingredientRepository.findById(ID)).thenReturn(Optional.of(ingredient));
 
         mockMvc.perform(get(API_INGREDIENTS + "/" + ID))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.uuid", is(ID.toString())))
+                .andExpect(jsonPath("$.id", is(ID.toString())))
                 .andExpect(jsonPath("$.name", is(INGREDIENT_NAME)))
                 .andExpect(jsonPath("$.measure", is(MEASURE.toString())));
     }
 
     @Test
     public void shouldNotGetIngredient_notFound() throws Exception {
-        when(ingredientRepository.findByUuid(ID)).thenReturn(Optional.empty());
+        when(ingredientRepository.findById(ID)).thenReturn(Optional.empty());
 
         mockMvc.perform(get(API_INGREDIENTS + "/" + ID))
                 .andExpect(status().isNotFound());
@@ -105,12 +105,12 @@ public class IngredientControllerTest {
     @Test
     public void shouldGetAllIngredients() throws Exception {
         final var ingredientDto = IngredientDto.builder()
-                .uuid(UUID.randomUUID())
+                .ingredientId(UUID.randomUUID())
                 .name(INGREDIENT_NAME)
                 .measure(MEASURE)
                 .build();
         final var ingredientDto2 = IngredientDto.builder()
-                .uuid(UUID.randomUUID())
+                .ingredientId(UUID.randomUUID())
                 .name(INGREDIENT_NAME + "2")
                 .measure(MEASURE)
                 .build();
@@ -131,7 +131,7 @@ public class IngredientControllerTest {
     @Test
     public void shouldSearch() throws Exception {
         final var ingredientDto = IngredientDto.builder()
-                .uuid(ID)
+                .ingredientId(ID)
                 .name(INGREDIENT_NAME)
                 .measure(MEASURE)
                 .build();

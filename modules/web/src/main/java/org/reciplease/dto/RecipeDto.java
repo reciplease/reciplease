@@ -21,7 +21,7 @@ public class RecipeDto {
 
     public static RecipeDto from(final Recipe recipe) {
         return RecipeDto.builder()
-                .recipeId(recipe.getUuid())
+                .recipeId(recipe.getId())
                 .name(recipe.getName())
                 .ingredients(recipe.getRecipeIngredients().stream()
                         .map(RecipeIngredientDto::from)
@@ -31,7 +31,7 @@ public class RecipeDto {
 
     public Recipe toEntity() {
         return Recipe.builder()
-                .uuid(this.recipeId)
+                .id(this.recipeId)
                 .name(this.name)
                 .build();
     }

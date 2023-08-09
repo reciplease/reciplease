@@ -34,9 +34,9 @@ public class IngredientController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedIngredient);
     }
 
-    @GetMapping("{uuid}")
-    public ResponseEntity<Ingredient> findById(@PathVariable final UUID uuid) {
-        final Optional<Ingredient> foundIngredient = ingredientRepository.findByUuid(uuid);
+    @GetMapping("{ingredientId}")
+    public ResponseEntity<Ingredient> findById(@PathVariable final UUID ingredientId) {
+        final Optional<Ingredient> foundIngredient = ingredientRepository.findById(ingredientId);
 
         return ResponseEntity.of(foundIngredient);
     }

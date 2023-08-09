@@ -15,13 +15,13 @@ class RecipeDtoTest {
     @DisplayName("create DTO from entity")
     void fromEntity() {
         final var recipe = Recipe.builder()
-                .uuid(UUID.randomUUID())
+                .id(UUID.randomUUID())
                 .name("Toast")
                 .build();
 
         final var recipeDto = RecipeDto.from(recipe);
 
-        assertThat(recipeDto.getRecipeId(), is(recipe.getUuid()));
+        assertThat(recipeDto.getRecipeId(), is(recipe.getId()));
         assertThat(recipeDto.getName(), is(recipe.getName()));
     }
 }

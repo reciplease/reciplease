@@ -22,7 +22,7 @@ public class RecipeIngredientDto {
     public static RecipeIngredientDto from(final RecipeIngredient recipeIngredient) {
         final var ingredient = recipeIngredient.getIngredient();
         return RecipeIngredientDto.builder()
-                .ingredientId(ingredient.getUuid())
+                .ingredientId(ingredient.getId())
                 .name(ingredient.getName())
                 .measure(ingredient.getMeasure())
                 .amount(recipeIngredient.getAmount())

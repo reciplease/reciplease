@@ -33,9 +33,9 @@ public class InventoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedItemDto);
     }
 
-    @GetMapping("{uuid}")
-    public ResponseEntity<InventoryItemDto> findById(@PathVariable final UUID uuid) {
-        final Optional<InventoryItemDto> foundItem = inventoryService.findById(uuid)
+    @GetMapping("{inventoryItemId}")
+    public ResponseEntity<InventoryItemDto> findById(@PathVariable final UUID inventoryItemId) {
+        final Optional<InventoryItemDto> foundItem = inventoryService.findById(inventoryItemId)
                 .map(InventoryItemDto::from);
 
         return ResponseEntity.of(foundItem);

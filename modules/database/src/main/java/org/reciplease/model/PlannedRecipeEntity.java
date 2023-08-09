@@ -31,7 +31,7 @@ public class PlannedRecipeEntity extends BaseEntity {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         final PlannedRecipeEntity that = (PlannedRecipeEntity) o;
 
-        return Objects.equals(getUuid(), that.getUuid());
+        return Objects.equals(getId(), that.getId());
     }
 
     @Override

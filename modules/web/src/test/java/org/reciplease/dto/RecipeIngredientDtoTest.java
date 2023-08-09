@@ -18,10 +18,10 @@ class RecipeIngredientDtoTest {
     @DisplayName("create DTO from entity")
     void fromEntity() {
         final var recipe = Recipe.builder()
-                .uuid(UUID.randomUUID())
+                .id(UUID.randomUUID())
                 .build();
         final var ingredient = Ingredient.builder()
-                .uuid(UUID.randomUUID())
+                .id(UUID.randomUUID())
                 .name("Bread")
                 .measure(Measure.ITEMS)
                 .build();
@@ -29,7 +29,7 @@ class RecipeIngredientDtoTest {
 
         final var recipeIngredientDto = RecipeIngredientDto.from(recipeIngredient);
 
-        assertThat(recipeIngredientDto.getIngredientId(), is(ingredient.getUuid()));
+        assertThat(recipeIngredientDto.getIngredientId(), is(ingredient.getId()));
         assertThat(recipeIngredientDto.getName(), is(ingredient.getName()));
         assertThat(recipeIngredientDto.getMeasure(), is(ingredient.getMeasure()));
         assertThat(recipeIngredientDto.getAmount(), is(recipeIngredient.getAmount()));

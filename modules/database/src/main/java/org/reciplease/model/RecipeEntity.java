@@ -35,7 +35,7 @@ public class RecipeEntity extends BaseEntity {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         final RecipeEntity recipe = (RecipeEntity) o;
 
-        return Objects.equals(getUuid(), recipe.getUuid());
+        return Objects.equals(getId(), recipe.getId());
     }
 
     @Override
@@ -46,13 +46,13 @@ public class RecipeEntity extends BaseEntity {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "(" +
-                "uuid = " + getUuid() + ", " +
+                "id = " + getId() + ", " +
                 "name = " + getName() + ")";
     }
 
     public static RecipeEntity from(final Recipe recipe) {
         final RecipeEntity recipeEntity = RecipeEntity.builder()
-                .uuid(recipe.getUuid())
+                .id(recipe.getId())
                 .name(recipe.getName())
                 .build();
         final var recipeIngredientEntities = recipe.getRecipeIngredients().stream()
@@ -66,7 +66,7 @@ public class RecipeEntity extends BaseEntity {
 
     public Recipe toModel() {
         Recipe recipe = Recipe.builder()
-                .uuid(getUuid())
+                .id(getId())
                 .name(getName())
                 .build();
         getRecipeIngredientEntities().stream()

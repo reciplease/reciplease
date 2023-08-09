@@ -20,7 +20,7 @@ import java.util.UUID;
 @JsonInclude(Include.NON_EMPTY)
 public class IngredientDto {
 
-    UUID uuid;
+    UUID ingredientId;
 
     @NotNull
     @NotBlank
@@ -31,7 +31,7 @@ public class IngredientDto {
 
     public static IngredientDto from(Ingredient ingredient) {
         return IngredientDto.builder()
-                .uuid(ingredient.getUuid())
+                .ingredientId(ingredient.getId())
                 .name(ingredient.getName())
                 .measure(ingredient.getMeasure())
                 .build();
@@ -39,7 +39,7 @@ public class IngredientDto {
 
     public Ingredient toModel() {
         return Ingredient.builder()
-                .uuid(getUuid())
+                .id(getIngredientId())
                 .name(getName())
                 .measure(getMeasure())
                 .build();

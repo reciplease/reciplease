@@ -60,7 +60,7 @@ public class RecipeIngredientEntity {
 
     public static RecipeIngredientEntity from(final RecipeEntity recipeEntity, final RecipeIngredient recipeIngredient) {
         final var ingredientEntity = IngredientEntity.from(recipeIngredient.getIngredient());
-        final var recipeIngredientId = new RecipeIngredientIdEntity(recipeEntity.getUuid(), ingredientEntity.getUuid());
+        final var recipeIngredientId = new RecipeIngredientIdEntity(recipeEntity.getId(), ingredientEntity.getId());
         return RecipeIngredientEntity.builder()
                 .id(recipeIngredientId)
                 .recipeEntity(recipeEntity)
