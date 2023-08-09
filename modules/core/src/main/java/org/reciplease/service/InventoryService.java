@@ -30,8 +30,8 @@ public class InventoryService {
         return inventoryRepository.save(updatedItem);
     }
 
-    public Optional<InventoryItem> findById(final UUID uuid) {
-        return inventoryRepository.findById(uuid);
+    public Optional<InventoryItem> findById(final UUID inventoryItemId) {
+        return inventoryRepository.findById(inventoryItemId);
     }
 
     public List<InventoryItem> findAll() {

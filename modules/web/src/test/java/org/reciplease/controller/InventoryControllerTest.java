@@ -100,7 +100,7 @@ class InventoryControllerTest {
 
             when(inventoryService.findById(item.getId())).thenReturn(Optional.of(item));
 
-            mockMvc.perform(get("/api/inventory/{uuid}", item.getId()))
+            mockMvc.perform(get("/api/inventory/{inventoryId}", item.getId()))
                     .andExpect(status().isOk())
                     .andExpect(content().json(itemJson, true));
         }

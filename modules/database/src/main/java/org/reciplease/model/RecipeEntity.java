@@ -46,7 +46,7 @@ public class RecipeEntity extends BaseEntity {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "(" +
-                "uuid = " + getId() + ", " +
+                "id = " + getId() + ", " +
                 "name = " + getName() + ")";
     }
 

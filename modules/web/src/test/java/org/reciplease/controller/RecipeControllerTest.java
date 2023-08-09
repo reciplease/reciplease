@@ -45,10 +45,10 @@ class RecipeControllerTest {
     @Test
     @DisplayName("ID does not exist")
     void noRecipe() throws Exception {
-        final var uuid = UUID.randomUUID();
-        when(recipeService.findById(uuid)).thenReturn(Optional.empty());
+        final var randomId = UUID.randomUUID();
+        when(recipeService.findById(randomId)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/recipes/{uuid}", uuid))
+        mockMvc.perform(get("/api/recipes/{recipeId}", randomId))
                 .andExpect(status().isNotFound());
     }
 
@@ -60,7 +60,7 @@ class RecipeControllerTest {
 
         when(recipeService.findById(soup.getId())).thenReturn(Optional.of(soup));
 
-        mockMvc.perform(get("/api/recipes/{uuid}", soup.getId()))
+        mockMvc.perform(get("/api/recipes/{recipeId}", soup.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(soupDto), true));
     }
@@ -119,7 +119,7 @@ class RecipeControllerTest {
         final var data = "{\"ingredientId\": \"70991766-7944-40c2-be90-20065af3d02b\", \"amount\": 10.0}";
         final var expectedJson = "[{\"ingredientId\": \"70991766-7944-40c2-be90-20065af3d02b\", \"name\": \"tomato\", \"measure\": \"ITEMS\", \"amount\": 10.0}]";
 
-        mockMvc.perform(put("/api/recipes/{uuid}/ingredients", recipe.getId())
+        mockMvc.perform(put("/api/recipes/{recipeId}/ingredients", recipe.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(data))
                 .andExpect(status().isCreated())

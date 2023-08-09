@@ -28,7 +28,7 @@ class InventoryItemDtoTest {
         final var itemDto = InventoryItemDto.from(item);
 
         assertThat(itemDto.getInventoryItemId(), is(item.getId()));
-        assertThat(itemDto.getIngredientUuid(), is(ingredient.getId()));
+        assertThat(itemDto.getIngredientId(), is(ingredient.getId()));
         assertThat(itemDto.getAmount(), is(item.getAmount()));
         assertThat(itemDto.getExpiration(), is(item.getExpiration()));
     }
@@ -38,7 +38,7 @@ class InventoryItemDtoTest {
     void toEntity() {
         final var itemDto = InventoryItemDto.builder()
                 .inventoryItemId(UUID.randomUUID())
-                .ingredientUuid(UUID.randomUUID())
+                .ingredientId(UUID.randomUUID())
                 .amount(10d)
                 .expiration(LocalDate.now())
                 .build();
@@ -46,7 +46,7 @@ class InventoryItemDtoTest {
         final var item = itemDto.toEntity();
 
         assertThat(item.getId(), is(itemDto.getInventoryItemId()));
-        assertThat(item.getIngredient().getId(), is(itemDto.getIngredientUuid()));
+        assertThat(item.getIngredient().getId(), is(itemDto.getIngredientId()));
         assertThat(item.getAmount(), is(itemDto.getAmount()));
         assertThat(item.getExpiration(), is(itemDto.getExpiration()));
     }

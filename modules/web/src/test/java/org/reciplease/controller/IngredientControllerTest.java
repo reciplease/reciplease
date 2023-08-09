@@ -59,7 +59,7 @@ public class IngredientControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.uuid", is(ID.toString())));
+                .andExpect(jsonPath("$.id", is(ID.toString())));
     }
 
     @Test
@@ -89,7 +89,7 @@ public class IngredientControllerTest {
 
         mockMvc.perform(get(API_INGREDIENTS + "/" + ID))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.uuid", is(ID.toString())))
+                .andExpect(jsonPath("$.id", is(ID.toString())))
                 .andExpect(jsonPath("$.name", is(INGREDIENT_NAME)))
                 .andExpect(jsonPath("$.measure", is(MEASURE.toString())));
     }
