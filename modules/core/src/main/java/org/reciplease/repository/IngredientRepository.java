@@ -16,4 +16,6 @@ public interface IngredientRepository {
     List<Ingredient> saveAll(final List<Ingredient> ingredients);
 
     List<Ingredient> searchByName(String searchName);
+
+    void deleteByUuid(UUID uuid);
 }

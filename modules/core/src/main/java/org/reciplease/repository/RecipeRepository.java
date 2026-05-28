@@ -12,4 +12,6 @@ public interface RecipeRepository {
     Recipe save(final Recipe recipe);
 
     Optional<Recipe> findByUuid(final UUID uuid);
+
+    void deleteByUuid(UUID uuid);
 }

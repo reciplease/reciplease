@@ -32,4 +32,9 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     public Optional<Recipe> findByUuid(final UUID uuid) {
         return recipeMongoRepository.findById(uuid).map(RecipeDocument::toModel);
     }
+
+    @Override
+    public void deleteByUuid(final UUID uuid) {
+        recipeMongoRepository.deleteById(uuid);
+    }
 }

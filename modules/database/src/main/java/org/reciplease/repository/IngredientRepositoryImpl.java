@@ -46,4 +46,9 @@ public class IngredientRepositoryImpl implements IngredientRepository {
                 .map(IngredientDocument::toModel)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void deleteByUuid(final UUID uuid) {
+        ingredientMongoRepository.deleteById(uuid);
+    }
 }

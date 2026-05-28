@@ -8,6 +8,7 @@ import org.reciplease.service.RecipeService;
 import org.reciplease.service.request.AddIngredient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,6 +50,12 @@ public class RecipeController {
     public ResponseEntity<RecipeDto> create(@RequestBody final RecipeDto recipeDto) {
         final Recipe recipe = recipeService.create(recipeDto.toEntity());
         return ResponseEntity.status(HttpStatus.CREATED).body(RecipeDto.from(recipe));
+    }
+
+    @DeleteMapping("{uuid}")
+    public ResponseEntity<Void> deleteById(@PathVariable final UUID uuid) {
+        recipeService.deleteById(uuid);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("{uuid}/ingredients")

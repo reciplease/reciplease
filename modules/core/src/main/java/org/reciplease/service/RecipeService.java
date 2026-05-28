@@ -35,6 +35,10 @@ public class RecipeService {
         return recipeRepository.save(recipe);
     }
 
+    public void deleteById(final UUID uuid) {
+        recipeRepository.deleteByUuid(uuid);
+    }
+
     public Set<RecipeIngredient> addIngredient(final UUID recipeUuid, final AddIngredient addIngredient) {
         final var recipe = recipeRepository.findByUuid(recipeUuid)
                 .orElseThrow(() -> new IllegalArgumentException("Recipe does not exist"));
