@@ -2,8 +2,9 @@ package org.reciplease.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.reciplease.model.PlannedRecipe;
-import org.reciplease.model.PlannedRecipeEntity;
-import org.reciplease.repository.jpa.PlannedRecipeJpaRepository;
+import org.reciplease.model.PlannedRecipeDocument;
+import org.reciplease.repository.mongo.PlannedRecipeMongoRepository;
+import org.reciplease.repository.mongo.RecipeMongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -13,17 +14,21 @@ import java.util.stream.Collectors;
 @Repository
 @RequiredArgsConstructor
 public class PlannedRecipeRepositoryImpl implements PlannedRecipeRepository {
-    private final PlannedRecipeJpaRepository plannedRecipeJpaRepository;
+    private final PlannedRecipeMongoRepository plannedRecipeMongoRepository;
+    private final RecipeMongoRepository recipeMongoRepository;
 
     @Override
-    public PlannedRecipe save(PlannedRecipe plannedRecipe) {
-        return plannedRecipeJpaRepository.save(PlannedRecipeEntity.from(plannedRecipe)).toModel();
+    public PlannedRecipe save(final PlannedRecipe plannedRecipe) {
+        final var saved = plannedRecipeMongoRepository.save(PlannedRecipeDocument.from(plannedRecipe));
+        return saved.toModel(plannedRecipe.getRecipe());
     }
 
     @Override
-    public List<PlannedRecipe> findByDateIsBetween(LocalDate start, LocalDate end) {
-        return plannedRecipeJpaRepository.findByDateIsBetween(start, end).stream()
-                .map(PlannedRecipeEntity::toModel)
+    public List<PlannedRecipe> findByDateIsBetween(final LocalDate start, final LocalDate end) {
+        return plannedRecipeMongoRepository.findByDateBetween(start, end).stream()
+                .flatMap(doc -> recipeMongoRepository.findById(doc.getRecipeId())
+                        .map(recipe -> doc.toModel(recipe.toModel()))
+                        .stream())
                 .collect(Collectors.toList());
     }
 }
