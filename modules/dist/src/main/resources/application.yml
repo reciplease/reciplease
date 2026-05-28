@@ -6,9 +6,6 @@ springdoc:
     path: /openapi
 
 spring:
-  jpa:
-    hibernate:
-      naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
   cloud:
     gcp:
       core:

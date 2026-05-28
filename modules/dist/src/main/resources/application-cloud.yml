@@ -7,7 +7,6 @@ spring:
         enabled: true
       secretmanager:
         enabled: true
-  datasource:
-    url: ${sm://reciplease-database-url}
-    username: ${sm://reciplease-database-username}
-    password: ${sm://reciplease-database-password}
+  data:
+    mongodb:
+      uri: ${sm://reciplease-mongodb-uri}

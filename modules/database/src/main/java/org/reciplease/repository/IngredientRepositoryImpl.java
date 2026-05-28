@@ -2,8 +2,8 @@ package org.reciplease.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.reciplease.model.Ingredient;
-import org.reciplease.model.IngredientEntity;
-import org.reciplease.repository.jpa.IngredientJpaRepository;
+import org.reciplease.model.IngredientDocument;
+import org.reciplease.repository.mongo.IngredientMongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,39 +14,36 @@ import java.util.stream.Collectors;
 @Repository
 @RequiredArgsConstructor
 public class IngredientRepositoryImpl implements IngredientRepository {
-    private final IngredientJpaRepository ingredientJpaRepository;
+    private final IngredientMongoRepository ingredientMongoRepository;
 
     @Override
     public List<Ingredient> findAll() {
-        return ingredientJpaRepository.findAll().stream()
-                .map(IngredientEntity::toModel)
+        return ingredientMongoRepository.findAll().stream()
+                .map(IngredientDocument::toModel)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<Ingredient> findByUuid(UUID uuid) {
-        return ingredientJpaRepository.findById(uuid).map(IngredientEntity::toModel);
+    public Optional<Ingredient> findByUuid(final UUID uuid) {
+        return ingredientMongoRepository.findById(uuid).map(IngredientDocument::toModel);
     }
 
     @Override
-    public Ingredient save(Ingredient ingredient) {
-        return ingredientJpaRepository.save(IngredientEntity.from(ingredient)).toModel();
+    public Ingredient save(final Ingredient ingredient) {
+        return ingredientMongoRepository.save(IngredientDocument.from(ingredient)).toModel();
     }
 
     @Override
-    public List<Ingredient> saveAll(List<Ingredient> ingredients) {
-        final var ingredientEntities = ingredients.stream()
-                .map(IngredientEntity::from)
-                .collect(Collectors.toList());
-        return ingredientJpaRepository.saveAll(ingredientEntities).stream()
-                .map(IngredientEntity::toModel)
-                .collect(Collectors.toList());
+    public List<Ingredient> saveAll(final List<Ingredient> ingredients) {
+        return ingredientMongoRepository.saveAll(
+                ingredients.stream().map(IngredientDocument::from).collect(Collectors.toList())
+        ).stream().map(IngredientDocument::toModel).collect(Collectors.toList());
     }
 
     @Override
-    public List<Ingredient> searchByName(String searchName) {
-        return ingredientJpaRepository.findByNameContains(searchName).stream()
-                .map(IngredientEntity::toModel)
+    public List<Ingredient> searchByName(final String searchName) {
+        return ingredientMongoRepository.findByNameContainingIgnoreCase(searchName).stream()
+                .map(IngredientDocument::toModel)
                 .collect(Collectors.toList());
     }
 }
