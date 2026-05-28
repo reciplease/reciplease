@@ -1,4 +1,5 @@
 #!/usr/bin/env make
+SHELL := /bin/bash
 
 RECIPLEASE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 RECIPLEASE_NAME := Reciplease (Backend)
@@ -40,7 +41,7 @@ run: postgres
 .PHONY: config #: Create config file based on ENV variable.
 config: config/.env.${ENV}
 config/.env.%:
-	@cp -n config/.env.example config/.env.${ENV}
+	@cp --update=none config/.env.example config/.env.${ENV} 2>/dev/null || cp -n config/.env.example config/.env.${ENV}
 
 .PHONY: init #: Download Maven dependencies.
 init:
