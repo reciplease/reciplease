@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Value;
 import org.reciplease.model.Recipe;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -16,6 +17,8 @@ public class RecipeDto {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     UUID recipeId;
     String name;
+    String description;
+    List<String> steps;
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     Set<RecipeIngredientDto> ingredients;
 
@@ -23,6 +26,8 @@ public class RecipeDto {
         return RecipeDto.builder()
                 .recipeId(recipe.getUuid())
                 .name(recipe.getName())
+                .description(recipe.getDescription())
+                .steps(recipe.getSteps())
                 .ingredients(recipe.getRecipeIngredients().stream()
                         .map(RecipeIngredientDto::from)
                         .collect(Collectors.toSet()))
@@ -33,6 +38,8 @@ public class RecipeDto {
         return Recipe.builder()
                 .uuid(this.recipeId)
                 .name(this.name)
+                .description(this.description)
+                .steps(this.steps)
                 .build();
     }
 }

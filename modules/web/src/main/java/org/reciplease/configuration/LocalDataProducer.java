@@ -53,6 +53,12 @@ public class LocalDataProducer implements ApplicationRunner {
 
         final var toast = recipeRepository.save(Recipe.builder()
                 .name("Toast")
+                .description("A staple and classic")
+                .steps(List.of(
+                        "Toast the bread",
+                        "Optionally: Wait for toast to cool down",
+                        "Spread butter on toast"
+                ))
                 .build());
 
         toast.addIngredient(bread, 1d);

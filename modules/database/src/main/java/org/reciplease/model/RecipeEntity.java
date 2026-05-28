@@ -1,8 +1,13 @@
 package org.reciplease.model;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderColumn;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,7 +15,9 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.Hibernate;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -24,6 +31,14 @@ import static java.util.stream.Collectors.toSet;
 public class RecipeEntity extends BaseEntity {
     
     private String name;
+    private String description;
+
+    @ElementCollection
+    @CollectionTable(name = "recipe_steps", joinColumns = @JoinColumn(name = "recipe_uuid"))
+    @Column(name = "step")
+    @OrderColumn(name = "step_order")
+    @Builder.Default
+    private List<String> steps = new ArrayList<>();
 
     @OneToMany(mappedBy = "recipeEntity", cascade = CascadeType.ALL)
     @Builder.Default
@@ -54,6 +69,8 @@ public class RecipeEntity extends BaseEntity {
         final RecipeEntity recipeEntity = RecipeEntity.builder()
                 .uuid(recipe.getUuid())
                 .name(recipe.getName())
+                .description(recipe.getDescription())
+                .steps(recipe.getSteps())
                 .build();
         final var recipeIngredientEntities = recipe.getRecipeIngredients().stream()
                 .map(recipeIngredient -> RecipeIngredientEntity.from(recipeEntity, recipeIngredient))
@@ -68,6 +85,8 @@ public class RecipeEntity extends BaseEntity {
         Recipe recipe = Recipe.builder()
                 .uuid(getUuid())
                 .name(getName())
+                .description(getDescription())
+                .steps(getSteps())
                 .build();
         getRecipeIngredientEntities().stream()
                 .map(RecipeIngredientEntity::toModel)
