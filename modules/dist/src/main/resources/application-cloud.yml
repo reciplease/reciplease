@@ -9,4 +9,4 @@ spring:
         enabled: true
   data:
     mongodb:
-      uri: ${sm://reciplease-mongodb-uri}
+      uri: ${sm://reciplease-database-url}
