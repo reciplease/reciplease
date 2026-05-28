@@ -8,6 +8,7 @@ import org.reciplease.model.Ingredient;
 import org.reciplease.repository.IngredientRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,6 +49,12 @@ public class IngredientController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.status(HttpStatus.OK).body(ingredients);
+    }
+
+    @DeleteMapping("{uuid}")
+    public ResponseEntity<Void> deleteById(@PathVariable final UUID uuid) {
+        ingredientRepository.deleteByUuid(uuid);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/search/{searchName}")
