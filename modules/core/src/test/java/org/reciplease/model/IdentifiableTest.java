@@ -4,8 +4,6 @@ import lombok.experimental.SuperBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -16,14 +14,14 @@ class IdentifiableTest {
     }
 
     @Test
-    @DisplayName("should set UUID through builder")
-    void setUuid() {
-        final UUID uuid = UUID.randomUUID();
+    @DisplayName("should set id through builder")
+    void setId() {
+        final String id = "5f8d04b3d3b9a72b8c7e1a4f";
 
         final TestModel model = TestModel.builder()
-                .uuid(uuid)
+                .id(id)
                 .build();
 
-        assertThat(model.getUuid(), is(uuid));
+        assertThat(model.getId(), is(id));
     }
 }

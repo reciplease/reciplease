@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
 import org.reciplease.model.Ingredient;
-import org.reciplease.model.Measure;
 
 
 @Value
@@ -17,7 +16,7 @@ public class IngredientRequest {
     String name;
 
     @NotNull
-    Measure measure;
+    String measure;
 
     public Ingredient toModel() {
         return Ingredient.builder()

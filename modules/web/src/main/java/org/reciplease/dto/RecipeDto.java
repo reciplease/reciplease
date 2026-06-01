@@ -7,7 +7,6 @@ import org.reciplease.model.Recipe;
 
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Value
@@ -15,7 +14,7 @@ import java.util.stream.Collectors;
 public class RecipeDto {
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-    UUID recipeId;
+    String recipeId;
     String name;
     String description;
     List<String> steps;
@@ -24,7 +23,7 @@ public class RecipeDto {
 
     public static RecipeDto from(final Recipe recipe) {
         return RecipeDto.builder()
-                .recipeId(recipe.getUuid())
+                .recipeId(recipe.getId())
                 .name(recipe.getName())
                 .description(recipe.getDescription())
                 .steps(recipe.getSteps())
@@ -36,7 +35,7 @@ public class RecipeDto {
 
     public Recipe toEntity() {
         return Recipe.builder()
-                .uuid(this.recipeId)
+                .id(this.recipeId)
                 .name(this.name)
                 .description(this.description)
                 .steps(this.steps)

@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -32,7 +31,7 @@ public class RecipeController {
     private final RecipeService recipeService;
 
     @GetMapping("{uuid}")
-    public ResponseEntity<RecipeDto> findById(@PathVariable final UUID uuid) {
+    public ResponseEntity<RecipeDto> findById(@PathVariable final String uuid) {
         final var optionalRecipe = recipeService.findById(uuid)
                 .map(RecipeDto::from);
         return ResponseEntity.of(optionalRecipe);
@@ -53,13 +52,13 @@ public class RecipeController {
     }
 
     @DeleteMapping("{uuid}")
-    public ResponseEntity<Void> deleteById(@PathVariable final UUID uuid) {
+    public ResponseEntity<Void> deleteById(@PathVariable final String uuid) {
         recipeService.deleteById(uuid);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("{uuid}/ingredients")
-    public ResponseEntity<Set<RecipeIngredientDto>> addIngredient(@PathVariable final UUID uuid, @RequestBody final AddIngredient addIngredient) {
+    public ResponseEntity<Set<RecipeIngredientDto>> addIngredient(@PathVariable final String uuid, @RequestBody final AddIngredient addIngredient) {
         final var recipeIngredients = recipeService.addIngredient(uuid, addIngredient).stream()
                 .map(RecipeIngredientDto::from)
                 .collect(Collectors.toSet());

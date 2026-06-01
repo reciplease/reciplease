@@ -16,7 +16,7 @@ class RecipeDtoTest {
     @DisplayName("create DTO from entity")
     void fromEntity() {
         final var recipe = Recipe.builder()
-                .uuid(UUID.randomUUID())
+                .id(UUID.randomUUID().toString())
                 .name("Toast")
                 .description("A staple and classic")
                 .steps(List.of("Toast the bread", "Spread butter on toast"))
@@ -24,7 +24,7 @@ class RecipeDtoTest {
 
         final var recipeDto = RecipeDto.from(recipe);
 
-        assertThat(recipeDto.getRecipeId(), is(recipe.getUuid()));
+        assertThat(recipeDto.getRecipeId(), is(recipe.getId()));
         assertThat(recipeDto.getName(), is(recipe.getName()));
         assertThat(recipeDto.getDescription(), is(recipe.getDescription()));
         assertThat(recipeDto.getSteps(), is(recipe.getSteps()));
@@ -34,7 +34,7 @@ class RecipeDtoTest {
     @DisplayName("description and steps default to null when not set")
     void fromEntityDefaults() {
         final var recipe = Recipe.builder()
-                .uuid(UUID.randomUUID())
+                .id(UUID.randomUUID().toString())
                 .name("Toast")
                 .build();
 

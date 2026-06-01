@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Repository
@@ -29,12 +28,12 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
-    public Optional<Recipe> findByUuid(final UUID uuid) {
-        return recipeMongoRepository.findById(uuid).map(RecipeDocument::toModel);
+    public Optional<Recipe> findById(final String id) {
+        return recipeMongoRepository.findById(id).map(RecipeDocument::toModel);
     }
 
     @Override
-    public void deleteByUuid(final UUID uuid) {
-        recipeMongoRepository.deleteById(uuid);
+    public void deleteById(final String id) {
+        recipeMongoRepository.deleteById(id);
     }
 }

@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,8 +20,8 @@ public class RecipeService {
     private final RecipeRepository recipeRepository;
     private final IngredientRepository ingredientRepository;
 
-    public Optional<Recipe> findById(final UUID uuid) {
-        return recipeRepository.findByUuid(uuid);
+    public Optional<Recipe> findById(final String id) {
+        return recipeRepository.findById(id);
     }
 
     public List<Recipe> findAll() {
@@ -35,14 +34,14 @@ public class RecipeService {
         return recipeRepository.save(recipe);
     }
 
-    public void deleteById(final UUID uuid) {
-        recipeRepository.deleteByUuid(uuid);
+    public void deleteById(final String id) {
+        recipeRepository.deleteById(id);
     }
 
-    public Set<RecipeIngredient> addIngredient(final UUID recipeUuid, final AddIngredient addIngredient) {
-        final var recipe = recipeRepository.findByUuid(recipeUuid)
+    public Set<RecipeIngredient> addIngredient(final String recipeId, final AddIngredient addIngredient) {
+        final var recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new IllegalArgumentException("Recipe does not exist"));
-        final var ingredient = ingredientRepository.findByUuid(addIngredient.getIngredientId())
+        final var ingredient = ingredientRepository.findById(addIngredient.getIngredientId())
                 .orElseThrow(() -> new IllegalArgumentException("Ingredient does not exist"));
 
         recipe.addIngredient(ingredient, addIngredient.getAmount());

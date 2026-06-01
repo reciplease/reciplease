@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Repository
@@ -18,8 +17,8 @@ public class InventoryRepositoryImpl implements InventoryRepository {
     private final InventoryMongoRepository inventoryMongoRepository;
 
     @Override
-    public Optional<InventoryItem> findByUuid(final UUID uuid) {
-        return inventoryMongoRepository.findById(uuid).map(InventoryItemDocument::toModel);
+    public Optional<InventoryItem> findById(final String id) {
+        return inventoryMongoRepository.findById(id).map(InventoryItemDocument::toModel);
     }
 
     @Override

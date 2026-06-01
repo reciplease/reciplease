@@ -1,9 +1,12 @@
 package org.reciplease.model;
 
-public enum Measure {
-    ITEMS,
-    KILOGRAMS,
-    GRAMS,
-    LITRES,
-    MILLILITRES
+import lombok.Builder;
+import lombok.Value;
+
+@Value
+@Builder
+public class Measure {
+    String measureId;
+    String singular;
+    String plural;
 }

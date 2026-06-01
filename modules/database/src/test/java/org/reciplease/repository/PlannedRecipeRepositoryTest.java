@@ -1,11 +1,13 @@
 package org.reciplease.repository;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.PlannedRecipe;
 import org.reciplease.model.Recipe;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,13 +17,20 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 
-@DataJpaTest
+@DataMongoTest
 @Import({PlannedRecipeRepositoryImpl.class, RecipeRepositoryImpl.class})
 public class PlannedRecipeRepositoryTest {
     @Autowired
     private PlannedRecipeRepository plannedRecipeRepository;
     @Autowired
     private RecipeRepository recipeRepository;
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @BeforeEach
+    void cleanDatabase() {
+        mongoTemplate.getCollectionNames().forEach(mongoTemplate::dropCollection);
+    }
 
     @Test
     public void shouldReturnPlannedRecipesByDate() {

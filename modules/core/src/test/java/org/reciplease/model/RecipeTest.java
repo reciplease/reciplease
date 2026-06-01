@@ -25,7 +25,7 @@ class RecipeTest {
     void addIngredient() {
         final Ingredient ingredient = Ingredient.builder()
                 .name("tomato")
-                .measure(Measure.ITEMS)
+                .measure("ITEMS")
                 .build();
 
         final Recipe recipe = Recipe.builder()
@@ -45,11 +45,11 @@ class RecipeTest {
     void removeIngredient() {
         final Ingredient tomato = Ingredient.builder()
                 .name("tomato")
-                .measure(Measure.ITEMS)
+                .measure("ITEMS")
                 .build();
         final Ingredient bread = Ingredient.builder()
                 .name("bread")
-                .measure(Measure.ITEMS)
+                .measure("ITEMS")
                 .build();
 
         final Recipe recipe = Recipe.builder()
@@ -66,7 +66,7 @@ class RecipeTest {
     void fluentApi() {
         final Ingredient ingredient = Ingredient.builder()
                 .name("tomato")
-                .measure(Measure.ITEMS)
+                .measure("ITEMS")
                 .build();
 
         final Recipe recipe = Recipe.builder()

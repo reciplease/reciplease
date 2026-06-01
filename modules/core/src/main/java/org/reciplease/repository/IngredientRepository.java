@@ -4,18 +4,17 @@ import org.reciplease.model.Ingredient;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface IngredientRepository {
     List<Ingredient> findAll();
 
-    Optional<Ingredient> findByUuid(final UUID uuid);
+    Optional<Ingredient> findById(String id);
 
-    Ingredient save(final Ingredient ingredient);
+    Ingredient save(Ingredient ingredient);
 
-    List<Ingredient> saveAll(final List<Ingredient> ingredients);
+    List<Ingredient> saveAll(List<Ingredient> ingredients);
 
     List<Ingredient> searchByName(String searchName);
 
-    void deleteByUuid(UUID uuid);
+    void deleteById(String id);
 }

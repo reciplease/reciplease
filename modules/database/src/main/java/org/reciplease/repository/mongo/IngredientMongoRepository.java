@@ -4,8 +4,7 @@ import org.reciplease.model.IngredientDocument;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
-import java.util.UUID;
 
-public interface IngredientMongoRepository extends MongoRepository<IngredientDocument, UUID> {
+public interface IngredientMongoRepository extends MongoRepository<IngredientDocument, String> {
     List<IngredientDocument> findByNameContainingIgnoreCase(String name);
 }

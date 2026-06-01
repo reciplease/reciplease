@@ -5,22 +5,20 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 @Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class RecipeIngredientDocument {
 
-    private UUID ingredientId;
+    private String ingredientId;
     private String name;
-    private Measure measure;
+    private String measure;
     private Double amount;
 
     public static RecipeIngredientDocument from(final RecipeIngredient recipeIngredient) {
         return RecipeIngredientDocument.builder()
-                .ingredientId(recipeIngredient.getIngredient().getUuid())
+                .ingredientId(recipeIngredient.getIngredient().getId())
                 .name(recipeIngredient.getIngredient().getName())
                 .measure(recipeIngredient.getIngredient().getMeasure())
                 .amount(recipeIngredient.getAmount())
@@ -29,7 +27,7 @@ public class RecipeIngredientDocument {
 
     public RecipeIngredient toModel() {
         final Ingredient ingredient = Ingredient.builder()
-                .uuid(ingredientId)
+                .id(ingredientId)
                 .name(name)
                 .measure(measure)
                 .build();

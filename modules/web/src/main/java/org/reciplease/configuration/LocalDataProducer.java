@@ -7,6 +7,7 @@ import org.reciplease.model.Measure;
 import org.reciplease.model.Recipe;
 import org.reciplease.repository.IngredientRepository;
 import org.reciplease.repository.InventoryRepository;
+import org.reciplease.repository.MeasureRepository;
 import org.reciplease.repository.RecipeRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -25,21 +26,33 @@ public class LocalDataProducer implements ApplicationRunner {
     final IngredientRepository ingredientRepository;
     final InventoryRepository inventoryRepository;
     final RecipeRepository recipeRepository;
+    final MeasureRepository measureRepository;
 
     @Override
     public void run(final ApplicationArguments args) {
+        measureRepository.saveAll(List.of(
+                Measure.builder().measureId("ITEMS").singular("item").plural("items").build(),
+                Measure.builder().measureId("PIECES").singular("piece").plural("pieces").build(),
+                Measure.builder().measureId("KILOGRAMS").singular("kilogram").plural("kilograms").build(),
+                Measure.builder().measureId("GRAMS").singular("gram").plural("grams").build(),
+                Measure.builder().measureId("LITRES").singular("litre").plural("litres").build(),
+                Measure.builder().measureId("MILLILITRES").singular("millilitre").plural("millilitres").build(),
+                Measure.builder().measureId("tbsp").singular("tbsp").plural("tbsp").build(),
+                Measure.builder().measureId("tsp").singular("tsp").plural("tsp").build()
+        ));
+
         final var ingredients = ingredientRepository.saveAll(List.of(
                 Ingredient.builder()
                         .name("milk")
-                        .measure(Measure.MILLILITRES)
+                        .measure("MILLILITRES")
                         .build(),
                 Ingredient.builder()
                         .name("eggs")
-                        .measure(Measure.ITEMS)
+                        .measure("ITEMS")
                         .build(),
                 Ingredient.builder()
                         .name("bread")
-                        .measure(Measure.ITEMS)
+                        .measure("ITEMS")
                         .build()
         ));
 

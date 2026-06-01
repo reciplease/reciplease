@@ -5,12 +5,11 @@ import org.reciplease.model.InventoryItem;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface InventoryRepository {
-    Optional<InventoryItem> findByUuid(final UUID uuid);
+    Optional<InventoryItem> findById(String id);
 
-    InventoryItem save(final InventoryItem item);
+    InventoryItem save(InventoryItem item);
 
     List<InventoryItem> findAll();
 

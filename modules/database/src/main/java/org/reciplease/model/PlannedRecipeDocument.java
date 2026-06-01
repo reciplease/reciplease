@@ -8,7 +8,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Document("planned_recipes")
 @Builder
@@ -18,14 +17,13 @@ import java.util.UUID;
 public class PlannedRecipeDocument {
 
     @Id
-    private UUID uuid;
-    private UUID recipeId;
+    private String id;
+    private String recipeId;
     private LocalDate date;
 
     public static PlannedRecipeDocument from(final PlannedRecipe plannedRecipe) {
         return PlannedRecipeDocument.builder()
-                .uuid(UUID.randomUUID())
-                .recipeId(plannedRecipe.getRecipe().getUuid())
+                .recipeId(plannedRecipe.getRecipe().getId())
                 .date(plannedRecipe.getDate())
                 .build();
     }

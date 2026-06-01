@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
 
@@ -34,7 +33,7 @@ public class InventoryController {
     }
 
     @GetMapping("{uuid}")
-    public ResponseEntity<InventoryItemDto> findById(@PathVariable final UUID uuid) {
+    public ResponseEntity<InventoryItemDto> findById(@PathVariable final String uuid) {
         final Optional<InventoryItemDto> foundItem = inventoryService.findById(uuid)
                 .map(InventoryItemDto::from);
 
