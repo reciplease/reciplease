@@ -4,14 +4,13 @@ import org.reciplease.model.Recipe;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface RecipeRepository {
     List<Recipe> findAll();
 
-    Recipe save(final Recipe recipe);
+    Recipe save(Recipe recipe);
 
-    Optional<Recipe> findByUuid(final UUID uuid);
+    Optional<Recipe> findById(String id);
 
-    void deleteByUuid(UUID uuid);
+    void deleteById(String id);
 }

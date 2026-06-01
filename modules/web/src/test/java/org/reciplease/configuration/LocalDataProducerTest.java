@@ -9,6 +9,7 @@ import org.reciplease.model.InventoryItem;
 import org.reciplease.model.Recipe;
 import org.reciplease.repository.IngredientRepository;
 import org.reciplease.repository.InventoryRepository;
+import org.reciplease.repository.MeasureRepository;
 import org.reciplease.repository.RecipeRepository;
 
 import java.util.List;
@@ -26,6 +27,8 @@ public class LocalDataProducerTest {
     private InventoryRepository inventoryRepository;
     @Mock
     private RecipeRepository recipeRepository;
+    @Mock
+    private MeasureRepository measureRepository;
     @InjectMocks
     private LocalDataProducer localDataProducer;
 

@@ -3,7 +3,6 @@ package org.reciplease.dto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.Ingredient;
-import org.reciplease.model.Measure;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
 
@@ -18,18 +17,18 @@ class RecipeIngredientDtoTest {
     @DisplayName("create DTO from entity")
     void fromEntity() {
         final var recipe = Recipe.builder()
-                .uuid(UUID.randomUUID())
+                .id(UUID.randomUUID().toString())
                 .build();
         final var ingredient = Ingredient.builder()
-                .uuid(UUID.randomUUID())
+                .id(UUID.randomUUID().toString())
                 .name("Bread")
-                .measure(Measure.ITEMS)
+                .measure("ITEMS")
                 .build();
         final var recipeIngredient = new RecipeIngredient(ingredient, 1d);
 
         final var recipeIngredientDto = RecipeIngredientDto.from(recipeIngredient);
 
-        assertThat(recipeIngredientDto.getIngredientId(), is(ingredient.getUuid()));
+        assertThat(recipeIngredientDto.getIngredientId(), is(ingredient.getId()));
         assertThat(recipeIngredientDto.getName(), is(ingredient.getName()));
         assertThat(recipeIngredientDto.getMeasure(), is(ingredient.getMeasure()));
         assertThat(recipeIngredientDto.getAmount(), is(recipeIngredient.getAmount()));

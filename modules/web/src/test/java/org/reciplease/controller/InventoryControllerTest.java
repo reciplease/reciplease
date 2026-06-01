@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.Ingredient;
 import org.reciplease.model.InventoryItem;
-import org.reciplease.model.Measure;
 import org.reciplease.service.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -19,7 +18,6 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,7 +42,7 @@ class InventoryControllerTest {
     @DisplayName("should create inventory item")
     void shouldCreateInventoryItem() throws Exception {
         final var mockRequestIngredient = Ingredient.builder()
-                .uuid(UUID.fromString("f3aa25a0-5716-4c7d-add5-164396f192fa"))
+                .id("f3aa25a0-5716-4c7d-add5-164396f192fa")
                 .build();
         final var mockRequestItem = InventoryItem.builder()
                 .ingredient(mockRequestIngredient)
@@ -53,10 +51,10 @@ class InventoryControllerTest {
                 .build();
         final var mockResponseIngredient = mockRequestIngredient.toBuilder()
                 .name("bread")
-                .measure(Measure.ITEMS)
+                .measure("ITEMS")
                 .build();
         final var mockResponseItem = mockRequestItem.toBuilder()
-                .uuid(UUID.fromString("b465af6e-2465-4436-84c1-14f35db68dbf"))
+                .id("b465af6e-2465-4436-84c1-14f35db68dbf")
                 .ingredient(mockResponseIngredient)
                 .build();
 
@@ -82,11 +80,11 @@ class InventoryControllerTest {
         @BeforeEach
         void setUp() {
             item = InventoryItem.builder()
-                    .uuid(UUID.fromString("b465af6e-2465-4436-84c1-14f35db68dbf"))
+                    .id("b465af6e-2465-4436-84c1-14f35db68dbf")
                     .ingredient(Ingredient.builder()
-                            .uuid(UUID.fromString("f3aa25a0-5716-4c7d-add5-164396f192fa"))
+                            .id("f3aa25a0-5716-4c7d-add5-164396f192fa")
                             .name("bread")
-                            .measure(Measure.ITEMS)
+                            .measure("ITEMS")
                             .build())
                     .amount(20d)
                     .expiration(LocalDate.of(2020, Month.JANUARY, 1))
@@ -98,9 +96,9 @@ class InventoryControllerTest {
         void findById() throws Exception {
             final String itemJson = readTestResource(WithItem.class, "item.json");
 
-            when(inventoryService.findById(item.getUuid())).thenReturn(Optional.of(item));
+            when(inventoryService.findById(item.getId())).thenReturn(Optional.of(item));
 
-            mockMvc.perform(get("/api/inventory/{uuid}", item.getUuid()))
+            mockMvc.perform(get("/api/inventory/{uuid}", item.getId()))
                     .andExpect(status().isOk())
                     .andExpect(content().json(itemJson, true));
         }

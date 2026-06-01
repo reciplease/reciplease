@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -29,15 +28,16 @@ public class IngredientController {
     final IngredientRepository ingredientRepository;
 
     @PostMapping
-    public ResponseEntity<Ingredient> create(@Valid @RequestBody final IngredientRequest ingredientRequest) {
+    public ResponseEntity<IngredientDto> create(@Valid @RequestBody final IngredientRequest ingredientRequest) {
         final Ingredient savedIngredient = ingredientRepository.save(ingredientRequest.toModel());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedIngredient);
+        return ResponseEntity.status(HttpStatus.CREATED).body(IngredientDto.from(savedIngredient));
     }
 
     @GetMapping("{uuid}")
-    public ResponseEntity<Ingredient> findById(@PathVariable final UUID uuid) {
-        final Optional<Ingredient> foundIngredient = ingredientRepository.findByUuid(uuid);
+    public ResponseEntity<IngredientDto> findById(@PathVariable final String uuid) {
+        final Optional<IngredientDto> foundIngredient = ingredientRepository.findById(uuid)
+                .map(IngredientDto::from);
 
         return ResponseEntity.of(foundIngredient);
     }
@@ -52,8 +52,8 @@ public class IngredientController {
     }
 
     @DeleteMapping("{uuid}")
-    public ResponseEntity<Void> deleteById(@PathVariable final UUID uuid) {
-        ingredientRepository.deleteByUuid(uuid);
+    public ResponseEntity<Void> deleteById(@PathVariable final String uuid) {
+        ingredientRepository.deleteById(uuid);
         return ResponseEntity.noContent().build();
     }
 

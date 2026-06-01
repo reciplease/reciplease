@@ -1,6 +1,8 @@
 package org.reciplease.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.reciplease.model.Measure;
+import org.reciplease.repository.MeasureRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,10 +13,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/measures")
+@RequiredArgsConstructor
 public class MeasureController {
+
+    private final MeasureRepository measureRepository;
 
     @GetMapping
     public ResponseEntity<List<Measure>> findAll() {
-        return ResponseEntity.status(HttpStatus.OK).body(List.of(Measure.values()));
+        return ResponseEntity.status(HttpStatus.OK).body(measureRepository.findAll());
     }
 }

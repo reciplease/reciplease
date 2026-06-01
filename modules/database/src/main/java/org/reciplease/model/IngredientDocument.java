@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.UUID;
-
 @Document("ingredients")
 @Builder
 @Getter
@@ -17,13 +15,13 @@ import java.util.UUID;
 public class IngredientDocument {
 
     @Id
-    private UUID uuid;
+    private String id;
     private String name;
-    private Measure measure;
+    private String measure;
 
     public static IngredientDocument from(final Ingredient ingredient) {
         return IngredientDocument.builder()
-                .uuid(ingredient.getUuid() != null ? ingredient.getUuid() : UUID.randomUUID())
+                .id(ingredient.getId())
                 .name(ingredient.getName())
                 .measure(ingredient.getMeasure())
                 .build();
@@ -31,7 +29,7 @@ public class IngredientDocument {
 
     public Ingredient toModel() {
         return Ingredient.builder()
-                .uuid(uuid)
+                .id(id)
                 .name(name)
                 .measure(measure)
                 .build();

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.reciplease.dto.IngredientDto;
 import org.reciplease.model.Ingredient;
-import org.reciplease.model.Measure;
 import org.reciplease.repository.IngredientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -32,9 +31,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class IngredientControllerTest {
 
     private static final String API_INGREDIENTS = "/api/ingredients";
-    private static final UUID ID = UUID.randomUUID();
+    private static final String ID = "5f8d04b3d3b9a72b8c7e1a4f";
     private static final String INGREDIENT_NAME = "ingredient name";
-    private static final Measure MEASURE = Measure.GRAMS;
+    private static final String MEASURE = "GRAMS";
 
     @MockBean
     IngredientRepository ingredientRepository;
@@ -48,10 +47,10 @@ public class IngredientControllerTest {
     public void shouldCreateIngredient() throws Exception {
         final Ingredient ingredient = Ingredient.builder()
                 .name(INGREDIENT_NAME)
-                .measure(Measure.KILOGRAMS)
+                .measure("KILOGRAMS")
                 .build();
 
-        when(ingredientRepository.save(any(Ingredient.class))).then(invocation -> invocation.getArgument(0, Ingredient.class).toBuilder().uuid(ID).build());
+        when(ingredientRepository.save(any(Ingredient.class))).then(invocation -> invocation.getArgument(0, Ingredient.class).toBuilder().id(ID).build());
 
         final String json = mapper.writeValueAsString(ingredient);
 
@@ -59,7 +58,7 @@ public class IngredientControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.uuid", is(ID.toString())));
+                .andExpect(jsonPath("$.uuid", is(ID)));
     }
 
     @Test
@@ -80,23 +79,23 @@ public class IngredientControllerTest {
     @Test
     public void shouldGetIngredientById() throws Exception {
         final Ingredient ingredient = Ingredient.builder()
-                .uuid(ID)
+                .id(ID)
                 .name(INGREDIENT_NAME)
                 .measure(MEASURE)
                 .build();
 
-        when(ingredientRepository.findByUuid(ID)).thenReturn(Optional.of(ingredient));
+        when(ingredientRepository.findById(ID)).thenReturn(Optional.of(ingredient));
 
         mockMvc.perform(get(API_INGREDIENTS + "/" + ID))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.uuid", is(ID.toString())))
+                .andExpect(jsonPath("$.uuid", is(ID)))
                 .andExpect(jsonPath("$.name", is(INGREDIENT_NAME)))
-                .andExpect(jsonPath("$.measure", is(MEASURE.toString())));
+                .andExpect(jsonPath("$.measure", is(MEASURE)));
     }
 
     @Test
     public void shouldNotGetIngredient_notFound() throws Exception {
-        when(ingredientRepository.findByUuid(ID)).thenReturn(Optional.empty());
+        when(ingredientRepository.findById(ID)).thenReturn(Optional.empty());
 
         mockMvc.perform(get(API_INGREDIENTS + "/" + ID))
                 .andExpect(status().isNotFound());
@@ -105,12 +104,12 @@ public class IngredientControllerTest {
     @Test
     public void shouldGetAllIngredients() throws Exception {
         final var ingredientDto = IngredientDto.builder()
-                .uuid(UUID.randomUUID())
+                .uuid(UUID.randomUUID().toString())
                 .name(INGREDIENT_NAME)
                 .measure(MEASURE)
                 .build();
         final var ingredientDto2 = IngredientDto.builder()
-                .uuid(UUID.randomUUID())
+                .uuid(UUID.randomUUID().toString())
                 .name(INGREDIENT_NAME + "2")
                 .measure(MEASURE)
                 .build();

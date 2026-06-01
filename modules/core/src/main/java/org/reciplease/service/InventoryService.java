@@ -10,7 +10,6 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +19,7 @@ public class InventoryService {
     private final Clock clock;
 
     public InventoryItem save(final InventoryItem item) {
-        final var ingredient = ingredientRepository.findByUuid(item.getIngredient().getUuid())
+        final var ingredient = ingredientRepository.findById(item.getIngredient().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Ingredient does not exist"));
 
         final InventoryItem updatedItem = item.toBuilder()
@@ -30,8 +29,8 @@ public class InventoryService {
         return inventoryRepository.save(updatedItem);
     }
 
-    public Optional<InventoryItem> findById(final UUID uuid) {
-        return inventoryRepository.findByUuid(uuid);
+    public Optional<InventoryItem> findById(final String id) {
+        return inventoryRepository.findById(id);
     }
 
     public List<InventoryItem> findAll() {

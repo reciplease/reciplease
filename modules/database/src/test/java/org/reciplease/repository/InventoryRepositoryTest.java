@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.Ingredient;
 import org.reciplease.model.InventoryItem;
-import org.reciplease.model.Measure;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -16,13 +16,20 @@ import java.time.Month;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 
-@DataJpaTest
+@DataMongoTest
 @Import({IngredientRepositoryImpl.class, InventoryRepositoryImpl.class})
 class InventoryRepositoryTest {
     @Autowired
     private IngredientRepository ingredientRepository;
     @Autowired
     private InventoryRepository inventoryRepository;
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @BeforeEach
+    void cleanDatabase() {
+        mongoTemplate.getCollectionNames().forEach(mongoTemplate::dropCollection);
+    }
 
     @Nested
     class WithSlicesOfBread {
@@ -38,7 +45,7 @@ class InventoryRepositoryTest {
 
             final Ingredient bread = ingredientRepository.save(Ingredient.builder()
                     .name("bread")
-                    .measure(Measure.ITEMS)
+                    .measure("ITEMS")
                     .build());
 
             final var sliceOfBreadBuilder = InventoryItem.builder()

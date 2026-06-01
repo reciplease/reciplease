@@ -9,9 +9,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.reciplease.model.Ingredient;
-import org.reciplease.model.Measure;
-
-import java.util.UUID;
 
 @Builder
 @Data
@@ -20,18 +17,18 @@ import java.util.UUID;
 @JsonInclude(Include.NON_EMPTY)
 public class IngredientDto {
 
-    UUID uuid;
+    String uuid;
 
     @NotNull
     @NotBlank
     String name;
 
     @NotNull
-    Measure measure;
+    String measure;
 
     public static IngredientDto from(Ingredient ingredient) {
         return IngredientDto.builder()
-                .uuid(ingredient.getUuid())
+                .uuid(ingredient.getId())
                 .name(ingredient.getName())
                 .measure(ingredient.getMeasure())
                 .build();
@@ -39,7 +36,7 @@ public class IngredientDto {
 
     public Ingredient toModel() {
         return Ingredient.builder()
-                .uuid(getUuid())
+                .id(getUuid())
                 .name(getName())
                 .measure(getMeasure())
                 .build();

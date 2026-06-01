@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Document("recipes")
@@ -20,7 +19,7 @@ import java.util.stream.Collectors;
 public class RecipeDocument {
 
     @Id
-    private UUID uuid;
+    private String id;
     private String name;
     private String description;
     @Builder.Default
@@ -30,7 +29,7 @@ public class RecipeDocument {
 
     public static RecipeDocument from(final Recipe recipe) {
         return RecipeDocument.builder()
-                .uuid(recipe.getUuid() != null ? recipe.getUuid() : UUID.randomUUID())
+                .id(recipe.getId())
                 .name(recipe.getName())
                 .description(recipe.getDescription())
                 .steps(recipe.getSteps() != null ? recipe.getSteps() : new ArrayList<>())
@@ -42,7 +41,7 @@ public class RecipeDocument {
 
     public Recipe toModel() {
         Recipe recipe = Recipe.builder()
-                .uuid(uuid)
+                .id(id)
                 .name(name)
                 .description(description)
                 .steps(steps != null ? steps : new ArrayList<>())

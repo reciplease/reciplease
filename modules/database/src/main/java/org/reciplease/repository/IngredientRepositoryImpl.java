@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Repository
@@ -24,8 +23,8 @@ public class IngredientRepositoryImpl implements IngredientRepository {
     }
 
     @Override
-    public Optional<Ingredient> findByUuid(final UUID uuid) {
-        return ingredientMongoRepository.findById(uuid).map(IngredientDocument::toModel);
+    public Optional<Ingredient> findById(final String id) {
+        return ingredientMongoRepository.findById(id).map(IngredientDocument::toModel);
     }
 
     @Override
@@ -48,7 +47,7 @@ public class IngredientRepositoryImpl implements IngredientRepository {
     }
 
     @Override
-    public void deleteByUuid(final UUID uuid) {
-        ingredientMongoRepository.deleteById(uuid);
+    public void deleteById(final String id) {
+        ingredientMongoRepository.deleteById(id);
     }
 }
