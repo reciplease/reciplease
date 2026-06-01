@@ -7,6 +7,7 @@ import org.reciplease.repository.mongo.MeasureMongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
@@ -19,6 +20,11 @@ public class MeasureRepositoryImpl implements MeasureRepository {
         return measureMongoRepository.findAll().stream()
                 .map(MeasureDocument::toModel)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<Measure> findById(final String measureId) {
+        return measureMongoRepository.findById(measureId).map(MeasureDocument::toModel);
     }
 
     @Override
