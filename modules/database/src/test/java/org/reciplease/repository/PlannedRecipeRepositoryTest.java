@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.reciplease.model.PlannedRecipe;
 import org.reciplease.model.Recipe;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.context.annotation.Import;
 
 import java.time.LocalDate;
@@ -15,7 +15,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 
-@DataJpaTest
+@DataMongoTest
 @Import({PlannedRecipeRepositoryImpl.class, RecipeRepositoryImpl.class})
 public class PlannedRecipeRepositoryTest {
     @Autowired

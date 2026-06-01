@@ -7,7 +7,7 @@ import org.reciplease.model.Ingredient;
 import org.reciplease.model.InventoryItem;
 import org.reciplease.model.Measure;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.context.annotation.Import;
 
 import java.time.LocalDate;
@@ -16,7 +16,7 @@ import java.time.Month;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 
-@DataJpaTest
+@DataMongoTest
 @Import({IngredientRepositoryImpl.class, InventoryRepositoryImpl.class})
 class InventoryRepositoryTest {
     @Autowired
