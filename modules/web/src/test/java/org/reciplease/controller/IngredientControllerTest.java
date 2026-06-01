@@ -1,13 +1,13 @@
 package org.reciplease.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.reciplease.dto.IngredientDto;
 import org.reciplease.model.Ingredient;
 import org.reciplease.repository.IngredientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,7 +35,7 @@ public class IngredientControllerTest {
     private static final String INGREDIENT_NAME = "ingredient name";
     private static final String MEASURE = "GRAMS";
 
-    @MockBean
+    @MockitoBean
     IngredientRepository ingredientRepository;
 
     @Autowired

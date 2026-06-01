@@ -2,12 +2,14 @@ package org.reciplease.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 import org.reciplease.model.Ingredient;
 
 
 @Value
+@AllArgsConstructor
 @Builder
 public class IngredientRequest {
 
