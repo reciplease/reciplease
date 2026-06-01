@@ -1,6 +1,7 @@
 package org.reciplease.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 import org.reciplease.model.Ingredient;
@@ -10,6 +11,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDate;
 
 @Value
+@AllArgsConstructor
 @Builder(toBuilder = true)
 public class InventoryItemDto {
 
