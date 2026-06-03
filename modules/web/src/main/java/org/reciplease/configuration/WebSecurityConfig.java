@@ -2,17 +2,21 @@ package org.reciplease.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
+/**
+ * Permissive security for local development and tests. Google OIDC + allowlist enforcement
+ * are only enabled under the {@code cloud} profile (see {@link CloudWebSecurityConfig}).
+ */
 @Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
+@Profile("!cloud")
 public class WebSecurityConfig {
 
     @Bean
@@ -24,16 +28,5 @@ public class WebSecurityConfig {
                 .cors(Customizer.withDefaults())
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .build();
-    }
-
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(final CorsRegistry registry) {
-                registry.addMapping("/api/**")
-                        .allowedMethods("*");
-            }
-        };
     }
 }
