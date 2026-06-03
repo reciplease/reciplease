@@ -5,6 +5,12 @@ springdoc:
   api-docs:
     path: /openapi
 
+server:
+  # Honour X-Forwarded-* (in particular X-Forwarded-Prefix) so that, when the
+  # Reciplease web app reverse-proxies Swagger UI under /swagger, SpringDoc emits
+  # its asset, spec and "Try it out" server URLs under that prefix.
+  forward-headers-strategy: framework
+
 spring:
   cloud:
     gcp:
