@@ -2,6 +2,11 @@
 # file: gcp-docker-build.sh
 # description: Build Docker image.
 
+# Fail loudly: a swallowed `docker build` error previously let CI report success
+# while the image (and thus every deploy) stayed stale. -e propagates the build
+# failure; pipefail catches failures in the docker-login pipe.
+set -eo pipefail
+
 if [[ -z "${GCP_PROJECT_ID}" ]]; then
   echo 'GCP_PROJECT_ID is not set.'
   exit 1
