@@ -10,3 +10,11 @@ spring:
   data:
     mongodb:
       uri: ${sm://reciplease-database-url}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Google's OIDC issuer; Spring fetches its public keys to validate tokens.
+          issuer-uri: https://accounts.google.com
+          # Tokens must be minted for our OAuth client (the id_token "aud" claim).
+          audiences: ${sm://reciplease-google-client-id}
