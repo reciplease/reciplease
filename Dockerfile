@@ -13,10 +13,11 @@ FROM ${BASE_IMAGE}
 WORKDIR /application
 
 COPY --from=builder /builder/extracted/dependencies/ ./
-COPY --from=builder /builder/extracted/spring-boot-loader/ ./
 COPY --from=builder /builder/extracted/snapshot-dependencies/ ./
 COPY --from=builder /builder/extracted/reciplease-dependencies/ ./
 COPY --from=builder /builder/extracted/application/ ./
 
-# Launcher moved to the `.launch` package in Spring Boot 3.2+/4.
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "org.springframework.boot.loader.launch.JarLauncher"]
+# The `tools` extractor emits a thin launcher (application/application.jar) whose
+# manifest Class-Path references the sibling dependency layers, so run it with
+# `-jar` rather than invoking JarLauncher on a hand-built classpath.
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "application.jar"]
