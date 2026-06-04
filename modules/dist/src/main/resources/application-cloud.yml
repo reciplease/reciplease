@@ -1,17 +1,10 @@
 spring:
-  cloud:
-    gcp:
-      core:
-        enabled: true
-      secretmanager:
-        enabled: false
   security:
     oauth2:
       resourceserver:
         jwt:
           # Google's OIDC issuer; Spring fetches its public keys to validate tokens.
           issuer-uri: https://accounts.google.com
-          # Audience and Mongo URI are injected as env vars by gcloud run deploy
-          # --set-secrets (Spring Boot relaxed binding maps them automatically).
-          # Spring Boot 4 + spring-cloud-gcp 8.x has a bug where ${sm://...}
-          # placeholders fail to bind to these properties (see issue #4395).
+          # Audience is injected as SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES
+          # and Mongo URI as SPRING_DATA_MONGODB_URI via Cloud Run --set-secrets;
+          # Spring Boot relaxed binding maps them automatically.
