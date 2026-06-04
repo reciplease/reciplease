@@ -28,6 +28,11 @@ public class MeasureRepositoryImpl implements MeasureRepository {
     }
 
     @Override
+    public Measure save(final Measure measure) {
+        return measureMongoRepository.save(MeasureDocument.from(measure)).toModel();
+    }
+
+    @Override
     public List<Measure> saveAll(final List<Measure> measures) {
         return measureMongoRepository.saveAll(
                 measures.stream().map(MeasureDocument::from).collect(Collectors.toList())

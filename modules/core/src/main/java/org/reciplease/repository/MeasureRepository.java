@@ -10,5 +10,7 @@ public interface MeasureRepository {
 
     Optional<Measure> findById(String measureId);
 
+    Measure save(Measure measure);
+
     List<Measure> saveAll(List<Measure> measures);
 }
