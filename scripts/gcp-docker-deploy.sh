@@ -16,10 +16,6 @@ ${GCLOUD} config set run/platform managed
 ${GCLOUD} config set run/region ${GCP_REGION}
 
 # Resolve the mutable :latest tag to its immutable digest and deploy THAT.
-# Deploying the bare `gcr.io/$PROJECT/dist` (:latest) reference let Cloud Run
-# keep resolving to a stale digest, so freshly-pushed images never went live
-# (every revision stayed pinned to the same old digest). Pinning the digest
-# guarantees each new push rolls a new revision forward.
 IMAGE="gcr.io/${GCP_PROJECT_ID}/dist"
 DIGEST=$(${GCLOUD} container images describe "${IMAGE}:latest" \
   --format='value(image_summary.fully_qualified_digest)')
@@ -29,9 +25,8 @@ if [[ -z "${DIGEST}" ]]; then
   exit 1
 fi
 
-# Inject secrets as env vars: Spring Boot 4 + spring-cloud-gcp 8.x has a bug
-# where ${sm://...} placeholders fail to bind (GoogleCloudPlatform/spring-cloud-gcp#4395).
-# --update-secrets is idempotent (safe whether or not the secrets are already set).
+# Inject secrets as env vars. spring.data.mongodb.uri was renamed to
+# spring.mongodb.uri in Spring Boot 4, so the env var is SPRING_MONGODB_URI.
 echo "Deploying ${DIGEST}"
 ${GCLOUD} run deploy dist --image "${DIGEST}" \
-  --update-secrets "SPRING_DATA_MONGODB_URI=reciplease-database-url:latest,SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES=reciplease-google-client-id:latest"
+  --update-secrets "SPRING_MONGODB_URI=reciplease-database-url:latest,SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES=reciplease-google-client-id:latest"
