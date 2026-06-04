@@ -57,4 +57,23 @@ class MeasureRepositoryTest {
     void shouldReturnSavedMeasures() {
         assertThat(measureRepository.saveAll(List.of(grams)), contains(grams));
     }
+
+    @Test
+    void shouldSaveSingleMeasure() {
+        final Measure saved = measureRepository.save(grams);
+
+        assertThat(saved, is(grams));
+        assertThat(measureRepository.findById("GRAMS"), is(Optional.of(grams)));
+    }
+
+    @Test
+    void shouldGenerateIdWhenSavingMeasureWithoutId() {
+        final Measure noId = Measure.builder().singular("litre").plural("litres").build();
+
+        final Measure saved = measureRepository.save(noId);
+
+        assertThat(saved.getSingular(), is("litre"));
+        assertThat(saved.getPlural(), is("litres"));
+        assertThat(saved.getMeasureId() != null && !saved.getMeasureId().isBlank(), is(true));
+    }
 }
