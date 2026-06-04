@@ -39,4 +39,4 @@ SECRETS="${SECRETS},SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES=reciplea
 
 echo "Deploying ${DIGEST}"
 ${GCLOUD} run deploy dist --image "${DIGEST}" \
-  --set-secrets "SPRING_DATA_MONGODB_URI=reciplease-database-url:latest,SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES=reciplease-google-client-id:latest" --set-secrets "${SECRETS}"
+  --update-secrets "SPRING_DATA_MONGODB_URI=reciplease-database-url:latest,SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES=reciplease-google-client-id:latest" --set-secrets "${SECRETS}"
