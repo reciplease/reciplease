@@ -1,15 +1,17 @@
 spring:
-  config:
-    import: sm://
   cloud:
     gcp:
       core:
         enabled: true
       secretmanager:
-        enabled: true
+        enabled: false
   data:
     mongodb:
-      uri: ${sm://reciplease-database-url}
+      # Spring Boot 4 + spring-cloud-gcp 8.x has a bug where ${sm://...} placeholders
+      # fail to bind to this property. Use env vars instead: gcloud run deploy
+      # --set-secrets SPRING_DATA_MONGODB_URI=reciplease-database-url:latest mounts
+      # the secret value directly.
+      uri: ${SPRING_DATA_MONGODB_URI}
   security:
     oauth2:
       resourceserver:
@@ -17,4 +19,5 @@ spring:
           # Google's OIDC issuer; Spring fetches its public keys to validate tokens.
           issuer-uri: https://accounts.google.com
           # Tokens must be minted for our OAuth client (the id_token "aud" claim).
-          audiences: ${sm://reciplease-google-client-id}
+          # Same bug workaround: mounted as env var by gcloud run deploy.
+          audiences: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES}
