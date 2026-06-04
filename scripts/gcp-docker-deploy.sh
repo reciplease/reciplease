@@ -29,14 +29,9 @@ if [[ -z "${DIGEST}" ]]; then
   exit 1
 fi
 
-# Inject secrets as env vars rather than via in-app `sm://` placeholders:
-# on Spring Boot 4 + spring-cloud-gcp 8.x, `${sm://...}` fails to bind to
-# spring.data.mongodb.uri / jwt.audiences (ByteString binding bug, see
-# GoogleCloudPlatform/spring-cloud-gcp#4395), silently falling back to a
-# localhost Mongo and an empty audience list. Env vars override the yaml.
-SECRETS="SPRING_DATA_MONGODB_URI=reciplease-database-url:latest"
-SECRETS="${SECRETS},SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES=reciplease-google-client-id:latest"
-
+# Inject secrets as env vars: Spring Boot 4 + spring-cloud-gcp 8.x has a bug
+# where ${sm://...} placeholders fail to bind (GoogleCloudPlatform/spring-cloud-gcp#4395).
+# --update-secrets is idempotent (safe whether or not the secrets are already set).
 echo "Deploying ${DIGEST}"
 ${GCLOUD} run deploy dist --image "${DIGEST}" \
-  --update-secrets "SPRING_DATA_MONGODB_URI=reciplease-database-url:latest,SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES=reciplease-google-client-id:latest" --set-secrets "${SECRETS}"
+  --update-secrets "SPRING_DATA_MONGODB_URI=reciplease-database-url:latest,SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES=reciplease-google-client-id:latest"
