@@ -34,7 +34,9 @@ public class CloudWebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Swagger UI / OpenAPI docs remain public.
                         .requestMatchers("/", "/openapi/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        // The API requires an allowlisted Google user (see the JWT converter).
+                        // Recipes are publicly readable.
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/recipes", "/api/recipes/**").permitAll()
+                        // All other API endpoints require an allowlisted Google user.
                         .requestMatchers("/api/**").hasRole("RECIPLEASE")
                         .anyRequest().permitAll())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt ->
