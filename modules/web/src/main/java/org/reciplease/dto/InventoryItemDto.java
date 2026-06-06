@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 import org.reciplease.model.InventoryItem;
+import org.reciplease.model.Measure;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -27,7 +28,7 @@ public class InventoryItemDto {
         return InventoryItemDto.builder()
                 .uuid(inventoryItem.getId())
                 .name(inventoryItem.getName())
-                .measure(inventoryItem.getMeasure())
+                .measure(Measure.normalizeId(inventoryItem.getMeasure()))
                 .amount(inventoryItem.getAmount())
                 .expiration(inventoryItem.getExpiration())
                 .barcode(inventoryItem.getBarcode())
@@ -38,7 +39,7 @@ public class InventoryItemDto {
         return InventoryItem.builder()
                 .id(uuid)
                 .name(name)
-                .measure(measure)
+                .measure(Measure.normalizeId(measure))
                 .amount(amount)
                 .expiration(expiration)
                 .barcode(barcode)
