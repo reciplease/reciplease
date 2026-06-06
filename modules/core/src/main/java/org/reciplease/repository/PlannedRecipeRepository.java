@@ -9,4 +9,6 @@ public interface PlannedRecipeRepository {
     PlannedRecipe save(PlannedRecipe plannedRecipe);
 
     List<PlannedRecipe> findByDateIsBetween(LocalDate start, LocalDate end);
+
+    List<PlannedRecipe> findByRecipeId(String recipeId);
 }

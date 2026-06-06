@@ -16,4 +16,8 @@ public interface InventoryRepository {
     List<InventoryItem> expiresAfter(LocalDate now);
 
     List<InventoryItem> betweenDates(LocalDate now);
+
+    List<InventoryItem> findByBarcode(String barcode);
+
+    List<InventoryItem> findByName(String name);
 }

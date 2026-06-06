@@ -4,7 +4,6 @@ import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reciplease.dto.RecipeDto;
-import org.reciplease.model.Ingredient;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
 import org.reciplease.service.RecipeService;
@@ -99,24 +98,19 @@ class RecipeControllerTest {
 
     @Test
     void addRecipeIngredient() throws Exception {
-        final var ingredient = Ingredient.builder()
-                .id("70991766-7944-40c2-be90-20065af3d02b")
-                .name("tomato")
-                .measure("ITEMS")
-                .build();
         final var recipe = Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("soup")
                 .build();
-        final var amount = 10d;
 
-        final var addIngredientRequest = new AddIngredient(ingredient.getId(), amount);
-        final var savedRecipeIngredient = new RecipeIngredient(ingredient, amount);
+        final var addIngredientRequest = new AddIngredient("tomato", "ITEMS", 10d);
+        final var savedRecipeIngredient = RecipeIngredient.builder()
+                .name("tomato").measure("ITEMS").amount(10d).build();
 
         when(recipeService.addIngredient(recipe.getId(), addIngredientRequest)).thenReturn(Set.of(savedRecipeIngredient));
 
-        final var data = "{\"ingredientId\": \"70991766-7944-40c2-be90-20065af3d02b\", \"amount\": 10.0}";
-        final var expectedJson = "[{\"ingredientId\": \"70991766-7944-40c2-be90-20065af3d02b\", \"name\": \"tomato\", \"measure\": \"ITEMS\", \"amount\": 10.0}]";
+        final var data = "{\"name\": \"tomato\", \"measure\": \"ITEMS\", \"amount\": 10.0}";
+        final var expectedJson = "[{\"name\": \"tomato\", \"measure\": \"ITEMS\", \"amount\": 10.0}]";
 
         mockMvc.perform(put("/api/recipes/{uuid}/ingredients", recipe.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -143,15 +137,7 @@ class RecipeControllerTest {
                 .id(UUID.randomUUID().toString())
                 .name("soup")
                 .build()
-                .addIngredient(getTomato(), 5d);
-    }
-
-    private Ingredient getTomato() {
-        return Ingredient.builder()
-                .id(UUID.randomUUID().toString())
-                .name("tomato")
-                .measure("ITEMS")
-                .build();
+                .addIngredient("tomato", "ITEMS", 5d);
     }
 
     private Recipe getToast() {
@@ -159,14 +145,6 @@ class RecipeControllerTest {
                 .id(UUID.randomUUID().toString())
                 .name("toast")
                 .build()
-                .addIngredient(getBread(), 1d);
-    }
-
-    private Ingredient getBread() {
-        return Ingredient.builder()
-                .id(UUID.randomUUID().toString())
-                .name("bread")
-                .measure("ITEMS")
-                .build();
+                .addIngredient("bread", "ITEMS", 1d);
     }
 }

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
-import org.reciplease.model.Ingredient;
 import org.reciplease.model.PlannedRecipe;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.ShoppingList;
@@ -44,12 +43,10 @@ public class ShoppingListServiceTest {
     public void shouldReturnShoppingList() {
         final LocalDate date = LocalDate.of(2019, 2, 2);
 
-        final var bread = Ingredient.builder()
-                .name("bread").build();
         final var recipe = Recipe.builder()
                 .name("toast")
                 .build()
-                .addIngredient(bread, 10d);
+                .addIngredient("bread", "ITEMS", 10d);
         PlannedRecipe plannedRecipe = PlannedRecipe.builder()
                 .recipe(recipe)
                 .date(date).build();

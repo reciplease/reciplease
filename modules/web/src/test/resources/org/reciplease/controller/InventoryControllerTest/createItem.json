@@ -1,5 +1,7 @@
 {
-  "ingredientUuid": "f3aa25a0-5716-4c7d-add5-164396f192fa",
+  "name": "bread",
+  "measure": "ITEMS",
   "expiration": "2020-01-01",
-  "amount": 20.0
+  "amount": 20.0,
+  "barcode": "0123456789012"
 }

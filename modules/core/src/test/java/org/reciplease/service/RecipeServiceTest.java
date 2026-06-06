@@ -7,10 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
-import org.reciplease.model.Ingredient;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
-import org.reciplease.repository.IngredientRepository;
 import org.reciplease.repository.RecipeRepository;
 import org.reciplease.service.request.AddIngredient;
 
@@ -30,8 +28,6 @@ import static org.mockito.Mockito.when;
 class RecipeServiceTest {
     @Mock
     private RecipeRepository recipeRepository;
-    @Mock
-    private IngredientRepository ingredientRepository;
 
     @InjectMocks
     private RecipeService recipeService;
@@ -91,7 +87,6 @@ class RecipeServiceTest {
     @Nested
     class AddRecipeIngredient {
         private Recipe recipe;
-        private Ingredient ingredient;
 
         @BeforeEach
         void setUp() {
@@ -99,40 +94,31 @@ class RecipeServiceTest {
                     .id(UUID.randomUUID().toString())
                     .name("toast")
                     .build();
-            ingredient = Ingredient.builder()
-                    .id(UUID.randomUUID().toString())
-                    .name("bread")
-                    .build();
         }
 
         @Test
         void shouldAddIngredientToRecipe() {
             when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
-            when(ingredientRepository.findById(ingredient.getId())).thenReturn(Optional.of(ingredient));
             when(recipeRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-            final var recipeIngredients = recipeService.addIngredient(recipe.getId(), new AddIngredient(ingredient.getId(), 10d));
+            final var recipeIngredients = recipeService.addIngredient(recipe.getId(),
+                    new AddIngredient("bread", "ITEMS", 10d));
 
-            assertThat(recipeIngredients, contains(new RecipeIngredient(ingredient, 10d)));
+            assertThat(recipeIngredients, contains(RecipeIngredient.builder()
+                    .name("bread")
+                    .measure("ITEMS")
+                    .amount(10d)
+                    .build()));
         }
 
         @Test
         void shouldFail_recipeNotFound() {
             when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.empty());
 
-            final var exception = assertThrows(IllegalArgumentException.class, () -> recipeService.addIngredient(recipe.getId(), new AddIngredient(ingredient.getId(), 10d)));
+            final var exception = assertThrows(IllegalArgumentException.class,
+                    () -> recipeService.addIngredient(recipe.getId(), new AddIngredient("bread", "ITEMS", 10d)));
 
             assertThat(exception.getMessage(), is("Recipe does not exist"));
-        }
-
-        @Test
-        void shouldFail_ingredientNotFound() {
-            when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
-            when(ingredientRepository.findById(ingredient.getId())).thenReturn(Optional.empty());
-
-            final var exception = assertThrows(IllegalArgumentException.class, () -> recipeService.addIngredient(recipe.getId(), new AddIngredient(ingredient.getId(), 10d)));
-
-            assertThat(exception.getMessage(), is("Ingredient does not exist"));
         }
     }
 }

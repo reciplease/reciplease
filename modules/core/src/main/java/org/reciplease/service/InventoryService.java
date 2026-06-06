@@ -2,7 +2,6 @@ package org.reciplease.service;
 
 import lombok.RequiredArgsConstructor;
 import org.reciplease.model.InventoryItem;
-import org.reciplease.repository.IngredientRepository;
 import org.reciplease.repository.InventoryRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,18 +14,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class InventoryService {
     private final InventoryRepository inventoryRepository;
-    private final IngredientRepository ingredientRepository;
     private final Clock clock;
 
     public InventoryItem save(final InventoryItem item) {
-        final var ingredient = ingredientRepository.findById(item.getIngredient().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Ingredient does not exist"));
-
-        final InventoryItem updatedItem = item.toBuilder()
-                .ingredient(ingredient)
-                .build();
-
-        return inventoryRepository.save(updatedItem);
+        return inventoryRepository.save(item);
     }
 
     public Optional<InventoryItem> findById(final String id) {

@@ -2,7 +2,6 @@ package org.reciplease.dto;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.reciplease.model.Ingredient;
 import org.reciplease.model.InventoryItem;
 
 import java.time.LocalDate;
@@ -15,22 +14,23 @@ class InventoryItemDtoTest {
     @Test
     @DisplayName("create DTO from entity")
     void from() {
-        final var ingredient = Ingredient.builder()
-                .id(UUID.randomUUID().toString())
-                .build();
-
         final var item = InventoryItem.builder()
-                .ingredient(ingredient)
+                .id(UUID.randomUUID().toString())
+                .name("bread")
+                .measure("ITEMS")
                 .amount(10d)
                 .expiration(LocalDate.now())
+                .barcode("0123456789012")
                 .build();
 
         final var itemDto = InventoryItemDto.from(item);
 
         assertThat(itemDto.getUuid(), is(item.getId()));
-        assertThat(itemDto.getIngredientUuid(), is(ingredient.getId()));
+        assertThat(itemDto.getName(), is(item.getName()));
+        assertThat(itemDto.getMeasure(), is(item.getMeasure()));
         assertThat(itemDto.getAmount(), is(item.getAmount()));
         assertThat(itemDto.getExpiration(), is(item.getExpiration()));
+        assertThat(itemDto.getBarcode(), is(item.getBarcode()));
     }
 
     @Test
@@ -38,16 +38,20 @@ class InventoryItemDtoTest {
     void toEntity() {
         final var itemDto = InventoryItemDto.builder()
                 .uuid(UUID.randomUUID().toString())
-                .ingredientUuid(UUID.randomUUID().toString())
+                .name("bread")
+                .measure("ITEMS")
                 .amount(10d)
                 .expiration(LocalDate.now())
+                .barcode("0123456789012")
                 .build();
 
         final var item = itemDto.toEntity();
 
         assertThat(item.getId(), is(itemDto.getUuid()));
-        assertThat(item.getIngredient().getId(), is(itemDto.getIngredientUuid()));
+        assertThat(item.getName(), is(itemDto.getName()));
+        assertThat(item.getMeasure(), is(itemDto.getMeasure()));
         assertThat(item.getAmount(), is(itemDto.getAmount()));
         assertThat(item.getExpiration(), is(itemDto.getExpiration()));
+        assertThat(item.getBarcode(), is(itemDto.getBarcode()));
     }
 }
