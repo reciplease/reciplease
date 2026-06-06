@@ -1,7 +1,7 @@
 {
   "uuid": "b465af6e-2465-4436-84c1-14f35db68dbf",
   "name": "bread",
-  "measure": "ITEMS",
+  "measure": "item",
   "expiration": "2020-01-01",
   "amount": 20.0,
   "barcode": "0123456789012"

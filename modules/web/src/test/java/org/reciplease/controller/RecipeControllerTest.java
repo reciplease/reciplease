@@ -110,7 +110,8 @@ class RecipeControllerTest {
         when(recipeService.addIngredient(recipe.getId(), addIngredientRequest)).thenReturn(Set.of(savedRecipeIngredient));
 
         final var data = "{\"name\": \"tomato\", \"measure\": \"ITEMS\", \"amount\": 10.0}";
-        final var expectedJson = "[{\"name\": \"tomato\", \"measure\": \"ITEMS\", \"amount\": 10.0}]";
+        // Response normalizes the legacy measure id to its short form.
+        final var expectedJson = "[{\"name\": \"tomato\", \"measure\": \"item\", \"amount\": 10.0}]";
 
         mockMvc.perform(put("/api/recipes/{uuid}/ingredients", recipe.getId())
                         .contentType(MediaType.APPLICATION_JSON)

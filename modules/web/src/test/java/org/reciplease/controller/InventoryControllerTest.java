@@ -42,7 +42,7 @@ class InventoryControllerTest {
     void shouldCreateInventoryItem() throws Exception {
         final var mockRequestItem = InventoryItem.builder()
                 .name("bread")
-                .measure("ITEMS")
+                .measure("item")
                 .amount(20d)
                 .expiration(LocalDate.of(2020, Month.JANUARY, 1))
                 .barcode("0123456789012")
@@ -75,7 +75,7 @@ class InventoryControllerTest {
             item = InventoryItem.builder()
                     .id("b465af6e-2465-4436-84c1-14f35db68dbf")
                     .name("bread")
-                    .measure("ITEMS")
+                    .measure("item")
                     .amount(20d)
                     .expiration(LocalDate.of(2020, Month.JANUARY, 1))
                     .barcode("0123456789012")

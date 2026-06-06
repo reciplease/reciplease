@@ -85,6 +85,6 @@ class PlannedRecipeControllerTest {
         mockMvc.perform(get("/api/planned-recipes/{recipeId}/suggestions", "recipe-1")
                         .param("ingredient", "bread"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("[{\"uuid\":\"item-1\",\"name\":\"bread\",\"measure\":\"ITEMS\",\"amount\":5.0,\"expiration\":\"2026-06-30\",\"barcode\":\"111\"}]", true));
+                .andExpect(content().json("[{\"uuid\":\"item-1\",\"name\":\"bread\",\"measure\":\"item\",\"amount\":5.0,\"expiration\":\"2026-06-30\",\"barcode\":\"111\"}]", true));
     }
 }

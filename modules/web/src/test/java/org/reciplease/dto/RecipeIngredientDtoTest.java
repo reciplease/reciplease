@@ -21,7 +21,8 @@ class RecipeIngredientDtoTest {
         final var recipeIngredientDto = RecipeIngredientDto.from(recipeIngredient);
 
         assertThat(recipeIngredientDto.getName(), is(recipeIngredient.getName()));
-        assertThat(recipeIngredientDto.getMeasure(), is(recipeIngredient.getMeasure()));
+        // Legacy measure ids are normalized to their short form.
+        assertThat(recipeIngredientDto.getMeasure(), is("item"));
         assertThat(recipeIngredientDto.getAmount(), is(recipeIngredient.getAmount()));
     }
 
@@ -29,12 +30,12 @@ class RecipeIngredientDtoTest {
     @DisplayName("round-trips to model")
     void toModel() {
         final var dto = RecipeIngredientDto.builder()
-                .name("Bread").measure("ITEMS").amount(2d).build();
+                .name("Bread").measure("item").amount(2d).build();
 
         final var model = dto.toModel();
 
         assertThat(model.getName(), is("Bread"));
-        assertThat(model.getMeasure(), is("ITEMS"));
+        assertThat(model.getMeasure(), is("item"));
         assertThat(model.getAmount(), is(2d));
     }
 }

@@ -27,7 +27,8 @@ class InventoryItemDtoTest {
 
         assertThat(itemDto.getUuid(), is(item.getId()));
         assertThat(itemDto.getName(), is(item.getName()));
-        assertThat(itemDto.getMeasure(), is(item.getMeasure()));
+        // Legacy measure ids are normalized to their short form.
+        assertThat(itemDto.getMeasure(), is("item"));
         assertThat(itemDto.getAmount(), is(item.getAmount()));
         assertThat(itemDto.getExpiration(), is(item.getExpiration()));
         assertThat(itemDto.getBarcode(), is(item.getBarcode()));
@@ -39,7 +40,7 @@ class InventoryItemDtoTest {
         final var itemDto = InventoryItemDto.builder()
                 .uuid(UUID.randomUUID().toString())
                 .name("bread")
-                .measure("ITEMS")
+                .measure("g")
                 .amount(10d)
                 .expiration(LocalDate.now())
                 .barcode("0123456789012")
@@ -49,7 +50,8 @@ class InventoryItemDtoTest {
 
         assertThat(item.getId(), is(itemDto.getUuid()));
         assertThat(item.getName(), is(itemDto.getName()));
-        assertThat(item.getMeasure(), is(itemDto.getMeasure()));
+        // A short id passes through unchanged.
+        assertThat(item.getMeasure(), is("g"));
         assertThat(item.getAmount(), is(itemDto.getAmount()));
         assertThat(item.getExpiration(), is(itemDto.getExpiration()));
         assertThat(item.getBarcode(), is(itemDto.getBarcode()));
