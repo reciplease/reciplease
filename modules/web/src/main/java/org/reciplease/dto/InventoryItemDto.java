@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
-import org.reciplease.model.Ingredient;
 import org.reciplease.model.InventoryItem;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -17,36 +16,32 @@ public class InventoryItemDto {
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     String uuid;
-    String ingredientUuid;
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     String name;
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     String measure;
     Double amount;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate expiration;
+    String barcode;
 
     public static InventoryItemDto from(final InventoryItem inventoryItem) {
         return InventoryItemDto.builder()
                 .uuid(inventoryItem.getId())
-                .ingredientUuid(inventoryItem.getIngredient().getId())
-                .name(inventoryItem.getIngredient().getName())
-                .measure(inventoryItem.getIngredient().getMeasure())
+                .name(inventoryItem.getName())
+                .measure(inventoryItem.getMeasure())
                 .amount(inventoryItem.getAmount())
                 .expiration(inventoryItem.getExpiration())
+                .barcode(inventoryItem.getBarcode())
                 .build();
     }
 
     public InventoryItem toEntity() {
         return InventoryItem.builder()
                 .id(uuid)
-                .ingredient(Ingredient.builder()
-                        .id(ingredientUuid)
-                        .name(name)
-                        .measure(measure)
-                        .build())
+                .name(name)
+                .measure(measure)
                 .amount(amount)
                 .expiration(expiration)
+                .barcode(barcode)
                 .build();
     }
 }

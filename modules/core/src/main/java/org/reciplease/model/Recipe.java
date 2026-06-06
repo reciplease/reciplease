@@ -22,8 +22,12 @@ public class Recipe extends Identifiable {
 
     Set<RecipeIngredient> recipeIngredients = new HashSet<>();
 
-    public Recipe addIngredient(final Ingredient ingredient, final Double amount) {
-        return addIngredient(new RecipeIngredient(ingredient, amount));
+    public Recipe addIngredient(final String name, final String measure, final Double amount) {
+        return addIngredient(RecipeIngredient.builder()
+                .name(name)
+                .measure(measure)
+                .amount(amount)
+                .build());
     }
 
     public Recipe addIngredient(final RecipeIngredient recipeIngredient) {
@@ -31,8 +35,8 @@ public class Recipe extends Identifiable {
         return this;
     }
 
-    public Recipe removeIngredient(final Ingredient ingredient) {
-        recipeIngredients.removeIf(item -> item.getIngredient().equals(ingredient));
+    public Recipe removeIngredient(final String name) {
+        recipeIngredients.removeIf(item -> item.getName().equals(name));
         return this;
     }
 }

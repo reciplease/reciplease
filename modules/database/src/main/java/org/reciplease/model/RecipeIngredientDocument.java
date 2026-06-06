@@ -11,26 +11,23 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RecipeIngredientDocument {
 
-    private String ingredientId;
     private String name;
     private String measure;
     private Double amount;
 
     public static RecipeIngredientDocument from(final RecipeIngredient recipeIngredient) {
         return RecipeIngredientDocument.builder()
-                .ingredientId(recipeIngredient.getIngredient().getId())
-                .name(recipeIngredient.getIngredient().getName())
-                .measure(recipeIngredient.getIngredient().getMeasure())
+                .name(recipeIngredient.getName())
+                .measure(recipeIngredient.getMeasure())
                 .amount(recipeIngredient.getAmount())
                 .build();
     }
 
     public RecipeIngredient toModel() {
-        final Ingredient ingredient = Ingredient.builder()
-                .id(ingredientId)
+        return RecipeIngredient.builder()
                 .name(name)
                 .measure(measure)
+                .amount(amount)
                 .build();
-        return new RecipeIngredient(ingredient, amount);
     }
 }

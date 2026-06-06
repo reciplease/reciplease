@@ -1,28 +1,32 @@
 package org.reciplease.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 import org.reciplease.model.RecipeIngredient;
 
 @Value
+@AllArgsConstructor
 @Builder
 public class RecipeIngredientDto {
 
-    String ingredientId;
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     String name;
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     String measure;
     Double amount;
 
     public static RecipeIngredientDto from(final RecipeIngredient recipeIngredient) {
-        final var ingredient = recipeIngredient.getIngredient();
         return RecipeIngredientDto.builder()
-                .ingredientId(ingredient.getId())
-                .name(ingredient.getName())
-                .measure(ingredient.getMeasure())
+                .name(recipeIngredient.getName())
+                .measure(recipeIngredient.getMeasure())
                 .amount(recipeIngredient.getAmount())
+                .build();
+    }
+
+    public RecipeIngredient toModel() {
+        return RecipeIngredient.builder()
+                .name(name)
+                .measure(measure)
+                .amount(amount)
                 .build();
     }
 }

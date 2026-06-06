@@ -46,4 +46,18 @@ public class InventoryRepositoryImpl implements InventoryRepository {
                 .map(InventoryItemDocument::toModel)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<InventoryItem> findByBarcode(final String barcode) {
+        return inventoryMongoRepository.findByBarcode(barcode).stream()
+                .map(InventoryItemDocument::toModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<InventoryItem> findByName(final String name) {
+        return inventoryMongoRepository.findByNameIgnoreCase(name).stream()
+                .map(InventoryItemDocument::toModel)
+                .collect(Collectors.toList());
+    }
 }

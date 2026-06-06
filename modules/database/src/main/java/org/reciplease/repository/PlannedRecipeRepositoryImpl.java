@@ -31,4 +31,13 @@ public class PlannedRecipeRepositoryImpl implements PlannedRecipeRepository {
                         .stream())
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<PlannedRecipe> findByRecipeId(final String recipeId) {
+        return plannedRecipeMongoRepository.findByRecipeId(recipeId).stream()
+                .flatMap(doc -> recipeMongoRepository.findById(doc.getRecipeId())
+                        .map(recipe -> doc.toModel(recipe.toModel()))
+                        .stream())
+                .collect(Collectors.toList());
+    }
 }

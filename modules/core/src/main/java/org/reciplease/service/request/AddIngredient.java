@@ -4,6 +4,7 @@ import lombok.Value;
 
 @Value
 public class AddIngredient {
-    String ingredientId;
+    String name;
+    String measure;
     Double amount;
 }

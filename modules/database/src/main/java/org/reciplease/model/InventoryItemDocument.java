@@ -18,34 +18,31 @@ public class InventoryItemDocument {
 
     @Id
     private String id;
-    private String ingredientId;
-    private String ingredientName;
+    private String name;
     private String measure;
     private Double amount;
     private LocalDate expiration;
+    private String barcode;
 
     public static InventoryItemDocument from(final InventoryItem item) {
         return InventoryItemDocument.builder()
                 .id(item.getId())
-                .ingredientId(item.getIngredient().getId())
-                .ingredientName(item.getIngredient().getName())
-                .measure(item.getIngredient().getMeasure())
+                .name(item.getName())
+                .measure(item.getMeasure())
                 .amount(item.getAmount())
                 .expiration(item.getExpiration())
+                .barcode(item.getBarcode())
                 .build();
     }
 
     public InventoryItem toModel() {
-        final Ingredient ingredient = Ingredient.builder()
-                .id(ingredientId)
-                .name(ingredientName)
-                .measure(measure)
-                .build();
         return InventoryItem.builder()
                 .id(id)
-                .ingredient(ingredient)
+                .name(name)
+                .measure(measure)
                 .amount(amount)
                 .expiration(expiration)
+                .barcode(barcode)
                 .build();
     }
 }

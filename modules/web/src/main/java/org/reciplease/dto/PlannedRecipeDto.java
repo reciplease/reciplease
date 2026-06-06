@@ -1,0 +1,32 @@
+package org.reciplease.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Value;
+import org.reciplease.model.PlannedRecipe;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Value
+@AllArgsConstructor
+@Builder
+public class PlannedRecipeDto {
+
+    RecipeDto recipe;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    LocalDate date;
+    List<IngredientPairingDto> pairings;
+
+    public static PlannedRecipeDto from(final PlannedRecipe plannedRecipe) {
+        return PlannedRecipeDto.builder()
+                .recipe(RecipeDto.from(plannedRecipe.getRecipe()))
+                .date(plannedRecipe.getDate())
+                .pairings(plannedRecipe.getPairings().stream()
+                        .map(IngredientPairingDto::from)
+                        .collect(Collectors.toList()))
+                .build();
+    }
+}

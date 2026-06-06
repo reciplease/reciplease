@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface PlannedRecipeMongoRepository extends MongoRepository<PlannedRecipeDocument, String> {
     List<PlannedRecipeDocument> findByDateBetween(LocalDate start, LocalDate end);
+
+    List<PlannedRecipeDocument> findByRecipeId(String recipeId);
 }

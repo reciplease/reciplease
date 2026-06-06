@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
-import org.reciplease.repository.IngredientRepository;
 import org.reciplease.repository.RecipeRepository;
 import org.reciplease.service.request.AddIngredient;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,6 @@ import java.util.Set;
 @Slf4j
 public class RecipeService {
     private final RecipeRepository recipeRepository;
-    private final IngredientRepository ingredientRepository;
 
     public Optional<Recipe> findById(final String id) {
         return recipeRepository.findById(id);
@@ -41,10 +39,8 @@ public class RecipeService {
     public Set<RecipeIngredient> addIngredient(final String recipeId, final AddIngredient addIngredient) {
         final var recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new IllegalArgumentException("Recipe does not exist"));
-        final var ingredient = ingredientRepository.findById(addIngredient.getIngredientId())
-                .orElseThrow(() -> new IllegalArgumentException("Ingredient does not exist"));
 
-        recipe.addIngredient(ingredient, addIngredient.getAmount());
+        recipe.addIngredient(addIngredient.getName(), addIngredient.getMeasure(), addIngredient.getAmount());
 
         final var savedRecipe = recipeRepository.save(recipe);
 

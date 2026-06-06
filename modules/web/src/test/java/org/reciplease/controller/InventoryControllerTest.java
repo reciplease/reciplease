@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.reciplease.model.Ingredient;
 import org.reciplease.model.InventoryItem;
 import org.reciplease.service.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,21 +40,15 @@ class InventoryControllerTest {
     @Test
     @DisplayName("should create inventory item")
     void shouldCreateInventoryItem() throws Exception {
-        final var mockRequestIngredient = Ingredient.builder()
-                .id("f3aa25a0-5716-4c7d-add5-164396f192fa")
-                .build();
         final var mockRequestItem = InventoryItem.builder()
-                .ingredient(mockRequestIngredient)
-                .amount(20d)
-                .expiration(LocalDate.of(2020, Month.JANUARY, 1))
-                .build();
-        final var mockResponseIngredient = mockRequestIngredient.toBuilder()
                 .name("bread")
                 .measure("ITEMS")
+                .amount(20d)
+                .expiration(LocalDate.of(2020, Month.JANUARY, 1))
+                .barcode("0123456789012")
                 .build();
         final var mockResponseItem = mockRequestItem.toBuilder()
                 .id("b465af6e-2465-4436-84c1-14f35db68dbf")
-                .ingredient(mockResponseIngredient)
                 .build();
 
         when(inventoryService.save(mockRequestItem)).thenReturn(mockResponseItem);
@@ -81,13 +74,11 @@ class InventoryControllerTest {
         void setUp() {
             item = InventoryItem.builder()
                     .id("b465af6e-2465-4436-84c1-14f35db68dbf")
-                    .ingredient(Ingredient.builder()
-                            .id("f3aa25a0-5716-4c7d-add5-164396f192fa")
-                            .name("bread")
-                            .measure("ITEMS")
-                            .build())
+                    .name("bread")
+                    .measure("ITEMS")
                     .amount(20d)
                     .expiration(LocalDate.of(2020, Month.JANUARY, 1))
+                    .barcode("0123456789012")
                     .build();
         }
 

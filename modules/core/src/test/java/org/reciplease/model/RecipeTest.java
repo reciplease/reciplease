@@ -23,19 +23,14 @@ class RecipeTest {
     @Test
     @DisplayName("add ingredient")
     void addIngredient() {
-        final Ingredient ingredient = Ingredient.builder()
-                .name("tomato")
-                .measure("ITEMS")
-                .build();
+        final Recipe recipe = Recipe.builder().build();
 
-        final Recipe recipe = Recipe.builder()
-                .build();
-
-        recipe.addIngredient(ingredient, 5d);
+        recipe.addIngredient("tomato", "ITEMS", 5d);
 
         assertThat(recipe.getRecipeIngredients(), hasSize(1));
         assertThat(recipe.getRecipeIngredients(), contains(allOf(
-                hasProperty("ingredient", is(ingredient)),
+                hasProperty("name", is("tomato")),
+                hasProperty("measure", is("ITEMS")),
                 hasProperty("amount", is(5d))
         )));
     }
@@ -43,36 +38,20 @@ class RecipeTest {
     @Test
     @DisplayName("remove ingredient")
     void removeIngredient() {
-        final Ingredient tomato = Ingredient.builder()
-                .name("tomato")
-                .measure("ITEMS")
-                .build();
-        final Ingredient bread = Ingredient.builder()
-                .name("bread")
-                .measure("ITEMS")
-                .build();
+        final Recipe recipe = Recipe.builder().build();
 
-        final Recipe recipe = Recipe.builder()
-                .build();
+        recipe.addIngredient("bread", "ITEMS", 5d);
+        recipe.addIngredient("tomato", "ITEMS", 10d);
+        recipe.removeIngredient("tomato");
 
-        recipe.addIngredient(bread, 5d);
-        recipe.addIngredient(tomato, 10d);
-        recipe.removeIngredient(tomato);
-
-        assertThat(recipe.getRecipeIngredients(), contains(hasProperty("ingredient", is(bread))));
+        assertThat(recipe.getRecipeIngredients(), contains(hasProperty("name", is("bread"))));
     }
 
     @Test
     void fluentApi() {
-        final Ingredient ingredient = Ingredient.builder()
-                .name("tomato")
-                .measure("ITEMS")
-                .build();
+        final Recipe recipe = Recipe.builder().build();
 
-        final Recipe recipe = Recipe.builder()
-                .build();
-
-        assertThat(recipe.addIngredient(ingredient, 5d), is(recipe));
-        assertThat(recipe.removeIngredient(ingredient), is(recipe));
+        assertThat(recipe.addIngredient("tomato", "ITEMS", 5d), is(recipe));
+        assertThat(recipe.removeIngredient("tomato"), is(recipe));
     }
 }
