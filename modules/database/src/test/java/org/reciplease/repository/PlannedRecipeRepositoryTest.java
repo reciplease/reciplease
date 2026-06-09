@@ -37,39 +37,35 @@ public class PlannedRecipeRepositoryTest {
 
     @Test
     public void shouldReturnPlannedRecipesByDate() {
-        final Recipe recipe = recipeRepository.save(Recipe.builder().build());
-        final PlannedRecipe plannedRecipe = plannedRecipeRepository.save(PlannedRecipe.builder()
-                .recipe(recipe).date(LocalDate.of(2019, 2, 2)).build());
+        var recipe = recipeRepository.save(Recipe.builder().build());
+        var plannedRecipe = plannedRecipeRepository.save(new PlannedRecipe(recipe, LocalDate.of(2019, 2, 2), List.of()));
 
-        final List<PlannedRecipe> plannedRecipes = plannedRecipeRepository.findByDateIsBetween(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
+        var plannedRecipes = plannedRecipeRepository.findByDateIsBetween(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
 
         assertThat(plannedRecipes, contains(plannedRecipe));
     }
 
     @Test
     public void shouldReturnEmptyList() {
-        final Recipe recipe = recipeRepository.save(Recipe.builder().build());
-        plannedRecipeRepository.save(PlannedRecipe.builder()
-                .recipe(recipe).date(LocalDate.of(2019, 2, 5)).build());
+        var recipe = recipeRepository.save(Recipe.builder().build());
+        plannedRecipeRepository.save(new PlannedRecipe(recipe, LocalDate.of(2019, 2, 5), List.of()));
 
-        final List<PlannedRecipe> plannedRecipes = plannedRecipeRepository.findByDateIsBetween(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
+        var plannedRecipes = plannedRecipeRepository.findByDateIsBetween(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
 
         assertThat(plannedRecipes, is(empty()));
     }
 
     @Test
     public void shouldRoundTripPairingsAndFindByRecipeId() {
-        final Recipe recipe = recipeRepository.save(Recipe.builder().name("toast").build());
-        final var pairing = IngredientPairing.builder()
-                .recipeIngredient(RecipeIngredient.builder().name("bread").measure("ITEMS").amount(2d).build())
-                .allocation(InventoryAllocation.builder()
-                        .inventoryItemId("item-1").barcode("111").amount(2d).build())
-                .build();
-        plannedRecipeRepository.save(PlannedRecipe.builder()
-                .recipe(recipe).date(LocalDate.of(2026, 6, 6)).pairing(pairing).build());
+        var recipe = recipeRepository.save(Recipe.builder().name("toast").build());
+        var pairing = new IngredientPairing(
+                new RecipeIngredient("bread", "ITEMS", 2d),
+                List.of(new InventoryAllocation("item-1", "111", 2d)));
+        plannedRecipeRepository.save(new PlannedRecipe(recipe, LocalDate.of(2026, 6, 6), List.of(pairing)));
 
-        final List<PlannedRecipe> found = plannedRecipeRepository.findByRecipeId(recipe.getId());
+        var found = plannedRecipeRepository.findByRecipeId(recipe.id());
 
-        assertThat(found, contains(is(org.hamcrest.Matchers.hasProperty("pairings", contains(pairing)))));
+        assertThat(found.size(), is(1));
+        assertThat(found.get(0).pairings(), contains(pairing));
     }
 }

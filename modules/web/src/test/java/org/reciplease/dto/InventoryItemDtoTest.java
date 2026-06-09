@@ -14,30 +14,23 @@ class InventoryItemDtoTest {
     @Test
     @DisplayName("create DTO from entity")
     void from() {
-        final var item = InventoryItem.builder()
-                .id(UUID.randomUUID().toString())
-                .name("bread")
-                .measure("ITEMS")
-                .amount(10d)
-                .expiration(LocalDate.now())
-                .barcode("0123456789012")
-                .build();
+        var item = new InventoryItem(UUID.randomUUID().toString(), null, "bread", "ITEMS", 10d, LocalDate.now(), "0123456789012");
 
-        final var itemDto = InventoryItemDto.from(item);
+        var itemDto = InventoryItemDto.from(item);
 
-        assertThat(itemDto.getUuid(), is(item.getId()));
-        assertThat(itemDto.getName(), is(item.getName()));
+        assertThat(itemDto.getUuid(), is(item.id()));
+        assertThat(itemDto.getName(), is(item.name()));
         // Legacy measure ids are normalized to their short form.
         assertThat(itemDto.getMeasure(), is("item"));
-        assertThat(itemDto.getAmount(), is(item.getAmount()));
-        assertThat(itemDto.getExpiration(), is(item.getExpiration()));
-        assertThat(itemDto.getBarcode(), is(item.getBarcode()));
+        assertThat(itemDto.getAmount(), is(item.amount()));
+        assertThat(itemDto.getExpiration(), is(item.expiration()));
+        assertThat(itemDto.getBarcode(), is(item.barcode()));
     }
 
     @Test
     @DisplayName("create entity from DTO")
     void toEntity() {
-        final var itemDto = InventoryItemDto.builder()
+        var itemDto = InventoryItemDto.builder()
                 .uuid(UUID.randomUUID().toString())
                 .name("bread")
                 .measure("g")
@@ -46,14 +39,14 @@ class InventoryItemDtoTest {
                 .barcode("0123456789012")
                 .build();
 
-        final var item = itemDto.toEntity();
+        var item = itemDto.toEntity();
 
-        assertThat(item.getId(), is(itemDto.getUuid()));
-        assertThat(item.getName(), is(itemDto.getName()));
+        assertThat(item.id(), is(itemDto.getUuid()));
+        assertThat(item.name(), is(itemDto.getName()));
         // A short id passes through unchanged.
-        assertThat(item.getMeasure(), is("g"));
-        assertThat(item.getAmount(), is(itemDto.getAmount()));
-        assertThat(item.getExpiration(), is(itemDto.getExpiration()));
-        assertThat(item.getBarcode(), is(itemDto.getBarcode()));
+        assertThat(item.measure(), is("g"));
+        assertThat(item.amount(), is(itemDto.getAmount()));
+        assertThat(item.expiration(), is(itemDto.getExpiration()));
+        assertThat(item.barcode(), is(itemDto.getBarcode()));
     }
 }

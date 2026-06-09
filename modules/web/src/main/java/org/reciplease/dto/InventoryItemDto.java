@@ -26,23 +26,16 @@ public class InventoryItemDto {
 
     public static InventoryItemDto from(final InventoryItem inventoryItem) {
         return InventoryItemDto.builder()
-                .uuid(inventoryItem.getId())
-                .name(inventoryItem.getName())
-                .measure(Measure.normalizeId(inventoryItem.getMeasure()))
-                .amount(inventoryItem.getAmount())
-                .expiration(inventoryItem.getExpiration())
-                .barcode(inventoryItem.getBarcode())
+                .uuid(inventoryItem.id())
+                .name(inventoryItem.name())
+                .measure(Measure.normalizeId(inventoryItem.measure()))
+                .amount(inventoryItem.amount())
+                .expiration(inventoryItem.expiration())
+                .barcode(inventoryItem.barcode())
                 .build();
     }
 
     public InventoryItem toEntity() {
-        return InventoryItem.builder()
-                .id(uuid)
-                .name(name)
-                .measure(Measure.normalizeId(measure))
-                .amount(amount)
-                .expiration(expiration)
-                .barcode(barcode)
-                .build();
+        return new InventoryItem(uuid, null, name, Measure.normalizeId(measure), amount, expiration, barcode);
     }
 }

@@ -56,9 +56,9 @@ class RecipeControllerTest {
         final var soup = getSoup();
         final var soupDto = RecipeDto.from(soup);
 
-        when(recipeService.findById(soup.getId())).thenReturn(Optional.of(soup));
+        when(recipeService.findById(soup.id())).thenReturn(Optional.of(soup));
 
-        mockMvc.perform(get("/api/recipes/{uuid}", soup.getId()))
+        mockMvc.perform(get("/api/recipes/{uuid}", soup.id()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(soupDto), true));
     }
@@ -104,16 +104,15 @@ class RecipeControllerTest {
                 .build();
 
         final var addIngredientRequest = new AddIngredient("tomato", "ITEMS", 10d);
-        final var savedRecipeIngredient = RecipeIngredient.builder()
-                .name("tomato").measure("ITEMS").amount(10d).build();
+        var savedRecipeIngredient = new RecipeIngredient("tomato", "ITEMS", 10d);
 
-        when(recipeService.addIngredient(recipe.getId(), addIngredientRequest)).thenReturn(Set.of(savedRecipeIngredient));
+        when(recipeService.addIngredient(recipe.id(), addIngredientRequest)).thenReturn(Set.of(savedRecipeIngredient));
 
         final var data = "{\"name\": \"tomato\", \"measure\": \"ITEMS\", \"amount\": 10.0}";
         // Response normalizes the legacy measure id to its short form.
         final var expectedJson = "[{\"name\": \"tomato\", \"measure\": \"item\", \"amount\": 10.0}]";
 
-        mockMvc.perform(put("/api/recipes/{uuid}/ingredients", recipe.getId())
+        mockMvc.perform(put("/api/recipes/{uuid}/ingredients", recipe.id())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(data))
                 .andExpect(status().isCreated())

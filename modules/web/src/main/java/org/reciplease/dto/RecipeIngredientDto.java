@@ -17,17 +17,13 @@ public class RecipeIngredientDto {
 
     public static RecipeIngredientDto from(final RecipeIngredient recipeIngredient) {
         return RecipeIngredientDto.builder()
-                .name(recipeIngredient.getName())
-                .measure(Measure.normalizeId(recipeIngredient.getMeasure()))
-                .amount(recipeIngredient.getAmount())
+                .name(recipeIngredient.name())
+                .measure(Measure.normalizeId(recipeIngredient.measure()))
+                .amount(recipeIngredient.amount())
                 .build();
     }
 
     public RecipeIngredient toModel() {
-        return RecipeIngredient.builder()
-                .name(name)
-                .measure(Measure.normalizeId(measure))
-                .amount(amount)
-                .build();
+        return new RecipeIngredient(name, Measure.normalizeId(measure), amount);
     }
 }

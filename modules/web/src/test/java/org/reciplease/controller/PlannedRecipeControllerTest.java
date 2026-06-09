@@ -41,22 +41,15 @@ class PlannedRecipeControllerTest {
     @Test
     @DisplayName("plans a recipe with inventory pairings")
     void plan() throws Exception {
-        final var recipe = Recipe.builder().id("recipe-1").name("toast").build();
-        final var bread = RecipeIngredient.builder().name("bread").measure("ITEMS").amount(2d).build();
-        final var planned = PlannedRecipe.builder()
-                .recipe(recipe)
-                .date(LocalDate.of(2026, 6, 6))
-                .pairing(IngredientPairing.builder()
-                        .recipeIngredient(bread)
-                        .allocation(InventoryAllocation.builder()
-                                .inventoryItemId("item-1").barcode("111").amount(2d).build())
-                        .build())
-                .build();
+        var recipe = Recipe.builder().id("recipe-1").name("toast").build();
+        var bread = new RecipeIngredient("bread", "ITEMS", 2d);
+        var planned = new PlannedRecipe(recipe, LocalDate.of(2026, 6, 6),
+                List.of(new IngredientPairing(bread, List.of(new InventoryAllocation("item-1", "111", 2d)))));
 
         when(plannedRecipeService.plan(eq("recipe-1"), eq(LocalDate.of(2026, 6, 6)), org.mockito.ArgumentMatchers.anyList()))
                 .thenReturn(planned);
 
-        final var body = "{"
+        var body = "{"
                 + "\"recipeId\":\"recipe-1\","
                 + "\"date\":\"2026-06-06\","
                 + "\"pairings\":[{"
@@ -76,9 +69,7 @@ class PlannedRecipeControllerTest {
     @Test
     @DisplayName("returns inventory suggestions for a recipe ingredient")
     void suggestions() throws Exception {
-        final var item = InventoryItem.builder()
-                .id("item-1").name("bread").measure("ITEMS").amount(5d)
-                .expiration(LocalDate.of(2026, 6, 30)).barcode("111").build();
+        var item = new InventoryItem("item-1", null, "bread", "ITEMS", 5d, LocalDate.of(2026, 6, 30), "111");
 
         when(plannedRecipeService.suggestInventory("recipe-1", "bread")).thenReturn(List.of(item));
 

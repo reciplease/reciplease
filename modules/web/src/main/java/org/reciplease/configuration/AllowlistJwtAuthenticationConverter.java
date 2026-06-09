@@ -1,7 +1,9 @@
 package org.reciplease.configuration;
 
 import lombok.RequiredArgsConstructor;
+import org.reciplease.model.User;
 import org.reciplease.repository.AllowlistRepository;
+import org.reciplease.repository.UserRepository;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -37,15 +39,19 @@ public class AllowlistJwtAuthenticationConverter implements Converter<Jwt, Abstr
     private static final String ROLE_RECIPLEASE = "ROLE_RECIPLEASE";
 
     private final AllowlistRepository allowlistRepository;
+    private final UserRepository userRepository;
 
     @Override
     public AbstractAuthenticationToken convert(final Jwt jwt) {
         final String email = jwt.getClaimAsString("email");
         final boolean emailVerified = Boolean.TRUE.equals(jwt.getClaim("email_verified"));
+        final boolean allowlisted = email != null && emailVerified && allowlistRepository.contains(email);
 
-        final List<GrantedAuthority> authorities = email != null
-                && emailVerified
-                && allowlistRepository.contains(email)
+        if (allowlisted) {
+            userRepository.save(new User(jwt.getSubject(), email));
+        }
+
+        final List<GrantedAuthority> authorities = allowlisted
                 ? List.of(new SimpleGrantedAuthority(ROLE_RECIPLEASE))
                 : List.of();
 

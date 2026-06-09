@@ -18,17 +18,13 @@ public class InventoryAllocationDto {
 
     public static InventoryAllocationDto from(final InventoryAllocation allocation) {
         return InventoryAllocationDto.builder()
-                .inventoryItemId(allocation.getInventoryItemId())
-                .barcode(allocation.getBarcode())
-                .amount(allocation.getAmount())
+                .inventoryItemId(allocation.inventoryItemId())
+                .barcode(allocation.barcode())
+                .amount(allocation.amount())
                 .build();
     }
 
     public InventoryAllocation toModel() {
-        return InventoryAllocation.builder()
-                .inventoryItemId(inventoryItemId)
-                .barcode(barcode)
-                .amount(amount)
-                .build();
+        return new InventoryAllocation(inventoryItemId, barcode, amount);
     }
 }

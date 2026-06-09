@@ -34,27 +34,24 @@ public class ShoppingListServiceTest {
 
     @Test
     public void shouldGenerateEmptyShoppingList() {
-        final ShoppingList shoppingList = shoppingListService.generateShoppingList(startDate, endDate);
+        var shoppingList = shoppingListService.generateShoppingList(startDate, endDate);
 
         assertThat(shoppingList.getItems(), is(empty()));
     }
 
     @Test
     public void shouldReturnShoppingList() {
-        final LocalDate date = LocalDate.of(2019, 2, 2);
+        var date = LocalDate.of(2019, 2, 2);
 
-        final var recipe = Recipe.builder()
+        var recipe = Recipe.builder()
                 .name("toast")
                 .build()
                 .addIngredient("bread", "ITEMS", 10d);
-        PlannedRecipe plannedRecipe = PlannedRecipe.builder()
-                .recipe(recipe)
-                .date(date).build();
-        final List<PlannedRecipe> plannedRecipes = List.of(plannedRecipe);
-        when(plannedRecipeRepository.findByDateIsBetween(startDate, endDate)).thenReturn(plannedRecipes);
+        var plannedRecipe = new PlannedRecipe(recipe, date, List.of());
+        when(plannedRecipeRepository.findByDateIsBetween(startDate, endDate)).thenReturn(List.of(plannedRecipe));
 
-        final ShoppingList shoppingList = shoppingListService.generateShoppingList(startDate, endDate);
+        var shoppingList = shoppingListService.generateShoppingList(startDate, endDate);
 
-        assertThat(shoppingList.getItems(), is(recipe.getRecipeIngredients()));
+        assertThat(shoppingList.getItems(), is(recipe.recipeIngredients()));
     }
 }

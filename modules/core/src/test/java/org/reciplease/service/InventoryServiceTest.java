@@ -39,31 +39,22 @@ class InventoryServiceTest {
     @Test
     @DisplayName("should save item")
     void save() {
-        final var item = InventoryItem.builder()
-                .name("bread")
-                .measure("ITEMS")
-                .amount(10d)
-                .expiration(LocalDate.now())
-                .barcode("0123456789012")
-                .build();
-
-        final var savedItem = item.toBuilder()
-                .id(UUID.randomUUID().toString())
-                .build();
+        var item = new InventoryItem(null, null, "bread", "ITEMS", 10d, LocalDate.now(), "0123456789012");
+        var savedItem = item.withId(UUID.randomUUID().toString());
 
         when(inventoryRepository.save(item)).thenReturn(savedItem);
 
-        final var actual = inventoryService.save(item);
+        var actual = inventoryService.save(item);
 
         assertThat(actual, is(savedItem));
     }
 
     @Test
     void noItem() {
-        final var itemId = UUID.randomUUID().toString();
+        var itemId = UUID.randomUUID().toString();
         when(inventoryRepository.findById(itemId)).thenReturn(Optional.empty());
 
-        final var item = inventoryService.findById(itemId);
+        var item = inventoryService.findById(itemId);
 
         assertThat(item.isEmpty(), is(true));
     }
@@ -75,21 +66,15 @@ class InventoryServiceTest {
 
         @BeforeEach
         void setUp() {
-            item = InventoryItem.builder()
-                    .id(UUID.randomUUID().toString())
-                    .name("bread")
-                    .measure("ITEMS")
-                    .amount(10d)
-                    .expiration(LocalDate.now())
-                    .build();
+            item = new InventoryItem(UUID.randomUUID().toString(), null, "bread", "ITEMS", 10d, LocalDate.now(), null);
         }
 
         @Test
         @DisplayName("should find item by ID")
         void findById() {
-            when(inventoryRepository.findById(item.getId())).thenReturn(Optional.of(item));
+            when(inventoryRepository.findById(item.id())).thenReturn(Optional.of(item));
 
-            final var actual = inventoryService.findById(item.getId());
+            var actual = inventoryService.findById(item.id());
 
             assertThat(actual.isPresent(), is(true));
             assertThat(actual.get(), is(item));
@@ -99,7 +84,7 @@ class InventoryServiceTest {
         void findAll() {
             when(inventoryRepository.findAll()).thenReturn(List.of(item));
 
-            final var actual = inventoryService.findAll();
+            var actual = inventoryService.findAll();
 
             assertThat(actual, contains(item));
         }
@@ -109,7 +94,7 @@ class InventoryServiceTest {
             when((inventoryRepository.betweenDates(now.atOffset(ZoneOffset.UTC).toLocalDate())))
                     .thenReturn(List.of(item));
 
-            final var allExpired = inventoryService.findAllExpired();
+            var allExpired = inventoryService.findAllExpired();
 
             assertThat(allExpired, contains(item));
         }
@@ -119,7 +104,7 @@ class InventoryServiceTest {
             when(inventoryRepository.expiresAfter(now.atOffset(ZoneOffset.UTC).toLocalDate()))
                     .thenReturn(List.of(item));
 
-            final var allUnexpired = inventoryService.findAllUnexpired();
+            var allUnexpired = inventoryService.findAllUnexpired();
 
             assertThat(allUnexpired, contains(item));
         }

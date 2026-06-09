@@ -40,20 +40,12 @@ class InventoryControllerTest {
     @Test
     @DisplayName("should create inventory item")
     void shouldCreateInventoryItem() throws Exception {
-        final var mockRequestItem = InventoryItem.builder()
-                .name("bread")
-                .measure("item")
-                .amount(20d)
-                .expiration(LocalDate.of(2020, Month.JANUARY, 1))
-                .barcode("0123456789012")
-                .build();
-        final var mockResponseItem = mockRequestItem.toBuilder()
-                .id("b465af6e-2465-4436-84c1-14f35db68dbf")
-                .build();
+        var mockRequestItem = new InventoryItem(null, null, "bread", "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
+        var mockResponseItem = mockRequestItem.withId("b465af6e-2465-4436-84c1-14f35db68dbf");
 
         when(inventoryService.save(mockRequestItem)).thenReturn(mockResponseItem);
-        final String createJson = readTestResource(InventoryControllerTest.class, "createItem.json");
-        final String savedJson = readTestResource(InventoryControllerTest.class, "savedItem.json");
+        var createJson = readTestResource(InventoryControllerTest.class, "createItem.json");
+        var savedJson = readTestResource(InventoryControllerTest.class, "savedItem.json");
 
         mockMvc.perform(post("/api/inventory")
                         .with(csrf())
@@ -72,24 +64,17 @@ class InventoryControllerTest {
 
         @BeforeEach
         void setUp() {
-            item = InventoryItem.builder()
-                    .id("b465af6e-2465-4436-84c1-14f35db68dbf")
-                    .name("bread")
-                    .measure("item")
-                    .amount(20d)
-                    .expiration(LocalDate.of(2020, Month.JANUARY, 1))
-                    .barcode("0123456789012")
-                    .build();
+            item = new InventoryItem("b465af6e-2465-4436-84c1-14f35db68dbf", null, "bread", "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
         }
 
         @Test
         @DisplayName("should find item by ID")
         void findById() throws Exception {
-            final String itemJson = readTestResource(WithItem.class, "item.json");
+            var itemJson = readTestResource(WithItem.class, "item.json");
 
-            when(inventoryService.findById(item.getId())).thenReturn(Optional.of(item));
+            when(inventoryService.findById(item.id())).thenReturn(Optional.of(item));
 
-            mockMvc.perform(get("/api/inventory/{uuid}", item.getId()))
+            mockMvc.perform(get("/api/inventory/{uuid}", item.id()))
                     .andExpect(status().isOk())
                     .andExpect(content().json(itemJson, true));
         }
@@ -97,7 +82,7 @@ class InventoryControllerTest {
         @Test
         @DisplayName("should return all items")
         void findAll() throws Exception {
-            final String itemsJson = readTestResource(WithItem.class, "items.json");
+            var itemsJson = readTestResource(WithItem.class, "items.json");
 
             when(inventoryService.findAll()).thenReturn(List.of(item));
 
@@ -109,7 +94,7 @@ class InventoryControllerTest {
         @Test
         @DisplayName("should return expired items")
         void expiredItems() throws Exception {
-            final String itemsJson = readTestResource(WithItem.class, "items.json");
+            var itemsJson = readTestResource(WithItem.class, "items.json");
 
             when(inventoryService.findAllExpired()).thenReturn(List.of(item));
 
@@ -121,7 +106,7 @@ class InventoryControllerTest {
         @Test
         @DisplayName("should return unexpired items")
         void unexpiredItems() throws Exception {
-            final String itemsJson = readTestResource(WithItem.class, "items.json");
+            var itemsJson = readTestResource(WithItem.class, "items.json");
 
             when(inventoryService.findAllUnexpired()).thenReturn(List.of(item));
 

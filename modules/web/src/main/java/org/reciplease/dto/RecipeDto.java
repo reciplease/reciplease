@@ -25,11 +25,11 @@ public class RecipeDto {
 
     public static RecipeDto from(final Recipe recipe) {
         return RecipeDto.builder()
-                .recipeId(recipe.getId())
-                .name(recipe.getName())
-                .description(recipe.getDescription())
-                .steps(recipe.getSteps())
-                .ingredients(recipe.getRecipeIngredients().stream()
+                .recipeId(recipe.id())
+                .name(recipe.name())
+                .description(recipe.description())
+                .steps(recipe.steps())
+                .ingredients(recipe.recipeIngredients().stream()
                         .map(RecipeIngredientDto::from)
                         .collect(Collectors.toSet()))
                 .build();
