@@ -1,5 +1,6 @@
 package org.reciplease.model;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -16,7 +17,9 @@ public record InventoryItem(
         String measure,
         Double amount,
         LocalDate expiration,
-        String barcode) implements Audited {
+        String barcode,
+        Instant createdAt,
+        Instant updatedAt) implements Audited {
 
     public InventoryItem {
         Objects.requireNonNull(name, "name");
@@ -25,7 +28,12 @@ public record InventoryItem(
         Objects.requireNonNull(expiration, "expiration");
     }
 
+    public InventoryItem(final String id, final String createdBy, final String name, final String measure,
+                          final Double amount, final LocalDate expiration, final String barcode) {
+        this(id, createdBy, name, measure, amount, expiration, barcode, null, null);
+    }
+
     public InventoryItem withId(final String id) {
-        return new InventoryItem(id, createdBy, name, measure, amount, expiration, barcode);
+        return new InventoryItem(id, createdBy, name, measure, amount, expiration, barcode, createdAt, updatedAt);
     }
 }

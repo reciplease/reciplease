@@ -5,9 +5,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Document("inventory")
@@ -26,6 +29,10 @@ public class InventoryItemDocument {
     private String barcode;
     @CreatedBy
     private String createdBy;
+    @CreatedDate
+    private Instant createdAt;
+    @LastModifiedDate
+    private Instant updatedAt;
 
     public static InventoryItemDocument from(final InventoryItem item) {
         return InventoryItemDocument.builder()
@@ -36,10 +43,12 @@ public class InventoryItemDocument {
                 .expiration(item.expiration())
                 .barcode(item.barcode())
                 .createdBy(item.createdBy())
+                .createdAt(item.createdAt())
+                .updatedAt(item.updatedAt())
                 .build();
     }
 
     public InventoryItem toModel() {
-        return new InventoryItem(id, createdBy, name, measure, amount, expiration, barcode);
+        return new InventoryItem(id, createdBy, name, measure, amount, expiration, barcode, createdAt, updatedAt);
     }
 }

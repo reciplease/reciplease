@@ -19,6 +19,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 @DataMongoTest
 @Import({PlannedRecipeRepositoryImpl.class, RecipeRepositoryImpl.class})
@@ -53,6 +54,17 @@ public class PlannedRecipeRepositoryTest {
         var plannedRecipes = plannedRecipeRepository.findByDateIsBetween(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
 
         assertThat(plannedRecipes, is(empty()));
+    }
+
+    @Test
+    public void shouldSetIdAndCreatedAtAndUpdatedAtOnSave() {
+        var recipe = recipeRepository.save(Recipe.builder().build());
+
+        var saved = plannedRecipeRepository.save(new PlannedRecipe(recipe, LocalDate.of(2026, 6, 10), List.of()));
+
+        assertThat(saved.id(), is(notNullValue()));
+        assertThat(saved.createdAt(), is(notNullValue()));
+        assertThat(saved.updatedAt(), is(notNullValue()));
     }
 
     @Test

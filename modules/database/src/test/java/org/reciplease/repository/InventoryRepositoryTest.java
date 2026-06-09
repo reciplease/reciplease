@@ -15,7 +15,9 @@ import java.time.Month;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 @DataMongoTest
 @Import(InventoryRepositoryImpl.class)
@@ -82,5 +84,24 @@ class InventoryRepositoryTest {
     @Test
     void shouldReturnEmptyWhenBarcodeUnknown() {
         assertThat(inventoryRepository.findByBarcode("nope"), is(empty()));
+    }
+
+    @Test
+    void shouldSetCreatedAtAndUpdatedAtOnCreate() {
+        var saved = inventoryRepository.save(new InventoryItem(null, null, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
+
+        assertThat(saved.createdAt(), is(notNullValue()));
+        assertThat(saved.updatedAt(), is(notNullValue()));
+    }
+
+    @Test
+    void shouldPreserveCreatedAtAndAdvanceUpdatedAtOnUpdate() {
+        var saved = inventoryRepository.save(new InventoryItem(null, null, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
+
+        var updated = inventoryRepository.save(new InventoryItem(saved.id(), saved.createdBy(), saved.name(), saved.measure(), 12d,
+                saved.expiration(), saved.barcode(), saved.createdAt(), saved.updatedAt()));
+
+        assertThat(updated.createdAt(), is(saved.createdAt()));
+        assertThat(updated.updatedAt(), is(greaterThanOrEqualTo(saved.updatedAt())));
     }
 }

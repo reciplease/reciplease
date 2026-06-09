@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -13,12 +14,14 @@ import java.util.Set;
 
 @Getter
 @Accessors(fluent = true)
-@EqualsAndHashCode(exclude = "createdBy")
+@EqualsAndHashCode(exclude = {"createdBy", "createdAt", "updatedAt"})
 @ToString
 @Builder(toBuilder = true)
 public final class Recipe implements Audited {
     private final String id;
     private final String createdBy;
+    private final Instant createdAt;
+    private final Instant updatedAt;
     private final String name;
     private final String description;
     @Builder.Default
