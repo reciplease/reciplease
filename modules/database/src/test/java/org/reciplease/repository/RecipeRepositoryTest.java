@@ -2,6 +2,7 @@ package org.reciplease.repository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.reciplease.configuration.MongoAuditingConfig;
 import org.reciplease.model.Recipe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
@@ -14,7 +15,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 @DataMongoTest
-@Import(RecipeRepositoryImpl.class)
+@Import({RecipeRepositoryImpl.class, MongoAuditingConfig.class})
 class RecipeRepositoryTest {
     @Autowired
     private RecipeRepository recipeRepository;
