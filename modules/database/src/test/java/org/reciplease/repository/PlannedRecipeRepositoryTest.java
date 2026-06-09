@@ -2,6 +2,7 @@ package org.reciplease.repository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.reciplease.configuration.MongoAuditingConfig;
 import org.reciplease.model.IngredientPairing;
 import org.reciplease.model.InventoryAllocation;
 import org.reciplease.model.PlannedRecipe;
@@ -22,7 +23,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 @DataMongoTest
-@Import({PlannedRecipeRepositoryImpl.class, RecipeRepositoryImpl.class})
+@Import({PlannedRecipeRepositoryImpl.class, RecipeRepositoryImpl.class, MongoAuditingConfig.class})
 public class PlannedRecipeRepositoryTest {
     @Autowired
     private PlannedRecipeRepository plannedRecipeRepository;

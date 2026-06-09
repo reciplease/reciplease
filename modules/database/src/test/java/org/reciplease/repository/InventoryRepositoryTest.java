@@ -3,6 +3,7 @@ package org.reciplease.repository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.reciplease.configuration.MongoAuditingConfig;
 import org.reciplease.model.InventoryItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
@@ -20,7 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 @DataMongoTest
-@Import(InventoryRepositoryImpl.class)
+@Import({InventoryRepositoryImpl.class, MongoAuditingConfig.class})
 class InventoryRepositoryTest {
     @Autowired
     private InventoryRepository inventoryRepository;
