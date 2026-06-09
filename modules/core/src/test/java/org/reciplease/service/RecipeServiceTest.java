@@ -35,14 +35,14 @@ class RecipeServiceTest {
     @Test
     @DisplayName("get recipe by id")
     void getRecipe() {
-        final var toast = Recipe.builder()
+        var toast = Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("toast")
                 .build();
 
-        when(recipeRepository.findById(toast.getId())).thenReturn(Optional.of(toast));
+        when(recipeRepository.findById(toast.id())).thenReturn(Optional.of(toast));
 
-        final var optionalRecipe = recipeService.findById(toast.getId());
+        var optionalRecipe = recipeService.findById(toast.id());
 
         assertTrue(optionalRecipe.isPresent());
         assertThat(optionalRecipe.get(), is(toast));
@@ -51,35 +51,35 @@ class RecipeServiceTest {
     @Test
     @DisplayName("get all recipes")
     void findAll() {
-        final var recipe1 = Recipe.builder()
+        var recipe1 = Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("toast")
                 .build();
-        final var recipe2 = Recipe.builder()
+        var recipe2 = Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("soup")
                 .build();
-        final var recipes = List.of(recipe1, recipe2);
+        var recipes = List.of(recipe1, recipe2);
 
         when(recipeRepository.findAll()).thenReturn(recipes);
 
-        final var actualRecipes = recipeService.findAll();
+        var actualRecipes = recipeService.findAll();
 
         assertThat(actualRecipes, is(recipes));
     }
 
     @Test
     void createRecipe() {
-        final var newRecipe = Recipe.builder()
+        var newRecipe = Recipe.builder()
                 .name("toast")
                 .build();
-        final var savedRecipe = newRecipe.toBuilder()
+        var savedRecipe = newRecipe.toBuilder()
                 .id(UUID.randomUUID().toString())
                 .build();
 
         when(recipeRepository.save(newRecipe)).thenReturn(savedRecipe);
 
-        final Recipe actualRecipe = recipeService.create(newRecipe);
+        var actualRecipe = recipeService.create(newRecipe);
 
         assertThat(actualRecipe, is(savedRecipe));
     }
@@ -98,25 +98,21 @@ class RecipeServiceTest {
 
         @Test
         void shouldAddIngredientToRecipe() {
-            when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
+            when(recipeRepository.findById(recipe.id())).thenReturn(Optional.of(recipe));
             when(recipeRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-            final var recipeIngredients = recipeService.addIngredient(recipe.getId(),
+            var recipeIngredients = recipeService.addIngredient(recipe.id(),
                     new AddIngredient("bread", "ITEMS", 10d));
 
-            assertThat(recipeIngredients, contains(RecipeIngredient.builder()
-                    .name("bread")
-                    .measure("ITEMS")
-                    .amount(10d)
-                    .build()));
+            assertThat(recipeIngredients, contains(new RecipeIngredient("bread", "ITEMS", 10d)));
         }
 
         @Test
         void shouldFail_recipeNotFound() {
-            when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.empty());
+            when(recipeRepository.findById(recipe.id())).thenReturn(Optional.empty());
 
-            final var exception = assertThrows(IllegalArgumentException.class,
-                    () -> recipeService.addIngredient(recipe.getId(), new AddIngredient("bread", "ITEMS", 10d)));
+            var exception = assertThrows(IllegalArgumentException.class,
+                    () -> recipeService.addIngredient(recipe.id(), new AddIngredient("bread", "ITEMS", 10d)));
 
             assertThat(exception.getMessage(), is("Recipe does not exist"));
         }

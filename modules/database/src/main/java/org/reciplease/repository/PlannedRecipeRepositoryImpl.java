@@ -20,7 +20,7 @@ public class PlannedRecipeRepositoryImpl implements PlannedRecipeRepository {
     @Override
     public PlannedRecipe save(final PlannedRecipe plannedRecipe) {
         final var saved = plannedRecipeMongoRepository.save(PlannedRecipeDocument.from(plannedRecipe));
-        return saved.toModel(plannedRecipe.getRecipe());
+        return saved.toModel(plannedRecipe.recipe());
     }
 
     @Override

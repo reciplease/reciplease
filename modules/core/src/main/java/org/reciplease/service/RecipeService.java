@@ -44,6 +44,6 @@ public class RecipeService {
 
         final var savedRecipe = recipeRepository.save(recipe);
 
-        return savedRecipe.getRecipeIngredients();
+        return savedRecipe.recipeIngredients();
     }
 }

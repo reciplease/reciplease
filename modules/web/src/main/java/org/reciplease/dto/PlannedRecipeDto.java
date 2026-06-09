@@ -22,9 +22,9 @@ public class PlannedRecipeDto {
 
     public static PlannedRecipeDto from(final PlannedRecipe plannedRecipe) {
         return PlannedRecipeDto.builder()
-                .recipe(RecipeDto.from(plannedRecipe.getRecipe()))
-                .date(plannedRecipe.getDate())
-                .pairings(plannedRecipe.getPairings().stream()
+                .recipe(RecipeDto.from(plannedRecipe.recipe()))
+                .date(plannedRecipe.date())
+                .pairings(plannedRecipe.pairings().stream()
                         .map(IngredientPairingDto::from)
                         .collect(Collectors.toList()))
                 .build();

@@ -31,37 +31,26 @@ public class PlannedRecipeService {
      * same recipe can suggest matching items.
      */
     public PlannedRecipe plan(final String recipeId, final LocalDate date, final List<IngredientPairing> pairings) {
-        final var recipe = recipeRepository.findById(recipeId)
+        var recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new IllegalArgumentException("Recipe does not exist"));
 
-        final var resolvedPairings = pairings.stream()
+        var resolvedPairings = pairings.stream()
                 .map(this::resolvePairing)
                 .collect(Collectors.toList());
 
-        return plannedRecipeRepository.save(PlannedRecipe.builder()
-                .recipe(recipe)
-                .date(date)
-                .pairings(resolvedPairings)
-                .build());
+        return plannedRecipeRepository.save(new PlannedRecipe(recipe, date, resolvedPairings));
     }
 
     private IngredientPairing resolvePairing(final IngredientPairing pairing) {
-        final var allocations = pairing.getAllocations().stream()
+        var allocations = pairing.allocations().stream()
                 .map(allocation -> {
-                    final var item = inventoryRepository.findById(allocation.getInventoryItemId())
+                    var item = inventoryRepository.findById(allocation.inventoryItemId())
                             .orElseThrow(() -> new IllegalArgumentException("Inventory item does not exist"));
-                    return InventoryAllocation.builder()
-                            .inventoryItemId(item.getId())
-                            .barcode(item.getBarcode())
-                            .amount(allocation.getAmount())
-                            .build();
+                    return new InventoryAllocation(item.id(), item.barcode(), allocation.amount());
                 })
                 .collect(Collectors.toList());
 
-        return IngredientPairing.builder()
-                .recipeIngredient(pairing.getRecipeIngredient())
-                .allocations(allocations)
-                .build();
+        return new IngredientPairing(pairing.recipeIngredient(), allocations);
     }
 
     /**
@@ -70,15 +59,15 @@ public class PlannedRecipeService {
      * inventory. Falls back to matching the ingredient name when no barcode history is available.
      */
     public List<InventoryItem> suggestInventory(final String recipeId, final String recipeIngredientName) {
-        final Set<String> historicBarcodes = plannedRecipeRepository.findByRecipeId(recipeId).stream()
-                .flatMap(plannedRecipe -> plannedRecipe.getPairings().stream())
-                .filter(pairing -> pairing.getRecipeIngredient().getName().equals(recipeIngredientName))
-                .flatMap(pairing -> pairing.getAllocations().stream())
-                .map(InventoryAllocation::getBarcode)
+        var historicBarcodes = plannedRecipeRepository.findByRecipeId(recipeId).stream()
+                .flatMap(plannedRecipe -> plannedRecipe.pairings().stream())
+                .filter(pairing -> pairing.recipeIngredient().name().equals(recipeIngredientName))
+                .flatMap(pairing -> pairing.allocations().stream())
+                .map(InventoryAllocation::barcode)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
-        final List<InventoryItem> byBarcode = historicBarcodes.stream()
+        var byBarcode = historicBarcodes.stream()
                 .flatMap(barcode -> inventoryRepository.findByBarcode(barcode).stream())
                 .collect(Collectors.toList());
 
@@ -90,8 +79,8 @@ public class PlannedRecipeService {
     }
 
     private List<InventoryItem> distinctById(final List<InventoryItem> items) {
-        final Map<String, InventoryItem> byId = new LinkedHashMap<>();
-        items.forEach(item -> byId.putIfAbsent(item.getId(), item));
+        Map<String, InventoryItem> byId = new LinkedHashMap<>();
+        items.forEach(item -> byId.putIfAbsent(item.id(), item));
         return List.copyOf(byId.values());
     }
 }

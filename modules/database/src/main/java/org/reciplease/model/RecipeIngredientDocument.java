@@ -17,17 +17,13 @@ public class RecipeIngredientDocument {
 
     public static RecipeIngredientDocument from(final RecipeIngredient recipeIngredient) {
         return RecipeIngredientDocument.builder()
-                .name(recipeIngredient.getName())
-                .measure(recipeIngredient.getMeasure())
-                .amount(recipeIngredient.getAmount())
+                .name(recipeIngredient.name())
+                .measure(recipeIngredient.measure())
+                .amount(recipeIngredient.amount())
                 .build();
     }
 
     public RecipeIngredient toModel() {
-        return RecipeIngredient.builder()
-                .name(name)
-                .measure(measure)
-                .amount(amount)
-                .build();
+        return new RecipeIngredient(name, measure, amount);
     }
 }

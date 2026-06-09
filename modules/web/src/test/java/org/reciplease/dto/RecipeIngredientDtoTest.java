@@ -12,30 +12,26 @@ class RecipeIngredientDtoTest {
     @Test
     @DisplayName("create DTO from entity")
     void fromEntity() {
-        final var recipeIngredient = RecipeIngredient.builder()
-                .name("Bread")
-                .measure("ITEMS")
-                .amount(1d)
-                .build();
+        var recipeIngredient = new RecipeIngredient("Bread", "ITEMS", 1d);
 
-        final var recipeIngredientDto = RecipeIngredientDto.from(recipeIngredient);
+        var recipeIngredientDto = RecipeIngredientDto.from(recipeIngredient);
 
-        assertThat(recipeIngredientDto.getName(), is(recipeIngredient.getName()));
+        assertThat(recipeIngredientDto.getName(), is(recipeIngredient.name()));
         // Legacy measure ids are normalized to their short form.
         assertThat(recipeIngredientDto.getMeasure(), is("item"));
-        assertThat(recipeIngredientDto.getAmount(), is(recipeIngredient.getAmount()));
+        assertThat(recipeIngredientDto.getAmount(), is(recipeIngredient.amount()));
     }
 
     @Test
     @DisplayName("round-trips to model")
     void toModel() {
-        final var dto = RecipeIngredientDto.builder()
+        var dto = RecipeIngredientDto.builder()
                 .name("Bread").measure("item").amount(2d).build();
 
-        final var model = dto.toModel();
+        var model = dto.toModel();
 
-        assertThat(model.getName(), is("Bread"));
-        assertThat(model.getMeasure(), is("item"));
-        assertThat(model.getAmount(), is(2d));
+        assertThat(model.name(), is("Bread"));
+        assertThat(model.measure(), is("item"));
+        assertThat(model.amount(), is(2d));
     }
 }

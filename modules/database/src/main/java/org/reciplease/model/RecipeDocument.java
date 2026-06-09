@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -26,25 +27,29 @@ public class RecipeDocument {
     private List<String> steps = new ArrayList<>();
     @Builder.Default
     private List<RecipeIngredientDocument> ingredients = new ArrayList<>();
+    @CreatedBy
+    private String createdBy;
 
     public static RecipeDocument from(final Recipe recipe) {
         return RecipeDocument.builder()
-                .id(recipe.getId())
-                .name(recipe.getName())
-                .description(recipe.getDescription())
-                .steps(recipe.getSteps() != null ? recipe.getSteps() : new ArrayList<>())
-                .ingredients(recipe.getRecipeIngredients().stream()
+                .id(recipe.id())
+                .name(recipe.name())
+                .description(recipe.description())
+                .steps(recipe.steps() != null ? recipe.steps() : new ArrayList<>())
+                .ingredients(recipe.recipeIngredients().stream()
                         .map(RecipeIngredientDocument::from)
                         .collect(Collectors.toList()))
+                .createdBy(recipe.createdBy())
                 .build();
     }
 
     public Recipe toModel() {
-        Recipe recipe = Recipe.builder()
+        var recipe = Recipe.builder()
                 .id(id)
                 .name(name)
                 .description(description)
                 .steps(steps != null ? steps : new ArrayList<>())
+                .createdBy(createdBy)
                 .build();
         if (ingredients != null) {
             ingredients.stream()

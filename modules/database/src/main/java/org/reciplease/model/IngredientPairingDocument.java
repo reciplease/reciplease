@@ -21,19 +21,17 @@ public class IngredientPairingDocument {
 
     public static IngredientPairingDocument from(final IngredientPairing pairing) {
         return IngredientPairingDocument.builder()
-                .recipeIngredient(RecipeIngredientDocument.from(pairing.getRecipeIngredient()))
-                .allocations(pairing.getAllocations().stream()
+                .recipeIngredient(RecipeIngredientDocument.from(pairing.recipeIngredient()))
+                .allocations(pairing.allocations().stream()
                         .map(InventoryAllocationDocument::from)
                         .collect(Collectors.toList()))
                 .build();
     }
 
     public IngredientPairing toModel() {
-        return IngredientPairing.builder()
-                .recipeIngredient(recipeIngredient.toModel())
-                .allocations(allocations == null ? List.of() : allocations.stream()
-                        .map(InventoryAllocationDocument::toModel)
-                        .collect(Collectors.toList()))
-                .build();
+        var resolvedAllocations = allocations == null ? List.<InventoryAllocation>of() : allocations.stream()
+                .map(InventoryAllocationDocument::toModel)
+                .collect(Collectors.toList());
+        return new IngredientPairing(recipeIngredient.toModel(), resolvedAllocations);
     }
 }

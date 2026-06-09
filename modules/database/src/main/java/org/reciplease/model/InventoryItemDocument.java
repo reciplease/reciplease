@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -23,26 +24,22 @@ public class InventoryItemDocument {
     private Double amount;
     private LocalDate expiration;
     private String barcode;
+    @CreatedBy
+    private String createdBy;
 
     public static InventoryItemDocument from(final InventoryItem item) {
         return InventoryItemDocument.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .measure(item.getMeasure())
-                .amount(item.getAmount())
-                .expiration(item.getExpiration())
-                .barcode(item.getBarcode())
+                .id(item.id())
+                .name(item.name())
+                .measure(item.measure())
+                .amount(item.amount())
+                .expiration(item.expiration())
+                .barcode(item.barcode())
+                .createdBy(item.createdBy())
                 .build();
     }
 
     public InventoryItem toModel() {
-        return InventoryItem.builder()
-                .id(id)
-                .name(name)
-                .measure(measure)
-                .amount(amount)
-                .expiration(expiration)
-                .barcode(barcode)
-                .build();
+        return new InventoryItem(id, createdBy, name, measure, amount, expiration, barcode);
     }
 }

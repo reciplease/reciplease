@@ -1,22 +1,13 @@
 package org.reciplease.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NonNull;
-import lombok.Singular;
-import lombok.Value;
-
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
-@Value
-@AllArgsConstructor
-@Builder
-public class PlannedRecipe {
-    @NonNull
-    Recipe recipe;
-    @NonNull
-    LocalDate date;
-    @Singular
-    List<IngredientPairing> pairings;
+public record PlannedRecipe(Recipe recipe, LocalDate date, List<IngredientPairing> pairings) {
+    public PlannedRecipe {
+        Objects.requireNonNull(recipe, "recipe");
+        Objects.requireNonNull(date, "date");
+        pairings = pairings == null ? List.of() : List.copyOf(pairings);
+    }
 }

@@ -17,9 +17,9 @@ public class ShoppingListService {
     private final PlannedRecipeRepository plannedRecipeRepository;
 
     public ShoppingList generateShoppingList(final LocalDate start, final LocalDate end) {
-        final Set<RecipeIngredient> recipeIngredients = plannedRecipeRepository.findByDateIsBetween(start, end).stream()
-                .map(PlannedRecipe::getRecipe)
-                .flatMap(recipe -> recipe.getRecipeIngredients().stream())
+        var recipeIngredients = plannedRecipeRepository.findByDateIsBetween(start, end).stream()
+                .map(PlannedRecipe::recipe)
+                .flatMap(recipe -> recipe.recipeIngredients().stream())
                 .collect(Collectors.toSet());
         return new ShoppingList(recipeIngredients);
     }

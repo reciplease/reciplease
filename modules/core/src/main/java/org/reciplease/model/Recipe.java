@@ -2,32 +2,32 @@ package org.reciplease.model;
 
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
-import lombok.Value;
-import lombok.experimental.SuperBuilder;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Value
-@EqualsAndHashCode(callSuper = true)
-@SuperBuilder(toBuilder = true)
-public class Recipe extends Identifiable {
-    String name;
-    String description;
-
+@Getter
+@Accessors(fluent = true)
+@EqualsAndHashCode(exclude = "createdBy")
+@ToString
+@Builder(toBuilder = true)
+public final class Recipe implements Audited {
+    private final String id;
+    private final String createdBy;
+    private final String name;
+    private final String description;
     @Builder.Default
-    List<String> steps = new ArrayList<>();
-
-    Set<RecipeIngredient> recipeIngredients = new HashSet<>();
+    private final List<String> steps = new ArrayList<>();
+    @Builder.Default
+    private final Set<RecipeIngredient> recipeIngredients = new HashSet<>();
 
     public Recipe addIngredient(final String name, final String measure, final Double amount) {
-        return addIngredient(RecipeIngredient.builder()
-                .name(name)
-                .measure(measure)
-                .amount(amount)
-                .build());
+        return addIngredient(new RecipeIngredient(name, measure, amount));
     }
 
     public Recipe addIngredient(final RecipeIngredient recipeIngredient) {
@@ -36,7 +36,7 @@ public class Recipe extends Identifiable {
     }
 
     public Recipe removeIngredient(final String name) {
-        recipeIngredients.removeIf(item -> item.getName().equals(name));
+        recipeIngredients.removeIf(item -> item.name().equals(name));
         return this;
     }
 }

@@ -42,32 +42,21 @@ class InventoryRepositoryTest {
         void setUp() {
             today = LocalDate.of(2020, Month.JANUARY, 2);
 
-            final var sliceOfBreadBuilder = InventoryItem.builder()
-                    .name("bread")
-                    .measure("ITEMS")
-                    .amount(1d);
-
-            slice_Jan1 = inventoryRepository.save(sliceOfBreadBuilder
-                    .expiration(LocalDate.of(2020, Month.JANUARY, 1))
-                    .build());
-            slice_Jan2 = inventoryRepository.save(sliceOfBreadBuilder
-                    .expiration(LocalDate.of(2020, Month.JANUARY, 2))
-                    .build());
-            slice_Jan3 = inventoryRepository.save(sliceOfBreadBuilder
-                    .expiration(LocalDate.of(2020, Month.JANUARY, 3))
-                    .build());
+            slice_Jan1 = inventoryRepository.save(new InventoryItem(null, null, "bread", "ITEMS", 1d, LocalDate.of(2020, Month.JANUARY, 1), null));
+            slice_Jan2 = inventoryRepository.save(new InventoryItem(null, null, "bread", "ITEMS", 1d, LocalDate.of(2020, Month.JANUARY, 2), null));
+            slice_Jan3 = inventoryRepository.save(new InventoryItem(null, null, "bread", "ITEMS", 1d, LocalDate.of(2020, Month.JANUARY, 3), null));
         }
 
         @Test
         void shouldGetExpiredInventory() {
-            final var expired = inventoryRepository.betweenDates(today);
+            var expired = inventoryRepository.betweenDates(today);
 
             assertThat(expired, contains(slice_Jan1));
         }
 
         @Test
         void shouldGetUnexpiredInventory() {
-            final var unexpired = inventoryRepository.expiresAfter(today);
+            var unexpired = inventoryRepository.expiresAfter(today);
 
             assertThat(unexpired, contains(slice_Jan2, slice_Jan3));
         }
@@ -75,24 +64,17 @@ class InventoryRepositoryTest {
 
     @Test
     void shouldFindByBarcodeAndPreserveIt() {
-        final var saved = inventoryRepository.save(InventoryItem.builder()
-                .name("milk").measure("MILLILITRES").amount(1000d)
-                .expiration(LocalDate.of(2026, Month.JUNE, 6))
-                .barcode("5012345678900")
-                .build());
+        var saved = inventoryRepository.save(new InventoryItem(null, null, "milk", "MILLILITRES", 1000d, LocalDate.of(2026, Month.JUNE, 6), "5012345678900"));
 
-        final var found = inventoryRepository.findByBarcode("5012345678900");
+        var found = inventoryRepository.findByBarcode("5012345678900");
 
         assertThat(found, contains(saved));
-        assertThat(found.get(0).getBarcode(), is("5012345678900"));
+        assertThat(found.get(0).barcode(), is("5012345678900"));
     }
 
     @Test
     void shouldFindByNameIgnoringCase() {
-        final var saved = inventoryRepository.save(InventoryItem.builder()
-                .name("Bread").measure("ITEMS").amount(2d)
-                .expiration(LocalDate.of(2026, Month.JUNE, 6))
-                .build());
+        var saved = inventoryRepository.save(new InventoryItem(null, null, "Bread", "ITEMS", 2d, LocalDate.of(2026, Month.JUNE, 6), null));
 
         assertThat(inventoryRepository.findByName("bread"), contains(saved));
     }

@@ -18,19 +18,17 @@ public class IngredientPairingDto {
 
     public static IngredientPairingDto from(final IngredientPairing pairing) {
         return IngredientPairingDto.builder()
-                .recipeIngredient(RecipeIngredientDto.from(pairing.getRecipeIngredient()))
-                .allocations(pairing.getAllocations().stream()
+                .recipeIngredient(RecipeIngredientDto.from(pairing.recipeIngredient()))
+                .allocations(pairing.allocations().stream()
                         .map(InventoryAllocationDto::from)
                         .collect(Collectors.toList()))
                 .build();
     }
 
     public IngredientPairing toModel() {
-        return IngredientPairing.builder()
-                .recipeIngredient(recipeIngredient.toModel())
-                .allocations(allocations == null ? List.of() : allocations.stream()
+        return new IngredientPairing(recipeIngredient.toModel(),
+                allocations == null ? List.of() : allocations.stream()
                         .map(InventoryAllocationDto::toModel)
-                        .collect(Collectors.toList()))
-                .build();
+                        .collect(Collectors.toList()));
     }
 }

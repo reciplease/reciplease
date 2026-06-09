@@ -1,11 +1,7 @@
 package org.reciplease.model;
 
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.Value;
-import lombok.experimental.SuperBuilder;
-
 import java.time.LocalDate;
+import java.util.Objects;
 
 /**
  * A physical item in the pantry. Independent of any recipe — it carries its own name and
@@ -13,17 +9,23 @@ import java.time.LocalDate;
  * encoded by a scanned barcode) lets historic planned recipes suggest matching items when a
  * recipe is planned again.
  */
-@Value
-@EqualsAndHashCode(callSuper = true)
-@SuperBuilder(toBuilder = true)
-public class InventoryItem extends Identifiable {
-    @NonNull
-    String name;
-    @NonNull
-    String measure;
-    @NonNull
-    Double amount;
-    @NonNull
-    LocalDate expiration;
-    String barcode;
+public record InventoryItem(
+        String id,
+        String createdBy,
+        String name,
+        String measure,
+        Double amount,
+        LocalDate expiration,
+        String barcode) implements Audited {
+
+    public InventoryItem {
+        Objects.requireNonNull(name, "name");
+        Objects.requireNonNull(measure, "measure");
+        Objects.requireNonNull(amount, "amount");
+        Objects.requireNonNull(expiration, "expiration");
+    }
+
+    public InventoryItem withId(final String id) {
+        return new InventoryItem(id, createdBy, name, measure, amount, expiration, barcode);
+    }
 }
