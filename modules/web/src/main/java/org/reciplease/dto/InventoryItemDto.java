@@ -1,5 +1,6 @@
 package org.reciplease.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +9,7 @@ import org.reciplease.model.InventoryItem;
 import org.reciplease.model.Measure;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Value
@@ -23,6 +25,9 @@ public class InventoryItemDto {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate expiration;
     String barcode;
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Instant updatedAt;
 
     public static InventoryItemDto from(final InventoryItem inventoryItem) {
         return InventoryItemDto.builder()
@@ -32,6 +37,7 @@ public class InventoryItemDto {
                 .amount(inventoryItem.amount())
                 .expiration(inventoryItem.expiration())
                 .barcode(inventoryItem.barcode())
+                .updatedAt(inventoryItem.updatedAt())
                 .build();
     }
 

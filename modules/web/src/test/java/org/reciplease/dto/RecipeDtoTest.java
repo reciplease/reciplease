@@ -42,4 +42,31 @@ class RecipeDtoTest {
 
         assertThat(recipeDto.getDescription(), is((String) null));
     }
+
+    @Test
+    @DisplayName("not editable when no current user is given")
+    void notEditableWithoutCurrentUser() {
+        var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("Toast")
+                .createdBy("owner")
+                .build();
+
+        var recipeDto = RecipeDto.from(recipe);
+
+        assertThat(recipeDto.isEditable(), is(false));
+    }
+
+    @Test
+    @DisplayName("editable when the current user owns the recipe")
+    void editableForOwner() {
+        var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("Toast")
+                .createdBy("owner")
+                .build();
+
+        assertThat(RecipeDto.from(recipe, "owner").isEditable(), is(true));
+        assertThat(RecipeDto.from(recipe, "someone-else").isEditable(), is(false));
+    }
 }

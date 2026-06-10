@@ -85,6 +85,51 @@ class RecipeServiceTest {
     }
 
     @Nested
+    class Update {
+        @Test
+        @DisplayName("merges name, description, steps and ingredients into the existing recipe")
+        void mergesUpdatesIntoExisting() {
+            var existing = Recipe.builder()
+                    .id(UUID.randomUUID().toString())
+                    .name("toast")
+                    .description("Old description")
+                    .createdBy("owner")
+                    .build()
+                    .addIngredient("bread", "ITEMS", 1d);
+
+            var updates = Recipe.builder()
+                    .name("Fancy toast")
+                    .description("New description")
+                    .steps(List.of("Toast it"))
+                    .build()
+                    .addIngredient("bread", "ITEMS", 2d);
+
+            when(recipeRepository.findById(existing.id())).thenReturn(Optional.of(existing));
+            when(recipeRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+            var result = recipeService.update(existing.id(), updates);
+
+            assertThat(result.id(), is(existing.id()));
+            assertThat(result.createdBy(), is("owner"));
+            assertThat(result.name(), is("Fancy toast"));
+            assertThat(result.description(), is("New description"));
+            assertThat(result.steps(), is(List.of("Toast it")));
+            assertThat(result.recipeIngredients(), contains(new RecipeIngredient("bread", "ITEMS", 2d)));
+        }
+
+        @Test
+        void shouldFail_recipeNotFound() {
+            var id = UUID.randomUUID().toString();
+            when(recipeRepository.findById(id)).thenReturn(Optional.empty());
+
+            var exception = assertThrows(IllegalArgumentException.class,
+                    () -> recipeService.update(id, Recipe.builder().name("toast").build()));
+
+            assertThat(exception.getMessage(), is("Recipe does not exist"));
+        }
+    }
+
+    @Nested
     class AddRecipeIngredient {
         private Recipe recipe;
 

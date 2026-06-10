@@ -8,6 +8,8 @@ import org.reciplease.service.RecipeService;
 import org.reciplease.service.request.AddIngredient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,15 +34,17 @@ public class RecipeController {
 
     @GetMapping("{uuid}")
     public ResponseEntity<RecipeDto> findById(@PathVariable final String uuid) {
+        final var currentUserId = currentUserId();
         final var optionalRecipe = recipeService.findById(uuid)
-                .map(RecipeDto::from);
+                .map(recipe -> RecipeDto.from(recipe, currentUserId));
         return ResponseEntity.of(optionalRecipe);
     }
 
     @GetMapping
     public ResponseEntity<List<RecipeDto>> findAll() {
+        final var currentUserId = currentUserId();
         final var recipes = recipeService.findAll().stream()
-                .map(RecipeDto::from)
+                .map(recipe -> RecipeDto.from(recipe, currentUserId))
                 .collect(toList());
         return ResponseEntity.status(HttpStatus.OK).body(recipes);
     }
@@ -48,7 +52,23 @@ public class RecipeController {
     @PostMapping
     public ResponseEntity<RecipeDto> create(@RequestBody final RecipeDto recipeDto) {
         final Recipe recipe = recipeService.create(recipeDto.toEntity());
-        return ResponseEntity.status(HttpStatus.CREATED).body(RecipeDto.from(recipe));
+        return ResponseEntity.status(HttpStatus.CREATED).body(RecipeDto.from(recipe, currentUserId()));
+    }
+
+    @PutMapping("{uuid}")
+    public ResponseEntity<RecipeDto> update(@PathVariable final String uuid, @RequestBody final RecipeDto recipeDto) {
+        final var existing = recipeService.findById(uuid);
+        if (existing.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        final var currentUserId = currentUserId();
+        if (currentUserId == null || !currentUserId.equals(existing.get().createdBy())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        final var updated = recipeService.update(uuid, recipeDto.toEntity());
+        return ResponseEntity.ok(RecipeDto.from(updated, currentUserId));
     }
 
     @DeleteMapping("{uuid}")
@@ -64,5 +84,12 @@ public class RecipeController {
                 .collect(Collectors.toSet());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(recipeIngredients);
+    }
+
+    private String currentUserId() {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.isAuthenticated()
+                ? authentication.getName()
+                : null;
     }
 }

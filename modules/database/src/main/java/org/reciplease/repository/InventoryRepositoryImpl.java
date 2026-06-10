@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.reciplease.model.InventoryItem;
 import org.reciplease.model.InventoryItemDocument;
 import org.reciplease.repository.mongo.InventoryMongoRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,22 +29,15 @@ public class InventoryRepositoryImpl implements InventoryRepository {
     }
 
     @Override
-    public List<InventoryItem> findAll() {
-        return inventoryMongoRepository.findAll().stream()
-                .map(InventoryItemDocument::toModel)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public List<InventoryItem> expiresAfter(final LocalDate date) {
-        return inventoryMongoRepository.findByExpirationGreaterThanEqual(date).stream()
+        return inventoryMongoRepository.findByExpirationGreaterThanEqual(date, Sort.by(Sort.Direction.ASC, "name")).stream()
                 .map(InventoryItemDocument::toModel)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<InventoryItem> betweenDates(final LocalDate date) {
-        return inventoryMongoRepository.findByExpirationBefore(date).stream()
+        return inventoryMongoRepository.findByExpirationBefore(date, Sort.by(Sort.Direction.ASC, "name")).stream()
                 .map(InventoryItemDocument::toModel)
                 .collect(Collectors.toList());
     }
@@ -50,6 +45,13 @@ public class InventoryRepositoryImpl implements InventoryRepository {
     @Override
     public List<InventoryItem> findByBarcode(final String barcode) {
         return inventoryMongoRepository.findByBarcode(barcode).stream()
+                .map(InventoryItemDocument::toModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<InventoryItem> findByBarcodeIn(final Collection<String> barcodes) {
+        return inventoryMongoRepository.findByBarcodeIn(barcodes).stream()
                 .map(InventoryItemDocument::toModel)
                 .collect(Collectors.toList());
     }

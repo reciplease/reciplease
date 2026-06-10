@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.InventoryItem;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -14,7 +15,8 @@ class InventoryItemDtoTest {
     @Test
     @DisplayName("create DTO from entity")
     void from() {
-        var item = new InventoryItem(UUID.randomUUID().toString(), null, "bread", "ITEMS", 10d, LocalDate.now(), "0123456789012");
+        var item = new InventoryItem(UUID.randomUUID().toString(), null, "bread", "ITEMS", 10d, LocalDate.now(), "0123456789012",
+                Instant.now(), Instant.now());
 
         var itemDto = InventoryItemDto.from(item);
 
@@ -25,6 +27,7 @@ class InventoryItemDtoTest {
         assertThat(itemDto.getAmount(), is(item.amount()));
         assertThat(itemDto.getExpiration(), is(item.expiration()));
         assertThat(itemDto.getBarcode(), is(item.barcode()));
+        assertThat(itemDto.getUpdatedAt(), is(item.updatedAt()));
     }
 
     @Test

@@ -1,6 +1,7 @@
 package org.reciplease.repository;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.reciplease.configuration.MongoAuditingConfig;
@@ -12,9 +13,11 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
@@ -66,6 +69,32 @@ class InventoryRepositoryTest {
     }
 
     @Test
+    @DisplayName("expiresAfter orders results alphabetically by name")
+    void shouldOrderUnexpiredAlphabeticallyByName() {
+        var today = LocalDate.of(2026, Month.JUNE, 1);
+        var milk = inventoryRepository.save(new InventoryItem(null, null, "milk", "MILLILITRES", 500d, LocalDate.of(2026, Month.JUNE, 10), null));
+        var eggs = inventoryRepository.save(new InventoryItem(null, null, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 10), null));
+        var bread = inventoryRepository.save(new InventoryItem(null, null, "bread", "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 10), null));
+
+        var unexpired = inventoryRepository.expiresAfter(today);
+
+        assertThat(unexpired, contains(bread, eggs, milk));
+    }
+
+    @Test
+    @DisplayName("betweenDates orders results alphabetically by name")
+    void shouldOrderExpiredAlphabeticallyByName() {
+        var today = LocalDate.of(2026, Month.JUNE, 10);
+        var milk = inventoryRepository.save(new InventoryItem(null, null, "milk", "MILLILITRES", 500d, LocalDate.of(2026, Month.JUNE, 1), null));
+        var eggs = inventoryRepository.save(new InventoryItem(null, null, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 1), null));
+        var bread = inventoryRepository.save(new InventoryItem(null, null, "bread", "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 1), null));
+
+        var expired = inventoryRepository.betweenDates(today);
+
+        assertThat(expired, contains(bread, eggs, milk));
+    }
+
+    @Test
     void shouldFindByBarcodeAndPreserveIt() {
         var saved = inventoryRepository.save(new InventoryItem(null, null, "milk", "MILLILITRES", 1000d, LocalDate.of(2026, Month.JUNE, 6), "5012345678900"));
 
@@ -73,6 +102,17 @@ class InventoryRepositoryTest {
 
         assertThat(found, contains(saved));
         assertThat(found.get(0).barcode(), is("5012345678900"));
+    }
+
+    @Test
+    void shouldFindByBarcodeIn() {
+        var milk = inventoryRepository.save(new InventoryItem(null, null, "milk", "MILLILITRES", 1000d, LocalDate.of(2026, Month.JUNE, 6), "5012345678900"));
+        var eggs = inventoryRepository.save(new InventoryItem(null, null, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 6), "5012345678901"));
+        inventoryRepository.save(new InventoryItem(null, null, "bread", "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 6), "5012345678902"));
+
+        var found = inventoryRepository.findByBarcodeIn(Set.of("5012345678900", "5012345678901"));
+
+        assertThat(found, containsInAnyOrder(milk, eggs));
     }
 
     @Test

@@ -32,6 +32,20 @@ public class RecipeService {
         return recipeRepository.save(recipe);
     }
 
+    public Recipe update(final String id, final Recipe updates) {
+        final var existing = recipeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Recipe does not exist"));
+
+        final var merged = existing.toBuilder()
+                .name(updates.name())
+                .description(updates.description())
+                .steps(updates.steps())
+                .recipeIngredients(updates.recipeIngredients())
+                .build();
+
+        return recipeRepository.save(merged);
+    }
+
     public void deleteById(final String id) {
         recipeRepository.deleteById(id);
     }

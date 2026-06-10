@@ -67,9 +67,7 @@ public class PlannedRecipeService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
-        var byBarcode = historicBarcodes.stream()
-                .flatMap(barcode -> inventoryRepository.findByBarcode(barcode).stream())
-                .collect(Collectors.toList());
+        var byBarcode = inventoryRepository.findByBarcodeIn(historicBarcodes);
 
         if (!byBarcode.isEmpty()) {
             return distinctById(byBarcode);

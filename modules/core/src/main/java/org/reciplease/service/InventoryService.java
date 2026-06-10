@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,7 +26,10 @@ public class InventoryService {
     }
 
     public List<InventoryItem> findAll() {
-        return inventoryRepository.findAll();
+        final var today = LocalDate.now(clock);
+        final var items = new ArrayList<InventoryItem>(inventoryRepository.expiresAfter(today));
+        items.addAll(inventoryRepository.betweenDates(today));
+        return items;
     }
 
     public List<InventoryItem> findAllUnexpired() {

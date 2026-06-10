@@ -21,6 +21,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -117,6 +120,61 @@ class RecipeControllerTest {
                         .content(data))
                 .andExpect(status().isCreated())
                 .andExpect(content().json(expectedJson, true));
+    }
+
+    @Test
+    @DisplayName("update recipe when current user is the owner")
+    void updateRecipeAsOwner() throws Exception {
+        final var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("soup")
+                .createdBy("user")
+                .build();
+        final var updated = recipe.toBuilder().name("tomato soup").build();
+        final var updateDto = RecipeDto.builder().recipeId(recipe.id()).name("tomato soup").build();
+
+        when(recipeService.findById(recipe.id())).thenReturn(Optional.of(recipe));
+        when(recipeService.update(recipe.id(), updateDto.toEntity())).thenReturn(updated);
+
+        mockMvc.perform(put("/api/recipes/{uuid}", recipe.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(updateDto)))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(RecipeDto.from(updated, "user")), true));
+    }
+
+    @Test
+    @DisplayName("update recipe is forbidden for non-owners")
+    void updateRecipeForbiddenForNonOwner() throws Exception {
+        final var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("soup")
+                .createdBy("someone-else")
+                .build();
+        final var updateDto = RecipeDto.builder().recipeId(recipe.id()).name("tomato soup").build();
+
+        when(recipeService.findById(recipe.id())).thenReturn(Optional.of(recipe));
+
+        mockMvc.perform(put("/api/recipes/{uuid}", recipe.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(updateDto)))
+                .andExpect(status().isForbidden());
+
+        verify(recipeService, never()).update(any(), any());
+    }
+
+    @Test
+    @DisplayName("update recipe returns 404 when recipe does not exist")
+    void updateRecipeNotFound() throws Exception {
+        final var id = UUID.randomUUID().toString();
+        final var updateDto = RecipeDto.builder().recipeId(id).name("tomato soup").build();
+
+        when(recipeService.findById(id)).thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/api/recipes/{uuid}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(updateDto)))
+                .andExpect(status().isNotFound());
     }
 
     private RecipeDto getNewSoupDto() {
