@@ -81,12 +81,17 @@ class InventoryServiceTest {
         }
 
         @Test
+        @DisplayName("findAll returns unexpired items followed by expired items")
         void findAll() {
-            when(inventoryRepository.findAll()).thenReturn(List.of(item));
+            var expiredItem = new InventoryItem(UUID.randomUUID().toString(), null, "milk", "MILLILITRES", 500d, LocalDate.now().minusDays(1), null);
+            var today = now.atOffset(ZoneOffset.UTC).toLocalDate();
+
+            when(inventoryRepository.expiresAfter(today)).thenReturn(List.of(item));
+            when(inventoryRepository.betweenDates(today)).thenReturn(List.of(expiredItem));
 
             var actual = inventoryService.findAll();
 
-            assertThat(actual, contains(item));
+            assertThat(actual, contains(item, expiredItem));
         }
 
         @Test

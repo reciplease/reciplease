@@ -20,6 +20,7 @@ import org.reciplease.repository.RecipeRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -131,7 +132,7 @@ class PlannedRecipeServiceTest {
             var current = new InventoryItem("new", null, "bread", "ITEMS", 5d, date, "111");
 
             when(plannedRecipeRepository.findByRecipeId(recipe.id())).thenReturn(List.of(historicPlan));
-            when(inventoryRepository.findByBarcode("111")).thenReturn(List.of(current));
+            when(inventoryRepository.findByBarcodeIn(Set.of("111"))).thenReturn(List.of(current));
 
             var suggestions = plannedRecipeService.suggestInventory(recipe.id(), "bread");
 
