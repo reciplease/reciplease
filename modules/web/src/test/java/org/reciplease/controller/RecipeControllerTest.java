@@ -1,8 +1,13 @@
 package org.reciplease.controller;
 
 import tools.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.reciplease.configuration.HouseAccess;
+import org.reciplease.configuration.MethodSecurityTestSupport;
+import org.reciplease.configuration.WithHouseMember;
+import org.reciplease.configuration.WithHouseOwner;
+import org.reciplease.configuration.WithMockRecipleaseUser;
 import org.reciplease.dto.RecipeDto;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
@@ -10,9 +15,9 @@ import org.reciplease.service.RecipeService;
 import org.reciplease.service.request.AddIngredient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -25,15 +30,24 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Imports {@link org.reciplease.configuration.MethodSecurityTestSupport} to exercise the same
+ * {@code @HouseOwner} annotations the controller uses under real method security.
+ */
 @WebMvcTest(RecipeController.class)
-@WithMockUser
+@WithMockRecipleaseUser
+@Import(MethodSecurityTestSupport.class)
 class RecipeControllerTest {
+
+    private static final String HOUSE_ID = "house-1";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -43,11 +57,14 @@ class RecipeControllerTest {
     @MockitoBean
     private RecipeService recipeService;
 
+    @MockitoBean(name = "houseAccess")
+    private HouseAccess houseAccess;
+
     @Test
     @DisplayName("ID does not exist")
     void noRecipe() throws Exception {
         final var id = UUID.randomUUID().toString();
-        when(recipeService.findById(id)).thenReturn(Optional.empty());
+        when(recipeService.findVisibleById(id, null)).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/recipes/{uuid}", id))
                 .andExpect(status().isNotFound());
@@ -59,7 +76,7 @@ class RecipeControllerTest {
         final var soup = getSoup();
         final var soupDto = RecipeDto.from(soup);
 
-        when(recipeService.findById(soup.id())).thenReturn(Optional.of(soup));
+        when(recipeService.findVisibleById(soup.id(), null)).thenReturn(Optional.of(soup));
 
         mockMvc.perform(get("/api/recipes/{uuid}", soup.id()))
                 .andExpect(status().isOk())
@@ -74,7 +91,7 @@ class RecipeControllerTest {
                 .map(RecipeDto::from)
                 .collect(toList());
 
-        when(recipeService.findAll()).thenReturn(recipes);
+        when(recipeService.findVisibleTo(null)).thenReturn(recipes);
 
         mockMvc.perform(get("/api/recipes"))
                 .andExpect(status().isOk())
@@ -83,12 +100,15 @@ class RecipeControllerTest {
 
     @Test
     @DisplayName("create new recipe")
+    @WithHouseOwner
     void createRecipe() throws Exception {
         final var newSoupDto = getNewSoupDto();
         final var savedSoup = getSavedSoup();
         final var savedSoupDto = RecipeDto.from(savedSoup);
 
-        when(recipeService.create(newSoupDto.toEntity())).thenReturn(savedSoup);
+        when(houseAccess.isOwner()).thenReturn(true);
+        when(houseAccess.requireHouseId()).thenReturn(HOUSE_ID);
+        when(recipeService.create(HOUSE_ID, newSoupDto.toEntity())).thenReturn(savedSoup);
 
         final var json = mapper.writeValueAsString(newSoupDto);
 
@@ -100,15 +120,36 @@ class RecipeControllerTest {
     }
 
     @Test
+    @DisplayName("create new recipe is forbidden for non-owners")
+    @WithHouseMember
+    void createRecipeForbiddenForNonOwner() throws Exception {
+        when(houseAccess.isOwner()).thenReturn(false);
+
+        final var json = mapper.writeValueAsString(getNewSoupDto());
+
+        mockMvc.perform(post("/api/recipes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isForbidden());
+
+        verify(recipeService, never()).create(any(), any());
+    }
+
+    @Test
+    @WithHouseOwner
     void addRecipeIngredient() throws Exception {
         final var recipe = Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("soup")
+                .houseId(HOUSE_ID)
                 .build();
 
         final var addIngredientRequest = new AddIngredient("tomato", "ITEMS", 10d);
         var savedRecipeIngredient = new RecipeIngredient("tomato", "ITEMS", 10d);
 
+        when(houseAccess.isOwner()).thenReturn(true);
+        when(houseAccess.belongsToHeaderHouse(recipe)).thenReturn(true);
+        when(recipeService.findById(recipe.id())).thenReturn(Optional.of(recipe));
         when(recipeService.addIngredient(recipe.id(), addIngredientRequest)).thenReturn(Set.of(savedRecipeIngredient));
 
         final var data = "{\"name\": \"tomato\", \"measure\": \"ITEMS\", \"amount\": 10.0}";
@@ -123,16 +164,19 @@ class RecipeControllerTest {
     }
 
     @Test
-    @DisplayName("update recipe when current user is the owner")
+    @DisplayName("update recipe when current user is an OWNER of the recipe's house")
+    @WithHouseOwner
     void updateRecipeAsOwner() throws Exception {
         final var recipe = Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("soup")
-                .createdBy("user")
+                .houseId(HOUSE_ID)
                 .build();
         final var updated = recipe.toBuilder().name("tomato soup").build();
         final var updateDto = RecipeDto.builder().recipeId(recipe.id()).name("tomato soup").build();
 
+        when(houseAccess.isOwner()).thenReturn(true);
+        when(houseAccess.belongsToHeaderHouse(recipe)).thenReturn(true);
         when(recipeService.findById(recipe.id())).thenReturn(Optional.of(recipe));
         when(recipeService.update(recipe.id(), updateDto.toEntity())).thenReturn(updated);
 
@@ -140,20 +184,21 @@ class RecipeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(RecipeDto.from(updated, "user")), true));
+                .andExpect(content().json(mapper.writeValueAsString(RecipeDto.from(updated)), true));
     }
 
     @Test
     @DisplayName("update recipe is forbidden for non-owners")
+    @WithHouseMember
     void updateRecipeForbiddenForNonOwner() throws Exception {
         final var recipe = Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("soup")
-                .createdBy("someone-else")
+                .houseId(HOUSE_ID)
                 .build();
         final var updateDto = RecipeDto.builder().recipeId(recipe.id()).name("tomato soup").build();
 
-        when(recipeService.findById(recipe.id())).thenReturn(Optional.of(recipe));
+        when(houseAccess.isOwner()).thenReturn(false);
 
         mockMvc.perform(put("/api/recipes/{uuid}", recipe.id())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -164,11 +209,56 @@ class RecipeControllerTest {
     }
 
     @Test
+    @DisplayName("update recipe is not found when it belongs to a different house than the header asserts")
+    @WithHouseOwner
+    void updateRecipeForbiddenForDifferentHouse() throws Exception {
+        final var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("soup")
+                .houseId("some-other-house")
+                .build();
+        final var updateDto = RecipeDto.builder().recipeId(recipe.id()).name("tomato soup").build();
+
+        when(houseAccess.isOwner()).thenReturn(true);
+        when(houseAccess.belongsToHeaderHouse(recipe)).thenReturn(false);
+        when(recipeService.findById(recipe.id())).thenReturn(Optional.of(recipe));
+
+        mockMvc.perform(put("/api/recipes/{uuid}", recipe.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(updateDto)))
+                .andExpect(status().isNotFound());
+
+        verify(recipeService, never()).update(any(), any());
+    }
+
+    @Test
+    @DisplayName("delete recipe by ID")
+    @WithHouseOwner
+    void deleteRecipe() throws Exception {
+        final var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("soup")
+                .houseId(HOUSE_ID)
+                .build();
+
+        when(houseAccess.isOwner()).thenReturn(true);
+        when(houseAccess.belongsToHeaderHouse(recipe)).thenReturn(true);
+        when(recipeService.findById(recipe.id())).thenReturn(Optional.of(recipe));
+
+        mockMvc.perform(delete("/api/recipes/{uuid}", recipe.id()))
+                .andExpect(status().isNoContent());
+
+        verify(recipeService).deleteById(recipe.id());
+    }
+
+    @Test
     @DisplayName("update recipe returns 404 when recipe does not exist")
+    @WithHouseOwner
     void updateRecipeNotFound() throws Exception {
         final var id = UUID.randomUUID().toString();
         final var updateDto = RecipeDto.builder().recipeId(id).name("tomato soup").build();
 
+        when(houseAccess.isOwner()).thenReturn(true);
         when(recipeService.findById(id)).thenReturn(Optional.empty());
 
         mockMvc.perform(put("/api/recipes/{uuid}", id)
@@ -187,6 +277,7 @@ class RecipeControllerTest {
         return Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("soup")
+                .houseId(HOUSE_ID)
                 .build();
     }
 
@@ -205,4 +296,5 @@ class RecipeControllerTest {
                 .build()
                 .addIngredient("bread", "ITEMS", 1d);
     }
+
 }

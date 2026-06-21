@@ -9,9 +9,9 @@ import java.util.Collection;
 import java.util.List;
 
 public interface InventoryMongoRepository extends MongoRepository<InventoryItemDocument, String> {
-    List<InventoryItemDocument> findByExpirationGreaterThanEqual(LocalDate date, Sort sort);
-    List<InventoryItemDocument> findByExpirationBefore(LocalDate date, Sort sort);
-    List<InventoryItemDocument> findByBarcode(String barcode);
-    List<InventoryItemDocument> findByBarcodeIn(Collection<String> barcodes);
-    List<InventoryItemDocument> findByNameIgnoreCase(String name);
+    List<InventoryItemDocument> findByHouseIdAndExpirationGreaterThanEqual(String houseId, LocalDate date, Sort sort);
+    List<InventoryItemDocument> findByHouseIdAndExpirationBefore(String houseId, LocalDate date, Sort sort);
+    List<InventoryItemDocument> findByHouseIdAndBarcode(String houseId, String barcode);
+    List<InventoryItemDocument> findByHouseIdAndBarcodeIn(String houseId, Collection<String> barcodes);
+    List<InventoryItemDocument> findByHouseIdAndNameIgnoreCase(String houseId, String name);
 }

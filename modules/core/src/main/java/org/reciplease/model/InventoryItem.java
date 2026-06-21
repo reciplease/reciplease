@@ -14,6 +14,7 @@ import java.util.Objects;
 public record InventoryItem(
         String id,
         String createdBy,
+        String houseId,
         String name,
         String measure,
         Double amount,
@@ -21,7 +22,7 @@ public record InventoryItem(
         String barcode,
         byte[] image,
         Instant createdAt,
-        Instant updatedAt) implements Audited {
+        Instant updatedAt) implements Audited, HouseScoped {
 
     public InventoryItem {
         Objects.requireNonNull(name, "name");
@@ -30,18 +31,18 @@ public record InventoryItem(
         Objects.requireNonNull(expiration, "expiration");
     }
 
-    public InventoryItem(final String id, final String createdBy, final String name, final String measure,
+    public InventoryItem(final String id, final String createdBy, final String houseId, final String name, final String measure,
                           final Double amount, final LocalDate expiration, final String barcode) {
-        this(id, createdBy, name, measure, amount, expiration, barcode, null, null, null);
+        this(id, createdBy, houseId, name, measure, amount, expiration, barcode, null, null, null);
     }
 
-    public InventoryItem(final String id, final String createdBy, final String name, final String measure,
+    public InventoryItem(final String id, final String createdBy, final String houseId, final String name, final String measure,
                           final Double amount, final LocalDate expiration, final String barcode, final byte[] image) {
-        this(id, createdBy, name, measure, amount, expiration, barcode, image, null, null);
+        this(id, createdBy, houseId, name, measure, amount, expiration, barcode, image, null, null);
     }
 
     public InventoryItem withId(final String id) {
-        return new InventoryItem(id, createdBy, name, measure, amount, expiration, barcode, image, createdAt, updatedAt);
+        return new InventoryItem(id, createdBy, houseId, name, measure, amount, expiration, barcode, image, createdAt, updatedAt);
     }
 
     // The generated record equals()/hashCode() would compare `image` by array identity rather
@@ -56,6 +57,7 @@ public record InventoryItem(
         }
         return Objects.equals(id, other.id)
                 && Objects.equals(createdBy, other.createdBy)
+                && Objects.equals(houseId, other.houseId)
                 && Objects.equals(name, other.name)
                 && Objects.equals(measure, other.measure)
                 && Objects.equals(amount, other.amount)
@@ -68,6 +70,6 @@ public record InventoryItem(
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, createdBy, name, measure, amount, expiration, barcode, Arrays.hashCode(image), createdAt, updatedAt);
+        return Objects.hash(id, createdBy, houseId, name, measure, amount, expiration, barcode, Arrays.hashCode(image), createdAt, updatedAt);
     }
 }

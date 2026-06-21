@@ -28,8 +28,20 @@ public class RecipeService {
         return all;
     }
 
-    public Recipe create(final Recipe recipe) {
-        return recipeRepository.save(recipe);
+    /**
+     * Public recipes plus, if {@code houseId} is non-null, private recipes belonging to
+     * that house.
+     */
+    public List<Recipe> findVisibleTo(final String houseId) {
+        return recipeRepository.findVisibleTo(houseId);
+    }
+
+    public Optional<Recipe> findVisibleById(final String id, final String houseId) {
+        return recipeRepository.findVisibleById(id, houseId);
+    }
+
+    public Recipe create(final String houseId, final Recipe recipe) {
+        return recipeRepository.save(recipe.toBuilder().houseId(houseId).build());
     }
 
     public Recipe update(final String id, final Recipe updates) {
@@ -41,6 +53,7 @@ public class RecipeService {
                 .description(updates.description())
                 .steps(updates.steps())
                 .recipeIngredients(updates.recipeIngredients())
+                .isPublic(updates.isPublic())
                 .build();
 
         return recipeRepository.save(merged);

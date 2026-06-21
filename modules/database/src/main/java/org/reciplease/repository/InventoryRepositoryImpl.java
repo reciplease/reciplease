@@ -29,36 +29,36 @@ public class InventoryRepositoryImpl implements InventoryRepository {
     }
 
     @Override
-    public List<InventoryItem> expiresAfter(final LocalDate date) {
-        return inventoryMongoRepository.findByExpirationGreaterThanEqual(date, Sort.by(Sort.Direction.ASC, "name")).stream()
+    public List<InventoryItem> expiresAfter(final String houseId, final LocalDate date) {
+        return inventoryMongoRepository.findByHouseIdAndExpirationGreaterThanEqual(houseId, date, Sort.by(Sort.Direction.ASC, "name")).stream()
                 .map(InventoryItemDocument::toModel)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<InventoryItem> betweenDates(final LocalDate date) {
-        return inventoryMongoRepository.findByExpirationBefore(date, Sort.by(Sort.Direction.ASC, "name")).stream()
+    public List<InventoryItem> betweenDates(final String houseId, final LocalDate date) {
+        return inventoryMongoRepository.findByHouseIdAndExpirationBefore(houseId, date, Sort.by(Sort.Direction.ASC, "name")).stream()
                 .map(InventoryItemDocument::toModel)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<InventoryItem> findByBarcode(final String barcode) {
-        return inventoryMongoRepository.findByBarcode(barcode).stream()
+    public List<InventoryItem> findByBarcode(final String houseId, final String barcode) {
+        return inventoryMongoRepository.findByHouseIdAndBarcode(houseId, barcode).stream()
                 .map(InventoryItemDocument::toModel)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<InventoryItem> findByBarcodeIn(final Collection<String> barcodes) {
-        return inventoryMongoRepository.findByBarcodeIn(barcodes).stream()
+    public List<InventoryItem> findByBarcodeIn(final String houseId, final Collection<String> barcodes) {
+        return inventoryMongoRepository.findByHouseIdAndBarcodeIn(houseId, barcodes).stream()
                 .map(InventoryItemDocument::toModel)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<InventoryItem> findByName(final String name) {
-        return inventoryMongoRepository.findByNameIgnoreCase(name).stream()
+    public List<InventoryItem> findByName(final String houseId, final String name) {
+        return inventoryMongoRepository.findByHouseIdAndNameIgnoreCase(houseId, name).stream()
                 .map(InventoryItemDocument::toModel)
                 .collect(Collectors.toList());
     }

@@ -8,11 +8,12 @@ import java.util.Objects;
 public record PlannedRecipe(
         String id,
         String createdBy,
+        String houseId,
         Recipe recipe,
         LocalDate date,
         List<IngredientPairing> pairings,
         Instant createdAt,
-        Instant updatedAt) implements Audited {
+        Instant updatedAt) implements Audited, HouseScoped {
 
     public PlannedRecipe {
         Objects.requireNonNull(recipe, "recipe");
@@ -20,7 +21,7 @@ public record PlannedRecipe(
         pairings = pairings == null ? List.of() : List.copyOf(pairings);
     }
 
-    public PlannedRecipe(final Recipe recipe, final LocalDate date, final List<IngredientPairing> pairings) {
-        this(null, null, recipe, date, pairings, null, null);
+    public PlannedRecipe(final String houseId, final Recipe recipe, final LocalDate date, final List<IngredientPairing> pairings) {
+        this(null, null, houseId, recipe, date, pairings, null, null);
     }
 }

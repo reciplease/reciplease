@@ -32,6 +32,7 @@ class InventoryServiceTest {
     @Mock
     private InventoryRepository inventoryRepository;
     private Instant now;
+    private static final String HOUSE_ID = "house-1";
 
     private InventoryService inventoryService;
 
@@ -44,7 +45,7 @@ class InventoryServiceTest {
     @Test
     @DisplayName("should save item")
     void save() {
-        var item = new InventoryItem(null, null, "bread", "ITEMS", 10d, LocalDate.now(), "0123456789012");
+        var item = new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 10d, LocalDate.now(), "0123456789012");
         var savedItem = item.withId(UUID.randomUUID().toString());
 
         when(inventoryRepository.save(item)).thenReturn(savedItem);
@@ -71,7 +72,7 @@ class InventoryServiceTest {
 
         @BeforeEach
         void setUp() {
-            item = new InventoryItem(UUID.randomUUID().toString(), null, "bread", "ITEMS", 10d, LocalDate.now(), null);
+            item = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "bread", "ITEMS", 10d, LocalDate.now(), null);
         }
 
         @Test
@@ -88,33 +89,33 @@ class InventoryServiceTest {
         @Test
         @DisplayName("findAll returns unexpired items followed by expired items")
         void findAll() {
-            var expiredItem = new InventoryItem(UUID.randomUUID().toString(), null, "milk", "MILLILITRES", 500d, LocalDate.now().minusDays(1), null);
+            var expiredItem = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "milk", "MILLILITRES", 500d, LocalDate.now().minusDays(1), null);
             var today = now.atOffset(ZoneOffset.UTC).toLocalDate();
 
-            when(inventoryRepository.expiresAfter(today)).thenReturn(List.of(item));
-            when(inventoryRepository.betweenDates(today)).thenReturn(List.of(expiredItem));
+            when(inventoryRepository.expiresAfter(HOUSE_ID, today)).thenReturn(List.of(item));
+            when(inventoryRepository.betweenDates(HOUSE_ID, today)).thenReturn(List.of(expiredItem));
 
-            var actual = inventoryService.findAll();
+            var actual = inventoryService.findAll(HOUSE_ID);
 
             assertThat(actual, contains(item, expiredItem));
         }
 
         @Test
         void shouldFindExpiredInventory() {
-            when((inventoryRepository.betweenDates(now.atOffset(ZoneOffset.UTC).toLocalDate())))
+            when((inventoryRepository.betweenDates(HOUSE_ID, now.atOffset(ZoneOffset.UTC).toLocalDate())))
                     .thenReturn(List.of(item));
 
-            var allExpired = inventoryService.findAllExpired();
+            var allExpired = inventoryService.findAllExpired(HOUSE_ID);
 
             assertThat(allExpired, contains(item));
         }
 
         @Test
         void shouldFindUnexpiredInventory() {
-            when(inventoryRepository.expiresAfter(now.atOffset(ZoneOffset.UTC).toLocalDate()))
+            when(inventoryRepository.expiresAfter(HOUSE_ID, now.atOffset(ZoneOffset.UTC).toLocalDate()))
                     .thenReturn(List.of(item));
 
-            var allUnexpired = inventoryService.findAllUnexpired();
+            var allUnexpired = inventoryService.findAllUnexpired(HOUSE_ID);
 
             assertThat(allUnexpired, contains(item));
         }
@@ -123,9 +124,9 @@ class InventoryServiceTest {
         @DisplayName("update merges editable fields but preserves id, createdBy and createdAt")
         void shouldUpdatePreservingAuditFields() {
             var createdAt = Instant.now().minusSeconds(60);
-            var existing = new InventoryItem(item.id(), "someone", "bread", "ITEMS", 10d, LocalDate.now(), null,
+            var existing = new InventoryItem(item.id(), "someone", HOUSE_ID, "bread", "ITEMS", 10d, LocalDate.now(), null,
                     null, createdAt, createdAt);
-            var updates = new InventoryItem(null, null, "sourdough", "ITEMS", 12d, LocalDate.now().plusDays(3),
+            var updates = new InventoryItem(null, null, HOUSE_ID, "sourdough", "ITEMS", 12d, LocalDate.now().plusDays(3),
                     "0123456789012", new byte[]{1, 2, 3});
 
             when(inventoryRepository.findById(item.id())).thenReturn(Optional.of(existing));
@@ -151,7 +152,7 @@ class InventoryServiceTest {
         when(inventoryRepository.findById(itemId)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
-                () -> inventoryService.update(itemId, new InventoryItem(null, null, "bread", "ITEMS", 10d, LocalDate.now(), null)));
+                () -> inventoryService.update(itemId, new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 10d, LocalDate.now(), null)));
 
         verify(inventoryRepository, never()).save(any());
     }

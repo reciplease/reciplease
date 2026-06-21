@@ -2,6 +2,9 @@ package org.reciplease.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.reciplease.configuration.HouseAccess;
+import org.reciplease.configuration.HouseMember;
+import org.reciplease.configuration.HouseOwner;
 import org.reciplease.dto.IngredientPairingDto;
 import org.reciplease.dto.InventoryItemDto;
 import org.reciplease.dto.PlanRecipeRequest;
@@ -28,23 +31,26 @@ import static java.util.stream.Collectors.toList;
 public class PlannedRecipeController {
 
     private final PlannedRecipeService plannedRecipeService;
+    private final HouseAccess houseAccess;
 
     @PostMapping
+    @HouseOwner
     public ResponseEntity<PlannedRecipeDto> plan(@Valid @RequestBody final PlanRecipeRequest request) {
         final List<IngredientPairing> pairings = request.getPairings() == null ? List.of()
                 : request.getPairings().stream()
                         .map(IngredientPairingDto::toModel)
                         .collect(toList());
 
-        final var plannedRecipe = plannedRecipeService.plan(request.getRecipeId(), request.getDate(), pairings);
+        final var plannedRecipe = plannedRecipeService.plan(houseAccess.requireHouseId(), request.getRecipeId(), request.getDate(), pairings);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(PlannedRecipeDto.from(plannedRecipe));
     }
 
     @GetMapping("{recipeId}/suggestions")
+    @HouseMember
     public ResponseEntity<List<InventoryItemDto>> suggestInventory(@PathVariable final String recipeId,
                                                                    @RequestParam final String ingredient) {
-        final List<InventoryItemDto> suggestions = plannedRecipeService.suggestInventory(recipeId, ingredient).stream()
+        final List<InventoryItemDto> suggestions = plannedRecipeService.suggestInventory(houseAccess.requireHouseId(), recipeId, ingredient).stream()
                 .map(InventoryItemDto::from)
                 .collect(toList());
 

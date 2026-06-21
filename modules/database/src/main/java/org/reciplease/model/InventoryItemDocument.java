@@ -22,6 +22,7 @@ public class InventoryItemDocument {
 
     @Id
     private String id;
+    private String houseId;
     private String name;
     private String measure;
     private Double amount;
@@ -38,6 +39,7 @@ public class InventoryItemDocument {
     public static InventoryItemDocument from(final InventoryItem item) {
         return InventoryItemDocument.builder()
                 .id(item.id())
+                .houseId(item.houseId())
                 .name(item.name())
                 .measure(item.measure())
                 .amount(item.amount())
@@ -51,6 +53,6 @@ public class InventoryItemDocument {
     }
 
     public InventoryItem toModel() {
-        return new InventoryItem(id, createdBy, name, measure, amount, expiration, barcode, image, createdAt, updatedAt);
+        return new InventoryItem(id, createdBy, houseId, name, measure, amount, expiration, barcode, image, createdAt, updatedAt);
     }
 }

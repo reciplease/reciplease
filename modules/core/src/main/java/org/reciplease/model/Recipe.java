@@ -17,11 +17,14 @@ import java.util.Set;
 @EqualsAndHashCode(exclude = {"createdBy", "createdAt", "updatedAt"})
 @ToString
 @Builder(toBuilder = true)
-public final class Recipe implements Audited {
+public final class Recipe implements Audited, HouseScoped {
     private final String id;
     private final String createdBy;
     private final Instant createdAt;
     private final Instant updatedAt;
+    private final String houseId;
+    @Builder.Default
+    private final boolean isPublic = false;
     private final String name;
     private final String description;
     @Builder.Default

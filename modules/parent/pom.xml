@@ -27,6 +27,7 @@
     <lombok.version>1.18.36</lombok.version>
 
     <commons-io.version>2.20.0</commons-io.version>
+    <cucumber.version>7.18.1</cucumber.version>
     <jacoco.version>0.8.10</jacoco.version>
     <spring-cloud-dependencies.version>2025.1.0</spring-cloud-dependencies.version>
     <spring-cloud-gcp-dependencies.version>8.0.4</spring-cloud-gcp-dependencies.version>

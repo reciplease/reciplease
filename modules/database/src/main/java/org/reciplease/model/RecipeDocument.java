@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -24,6 +25,10 @@ public class RecipeDocument {
 
     @Id
     private String id;
+    private String houseId;
+    @Field("public")
+    @Builder.Default
+    private boolean isPublic = false;
     private String name;
     private String description;
     @Builder.Default
@@ -40,6 +45,8 @@ public class RecipeDocument {
     public static RecipeDocument from(final Recipe recipe) {
         return RecipeDocument.builder()
                 .id(recipe.id())
+                .houseId(recipe.houseId())
+                .isPublic(recipe.isPublic())
                 .name(recipe.name())
                 .description(recipe.description())
                 .steps(recipe.steps() != null ? recipe.steps() : new ArrayList<>())
@@ -55,6 +62,8 @@ public class RecipeDocument {
     public Recipe toModel() {
         var recipe = Recipe.builder()
                 .id(id)
+                .houseId(houseId)
+                .isPublic(isPublic)
                 .name(name)
                 .description(description)
                 .steps(steps != null ? steps : new ArrayList<>())

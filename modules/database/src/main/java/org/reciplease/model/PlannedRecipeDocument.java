@@ -25,6 +25,7 @@ public class PlannedRecipeDocument {
 
     @Id
     private String id;
+    private String houseId;
     private String recipeId;
     private LocalDate date;
     @Builder.Default
@@ -39,6 +40,7 @@ public class PlannedRecipeDocument {
     public static PlannedRecipeDocument from(final PlannedRecipe plannedRecipe) {
         return PlannedRecipeDocument.builder()
                 .id(plannedRecipe.id())
+                .houseId(plannedRecipe.houseId())
                 .recipeId(plannedRecipe.recipe().id())
                 .date(plannedRecipe.date())
                 .pairings(plannedRecipe.pairings().stream()
@@ -54,6 +56,6 @@ public class PlannedRecipeDocument {
         var resolvedPairings = pairings == null ? List.<IngredientPairing>of() : pairings.stream()
                 .map(IngredientPairingDocument::toModel)
                 .collect(Collectors.toList());
-        return new PlannedRecipe(id, createdBy, recipe, date, resolvedPairings, createdAt, updatedAt);
+        return new PlannedRecipe(id, createdBy, houseId, recipe, date, resolvedPairings, createdAt, updatedAt);
     }
 }

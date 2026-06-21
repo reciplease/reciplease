@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 @Builder
 public class PlannedRecipeDto {
 
+    String houseId;
     RecipeDto recipe;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate date;
@@ -22,6 +23,7 @@ public class PlannedRecipeDto {
 
     public static PlannedRecipeDto from(final PlannedRecipe plannedRecipe) {
         return PlannedRecipeDto.builder()
+                .houseId(plannedRecipe.houseId())
                 .recipe(RecipeDto.from(plannedRecipe.recipe()))
                 .date(plannedRecipe.date())
                 .pairings(plannedRecipe.pairings().stream()

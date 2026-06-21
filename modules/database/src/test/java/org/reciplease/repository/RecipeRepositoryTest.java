@@ -9,7 +9,11 @@ import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
+import java.util.Optional;
+
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -43,5 +47,39 @@ class RecipeRepositoryTest {
 
         assertThat(updated.createdAt(), is(saved.createdAt()));
         assertThat(updated.updatedAt(), is(greaterThanOrEqualTo(saved.updatedAt())));
+    }
+
+    @Test
+    void shouldFindAllSavedRecipes() {
+        var toast = recipeRepository.save(Recipe.builder().name("toast").build());
+        var soup = recipeRepository.save(Recipe.builder().name("soup").build());
+
+        assertThat(recipeRepository.findAll(), containsInAnyOrder(toast, soup));
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoRecipesExist() {
+        assertThat(recipeRepository.findAll(), is(empty()));
+    }
+
+    @Test
+    void shouldFindById() {
+        var saved = recipeRepository.save(Recipe.builder().name("toast").build());
+
+        assertThat(recipeRepository.findById(saved.id()), is(Optional.of(saved)));
+    }
+
+    @Test
+    void shouldReturnEmptyWhenIdUnknown() {
+        assertThat(recipeRepository.findById("does-not-exist"), is(Optional.empty()));
+    }
+
+    @Test
+    void shouldDeleteById() {
+        var saved = recipeRepository.save(Recipe.builder().name("toast").build());
+
+        recipeRepository.deleteById(saved.id());
+
+        assertThat(recipeRepository.findAll(), is(empty()));
     }
 }

@@ -32,9 +32,11 @@ public class ShoppingListServiceTest {
         shoppingListService = new ShoppingListService(plannedRecipeRepository);
     }
 
+    private static final String HOUSE_ID = "house-1";
+
     @Test
     public void shouldGenerateEmptyShoppingList() {
-        var shoppingList = shoppingListService.generateShoppingList(startDate, endDate);
+        var shoppingList = shoppingListService.generateShoppingList(HOUSE_ID, startDate, endDate);
 
         assertThat(shoppingList.getItems(), is(empty()));
     }
@@ -47,10 +49,10 @@ public class ShoppingListServiceTest {
                 .name("toast")
                 .build()
                 .addIngredient("bread", "ITEMS", 10d);
-        var plannedRecipe = new PlannedRecipe(recipe, date, List.of());
-        when(plannedRecipeRepository.findByDateIsBetween(startDate, endDate)).thenReturn(List.of(plannedRecipe));
+        var plannedRecipe = new PlannedRecipe(HOUSE_ID, recipe, date, List.of());
+        when(plannedRecipeRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate)).thenReturn(List.of(plannedRecipe));
 
-        var shoppingList = shoppingListService.generateShoppingList(startDate, endDate);
+        var shoppingList = shoppingListService.generateShoppingList(HOUSE_ID, startDate, endDate);
 
         assertThat(shoppingList.getItems(), is(recipe.recipeIngredients()));
     }

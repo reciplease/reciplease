@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 public class ShoppingListService {
     private final PlannedRecipeRepository plannedRecipeRepository;
 
-    public ShoppingList generateShoppingList(final LocalDate start, final LocalDate end) {
-        var recipeIngredients = plannedRecipeRepository.findByDateIsBetween(start, end).stream()
+    public ShoppingList generateShoppingList(final String houseId, final LocalDate start, final LocalDate end) {
+        var recipeIngredients = plannedRecipeRepository.findByDateIsBetween(houseId, start, end).stream()
                 .map(PlannedRecipe::recipe)
                 .flatMap(recipe -> recipe.recipeIngredients().stream())
                 .collect(Collectors.toSet());
