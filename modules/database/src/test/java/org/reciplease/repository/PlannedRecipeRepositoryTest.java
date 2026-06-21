@@ -25,6 +25,8 @@ import static org.hamcrest.Matchers.notNullValue;
 @DataMongoTest
 @Import({PlannedRecipeRepositoryImpl.class, RecipeRepositoryImpl.class, MongoAuditingConfig.class})
 public class PlannedRecipeRepositoryTest {
+    private static final String HOUSE_ID = "house-1";
+
     @Autowired
     private PlannedRecipeRepository plannedRecipeRepository;
     @Autowired
@@ -40,9 +42,9 @@ public class PlannedRecipeRepositoryTest {
     @Test
     public void shouldReturnPlannedRecipesByDate() {
         var recipe = recipeRepository.save(Recipe.builder().build());
-        var plannedRecipe = plannedRecipeRepository.save(new PlannedRecipe(recipe, LocalDate.of(2019, 2, 2), List.of()));
+        var plannedRecipe = plannedRecipeRepository.save(new PlannedRecipe(HOUSE_ID, recipe, LocalDate.of(2019, 2, 2), List.of()));
 
-        var plannedRecipes = plannedRecipeRepository.findByDateIsBetween(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
+        var plannedRecipes = plannedRecipeRepository.findByDateIsBetween(HOUSE_ID, LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
 
         assertThat(plannedRecipes, contains(plannedRecipe));
     }
@@ -50,9 +52,9 @@ public class PlannedRecipeRepositoryTest {
     @Test
     public void shouldReturnEmptyList() {
         var recipe = recipeRepository.save(Recipe.builder().build());
-        plannedRecipeRepository.save(new PlannedRecipe(recipe, LocalDate.of(2019, 2, 5), List.of()));
+        plannedRecipeRepository.save(new PlannedRecipe(HOUSE_ID, recipe, LocalDate.of(2019, 2, 5), List.of()));
 
-        var plannedRecipes = plannedRecipeRepository.findByDateIsBetween(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
+        var plannedRecipes = plannedRecipeRepository.findByDateIsBetween(HOUSE_ID, LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
 
         assertThat(plannedRecipes, is(empty()));
     }
@@ -61,7 +63,7 @@ public class PlannedRecipeRepositoryTest {
     public void shouldSetIdAndCreatedAtAndUpdatedAtOnSave() {
         var recipe = recipeRepository.save(Recipe.builder().build());
 
-        var saved = plannedRecipeRepository.save(new PlannedRecipe(recipe, LocalDate.of(2026, 6, 10), List.of()));
+        var saved = plannedRecipeRepository.save(new PlannedRecipe(HOUSE_ID, recipe, LocalDate.of(2026, 6, 10), List.of()));
 
         assertThat(saved.id(), is(notNullValue()));
         assertThat(saved.createdAt(), is(notNullValue()));
@@ -74,9 +76,9 @@ public class PlannedRecipeRepositoryTest {
         var pairing = new IngredientPairing(
                 new RecipeIngredient("bread", "ITEMS", 2d),
                 List.of(new InventoryAllocation("item-1", "111", 2d)));
-        plannedRecipeRepository.save(new PlannedRecipe(recipe, LocalDate.of(2026, 6, 6), List.of(pairing)));
+        plannedRecipeRepository.save(new PlannedRecipe(HOUSE_ID, recipe, LocalDate.of(2026, 6, 6), List.of(pairing)));
 
-        var found = plannedRecipeRepository.findByRecipeId(recipe.id());
+        var found = plannedRecipeRepository.findByRecipeId(HOUSE_ID, recipe.id());
 
         assertThat(found.size(), is(1));
         assertThat(found.get(0).pairings(), contains(pairing));

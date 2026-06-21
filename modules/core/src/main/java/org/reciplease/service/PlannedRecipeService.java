@@ -30,7 +30,7 @@ public class PlannedRecipeService {
      * referenced inventory item is validated and its barcode snapshotted so future plans of the
      * same recipe can suggest matching items.
      */
-    public PlannedRecipe plan(final String recipeId, final LocalDate date, final List<IngredientPairing> pairings) {
+    public PlannedRecipe plan(final String houseId, final String recipeId, final LocalDate date, final List<IngredientPairing> pairings) {
         var recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new IllegalArgumentException("Recipe does not exist"));
 
@@ -38,7 +38,7 @@ public class PlannedRecipeService {
                 .map(this::resolvePairing)
                 .collect(Collectors.toList());
 
-        return plannedRecipeRepository.save(new PlannedRecipe(recipe, date, resolvedPairings));
+        return plannedRecipeRepository.save(new PlannedRecipe(houseId, recipe, date, resolvedPairings));
     }
 
     private IngredientPairing resolvePairing(final IngredientPairing pairing) {
@@ -58,8 +58,8 @@ public class PlannedRecipeService {
      * previously planned: barcodes paired with this ingredient before are matched against current
      * inventory. Falls back to matching the ingredient name when no barcode history is available.
      */
-    public List<InventoryItem> suggestInventory(final String recipeId, final String recipeIngredientName) {
-        var historicBarcodes = plannedRecipeRepository.findByRecipeId(recipeId).stream()
+    public List<InventoryItem> suggestInventory(final String houseId, final String recipeId, final String recipeIngredientName) {
+        var historicBarcodes = plannedRecipeRepository.findByRecipeId(houseId, recipeId).stream()
                 .flatMap(plannedRecipe -> plannedRecipe.pairings().stream())
                 .filter(pairing -> pairing.recipeIngredient().name().equals(recipeIngredientName))
                 .flatMap(pairing -> pairing.allocations().stream())
@@ -67,13 +67,13 @@ public class PlannedRecipeService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
-        var byBarcode = inventoryRepository.findByBarcodeIn(historicBarcodes);
+        var byBarcode = inventoryRepository.findByBarcodeIn(houseId, historicBarcodes);
 
         if (!byBarcode.isEmpty()) {
             return distinctById(byBarcode);
         }
 
-        return distinctById(inventoryRepository.findByName(recipeIngredientName));
+        return distinctById(inventoryRepository.findByName(houseId, recipeIngredientName));
     }
 
     private List<InventoryItem> distinctById(final List<InventoryItem> items) {

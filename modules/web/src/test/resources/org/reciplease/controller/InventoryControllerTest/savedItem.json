@@ -1,5 +1,6 @@
 {
   "uuid": "b465af6e-2465-4436-84c1-14f35db68dbf",
+  "houseId": "house-1",
   "name": "bread",
   "measure": "item",
   "expiration": "2020-01-01",

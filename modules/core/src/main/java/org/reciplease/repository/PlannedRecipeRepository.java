@@ -8,7 +8,7 @@ import java.util.List;
 public interface PlannedRecipeRepository {
     PlannedRecipe save(PlannedRecipe plannedRecipe);
 
-    List<PlannedRecipe> findByDateIsBetween(LocalDate start, LocalDate end);
+    List<PlannedRecipe> findByDateIsBetween(String houseId, LocalDate start, LocalDate end);
 
-    List<PlannedRecipe> findByRecipeId(String recipeId);
+    List<PlannedRecipe> findByRecipeId(String houseId, String recipeId);
 }

@@ -2,6 +2,9 @@ package org.reciplease.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.reciplease.configuration.HouseAccess;
+import org.reciplease.configuration.HouseMember;
+import org.reciplease.configuration.HouseOwner;
 import org.reciplease.dto.InventoryItemDto;
 import org.reciplease.service.InventoryService;
 import org.springframework.http.HttpStatus;
@@ -25,35 +28,42 @@ import static java.util.stream.Collectors.toList;
 public class InventoryController {
 
     final InventoryService inventoryService;
+    final HouseAccess houseAccess;
 
     @PostMapping
+    @HouseOwner
     public ResponseEntity<InventoryItemDto> create(@Valid @RequestBody final InventoryItemDto itemDto) {
-        final var savedItem = inventoryService.save(itemDto.toEntity());
+        final var savedItem = inventoryService.save(itemDto.toEntity(houseAccess.requireHouseId()));
         final var savedItemDto = InventoryItemDto.from(savedItem);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedItemDto);
     }
 
     @PutMapping("{uuid}")
+    @HouseOwner
     public ResponseEntity<InventoryItemDto> update(@PathVariable final String uuid, @Valid @RequestBody final InventoryItemDto itemDto) {
-        if (inventoryService.findById(uuid).isEmpty()) {
+        final var existing = inventoryService.findById(uuid);
+        if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
             return ResponseEntity.notFound().build();
         }
 
-        final var updated = inventoryService.update(uuid, itemDto.toEntity());
+        final var updated = inventoryService.update(uuid, itemDto.toEntity(houseAccess.requireHouseId()));
         return ResponseEntity.ok(InventoryItemDto.from(updated));
     }
 
     @GetMapping("{uuid}")
+    @HouseMember
     public ResponseEntity<InventoryItemDto> findById(@PathVariable final String uuid) {
         final Optional<InventoryItemDto> foundItem = inventoryService.findById(uuid)
+                .filter(houseAccess::belongsToHeaderHouse)
                 .map(InventoryItemDto::from);
 
         return ResponseEntity.of(foundItem);
     }
 
     @GetMapping
+    @HouseMember
     public ResponseEntity<List<InventoryItemDto>> findAll() {
-        final List<InventoryItemDto> items = inventoryService.findAll().stream()
+        final List<InventoryItemDto> items = inventoryService.findAll(houseAccess.requireHouseId()).stream()
                 .map(InventoryItemDto::from)
                 .collect(toList());
 
@@ -61,8 +71,9 @@ public class InventoryController {
     }
 
     @GetMapping("/unexpired")
+    @HouseMember
     public ResponseEntity<List<InventoryItemDto>> findAllUnexpired() {
-        final List<InventoryItemDto> items = inventoryService.findAllUnexpired().stream()
+        final List<InventoryItemDto> items = inventoryService.findAllUnexpired(houseAccess.requireHouseId()).stream()
                 .map(InventoryItemDto::from)
                 .collect(toList());
 
@@ -70,8 +81,9 @@ public class InventoryController {
     }
 
     @GetMapping("/expired")
+    @HouseMember
     public ResponseEntity<List<InventoryItemDto>> findAllExpired() {
-        final List<InventoryItemDto> items = inventoryService.findAllExpired().stream()
+        final List<InventoryItemDto> items = inventoryService.findAllExpired(houseAccess.requireHouseId()).stream()
                 .map(InventoryItemDto::from)
                 .collect(toList());
 

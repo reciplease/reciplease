@@ -12,13 +12,13 @@ public interface InventoryRepository {
 
     InventoryItem save(InventoryItem item);
 
-    List<InventoryItem> expiresAfter(LocalDate now);
+    List<InventoryItem> expiresAfter(String houseId, LocalDate now);
 
-    List<InventoryItem> betweenDates(LocalDate now);
+    List<InventoryItem> betweenDates(String houseId, LocalDate now);
 
-    List<InventoryItem> findByBarcode(String barcode);
+    List<InventoryItem> findByBarcode(String houseId, String barcode);
 
-    List<InventoryItem> findByBarcodeIn(Collection<String> barcodes);
+    List<InventoryItem> findByBarcodeIn(String houseId, Collection<String> barcodes);
 
-    List<InventoryItem> findByName(String name);
+    List<InventoryItem> findByName(String houseId, String name);
 }

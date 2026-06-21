@@ -4,13 +4,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.reciplease.configuration.HouseAccess;
+import org.reciplease.configuration.MethodSecurityTestSupport;
+import org.reciplease.configuration.WithHouseMember;
+import org.reciplease.configuration.WithHouseOwner;
 import org.reciplease.model.InventoryItem;
 import org.reciplease.service.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
@@ -18,6 +22,7 @@ import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.reciplease.utils.ResourceUtils.readTestResource;
@@ -29,19 +34,33 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(InventoryController.class)
-@WithMockUser
+@WithHouseOwner
+@Import(MethodSecurityTestSupport.class)
 class InventoryControllerTest {
+
+    private static final String HOUSE_ID = "house-1";
 
     @MockitoBean
     InventoryService inventoryService;
 
+    @MockitoBean(name = "houseAccess")
+    HouseAccess houseAccess;
+
     @Autowired
     private MockMvc mockMvc;
+
+    @BeforeEach
+    void stubHouseAccess() {
+        when(houseAccess.isOwner()).thenReturn(true);
+        when(houseAccess.isMember()).thenReturn(true);
+        when(houseAccess.requireHouseId()).thenReturn(HOUSE_ID);
+        when(houseAccess.belongsToHeaderHouse(any(InventoryItem.class))).thenReturn(true);
+    }
 
     @Test
     @DisplayName("should create inventory item")
     void shouldCreateInventoryItem() throws Exception {
-        var mockRequestItem = new InventoryItem(null, null, "bread", "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
+        var mockRequestItem = new InventoryItem(null, null, HOUSE_ID, "bread", "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
         var mockResponseItem = mockRequestItem.withId("b465af6e-2465-4436-84c1-14f35db68dbf");
 
         when(inventoryService.save(mockRequestItem)).thenReturn(mockResponseItem);
@@ -63,7 +82,7 @@ class InventoryControllerTest {
     void shouldCreateInventoryItemWithImage() throws Exception {
         var imageBytes = new byte[]{1, 2, 3};
         var imageBase64 = java.util.Base64.getEncoder().encodeToString(imageBytes);
-        var mockRequestItem = new InventoryItem(null, null, "bread", "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012", imageBytes);
+        var mockRequestItem = new InventoryItem(null, null, HOUSE_ID, "bread", "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012", imageBytes);
         var mockResponseItem = mockRequestItem.withId("b465af6e-2465-4436-84c1-14f35db68dbf");
 
         when(inventoryService.save(mockRequestItem)).thenReturn(mockResponseItem);
@@ -84,13 +103,27 @@ class InventoryControllerTest {
                 .andExpect(content().json("""
                         {
                           "uuid": "b465af6e-2465-4436-84c1-14f35db68dbf",
+                          "houseId": "%s",
                           "name": "bread",
                           "measure": "item",
                           "expiration": "2020-01-01",
                           "amount": 20.0,
                           "barcode": "0123456789012",
                           "image": "%s"
-                        }""".formatted(imageBase64), true));
+                        }""".formatted(HOUSE_ID, imageBase64), true));
+    }
+
+    @Test
+    @DisplayName("create is forbidden for read-only members")
+    @WithHouseMember
+    void createForbiddenForReadOnly() throws Exception {
+        when(houseAccess.isOwner()).thenReturn(false);
+
+        mockMvc.perform(post("/api/inventory")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(readTestResource(InventoryControllerTest.class, "createItem.json")))
+                .andExpect(status().isForbidden());
     }
 
     @Nested
@@ -100,13 +133,13 @@ class InventoryControllerTest {
 
         @BeforeEach
         void setUp() {
-            item = new InventoryItem("b465af6e-2465-4436-84c1-14f35db68dbf", null, "bread", "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
+            item = new InventoryItem("b465af6e-2465-4436-84c1-14f35db68dbf", null, HOUSE_ID, "bread", "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
         }
 
         @Test
         @DisplayName("should update item")
         void update() throws Exception {
-            var updates = new InventoryItem(null, null, "sourdough", "item", 12d, LocalDate.of(2020, Month.JANUARY, 5), "0123456789012");
+            var updates = new InventoryItem(null, null, HOUSE_ID, "sourdough", "item", 12d, LocalDate.of(2020, Month.JANUARY, 5), "0123456789012");
             var updated = item.withId(item.id());
 
             when(inventoryService.findById(item.id())).thenReturn(Optional.of(item));
@@ -163,7 +196,7 @@ class InventoryControllerTest {
         void findAll() throws Exception {
             var itemsJson = readTestResource(WithItem.class, "items.json");
 
-            when(inventoryService.findAll()).thenReturn(List.of(item));
+            when(inventoryService.findAll(HOUSE_ID)).thenReturn(List.of(item));
 
             mockMvc.perform(get("/api/inventory"))
                     .andExpect(status().isOk())
@@ -175,7 +208,7 @@ class InventoryControllerTest {
         void expiredItems() throws Exception {
             var itemsJson = readTestResource(WithItem.class, "items.json");
 
-            when(inventoryService.findAllExpired()).thenReturn(List.of(item));
+            when(inventoryService.findAllExpired(HOUSE_ID)).thenReturn(List.of(item));
 
             mockMvc.perform(get("/api/inventory/expired"))
                     .andExpect(status().isOk())
@@ -187,11 +220,12 @@ class InventoryControllerTest {
         void unexpiredItems() throws Exception {
             var itemsJson = readTestResource(WithItem.class, "items.json");
 
-            when(inventoryService.findAllUnexpired()).thenReturn(List.of(item));
+            when(inventoryService.findAllUnexpired(HOUSE_ID)).thenReturn(List.of(item));
 
             mockMvc.perform(get("/api/inventory/unexpired"))
                     .andExpect(status().isOk())
                     .andExpect(content().json(itemsJson, true));
         }
     }
+
 }

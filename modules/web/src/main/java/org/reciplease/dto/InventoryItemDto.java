@@ -19,6 +19,8 @@ public class InventoryItemDto {
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     String uuid;
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    String houseId;
     String name;
     String measure;
     Double amount;
@@ -34,6 +36,7 @@ public class InventoryItemDto {
     public static InventoryItemDto from(final InventoryItem inventoryItem) {
         return InventoryItemDto.builder()
                 .uuid(inventoryItem.id())
+                .houseId(inventoryItem.houseId())
                 .name(inventoryItem.name())
                 .measure(Measure.normalizeId(inventoryItem.measure()))
                 .amount(inventoryItem.amount())
@@ -44,7 +47,10 @@ public class InventoryItemDto {
                 .build();
     }
 
-    public InventoryItem toEntity() {
-        return new InventoryItem(uuid, null, name, Measure.normalizeId(measure), amount, expiration, barcode, image);
+    // houseId is supplied by the controller from the already-validated X-RCPLS-House-Id
+    // header, not trusted from the request body, so a member can't write into a house
+    // they don't belong to by spoofing the field.
+    public InventoryItem toEntity(final String houseId) {
+        return new InventoryItem(uuid, null, houseId, name, Measure.normalizeId(measure), amount, expiration, barcode, image);
     }
 }

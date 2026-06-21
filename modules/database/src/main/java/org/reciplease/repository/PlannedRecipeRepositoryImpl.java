@@ -24,8 +24,8 @@ public class PlannedRecipeRepositoryImpl implements PlannedRecipeRepository {
     }
 
     @Override
-    public List<PlannedRecipe> findByDateIsBetween(final LocalDate start, final LocalDate end) {
-        return plannedRecipeMongoRepository.findByDateBetween(start, end).stream()
+    public List<PlannedRecipe> findByDateIsBetween(final String houseId, final LocalDate start, final LocalDate end) {
+        return plannedRecipeMongoRepository.findByHouseIdAndDateBetween(houseId, start, end).stream()
                 .flatMap(doc -> recipeMongoRepository.findById(doc.getRecipeId())
                         .map(recipe -> doc.toModel(recipe.toModel()))
                         .stream())
@@ -33,8 +33,8 @@ public class PlannedRecipeRepositoryImpl implements PlannedRecipeRepository {
     }
 
     @Override
-    public List<PlannedRecipe> findByRecipeId(final String recipeId) {
-        return plannedRecipeMongoRepository.findByRecipeId(recipeId).stream()
+    public List<PlannedRecipe> findByRecipeId(final String houseId, final String recipeId) {
+        return plannedRecipeMongoRepository.findByHouseIdAndRecipeId(houseId, recipeId).stream()
                 .flatMap(doc -> recipeMongoRepository.findById(doc.getRecipeId())
                         .map(recipe -> doc.toModel(recipe.toModel()))
                         .stream())

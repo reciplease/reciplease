@@ -17,12 +17,13 @@ class InventoryItemDtoTest {
     @Test
     @DisplayName("create DTO from entity")
     void from() {
-        var item = new InventoryItem(UUID.randomUUID().toString(), null, "bread", "ITEMS", 10d, LocalDate.now(), "0123456789012",
+        var item = new InventoryItem(UUID.randomUUID().toString(), null, "house-1", "bread", "ITEMS", 10d, LocalDate.now(), "0123456789012",
                 new byte[]{1, 2, 3}, Instant.now(), Instant.now());
 
         var itemDto = InventoryItemDto.from(item);
 
         assertThat(itemDto.getUuid(), is(item.id()));
+        assertThat(itemDto.getHouseId(), is(item.houseId()));
         assertThat(itemDto.getName(), is(item.name()));
         // Legacy measure ids are normalized to their short form.
         assertThat(itemDto.getMeasure(), is("item"));
@@ -36,7 +37,7 @@ class InventoryItemDtoTest {
     @Test
     @DisplayName("create DTO from entity with no image")
     void fromWithNoImage() {
-        var item = new InventoryItem(UUID.randomUUID().toString(), null, "bread", "ITEMS", 10d, LocalDate.now(), "0123456789012");
+        var item = new InventoryItem(UUID.randomUUID().toString(), null, "house-1", "bread", "ITEMS", 10d, LocalDate.now(), "0123456789012");
 
         var itemDto = InventoryItemDto.from(item);
 
@@ -56,9 +57,10 @@ class InventoryItemDtoTest {
                 .image(new byte[]{1, 2, 3})
                 .build();
 
-        var item = itemDto.toEntity();
+        var item = itemDto.toEntity("house-1");
 
         assertThat(item.id(), is(itemDto.getUuid()));
+        assertThat(item.houseId(), is("house-1"));
         assertThat(item.name(), is(itemDto.getName()));
         // A short id passes through unchanged.
         assertThat(item.measure(), is("g"));

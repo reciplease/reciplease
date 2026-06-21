@@ -4,16 +4,21 @@ import lombok.RequiredArgsConstructor;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeDocument;
 import org.reciplease.repository.mongo.RecipeMongoRepository;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.springframework.data.mongodb.core.query.Query.query;
+
 @Repository
 @RequiredArgsConstructor
 public class RecipeRepositoryImpl implements RecipeRepository {
     private final RecipeMongoRepository recipeMongoRepository;
+    private final MongoTemplate mongoTemplate;
 
     @Override
     public List<Recipe> findAll() {
@@ -35,5 +40,25 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     @Override
     public void deleteById(final String id) {
         recipeMongoRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Recipe> findVisibleTo(final String houseId) {
+        return mongoTemplate.find(query(visibilityCriteria(houseId)), RecipeDocument.class).stream()
+                .map(RecipeDocument::toModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<Recipe> findVisibleById(final String id, final String houseId) {
+        final var criteria = visibilityCriteria(houseId).and("_id").is(id);
+        return Optional.ofNullable(mongoTemplate.findOne(query(criteria), RecipeDocument.class))
+                .map(RecipeDocument::toModel);
+    }
+
+    private Criteria visibilityCriteria(final String houseId) {
+        return houseId == null
+                ? Criteria.where("public").is(true)
+                : new Criteria().orOperator(Criteria.where("public").is(true), Criteria.where("houseId").is(houseId));
     }
 }

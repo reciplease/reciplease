@@ -22,13 +22,13 @@ public class InventoryService {
     }
 
     // Merges editable fields from `updates` onto the existing item, preserving its id,
-    // createdBy and createdAt so an edit (e.g. attaching a photo after the fact) can't
-    // clobber audit fields the way a plain re-save would.
+    // createdBy, houseId and createdAt so an edit (e.g. attaching a photo after the fact)
+    // can't clobber audit/ownership fields the way a plain re-save would.
     public InventoryItem update(final String id, final InventoryItem updates) {
         final var existing = inventoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Inventory item does not exist"));
 
-        final var merged = new InventoryItem(existing.id(), existing.createdBy(), updates.name(), updates.measure(),
+        final var merged = new InventoryItem(existing.id(), existing.createdBy(), existing.houseId(), updates.name(), updates.measure(),
                 updates.amount(), updates.expiration(), updates.barcode(), updates.image(),
                 existing.createdAt(), existing.updatedAt());
 
@@ -39,18 +39,18 @@ public class InventoryService {
         return inventoryRepository.findById(id);
     }
 
-    public List<InventoryItem> findAll() {
+    public List<InventoryItem> findAll(final String houseId) {
         final var today = LocalDate.now(clock);
-        final var items = new ArrayList<InventoryItem>(inventoryRepository.expiresAfter(today));
-        items.addAll(inventoryRepository.betweenDates(today));
+        final var items = new ArrayList<InventoryItem>(inventoryRepository.expiresAfter(houseId, today));
+        items.addAll(inventoryRepository.betweenDates(houseId, today));
         return items;
     }
 
-    public List<InventoryItem> findAllUnexpired() {
-        return inventoryRepository.expiresAfter(LocalDate.now(clock));
+    public List<InventoryItem> findAllUnexpired(final String houseId) {
+        return inventoryRepository.expiresAfter(houseId, LocalDate.now(clock));
     }
 
-    public List<InventoryItem> findAllExpired() {
-        return inventoryRepository.betweenDates(LocalDate.now(clock));
+    public List<InventoryItem> findAllExpired(final String houseId) {
+        return inventoryRepository.betweenDates(houseId, LocalDate.now(clock));
     }
 }

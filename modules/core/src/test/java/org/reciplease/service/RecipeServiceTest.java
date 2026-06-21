@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @MockitoSettings
@@ -77,11 +78,21 @@ class RecipeServiceTest {
                 .id(UUID.randomUUID().toString())
                 .build();
 
-        when(recipeRepository.save(newRecipe)).thenReturn(savedRecipe);
+        when(recipeRepository.save(newRecipe.toBuilder().houseId("house-1").build())).thenReturn(savedRecipe);
 
-        var actualRecipe = recipeService.create(newRecipe);
+        var actualRecipe = recipeService.create("house-1", newRecipe);
 
         assertThat(actualRecipe, is(savedRecipe));
+    }
+
+    @Test
+    @DisplayName("delete recipe by id")
+    void deleteRecipe() {
+        var id = UUID.randomUUID().toString();
+
+        recipeService.deleteById(id);
+
+        verify(recipeRepository).deleteById(id);
     }
 
     @Nested
