@@ -1,5 +1,6 @@
 package org.reciplease.configuration;
 
+import org.reciplease.config.TimeConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -10,7 +11,7 @@ import java.time.Clock;
 
 @Configuration
 @EnableMongoAuditing(dateTimeProviderRef = "clockAuditingDateTimeProvider")
-@Import(TimeConfig.class)
+@Import(TimeConfiguration.class)
 public class MongoAuditingConfig {
 
     @Bean
