@@ -24,6 +24,7 @@ import static org.reciplease.utils.ResourceUtils.readTestResource;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -100,6 +101,49 @@ class InventoryControllerTest {
         @BeforeEach
         void setUp() {
             item = new InventoryItem("b465af6e-2465-4436-84c1-14f35db68dbf", null, "bread", "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
+        }
+
+        @Test
+        @DisplayName("should update item")
+        void update() throws Exception {
+            var updates = new InventoryItem(null, null, "sourdough", "item", 12d, LocalDate.of(2020, Month.JANUARY, 5), "0123456789012");
+            var updated = item.withId(item.id());
+
+            when(inventoryService.findById(item.id())).thenReturn(Optional.of(item));
+            when(inventoryService.update(item.id(), updates)).thenReturn(updated);
+
+            mockMvc.perform(put("/api/inventory/{uuid}", item.id())
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {
+                                      "name": "sourdough",
+                                      "measure": "item",
+                                      "expiration": "2020-01-05",
+                                      "amount": 12.0,
+                                      "barcode": "0123456789012"
+                                    }"""))
+                    .andExpect(status().isOk());
+
+            verify(inventoryService).update(item.id(), updates);
+        }
+
+        @Test
+        @DisplayName("should 404 when updating an unknown item")
+        void updateUnknown() throws Exception {
+            when(inventoryService.findById(item.id())).thenReturn(Optional.empty());
+
+            mockMvc.perform(put("/api/inventory/{uuid}", item.id())
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {
+                                      "name": "sourdough",
+                                      "measure": "item",
+                                      "expiration": "2020-01-05",
+                                      "amount": 12.0
+                                    }"""))
+                    .andExpect(status().isNotFound());
         }
 
         @Test

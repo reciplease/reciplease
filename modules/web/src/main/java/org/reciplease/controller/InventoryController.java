@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +31,16 @@ public class InventoryController {
         final var savedItem = inventoryService.save(itemDto.toEntity());
         final var savedItemDto = InventoryItemDto.from(savedItem);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedItemDto);
+    }
+
+    @PutMapping("{uuid}")
+    public ResponseEntity<InventoryItemDto> update(@PathVariable final String uuid, @Valid @RequestBody final InventoryItemDto itemDto) {
+        if (inventoryService.findById(uuid).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        final var updated = inventoryService.update(uuid, itemDto.toEntity());
+        return ResponseEntity.ok(InventoryItemDto.from(updated));
     }
 
     @GetMapping("{uuid}")

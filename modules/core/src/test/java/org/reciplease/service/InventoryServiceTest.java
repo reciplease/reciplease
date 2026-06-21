@@ -19,7 +19,12 @@ import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @MockitoSettings
@@ -113,5 +118,41 @@ class InventoryServiceTest {
 
             assertThat(allUnexpired, contains(item));
         }
+
+        @Test
+        @DisplayName("update merges editable fields but preserves id, createdBy and createdAt")
+        void shouldUpdatePreservingAuditFields() {
+            var createdAt = Instant.now().minusSeconds(60);
+            var existing = new InventoryItem(item.id(), "someone", "bread", "ITEMS", 10d, LocalDate.now(), null,
+                    null, createdAt, createdAt);
+            var updates = new InventoryItem(null, null, "sourdough", "ITEMS", 12d, LocalDate.now().plusDays(3),
+                    "0123456789012", new byte[]{1, 2, 3});
+
+            when(inventoryRepository.findById(item.id())).thenReturn(Optional.of(existing));
+            when(inventoryRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+            var updated = inventoryService.update(item.id(), updates);
+
+            assertThat(updated.id(), is(existing.id()));
+            assertThat(updated.createdBy(), is(existing.createdBy()));
+            assertThat(updated.createdAt(), is(existing.createdAt()));
+            assertThat(updated.name(), is("sourdough"));
+            assertThat(updated.amount(), is(12d));
+            assertThat(updated.expiration(), is(updates.expiration()));
+            assertThat(updated.barcode(), is("0123456789012"));
+            assertThat(updated.image(), is(equalTo(updates.image())));
+        }
+    }
+
+    @Test
+    @DisplayName("update throws when the item does not exist")
+    void shouldThrowWhenUpdatingUnknownItem() {
+        var itemId = UUID.randomUUID().toString();
+        when(inventoryRepository.findById(itemId)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> inventoryService.update(itemId, new InventoryItem(null, null, "bread", "ITEMS", 10d, LocalDate.now(), null)));
+
+        verify(inventoryRepository, never()).save(any());
     }
 }

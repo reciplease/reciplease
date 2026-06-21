@@ -21,6 +21,20 @@ public class InventoryService {
         return inventoryRepository.save(item);
     }
 
+    // Merges editable fields from `updates` onto the existing item, preserving its id,
+    // createdBy and createdAt so an edit (e.g. attaching a photo after the fact) can't
+    // clobber audit fields the way a plain re-save would.
+    public InventoryItem update(final String id, final InventoryItem updates) {
+        final var existing = inventoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Inventory item does not exist"));
+
+        final var merged = new InventoryItem(existing.id(), existing.createdBy(), updates.name(), updates.measure(),
+                updates.amount(), updates.expiration(), updates.barcode(), updates.image(),
+                existing.createdAt(), existing.updatedAt());
+
+        return inventoryRepository.save(merged);
+    }
+
     public Optional<InventoryItem> findById(final String id) {
         return inventoryRepository.findById(id);
     }
