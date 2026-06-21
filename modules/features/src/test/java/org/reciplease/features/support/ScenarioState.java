@@ -13,6 +13,8 @@ import java.util.Map;
 public class ScenarioState {
     private final Map<String, String> houseIdsByName = new HashMap<>();
     private ResultActions lastResult;
+    private String generatedInviteId;
+    private String generatedInviteCode;
 
     public void putHouseId(final String houseName, final String houseId) {
         houseIdsByName.put(houseName, houseId);
@@ -35,5 +37,24 @@ public class ScenarioState {
             throw new IllegalStateException("No request has been performed yet in this scenario");
         }
         return lastResult;
+    }
+
+    public void setGeneratedInvite(final String id, final String code) {
+        this.generatedInviteId = id;
+        this.generatedInviteCode = code;
+    }
+
+    public String generatedInviteId() {
+        if (generatedInviteId == null) {
+            throw new IllegalStateException("No invite has been generated yet in this scenario");
+        }
+        return generatedInviteId;
+    }
+
+    public String generatedInviteCode() {
+        if (generatedInviteCode == null) {
+            throw new IllegalStateException("No invite has been generated yet in this scenario");
+        }
+        return generatedInviteCode;
     }
 }

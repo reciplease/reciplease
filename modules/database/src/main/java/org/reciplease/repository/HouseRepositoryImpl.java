@@ -1,16 +1,22 @@
 package org.reciplease.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.reciplease.model.Email;
 import org.reciplease.model.House;
 import org.reciplease.model.HouseDocument;
+import org.reciplease.model.HouseMembership;
 import org.reciplease.model.HouseRole;
+import org.reciplease.model.UserDocument;
 import org.reciplease.repository.mongo.HouseMongoRepository;
+import org.reciplease.repository.mongo.UserMongoRepository;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -22,6 +28,7 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 public class HouseRepositoryImpl implements HouseRepository {
 
     private final HouseMongoRepository houseMongoRepository;
+    private final UserMongoRepository userMongoRepository;
     private final MongoTemplate mongoTemplate;
 
     @Override
@@ -56,5 +63,27 @@ public class HouseRepositoryImpl implements HouseRepository {
         final Query query = query(where("_id").is(houseId));
         final Update update = new Update().set("members." + userId, role.name());
         mongoTemplate.updateFirst(query, update, HouseDocument.class);
+    }
+
+    @Override
+    public List<HouseMembership> members(final String houseId) {
+        final var document = houseMongoRepository.findById(houseId).orElse(null);
+        if (document == null || document.getMembers() == null || document.getMembers().isEmpty()) {
+            return List.of();
+        }
+
+        final Map<String, String> members = document.getMembers();
+        final Map<String, UserDocument> usersById = userMongoRepository.findAllById(members.keySet()).stream()
+                .collect(Collectors.toMap(UserDocument::getGoogleId, user -> user));
+
+        return members.entrySet().stream()
+                .map(entry -> {
+                    final var user = usersById.get(entry.getKey());
+                    final var email = new Email(user != null ? user.getEmail() : entry.getKey());
+                    return new HouseMembership(entry.getKey(), email, HouseRole.valueOf(entry.getValue()));
+                })
+                .sorted(Comparator.comparing(HouseMembership::role)
+                        .thenComparing(membership -> membership.email().value()))
+                .collect(Collectors.toList());
     }
 }

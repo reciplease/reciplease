@@ -10,7 +10,10 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
@@ -36,5 +39,27 @@ public class InviteRepositoryImpl implements InviteRepository {
                 query, update, FindAndModifyOptions.options().returnNew(true), InviteDocument.class);
 
         return Optional.ofNullable(claimed).map(InviteDocument::toModel);
+    }
+
+    @Override
+    public Invite create(final Invite invite) {
+        return inviteMongoRepository.save(InviteDocument.from(invite)).toModel();
+    }
+
+    @Override
+    public List<Invite> findAllForHouse(final String houseId) {
+        return inviteMongoRepository.findAllByHouseId(houseId).stream()
+                .map(InviteDocument::toModel)
+                .collect(toList());
+    }
+
+    @Override
+    public Optional<Invite> findById(final String id) {
+        return inviteMongoRepository.findById(id).map(InviteDocument::toModel);
+    }
+
+    @Override
+    public void delete(final String id) {
+        inviteMongoRepository.deleteById(id);
     }
 }

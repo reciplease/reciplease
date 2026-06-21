@@ -1,6 +1,7 @@
 package org.reciplease.repository;
 
 import org.reciplease.model.House;
+import org.reciplease.model.HouseMembership;
 import org.reciplease.model.HouseRole;
 
 import java.util.List;
@@ -19,4 +20,10 @@ public interface HouseRepository {
     Optional<HouseRole> roleOf(String houseId, String userId);
 
     void addMember(String houseId, String userId, HouseRole role);
+
+    /**
+     * All members of {@code houseId}, resolved against their user records and sorted
+     * owners-first then alphabetically by email within each role.
+     */
+    List<HouseMembership> members(String houseId);
 }

@@ -2,6 +2,7 @@ package org.reciplease.repository;
 
 import org.reciplease.model.Invite;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface InviteRepository {
@@ -13,4 +14,13 @@ public interface InviteRepository {
      * now-claimed invite, or empty if the code is invalid or was already redeemed.
      */
     Optional<Invite> claim(String code, String userId);
+
+    /** Persists a brand-new, never-yet-used invite. */
+    Invite create(Invite invite);
+
+    List<Invite> findAllForHouse(String houseId);
+
+    Optional<Invite> findById(String id);
+
+    void delete(String id);
 }
