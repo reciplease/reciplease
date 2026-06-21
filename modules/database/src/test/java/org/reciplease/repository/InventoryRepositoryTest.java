@@ -162,6 +162,15 @@ class InventoryRepositoryTest {
     }
 
     @Test
+    void shouldDeleteById() {
+        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
+
+        inventoryRepository.deleteById(saved.id());
+
+        assertThat(inventoryRepository.findById(saved.id()), is(Optional.empty()));
+    }
+
+    @Test
     void shouldPreserveCreatedAtAndAdvanceUpdatedAtOnUpdate() {
         var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
 

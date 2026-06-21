@@ -62,4 +62,9 @@ public class InventoryRepositoryImpl implements InventoryRepository {
                 .map(InventoryItemDocument::toModel)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void deleteById(final String id) {
+        inventoryMongoRepository.deleteById(id);
+    }
 }

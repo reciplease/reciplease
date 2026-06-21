@@ -9,6 +9,7 @@ import org.reciplease.dto.InventoryItemDto;
 import org.reciplease.service.InventoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,6 +49,18 @@ public class InventoryController {
 
         final var updated = inventoryService.update(uuid, itemDto.toEntity(houseAccess.requireHouseId()));
         return ResponseEntity.ok(InventoryItemDto.from(updated));
+    }
+
+    @DeleteMapping("{uuid}")
+    @HouseOwner
+    public ResponseEntity<Void> deleteById(@PathVariable final String uuid) {
+        final var existing = inventoryService.findById(uuid);
+        if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
+            return ResponseEntity.notFound().build();
+        }
+
+        inventoryService.deleteById(uuid);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("{uuid}")

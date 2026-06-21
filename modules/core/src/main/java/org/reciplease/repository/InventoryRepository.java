@@ -21,4 +21,6 @@ public interface InventoryRepository {
     List<InventoryItem> findByBarcodeIn(String houseId, Collection<String> barcodes);
 
     List<InventoryItem> findByName(String houseId, String name);
+
+    void deleteById(String id);
 }

@@ -156,4 +156,14 @@ class InventoryServiceTest {
 
         verify(inventoryRepository, never()).save(any());
     }
+
+    @Test
+    @DisplayName("deleteById delegates to the repository")
+    void shouldDeleteById() {
+        var itemId = UUID.randomUUID().toString();
+
+        inventoryService.deleteById(itemId);
+
+        verify(inventoryRepository).deleteById(itemId);
+    }
 }

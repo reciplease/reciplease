@@ -23,10 +23,12 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.reciplease.utils.ResourceUtils.readTestResource;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -177,6 +179,51 @@ class InventoryControllerTest {
                                       "amount": 12.0
                                     }"""))
                     .andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("should delete an item")
+        void deleteItem() throws Exception {
+            when(inventoryService.findById(item.id())).thenReturn(Optional.of(item));
+
+            mockMvc.perform(delete("/api/inventory/{uuid}", item.id()).with(csrf()))
+                    .andExpect(status().isNoContent());
+
+            verify(inventoryService).deleteById(item.id());
+        }
+
+        @Test
+        @DisplayName("should 404 when deleting an unknown item")
+        void deleteUnknown() throws Exception {
+            when(inventoryService.findById(item.id())).thenReturn(Optional.empty());
+
+            mockMvc.perform(delete("/api/inventory/{uuid}", item.id()).with(csrf()))
+                    .andExpect(status().isNotFound());
+
+            verify(inventoryService, never()).deleteById(any());
+        }
+
+        @Test
+        @DisplayName("should 404 when deleting an item belonging to another house")
+        @WithHouseOwner
+        void deleteForbiddenForOtherHouse() throws Exception {
+            when(houseAccess.belongsToHeaderHouse(any(InventoryItem.class))).thenReturn(false);
+            when(inventoryService.findById(item.id())).thenReturn(Optional.of(item));
+
+            mockMvc.perform(delete("/api/inventory/{uuid}", item.id()).with(csrf()))
+                    .andExpect(status().isNotFound());
+
+            verify(inventoryService, never()).deleteById(any());
+        }
+
+        @Test
+        @DisplayName("delete is forbidden for read-only members")
+        @WithHouseMember
+        void deleteForbiddenForReadOnly() throws Exception {
+            when(houseAccess.isOwner()).thenReturn(false);
+
+            mockMvc.perform(delete("/api/inventory/{uuid}", item.id()).with(csrf()))
+                    .andExpect(status().isForbidden());
         }
 
         @Test

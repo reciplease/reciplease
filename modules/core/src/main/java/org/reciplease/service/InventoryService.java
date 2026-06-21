@@ -53,4 +53,8 @@ public class InventoryService {
     public List<InventoryItem> findAllExpired(final String houseId) {
         return inventoryRepository.betweenDates(houseId, LocalDate.now(clock));
     }
+
+    public void deleteById(final String id) {
+        inventoryRepository.deleteById(id);
+    }
 }
