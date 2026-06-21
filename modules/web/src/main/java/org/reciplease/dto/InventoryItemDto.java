@@ -25,6 +25,8 @@ public class InventoryItemDto {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate expiration;
     String barcode;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    byte[] image;
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Instant updatedAt;
@@ -37,11 +39,12 @@ public class InventoryItemDto {
                 .amount(inventoryItem.amount())
                 .expiration(inventoryItem.expiration())
                 .barcode(inventoryItem.barcode())
+                .image(inventoryItem.image())
                 .updatedAt(inventoryItem.updatedAt())
                 .build();
     }
 
     public InventoryItem toEntity() {
-        return new InventoryItem(uuid, null, name, Measure.normalizeId(measure), amount, expiration, barcode);
+        return new InventoryItem(uuid, null, name, Measure.normalizeId(measure), amount, expiration, barcode, image);
     }
 }

@@ -27,6 +27,7 @@ public class InventoryItemDocument {
     private Double amount;
     private LocalDate expiration;
     private String barcode;
+    private byte[] image;
     @CreatedBy
     private String createdBy;
     @CreatedDate
@@ -42,6 +43,7 @@ public class InventoryItemDocument {
                 .amount(item.amount())
                 .expiration(item.expiration())
                 .barcode(item.barcode())
+                .image(item.image())
                 .createdBy(item.createdBy())
                 .createdAt(item.createdAt())
                 .updatedAt(item.updatedAt())
@@ -49,6 +51,6 @@ public class InventoryItemDocument {
     }
 
     public InventoryItem toModel() {
-        return new InventoryItem(id, createdBy, name, measure, amount, expiration, barcode, createdAt, updatedAt);
+        return new InventoryItem(id, createdBy, name, measure, amount, expiration, barcode, image, createdAt, updatedAt);
     }
 }

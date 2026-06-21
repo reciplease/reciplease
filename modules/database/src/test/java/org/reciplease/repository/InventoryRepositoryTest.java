@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -116,6 +117,17 @@ class InventoryRepositoryTest {
     }
 
     @Test
+    void shouldPersistAndRetrieveImageBytes() {
+        var imageBytes = new byte[]{1, 2, 3, 4};
+        var saved = inventoryRepository.save(new InventoryItem(null, null, "milk", "MILLILITRES", 1000d, LocalDate.of(2026, Month.JUNE, 6), null, imageBytes));
+
+        var found = inventoryRepository.findById(saved.id());
+
+        assertThat(found.isPresent(), is(true));
+        assertThat(found.get().image(), is(imageBytes));
+    }
+
+    @Test
     void shouldFindByNameIgnoringCase() {
         var saved = inventoryRepository.save(new InventoryItem(null, null, "Bread", "ITEMS", 2d, LocalDate.of(2026, Month.JUNE, 6), null));
 
@@ -125,6 +137,18 @@ class InventoryRepositoryTest {
     @Test
     void shouldReturnEmptyWhenBarcodeUnknown() {
         assertThat(inventoryRepository.findByBarcode("nope"), is(empty()));
+    }
+
+    @Test
+    void shouldFindById() {
+        var saved = inventoryRepository.save(new InventoryItem(null, null, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
+
+        assertThat(inventoryRepository.findById(saved.id()), is(Optional.of(saved)));
+    }
+
+    @Test
+    void shouldReturnEmptyWhenIdUnknown() {
+        assertThat(inventoryRepository.findById("does-not-exist"), is(Optional.empty()));
     }
 
     @Test
@@ -140,7 +164,7 @@ class InventoryRepositoryTest {
         var saved = inventoryRepository.save(new InventoryItem(null, null, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
 
         var updated = inventoryRepository.save(new InventoryItem(saved.id(), saved.createdBy(), saved.name(), saved.measure(), 12d,
-                saved.expiration(), saved.barcode(), saved.createdAt(), saved.updatedAt()));
+                saved.expiration(), saved.barcode(), saved.image(), saved.createdAt(), saved.updatedAt()));
 
         assertThat(updated.createdAt(), is(saved.createdAt()));
         assertThat(updated.updatedAt(), is(greaterThanOrEqualTo(saved.updatedAt())));

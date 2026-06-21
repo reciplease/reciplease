@@ -2,6 +2,7 @@ package org.reciplease.model;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -18,6 +19,7 @@ public record InventoryItem(
         Double amount,
         LocalDate expiration,
         String barcode,
+        byte[] image,
         Instant createdAt,
         Instant updatedAt) implements Audited {
 
@@ -30,10 +32,42 @@ public record InventoryItem(
 
     public InventoryItem(final String id, final String createdBy, final String name, final String measure,
                           final Double amount, final LocalDate expiration, final String barcode) {
-        this(id, createdBy, name, measure, amount, expiration, barcode, null, null);
+        this(id, createdBy, name, measure, amount, expiration, barcode, null, null, null);
+    }
+
+    public InventoryItem(final String id, final String createdBy, final String name, final String measure,
+                          final Double amount, final LocalDate expiration, final String barcode, final byte[] image) {
+        this(id, createdBy, name, measure, amount, expiration, barcode, image, null, null);
     }
 
     public InventoryItem withId(final String id) {
-        return new InventoryItem(id, createdBy, name, measure, amount, expiration, barcode, createdAt, updatedAt);
+        return new InventoryItem(id, createdBy, name, measure, amount, expiration, barcode, image, createdAt, updatedAt);
+    }
+
+    // The generated record equals()/hashCode() would compare `image` by array identity rather
+    // than content; override both so two items with equal image bytes are considered equal.
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof InventoryItem other)) {
+            return false;
+        }
+        return Objects.equals(id, other.id)
+                && Objects.equals(createdBy, other.createdBy)
+                && Objects.equals(name, other.name)
+                && Objects.equals(measure, other.measure)
+                && Objects.equals(amount, other.amount)
+                && Objects.equals(expiration, other.expiration)
+                && Objects.equals(barcode, other.barcode)
+                && Arrays.equals(image, other.image)
+                && Objects.equals(createdAt, other.createdAt)
+                && Objects.equals(updatedAt, other.updatedAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, createdBy, name, measure, amount, expiration, barcode, Arrays.hashCode(image), createdAt, updatedAt);
     }
 }

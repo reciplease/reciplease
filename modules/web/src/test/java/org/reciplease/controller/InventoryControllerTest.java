@@ -57,6 +57,41 @@ class InventoryControllerTest {
         verify(inventoryService).save(mockRequestItem);
     }
 
+    @Test
+    @DisplayName("should create inventory item with an image")
+    void shouldCreateInventoryItemWithImage() throws Exception {
+        var imageBytes = new byte[]{1, 2, 3};
+        var imageBase64 = java.util.Base64.getEncoder().encodeToString(imageBytes);
+        var mockRequestItem = new InventoryItem(null, null, "bread", "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012", imageBytes);
+        var mockResponseItem = mockRequestItem.withId("b465af6e-2465-4436-84c1-14f35db68dbf");
+
+        when(inventoryService.save(mockRequestItem)).thenReturn(mockResponseItem);
+
+        mockMvc.perform(post("/api/inventory")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "bread",
+                                  "measure": "item",
+                                  "expiration": "2020-01-01",
+                                  "amount": 20.0,
+                                  "barcode": "0123456789012",
+                                  "image": "%s"
+                                }""".formatted(imageBase64)))
+                .andExpect(status().isCreated())
+                .andExpect(content().json("""
+                        {
+                          "uuid": "b465af6e-2465-4436-84c1-14f35db68dbf",
+                          "name": "bread",
+                          "measure": "item",
+                          "expiration": "2020-01-01",
+                          "amount": 20.0,
+                          "barcode": "0123456789012",
+                          "image": "%s"
+                        }""".formatted(imageBase64), true));
+    }
+
     @Nested
     @DisplayName("With item")
     class WithItem {
