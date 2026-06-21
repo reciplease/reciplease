@@ -51,8 +51,9 @@ public class HouseController {
     @GetMapping("members")
     @HouseMember
     public ResponseEntity<List<HouseMemberDto>> findMembers() {
+        final var userId = currentUserId();
         final var members = houseRepository.members(houseAccess.requireHouseId()).stream()
-                .map(HouseMemberDto::from)
+                .map(membership -> HouseMemberDto.from(membership, membership.userId().equals(userId)))
                 .collect(toList());
         return ResponseEntity.ok(members);
     }

@@ -14,10 +14,15 @@ public class HouseMemberDto {
     String email;
     HouseRole role;
 
-    public static HouseMemberDto from(final HouseMembership membership) {
+    /**
+     * @param isSelf whether this membership is the caller's own — their email is
+     *               shown in full; every other member's is masked (see {@link
+     *               org.reciplease.model.Email#masked()}).
+     */
+    public static HouseMemberDto from(final HouseMembership membership, final boolean isSelf) {
         return HouseMemberDto.builder()
                 .userId(membership.userId())
-                .email(membership.email().value())
+                .email((isSelf ? membership.email() : membership.email().masked()).value())
                 .role(membership.role())
                 .build();
     }

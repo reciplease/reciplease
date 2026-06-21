@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -58,7 +59,7 @@ class HouseControllerTest {
     }
 
     @Test
-    @DisplayName("should return members, owners first then alphabetically by email")
+    @DisplayName("should return members with every email but the caller's own masked")
     void findMembers() throws Exception {
         when(houseRepository.members(HOUSE_ID)).thenReturn(List.of(
                 new HouseMembership("owner-id", new Email("owner@example.com"), HouseRole.OWNER),
@@ -68,8 +69,25 @@ class HouseControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
                         [
+                          {"userId": "owner-id", "email": "ow**er@example.com", "role": "OWNER"},
+                          {"userId": "member-id", "email": "me**er@example.com", "role": "READ_ONLY"}
+                        ]""", true));
+    }
+
+    @Test
+    @DisplayName("shows the caller's own email in full, unmasked")
+    @WithMockUser(username = "owner-id", authorities = "ROLE_RECIPLEASE")
+    void findMembersShowsOwnEmailUnmasked() throws Exception {
+        when(houseRepository.members(HOUSE_ID)).thenReturn(List.of(
+                new HouseMembership("owner-id", new Email("owner@example.com"), HouseRole.OWNER),
+                new HouseMembership("member-id", new Email("member@example.com"), HouseRole.READ_ONLY)));
+
+        mockMvc.perform(get("/api/houses/members"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("""
+                        [
                           {"userId": "owner-id", "email": "owner@example.com", "role": "OWNER"},
-                          {"userId": "member-id", "email": "member@example.com", "role": "READ_ONLY"}
+                          {"userId": "member-id", "email": "me**er@example.com", "role": "READ_ONLY"}
                         ]""", true));
     }
 
@@ -95,7 +113,11 @@ class HouseControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"role": "OWNER"}"""))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().json("""
+                        [
+                          {"userId": "member-id", "email": "me**er@example.com", "role": "OWNER"}
+                        ]""", true));
 
         verify(houseRepository).addMember(HOUSE_ID, "member-id", HouseRole.OWNER);
     }
