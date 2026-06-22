@@ -6,7 +6,6 @@ import org.reciplease.repository.mongo.AllowlistMongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Repository
@@ -16,7 +15,7 @@ public class AllowlistRepositoryImpl implements AllowlistRepository {
 
     @Override
     public boolean contains(final String email) {
-        return allowlistMongoRepository.existsById(normalize(email));
+        return allowlistMongoRepository.existsById(email);
     }
 
     @Override
@@ -28,15 +27,11 @@ public class AllowlistRepositoryImpl implements AllowlistRepository {
 
     @Override
     public void add(final String email) {
-        allowlistMongoRepository.save(AllowlistDocument.builder().email(normalize(email)).build());
+        allowlistMongoRepository.save(AllowlistDocument.builder().email(email).build());
     }
 
     @Override
     public void remove(final String email) {
-        allowlistMongoRepository.deleteById(normalize(email));
-    }
-
-    private static String normalize(final String email) {
-        return email.trim().toLowerCase(Locale.ROOT);
+        allowlistMongoRepository.deleteById(email);
     }
 }

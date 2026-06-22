@@ -1,0 +1,3 @@
+reciplease:
+  jwt:
+    signing-secret: test-signing-secret-not-for-prod

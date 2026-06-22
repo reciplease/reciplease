@@ -26,12 +26,12 @@ public class InviteService {
 
     /**
      * Redeems a one-time invite code: claims it (atomically, so it can't be reused),
-     * allowlists the redeemer's email, and grants them the invite's role in its house.
+     * allowlists the redeemer's user id, and grants them the invite's role in its house.
      * Returns empty if the code is invalid or was already redeemed.
      */
-    public Optional<House> accept(final String code, final String userId, final String email) {
+    public Optional<House> accept(final String code, final String userId) {
         return inviteRepository.claim(code, userId).map(invite -> {
-            allowlistRepository.add(email);
+            allowlistRepository.add(userId);
             houseRepository.addMember(invite.houseId(), userId, invite.role());
             return houseRepository.findById(invite.houseId())
                     .orElseThrow(() -> new IllegalStateException("Invite references a missing house: " + invite.houseId()));

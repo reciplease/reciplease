@@ -7,7 +7,6 @@ import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.MethodSecurityTestSupport;
 import org.reciplease.configuration.WithHouseMember;
 import org.reciplease.configuration.WithHouseOwner;
-import org.reciplease.model.Email;
 import org.reciplease.model.HouseMembership;
 import org.reciplease.model.HouseRole;
 import org.reciplease.model.Invite;
@@ -59,35 +58,35 @@ class HouseControllerTest {
     }
 
     @Test
-    @DisplayName("should return members with every email but the caller's own masked")
+    @DisplayName("should return members with their handles")
     void findMembers() throws Exception {
         when(houseRepository.members(HOUSE_ID)).thenReturn(List.of(
-                new HouseMembership("owner-id", new Email("owner@example.com"), HouseRole.OWNER),
-                new HouseMembership("member-id", new Email("member@example.com"), HouseRole.READ_ONLY)));
+                new HouseMembership("owner-id", "owner-handle", HouseRole.OWNER),
+                new HouseMembership("member-id", "member-handle", HouseRole.READ_ONLY)));
 
         mockMvc.perform(get("/api/houses/members"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
                         [
-                          {"userId": "owner-id", "email": "ow**er@example.com", "role": "OWNER"},
-                          {"userId": "member-id", "email": "me**er@example.com", "role": "READ_ONLY"}
+                          {"userId": "owner-id", "handle": "owner-handle", "role": "OWNER"},
+                          {"userId": "member-id", "handle": "member-handle", "role": "READ_ONLY"}
                         ]""", true));
     }
 
     @Test
-    @DisplayName("shows the caller's own email in full, unmasked")
+    @DisplayName("returns a null handle for members who haven't set one")
     @WithMockUser(username = "owner-id", authorities = "ROLE_RECIPLEASE")
-    void findMembersShowsOwnEmailUnmasked() throws Exception {
+    void findMembersWithNullHandle() throws Exception {
         when(houseRepository.members(HOUSE_ID)).thenReturn(List.of(
-                new HouseMembership("owner-id", new Email("owner@example.com"), HouseRole.OWNER),
-                new HouseMembership("member-id", new Email("member@example.com"), HouseRole.READ_ONLY)));
+                new HouseMembership("owner-id", null, HouseRole.OWNER),
+                new HouseMembership("member-id", "member-handle", HouseRole.READ_ONLY)));
 
         mockMvc.perform(get("/api/houses/members"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
                         [
-                          {"userId": "owner-id", "email": "owner@example.com", "role": "OWNER"},
-                          {"userId": "member-id", "email": "me**er@example.com", "role": "READ_ONLY"}
+                          {"userId": "owner-id", "handle": null, "role": "OWNER"},
+                          {"userId": "member-id", "handle": "member-handle", "role": "READ_ONLY"}
                         ]""", true));
     }
 
@@ -106,7 +105,7 @@ class HouseControllerTest {
     @DisplayName("should update a member's role")
     void updateMemberRole() throws Exception {
         when(houseRepository.members(HOUSE_ID)).thenReturn(List.of(
-                new HouseMembership("member-id", new Email("member@example.com"), HouseRole.OWNER)));
+                new HouseMembership("member-id", "member-handle", HouseRole.OWNER)));
 
         mockMvc.perform(patch("/api/houses/members/{userId}", "member-id")
                         .with(csrf())
@@ -116,7 +115,7 @@ class HouseControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
                         [
-                          {"userId": "member-id", "email": "me**er@example.com", "role": "OWNER"}
+                          {"userId": "member-id", "handle": "member-handle", "role": "OWNER"}
                         ]""", true));
 
         verify(houseRepository).addMember(HOUSE_ID, "member-id", HouseRole.OWNER);

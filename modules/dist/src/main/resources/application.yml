@@ -1,3 +1,9 @@
+reciplease:
+  jwt:
+    # Fake, non-secret default so local/dev runs work without setting an env var.
+    # NEVER use this value outside local development.
+    signing-secret: local-dev-only-secret-do-not-use-in-prod
+
 springdoc:
   swagger-ui:
     path: /

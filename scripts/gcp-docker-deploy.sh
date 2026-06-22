@@ -29,4 +29,4 @@ fi
 # spring.mongodb.uri in Spring Boot 4, so the env var is SPRING_MONGODB_URI.
 echo "Deploying ${DIGEST}"
 ${GCLOUD} run deploy dist --image "${DIGEST}" \
-  --update-secrets "SPRING_MONGODB_URI=reciplease-database-url:latest,SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES=reciplease-google-client-id:latest"
+  --update-secrets "SPRING_MONGODB_URI=reciplease-database-url:latest,RECIPLEASE_JWT_SIGNING_SECRET=reciplease-jwt-signing-secret:latest"

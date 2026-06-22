@@ -60,10 +60,10 @@ public class HouseManagementSteps {
         }
     }
 
-    @When("{string} with email {string} accepts the generated invite")
-    public void acceptsTheGeneratedInvite(final String userId, final String email) throws Exception {
+    @When("{string} accepts the generated invite")
+    public void acceptsTheGeneratedInvite(final String userId) throws Exception {
         state.setLastResult(mockMvc.perform(post("/api/invites/{code}/accept", state.generatedInviteCode())
-                .with(jwt().jwt(builder -> builder.subject(userId).claim("email", email)))));
+                .with(jwt().jwt(builder -> builder.subject(userId)))));
     }
 
     @And("{string} deletes the generated invite in the house")

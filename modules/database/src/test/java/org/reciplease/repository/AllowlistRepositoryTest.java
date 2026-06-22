@@ -25,30 +25,30 @@ class AllowlistRepositoryTest {
     }
 
     @Test
-    void containsIsTrueForAddedEmail() {
-        allowlistRepository.add("rhys.saldanha@gmail.com");
+    void containsIsTrueForAddedUserId() {
+        allowlistRepository.add("user-1");
 
-        assertThat(allowlistRepository.contains("rhys.saldanha@gmail.com"), is(true));
+        assertThat(allowlistRepository.contains("user-1"), is(true));
     }
 
     @Test
-    void containsIsFalseForUnknownEmail() {
-        assertThat(allowlistRepository.contains("stranger@gmail.com"), is(false));
+    void containsIsFalseForUnknownUserId() {
+        assertThat(allowlistRepository.contains("stranger"), is(false));
     }
 
     @Test
-    void matchingIsCaseAndWhitespaceInsensitive() {
-        allowlistRepository.add("  Rhys.Saldanha@Gmail.com  ");
+    void matchingIsExactSinceUserIdsAreOpaque() {
+        allowlistRepository.add("user-1");
 
-        assertThat(allowlistRepository.contains("rhys.saldanha@gmail.com"), is(true));
-        assertThat(allowlistRepository.findAll(), contains("rhys.saldanha@gmail.com"));
+        assertThat(allowlistRepository.contains("user-1"), is(true));
+        assertThat(allowlistRepository.findAll(), contains("user-1"));
     }
 
     @Test
     void removeRevokesAccess() {
-        allowlistRepository.add("rhys.saldanha@gmail.com");
-        allowlistRepository.remove("RHYS.SALDANHA@gmail.com");
+        allowlistRepository.add("user-1");
+        allowlistRepository.remove("user-1");
 
-        assertThat(allowlistRepository.contains("rhys.saldanha@gmail.com"), is(false));
+        assertThat(allowlistRepository.contains("user-1"), is(false));
     }
 }

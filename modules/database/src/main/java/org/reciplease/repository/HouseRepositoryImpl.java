@@ -1,7 +1,6 @@
 package org.reciplease.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.reciplease.model.Email;
 import org.reciplease.model.House;
 import org.reciplease.model.HouseDocument;
 import org.reciplease.model.HouseMembership;
@@ -74,16 +73,16 @@ public class HouseRepositoryImpl implements HouseRepository {
 
         final Map<String, String> members = document.getMembers();
         final Map<String, UserDocument> usersById = userMongoRepository.findAllById(members.keySet()).stream()
-                .collect(Collectors.toMap(UserDocument::getGoogleId, user -> user));
+                .collect(Collectors.toMap(UserDocument::getId, user -> user));
 
         return members.entrySet().stream()
                 .map(entry -> {
                     final var user = usersById.get(entry.getKey());
-                    final var email = new Email(user != null ? user.getEmail() : entry.getKey());
-                    return new HouseMembership(entry.getKey(), email, HouseRole.valueOf(entry.getValue()));
+                    final var handle = user != null ? user.getHandle() : null;
+                    return new HouseMembership(entry.getKey(), handle, HouseRole.valueOf(entry.getValue()));
                 })
                 .sorted(Comparator.comparing(HouseMembership::role)
-                        .thenComparing(membership -> membership.email().value()))
+                        .thenComparing(membership -> membership.userId()))
                 .collect(Collectors.toList());
     }
 }

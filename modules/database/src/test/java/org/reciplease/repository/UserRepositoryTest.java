@@ -10,6 +10,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataMongoTest
 @Import(UserRepositoryImpl.class)
@@ -26,21 +28,104 @@ class UserRepositoryTest {
 
     @Test
     void savePersistsUser() {
-        var user = new User("google-sub-123", "user@example.com");
+        var user = new User("user-1", "handle-1");
 
         var saved = userRepository.save(user);
 
-        assertThat(saved.id(), is("google-sub-123"));
-        assertThat(saved.email(), is("user@example.com"));
+        assertThat(saved.id(), is("user-1"));
+        assertThat(saved.handle(), is("handle-1"));
     }
 
     @Test
-    void saveIsIdempotentForSameGoogleId() {
-        var user = new User("google-sub-123", "user@example.com");
+    void saveIsIdempotentForSameId() {
+        var user = new User("user-1", "handle-1");
 
         userRepository.save(user);
         var saved = userRepository.save(user);
 
-        assertThat(saved.id(), is("google-sub-123"));
+        assertThat(saved.id(), is("user-1"));
+    }
+
+    @Test
+    void findByIdReturnsTheSavedUser() {
+        userRepository.save(new User("user-1", "handle-1"));
+
+        var found = userRepository.findById("user-1");
+
+        assertThat(found.isPresent(), is(true));
+        assertThat(found.get().handle(), is("handle-1"));
+    }
+
+    @Test
+    void findByIdReturnsEmptyWhenMissing() {
+        var found = userRepository.findById("missing");
+
+        assertThat(found.isPresent(), is(false));
+    }
+
+    @Test
+    void createWithIdentityCreatesANewUserWithNullHandleAndLinksTheIdentity() {
+        var created = userRepository.createWithIdentity("google", "google-sub-1");
+
+        assertThat(created.handle(), is(nullValue()));
+
+        var found = userRepository.findByIdentity("google", "google-sub-1");
+        assertThat(found.isPresent(), is(true));
+        assertThat(found.get().id(), is(created.id()));
+    }
+
+    @Test
+    void findByIdentityReturnsEmptyWhenNotLinked() {
+        var found = userRepository.findByIdentity("google", "unknown-sub");
+
+        assertThat(found.isPresent(), is(false));
+    }
+
+    @Test
+    void linkIdentityLinksANewIdentityToAnExistingUser() {
+        var user = userRepository.createWithIdentity("google", "google-sub-1");
+
+        userRepository.linkIdentity(user.id(), "github", "github-sub-1");
+
+        var found = userRepository.findByIdentity("github", "github-sub-1");
+        assertThat(found.isPresent(), is(true));
+        assertThat(found.get().id(), is(user.id()));
+    }
+
+    @Test
+    void linkIdentityIsANoOpWhenAlreadyLinkedToTheSameUser() {
+        var user = userRepository.createWithIdentity("google", "google-sub-1");
+
+        userRepository.linkIdentity(user.id(), "google", "google-sub-1");
+
+        var found = userRepository.findByIdentity("google", "google-sub-1");
+        assertThat(found.get().id(), is(user.id()));
+    }
+
+    @Test
+    void linkIdentityThrowsWhenAlreadyLinkedToADifferentUser() {
+        var userA = userRepository.createWithIdentity("google", "google-sub-1");
+        var userB = userRepository.createWithIdentity("github", "github-sub-1");
+
+        assertThrows(IdentityConflictException.class,
+                () -> userRepository.linkIdentity(userB.id(), "google", "google-sub-1"));
+    }
+
+    @Test
+    void setHandleUpdatesTheUsersHandle() {
+        userRepository.save(new User("user-1", null));
+
+        userRepository.setHandle("user-1", "new-handle");
+
+        var found = userRepository.findById("user-1");
+        assertThat(found.get().handle(), is("new-handle"));
+    }
+
+    @Test
+    void setHandleThrowsWhenAnotherUserAlreadyHasThatHandle() {
+        userRepository.save(new User("user-1", "taken-handle"));
+        userRepository.save(new User("user-2", null));
+
+        assertThrows(HandleTakenException.class, () -> userRepository.setHandle("user-2", "taken-handle"));
     }
 }
