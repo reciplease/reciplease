@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
+import org.reciplease.model.House;
 import org.reciplease.model.HouseRole;
 import org.reciplease.model.Invite;
 import org.reciplease.repository.AllowlistRepository;
@@ -42,6 +43,30 @@ class InviteServiceTest {
     @BeforeEach
     void setUp() {
         inviteService = new InviteService(inviteRepository, houseRepository, allowlistRepository, inviteCodeGenerator);
+    }
+
+    @Test
+    void acceptClaimsTheCodeAllowlistsTheUserAndAddsThemToTheHouse() {
+        var invite = new Invite("invite-1", "code1", HOUSE_ID, HouseRole.READ_ONLY, Instant.now(), null, null);
+        var house = new House(HOUSE_ID, "My House", Instant.now());
+        when(inviteRepository.claim("code1", "user-1")).thenReturn(Optional.of(invite));
+        when(houseRepository.findById(HOUSE_ID)).thenReturn(Optional.of(house));
+
+        var accepted = inviteService.accept("code1", "user-1");
+
+        assertThat(accepted, is(Optional.of(house)));
+        verify(allowlistRepository).add("user-1");
+        verify(houseRepository).addMember(HOUSE_ID, "user-1", HouseRole.READ_ONLY);
+    }
+
+    @Test
+    void acceptReturnsEmptyWhenTheCodeIsInvalidOrAlreadyUsed() {
+        when(inviteRepository.claim("bad-code", "user-1")).thenReturn(Optional.empty());
+
+        var accepted = inviteService.accept("bad-code", "user-1");
+
+        assertThat(accepted, is(Optional.empty()));
+        verify(allowlistRepository, never()).add(any());
     }
 
     @Test
