@@ -53,4 +53,18 @@ class AllowlistJwtAuthenticationConverterTest {
         assertThat(auth.getAuthorities(), is(emptyIterable()));
         assertThat(auth.getName(), is(SUBJECT));
     }
+
+    @Test
+    void deniesWithoutConsultingTheAllowlistWhenTheTokenHasNoSubject() {
+        final var jwtWithoutSubject = Jwt.withTokenValue("token")
+                .header("alg", "HS256")
+                .claim("not-sub", "irrelevant")
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(3600))
+                .build();
+
+        final AbstractAuthenticationToken auth = converter.convert(jwtWithoutSubject);
+
+        assertThat(auth.getAuthorities(), is(emptyIterable()));
+    }
 }
