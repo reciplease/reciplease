@@ -11,18 +11,13 @@ import org.reciplease.model.HouseRole;
 @Builder
 public class HouseMemberDto {
     String userId;
-    String email;
+    String handle;
     HouseRole role;
 
-    /**
-     * @param isSelf whether this membership is the caller's own — their email is
-     *               shown in full; every other member's is masked (see {@link
-     *               org.reciplease.model.Email#masked()}).
-     */
-    public static HouseMemberDto from(final HouseMembership membership, final boolean isSelf) {
+    public static HouseMemberDto from(final HouseMembership membership) {
         return HouseMemberDto.builder()
                 .userId(membership.userId())
-                .email((isSelf ? membership.email() : membership.email().masked()).value())
+                .handle(membership.handle())
                 .role(membership.role())
                 .build();
     }

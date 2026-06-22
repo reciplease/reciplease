@@ -75,10 +75,10 @@ public class HouseInviteSteps {
         mongoTemplate.save(invite);
     }
 
-    @When("{string} with email {string} accepts invite {string}")
-    public void acceptsInvite(final String userId, final String email, final String code) throws Exception {
+    @When("{string} accepts invite {string}")
+    public void acceptsInvite(final String userId, final String code) throws Exception {
         state.setLastResult(mockMvc.perform(post("/api/invites/{code}/accept", code)
-                .with(jwt().jwt(builder -> builder.subject(userId).claim("email", email)))));
+                .with(jwt().jwt(builder -> builder.subject(userId)))));
     }
 
     @When("{string} creates an inventory item named {string} in the house")
@@ -108,8 +108,8 @@ public class HouseInviteSteps {
     }
 
     @Then("{string} is on the allowlist")
-    public void isOnTheAllowlist(final String email) {
-        assertThat(allowlistRepository.contains(email)).isTrue();
+    public void isOnTheAllowlist(final String userId) {
+        assertThat(allowlistRepository.contains(userId)).isTrue();
     }
 
     @Then("{string} has role {string} in the house")

@@ -1,11 +1,11 @@
+reciplease:
+  jwt:
+    # Reciplease's own HS256 signing secret (also reused as the /api/auth/exchange
+    # server-to-server shared secret). Injected via Cloud Run --set-secrets as
+    # RECIPLEASE_JWT_SIGNING_SECRET; Spring Boot relaxed binding maps it automatically.
+    signing-secret: ${RECIPLEASE_JWT_SIGNING_SECRET}
+
 spring:
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          # Google's OIDC issuer; Spring fetches its public keys to validate tokens.
-          issuer-uri: https://accounts.google.com
-          # Audience is injected as SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES
-          # and Mongo URI as SPRING_MONGODB_URI (spring.mongodb.uri, renamed from
-          # spring.data.mongodb.uri in Spring Boot 4) via Cloud Run --set-secrets;
-          # Spring Boot relaxed binding maps them automatically.
+  # Mongo URI is injected as SPRING_MONGODB_URI (spring.mongodb.uri, renamed from
+  # spring.data.mongodb.uri in Spring Boot 4) via Cloud Run --set-secrets; Spring
+  # Boot relaxed binding maps it automatically.

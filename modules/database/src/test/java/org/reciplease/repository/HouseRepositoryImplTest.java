@@ -2,7 +2,6 @@ package org.reciplease.repository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.reciplease.model.Email;
 import org.reciplease.model.HouseDocument;
 import org.reciplease.model.HouseMembership;
 import org.reciplease.model.HouseRole;
@@ -19,7 +18,6 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
 
 @DataMongoTest
 @Import({HouseRepositoryImpl.class, UserRepositoryImpl.class})
@@ -47,10 +45,10 @@ class HouseRepositoryImplTest {
     }
 
     @Test
-    void membersResolvesEmailsAndSortsOwnersFirstThenByEmail() {
-        userRepository.save(new User("owner-id", "owner@example.com"));
-        userRepository.save(new User("zed-id", "zed@example.com"));
-        userRepository.save(new User("amy-id", "amy@example.com"));
+    void membersResolvesHandlesAndSortsOwnersFirstThenByUserId() {
+        userRepository.save(new User("owner-id", "owner-handle"));
+        userRepository.save(new User("zed-id", "zed-handle"));
+        userRepository.save(new User("amy-id", "amy-handle"));
 
         var house = mongoTemplate.save(HouseDocument.builder()
                 .name("Test House")
@@ -64,13 +62,13 @@ class HouseRepositoryImplTest {
         var members = houseRepository.members(house.getId());
 
         assertThat(members, contains(
-                new HouseMembership("owner-id", new Email("owner@example.com"), HouseRole.OWNER),
-                new HouseMembership("amy-id", new Email("amy@example.com"), HouseRole.READ_ONLY),
-                new HouseMembership("zed-id", new Email("zed@example.com"), HouseRole.READ_ONLY)));
+                new HouseMembership("owner-id", "owner-handle", HouseRole.OWNER),
+                new HouseMembership("amy-id", "amy-handle", HouseRole.READ_ONLY),
+                new HouseMembership("zed-id", "zed-handle", HouseRole.READ_ONLY)));
     }
 
     @Test
-    void membersFallsBackToTheUserIdWhenNoUserRecordExists() {
+    void membersFallsBackToANullHandleWhenNoUserRecordExists() {
         var house = mongoTemplate.save(HouseDocument.builder()
                 .name("Test House")
                 .createdAt(Instant.now())
@@ -79,12 +77,12 @@ class HouseRepositoryImplTest {
 
         var members = houseRepository.members(house.getId());
 
-        assertThat(members, contains(new HouseMembership("unknown-id", new Email("unknown-id"), HouseRole.OWNER)));
+        assertThat(members, contains(new HouseMembership("unknown-id", null, HouseRole.OWNER)));
     }
 
     @Test
     void addMemberThenMembersReflectsTheUpdatedRole() {
-        userRepository.save(new User("user-1", "user1@example.com"));
+        userRepository.save(new User("user-1", "user1-handle"));
         var house = mongoTemplate.save(HouseDocument.builder().name("House").createdAt(Instant.now()).build());
 
         houseRepository.addMember(house.getId(), "user-1", HouseRole.READ_ONLY);
@@ -92,6 +90,6 @@ class HouseRepositoryImplTest {
 
         var members = houseRepository.members(house.getId());
 
-        assertThat(members, contains(new HouseMembership("user-1", new Email("user1@example.com"), HouseRole.OWNER)));
+        assertThat(members, contains(new HouseMembership("user-1", "user1-handle", HouseRole.OWNER)));
     }
 }
