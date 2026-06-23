@@ -20,7 +20,9 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 
 /**
  * Production security: validates Reciplease's own HS256-signed JWT bearer tokens (see
- * {@link ReciplaseJwtService}); the allowlist (and any other per-endpoint authorization) is
+ * {@link ReciplaseJwtService}), resolved from the {@code reciplease-session} cookie or, failing
+ * that, the {@code Authorization} header (see {@link CookieBearerTokenResolver}); the allowlist
+ * (and any other per-endpoint authorization) is
  * enforced via {@code @PreAuthorize} on individual controller methods rather than URL-matcher
  * rules here, so this filter chain only sets up the JWT mechanics and leaves
  * {@code authorizeHttpRequests} fully open except for {@code /api/auth/exchange}, which is how
@@ -58,6 +60,7 @@ public class CloudWebSecurityConfig {
                         .requestMatchers("/api/auth/exchange").permitAll()
                         .anyRequest().permitAll())
                 .oauth2ResourceServer(oauth2 -> oauth2
+                        .bearerTokenResolver(new CookieBearerTokenResolver())
                         .jwt(jwt -> jwt
                                 .decoder(jwtDecoder())
                                 .jwtAuthenticationConverter(allowlistJwtAuthenticationConverter)))
