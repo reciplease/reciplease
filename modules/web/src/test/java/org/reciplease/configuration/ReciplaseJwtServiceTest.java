@@ -11,31 +11,19 @@ import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 
 class ReciplaseJwtServiceTest {
 
     private final ReciplaseJwtService jwtService = new ReciplaseJwtService("a-sufficiently-long-test-signing-secret");
 
     @Test
-    void mintedTokenRoundTripsToTheSameUserIdAndHandle() {
-        var token = jwtService.mint("user-1", "some-handle");
+    void mintedTokenRoundTripsToTheSameUserId() {
+        var token = jwtService.mint("user-1");
 
         var parsed = jwtService.parse(token);
 
         assertThat(parsed.isPresent(), is(true));
-        assertThat(parsed.get().userId(), is("user-1"));
-        assertThat(parsed.get().handle(), is("some-handle"));
-    }
-
-    @Test
-    void mintedTokenRoundTripsWithANullHandle() {
-        var token = jwtService.mint("user-1", null);
-
-        var parsed = jwtService.parse(token);
-
-        assertThat(parsed.isPresent(), is(true));
-        assertThat(parsed.get().handle(), is(nullValue()));
+        assertThat(parsed.get(), is("user-1"));
     }
 
     @Test
@@ -48,7 +36,7 @@ class ReciplaseJwtServiceTest {
     @Test
     void parseReturnsEmptyForATokenSignedWithADifferentSecret() {
         var otherService = new ReciplaseJwtService("a-completely-different-test-signing-secret");
-        var token = otherService.mint("user-1", "some-handle");
+        var token = otherService.mint("user-1");
 
         var parsed = jwtService.parse(token);
 

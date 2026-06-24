@@ -24,7 +24,6 @@ import java.util.Optional;
 @Component
 public class ReciplaseJwtService {
 
-    private static final String HANDLE_CLAIM = "handle";
     private static final Duration EXPIRY = Duration.ofHours(24);
 
     private final SecretKey signingKey;
@@ -33,31 +32,35 @@ public class ReciplaseJwtService {
         this.signingKey = Keys.hmacShaKeyFor(signingSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    /** Mints a fresh token for {@code userId}, embedding {@code handle} (may be {@code null}). */
-    public String mint(final String userId, final String handle) {
+    /**
+     * Mints a fresh token identifying {@code userId}. The token carries only the user id — the
+     * handle is mutable and authoritative only in the user record (read via {@code /api/me}), so
+     * embedding it here just bakes in a stale copy that never refreshes.
+     */
+    public String mint(final String userId) {
         final var now = Instant.now();
         return Jwts.builder()
                 .subject(userId)
-                .claim(HANDLE_CLAIM, handle)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plus(EXPIRY)))
                 .signWith(signingKey)
                 .compact();
     }
 
-    /** Parses and validates {@code token}, returning empty if it is malformed, unsigned, or expired. */
-    public Optional<ParsedToken> parse(final String token) {
+    /**
+     * Parses and validates {@code token}, returning the user id, or empty if the token is
+     * malformed, unsigned, or expired.
+     */
+    public Optional<String> parse(final String token) {
         try {
             final Claims claims = Jwts.parser()
                     .verifyWith(signingKey)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
-            return Optional.of(new ParsedToken(claims.getSubject(), claims.get(HANDLE_CLAIM, String.class)));
+            return Optional.ofNullable(claims.getSubject());
         } catch (final JwtException | IllegalArgumentException e) {
             return Optional.empty();
         }
     }
-
-    public record ParsedToken(String userId, String handle) {}
 }

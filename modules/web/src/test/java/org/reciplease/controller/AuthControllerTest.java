@@ -92,7 +92,7 @@ class AuthControllerTest {
 
     @Test
     void linksANewIdentityWhenAValidLinkTokenIsProvided() throws Exception {
-        final var linkToken = jwtService.mint("user-1", "my-handle");
+        final var linkToken = jwtService.mint("user-1");
         when(userRepository.findById("user-1")).thenReturn(Optional.of(new User("user-1", "my-handle")));
 
         mockMvc.perform(post("/api/auth/exchange")
@@ -108,7 +108,7 @@ class AuthControllerTest {
 
     @Test
     void returnsConflictWhenLinkingAnIdentityAlreadyLinkedToADifferentUser() throws Exception {
-        final var linkToken = jwtService.mint("user-1", "my-handle");
+        final var linkToken = jwtService.mint("user-1");
         org.mockito.Mockito.doThrow(new IdentityConflictException("github", "github-sub-1"))
                 .when(userRepository).linkIdentity("user-1", "github", "github-sub-1");
 

@@ -52,7 +52,7 @@ public class AuthController {
                     ? link(request.linkToken(), provider, providerId)
                     : loginOrSignup(provider, providerId);
 
-            final var token = jwtService.mint(user.id(), user.handle());
+            final var token = jwtService.mint(user.id());
             return ResponseEntity.ok(new ExchangeResponse(token, user.id(), user.handle()));
         } catch (final IdentityConflictException e) {
             return ResponseEntity.status(409).build();
@@ -60,11 +60,11 @@ public class AuthController {
     }
 
     private User link(final String linkToken, final String provider, final String providerId) {
-        final var parsed = jwtService.parse(linkToken)
+        final var userId = jwtService.parse(linkToken)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid or expired linkToken"));
-        userRepository.linkIdentity(parsed.userId(), provider, providerId);
-        return userRepository.findById(parsed.userId())
-                .orElseThrow(() -> new IllegalStateException("Missing user referenced by a valid linkToken: " + parsed.userId()));
+        userRepository.linkIdentity(userId, provider, providerId);
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("Missing user referenced by a valid linkToken: " + userId));
     }
 
     private User loginOrSignup(final String provider, final String providerId) {
