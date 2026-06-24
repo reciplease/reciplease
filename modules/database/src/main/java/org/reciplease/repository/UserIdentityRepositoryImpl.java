@@ -19,6 +19,13 @@ public class UserIdentityRepositoryImpl implements UserIdentityRepository {
                 .toList();
     }
 
+    @Override
+    public void removeForUser(final String userId, final String provider) {
+        userIdentityMongoRepository.findAllByUserId(userId).stream()
+                .filter(identity -> providerOf(identity).equals(provider))
+                .forEach(identity -> userIdentityMongoRepository.deleteById(identity.getId()));
+    }
+
     private static String providerOf(final UserIdentityDocument identity) {
         final var id = identity.getId();
         final var separator = id.indexOf(':');

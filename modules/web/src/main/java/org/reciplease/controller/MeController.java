@@ -10,7 +10,9 @@ import org.reciplease.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,6 +43,22 @@ public class MeController {
     @PreAuthorize("isAuthenticated()")
     public IdentitiesDto identities() {
         return new IdentitiesDto(userIdentityRepository.findProvidersForUser(currentUserId()));
+    }
+
+    @DeleteMapping("identities/{provider}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<IdentitiesDto> unlinkIdentity(@PathVariable final String provider) {
+        final var userId = currentUserId();
+        final var providers = userIdentityRepository.findProvidersForUser(userId);
+        if (!providers.contains(provider)) {
+            return ResponseEntity.notFound().build();
+        }
+        // Refuse to remove the only sign-in method — it would lock the user out.
+        if (providers.size() <= 1) {
+            return ResponseEntity.status(409).build();
+        }
+        userIdentityRepository.removeForUser(userId, provider);
+        return ResponseEntity.ok(new IdentitiesDto(userIdentityRepository.findProvidersForUser(userId)));
     }
 
     @PostMapping("handle")

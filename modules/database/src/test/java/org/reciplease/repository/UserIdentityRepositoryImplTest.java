@@ -58,4 +58,20 @@ class UserIdentityRepositoryImplTest {
 
         assertThat(providers, contains("no-separator-id"));
     }
+
+    @Test
+    void removeForUserDeletesOnlyThatUsersIdentityForThatProvider() {
+        userIdentityMongoRepository.save(UserIdentityDocument.builder()
+                .id(UserIdentityDocument.idFor("google", "google-sub-1")).userId("user-1").build());
+        userIdentityMongoRepository.save(UserIdentityDocument.builder()
+                .id(UserIdentityDocument.idFor("github", "github-sub-1")).userId("user-1").build());
+        userIdentityMongoRepository.save(UserIdentityDocument.builder()
+                .id(UserIdentityDocument.idFor("github", "github-sub-2")).userId("user-2").build());
+
+        userIdentityRepository.removeForUser("user-1", "github");
+
+        assertThat(userIdentityRepository.findProvidersForUser("user-1"), contains("google"));
+        // Another user's github identity is untouched.
+        assertThat(userIdentityRepository.findProvidersForUser("user-2"), contains("github"));
+    }
 }

@@ -24,6 +24,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -68,6 +69,39 @@ class MeControllerTest {
         mockMvc.perform(get("/api/me/identities"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.providers", org.hamcrest.Matchers.contains("google", "github")));
+    }
+
+    @Test
+    void unlinkRemovesTheProviderAndReturnsTheRemaining() throws Exception {
+        when(userIdentityRepository.findProvidersForUser("user-1"))
+                .thenReturn(List.of("google", "github"))
+                .thenReturn(List.of("google"));
+
+        mockMvc.perform(delete("/api/me/identities/{provider}", "github").with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.providers", org.hamcrest.Matchers.contains("google")));
+
+        verify(userIdentityRepository).removeForUser("user-1", "github");
+    }
+
+    @Test
+    void unlinkRefusesToRemoveTheOnlyProvider() throws Exception {
+        when(userIdentityRepository.findProvidersForUser("user-1")).thenReturn(List.of("google"));
+
+        mockMvc.perform(delete("/api/me/identities/{provider}", "google").with(csrf()))
+                .andExpect(status().isConflict());
+
+        verify(userIdentityRepository, never()).removeForUser(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void unlinkReturnsNotFoundForAProviderTheUserHasNotLinked() throws Exception {
+        when(userIdentityRepository.findProvidersForUser("user-1")).thenReturn(List.of("google", "github"));
+
+        mockMvc.perform(delete("/api/me/identities/{provider}", "facebook").with(csrf()))
+                .andExpect(status().isNotFound());
+
+        verify(userIdentityRepository, never()).removeForUser(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
     }
 
     @Test
