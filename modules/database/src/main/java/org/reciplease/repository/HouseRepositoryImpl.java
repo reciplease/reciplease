@@ -65,6 +65,13 @@ public class HouseRepositoryImpl implements HouseRepository {
     }
 
     @Override
+    public void removeMember(final String houseId, final String userId) {
+        final Query query = query(where("_id").is(houseId));
+        final Update update = new Update().unset("members." + userId);
+        mongoTemplate.updateFirst(query, update, HouseDocument.class);
+    }
+
+    @Override
     public List<HouseMembership> members(final String houseId) {
         final var document = houseMongoRepository.findById(houseId).orElse(null);
         if (document == null || document.getMembers() == null || document.getMembers().isEmpty()) {

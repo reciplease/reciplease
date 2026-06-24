@@ -23,6 +23,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.Instant;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -132,6 +134,41 @@ class HouseControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"role": "OWNER"}"""))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("should remove a member and return the updated list")
+    void removeMember() throws Exception {
+        when(houseRepository.members(HOUSE_ID)).thenReturn(List.of(
+                new HouseMembership("user", "owner-handle", HouseRole.OWNER)));
+
+        mockMvc.perform(delete("/api/houses/members/{userId}", "member-id").with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().json("""
+                        [
+                          {"userId": "user", "handle": "owner-handle", "role": "OWNER"}
+                        ]""", true));
+
+        verify(houseRepository).removeMember(HOUSE_ID, "member-id");
+    }
+
+    @Test
+    @DisplayName("removing yourself is rejected (can't orphan the house)")
+    void removeSelfIsRejected() throws Exception {
+        mockMvc.perform(delete("/api/houses/members/{userId}", "user").with(csrf()))
+                .andExpect(status().isBadRequest());
+
+        verify(houseRepository, never()).removeMember(any(), any());
+    }
+
+    @Test
+    @DisplayName("removeMember is forbidden for read-only members")
+    @WithHouseMember
+    void removeMemberForbiddenForReadOnly() throws Exception {
+        when(houseAccess.isOwner()).thenReturn(false);
+
+        mockMvc.perform(delete("/api/houses/members/{userId}", "member-id").with(csrf()))
                 .andExpect(status().isForbidden());
     }
 

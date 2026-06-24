@@ -65,6 +65,18 @@ public class HouseController {
         return findMembers();
     }
 
+    @DeleteMapping("members/{userId}")
+    @HouseOwner
+    public ResponseEntity<List<HouseMemberDto>> removeMember(@PathVariable final String userId) {
+        // An owner can remove anyone but themselves — self-removal could orphan the
+        // house (and is better expressed as a future "leave house" action).
+        if (userId.equals(currentUserId())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        houseRepository.removeMember(houseAccess.requireHouseId(), userId);
+        return findMembers();
+    }
+
     @GetMapping("invites")
     @HouseOwner
     public ResponseEntity<List<HouseInviteDto>> findPendingInvites() {

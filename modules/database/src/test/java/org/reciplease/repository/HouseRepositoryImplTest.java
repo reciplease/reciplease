@@ -17,6 +17,7 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.empty;
 
 @DataMongoTest
@@ -91,5 +92,20 @@ class HouseRepositoryImplTest {
         var members = houseRepository.members(house.getId());
 
         assertThat(members, contains(new HouseMembership("user-1", "user1-handle", HouseRole.OWNER)));
+    }
+
+    @Test
+    void removeMemberDropsThatMemberButLeavesOthers() {
+        userRepository.save(new User("user-1", "user1-handle"));
+        userRepository.save(new User("user-2", "user2-handle"));
+        var house = mongoTemplate.save(HouseDocument.builder().name("House").createdAt(Instant.now()).build());
+        houseRepository.addMember(house.getId(), "user-1", HouseRole.OWNER);
+        houseRepository.addMember(house.getId(), "user-2", HouseRole.READ_ONLY);
+
+        houseRepository.removeMember(house.getId(), "user-2");
+
+        var members = houseRepository.members(house.getId());
+        assertThat(members, contains(new HouseMembership("user-1", "user1-handle", HouseRole.OWNER)));
+        assertThat(houseRepository.roleOf(house.getId(), "user-2").isPresent(), is(false));
     }
 }

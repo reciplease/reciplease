@@ -21,6 +21,8 @@ public interface HouseRepository {
 
     void addMember(String houseId, String userId, HouseRole role);
 
+    void removeMember(String houseId, String userId);
+
     /**
      * All members of {@code houseId}, resolved against their user records and sorted
      * owners-first then alphabetically by email within each role.
