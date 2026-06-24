@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.reciplease.model.House;
 import org.reciplease.model.HouseRole;
 import org.reciplease.model.Invite;
-import org.reciplease.repository.AllowlistRepository;
 import org.reciplease.repository.HouseRepository;
 import org.reciplease.repository.InviteRepository;
 import org.springframework.stereotype.Service;
@@ -21,17 +20,15 @@ public class InviteService {
 
     private final InviteRepository inviteRepository;
     private final HouseRepository houseRepository;
-    private final AllowlistRepository allowlistRepository;
     private final InviteCodeGenerator inviteCodeGenerator;
 
     /**
-     * Redeems a one-time invite code: claims it (atomically, so it can't be reused),
-     * allowlists the redeemer's user id, and grants them the invite's role in its house.
-     * Returns empty if the code is invalid or was already redeemed.
+     * Redeems a one-time invite code: claims it (atomically, so it can't be reused) and grants
+     * the redeemer the invite's role in its house. House membership is itself the access grant —
+     * there is no separate allowlist. Returns empty if the code is invalid or already redeemed.
      */
     public Optional<House> accept(final String code, final String userId) {
         return inviteRepository.claim(code, userId).map(invite -> {
-            allowlistRepository.add(userId);
             houseRepository.addMember(invite.houseId(), userId, invite.role());
             return houseRepository.findById(invite.houseId())
                     .orElseThrow(() -> new IllegalStateException("Invite references a missing house: " + invite.houseId()));

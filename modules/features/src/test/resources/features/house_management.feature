@@ -21,7 +21,6 @@ Feature: House settings: member roles and invite management
     Then the response status is 201
     When "newcomer-3" accepts the generated invite
     Then the response status is 200
-    And "newcomer-3" is on the allowlist
     And "newcomer-3" has role "READ_ONLY" in the house
 
   Scenario: An owner sees pending invites but not already-accepted ones

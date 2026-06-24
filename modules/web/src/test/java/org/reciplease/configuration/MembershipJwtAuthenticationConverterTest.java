@@ -1,27 +1,29 @@
 package org.reciplease.configuration;
 
 import org.junit.jupiter.api.Test;
-import org.reciplease.repository.AllowlistRepository;
+import org.reciplease.model.House;
+import org.reciplease.repository.HouseRepository;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.time.Instant;
-import java.util.Map;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-class AllowlistJwtAuthenticationConverterTest {
+class MembershipJwtAuthenticationConverterTest {
 
     private static final String SUBJECT = "user-1029384756";
 
-    private final AllowlistRepository allowlistRepository = mock(AllowlistRepository.class);
-    private final AllowlistJwtAuthenticationConverter converter =
-            new AllowlistJwtAuthenticationConverter(allowlistRepository);
+    private final HouseRepository houseRepository = mock(HouseRepository.class);
+    private final MembershipJwtAuthenticationConverter converter =
+            new MembershipJwtAuthenticationConverter(houseRepository);
 
     private static Jwt jwt() {
         return Jwt.withTokenValue("token")
@@ -34,8 +36,9 @@ class AllowlistJwtAuthenticationConverterTest {
     }
 
     @Test
-    void grantsRoleForAllowlistedUser() {
-        when(allowlistRepository.contains(SUBJECT)).thenReturn(true);
+    void grantsRoleWhenTheUserBelongsToAtLeastOneHouse() {
+        when(houseRepository.findAllForUser(SUBJECT))
+                .thenReturn(List.of(new House("house-1", "Home", Instant.now())));
 
         final AbstractAuthenticationToken auth = converter.convert(jwt());
 
@@ -45,8 +48,8 @@ class AllowlistJwtAuthenticationConverterTest {
     }
 
     @Test
-    void deniesWhenUserNotOnAllowlist() {
-        when(allowlistRepository.contains(SUBJECT)).thenReturn(false);
+    void deniesWhenTheUserBelongsToNoHouse() {
+        when(houseRepository.findAllForUser(SUBJECT)).thenReturn(List.of());
 
         final AbstractAuthenticationToken auth = converter.convert(jwt());
 
@@ -55,7 +58,7 @@ class AllowlistJwtAuthenticationConverterTest {
     }
 
     @Test
-    void deniesWithoutConsultingTheAllowlistWhenTheTokenHasNoSubject() {
+    void deniesWithoutQueryingMembershipWhenTheTokenHasNoSubject() {
         final var jwtWithoutSubject = Jwt.withTokenValue("token")
                 .header("alg", "HS256")
                 .claim("not-sub", "irrelevant")
@@ -66,5 +69,6 @@ class AllowlistJwtAuthenticationConverterTest {
         final AbstractAuthenticationToken auth = converter.convert(jwtWithoutSubject);
 
         assertThat(auth.getAuthorities(), is(emptyIterable()));
+        verifyNoInteractions(houseRepository);
     }
 }

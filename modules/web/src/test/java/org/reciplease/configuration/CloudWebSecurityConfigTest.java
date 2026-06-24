@@ -44,7 +44,7 @@ class CloudWebSecurityConfigTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private AllowlistJwtAuthenticationConverter converter;
+    private MembershipJwtAuthenticationConverter converter;
 
     @MockitoBean
     private JwtDecoder jwtDecoder;

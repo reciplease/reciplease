@@ -8,7 +8,6 @@ import org.reciplease.configuration.HouseAccess;
 import org.reciplease.features.support.ScenarioState;
 import org.reciplease.model.HouseDocument;
 import org.reciplease.model.InviteDocument;
-import org.reciplease.repository.AllowlistRepository;
 import org.reciplease.repository.HouseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -29,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 /**
  * Drives the invite-acceptance and house-scoped-data flows end to end through MockMvc, against
- * the real (non-mocked) {@code HouseRepository}/{@code AllowlistRepository}/{@code InviteRepository}
+ * the real (non-mocked) {@code HouseRepository}/{@code InviteRepository}
  * backed by an embedded Mongo. Houses/invites are seeded directly via {@code MongoTemplate},
  * mirroring how they're created by hand in production (there's no creation API for either).
  */
@@ -41,8 +40,6 @@ public class HouseInviteSteps {
     private MongoTemplate mongoTemplate;
     @Autowired
     private HouseRepository houseRepository;
-    @Autowired
-    private AllowlistRepository allowlistRepository;
     @Autowired
     private ScenarioState state;
 
@@ -105,11 +102,6 @@ public class HouseInviteSteps {
     @Then("the response status is {int}")
     public void theResponseStatusIs(final int status) throws Exception {
         state.lastResult().andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().is(status));
-    }
-
-    @Then("{string} is on the allowlist")
-    public void isOnTheAllowlist(final String userId) {
-        assertThat(allowlistRepository.contains(userId)).isTrue();
     }
 
     @Then("{string} has role {string} in the house")

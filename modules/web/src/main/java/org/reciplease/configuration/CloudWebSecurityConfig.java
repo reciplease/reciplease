@@ -21,8 +21,8 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 /**
  * Production security: validates Reciplease's own HS256-signed JWT bearer tokens (see
  * {@link ReciplaseJwtService}), resolved from the {@code reciplease-session} cookie or, failing
- * that, the {@code Authorization} header (see {@link CookieBearerTokenResolver}); the allowlist
- * (and any other per-endpoint authorization) is
+ * that, the {@code Authorization} header (see {@link CookieBearerTokenResolver}); authorization
+ * (and any other per-endpoint check) is
  * enforced via {@code @PreAuthorize} on individual controller methods rather than URL-matcher
  * rules here, so this filter chain only sets up the JWT mechanics and leaves
  * {@code authorizeHttpRequests} fully open except for {@code /api/auth/exchange}, which is how
@@ -30,9 +30,9 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
  * it instead authenticates the caller via the {@code X-Internal-Secret} header itself.
  * <p>
  * Missing/invalid tokens still yield 401 (the resource server rejects malformed bearer
- * tokens before a request reaches a controller); a valid token whose user id is not on the
- * allowlist gets no {@code ROLE_RECIPLEASE} authority, so {@code @PreAuthorize} checks against
- * it yield 403.
+ * tokens before a request reaches a controller); a valid token whose user belongs to no house
+ * gets no {@code ROLE_RECIPLEASE} authority (see {@link MembershipJwtAuthenticationConverter}),
+ * so {@code @PreAuthorize} checks against it yield 403.
  */
 @Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
@@ -41,7 +41,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @RequiredArgsConstructor
 public class CloudWebSecurityConfig {
 
-    private final AllowlistJwtAuthenticationConverter allowlistJwtAuthenticationConverter;
+    private final MembershipJwtAuthenticationConverter membershipJwtAuthenticationConverter;
 
     @Value("${reciplease.jwt.signing-secret}")
     private String signingSecret;
@@ -63,7 +63,7 @@ public class CloudWebSecurityConfig {
                         .bearerTokenResolver(new CookieBearerTokenResolver())
                         .jwt(jwt -> jwt
                                 .decoder(jwtDecoder())
-                                .jwtAuthenticationConverter(allowlistJwtAuthenticationConverter)))
+                                .jwtAuthenticationConverter(membershipJwtAuthenticationConverter)))
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))

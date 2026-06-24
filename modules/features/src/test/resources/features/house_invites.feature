@@ -3,11 +3,10 @@ Feature: House invites and role-based access
   Background:
     Given a house "Test House" owned by "owner-1"
 
-  Scenario: Accepting a valid invite allowlists the user and grants the invited role
+  Scenario: Accepting a valid invite grants the invited role in the house
     Given an invite code "INVITE-1" for the house with role "READ_ONLY"
     When "newcomer-1" accepts invite "INVITE-1"
     Then the response status is 200
-    And "newcomer-1" is on the allowlist
     And "newcomer-1" has role "READ_ONLY" in the house
 
   Scenario: An invite code can only be redeemed once

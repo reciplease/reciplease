@@ -7,7 +7,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.reciplease.model.House;
 import org.reciplease.model.HouseRole;
 import org.reciplease.model.Invite;
-import org.reciplease.repository.AllowlistRepository;
 import org.reciplease.repository.HouseRepository;
 import org.reciplease.repository.InviteRepository;
 
@@ -34,19 +33,17 @@ class InviteServiceTest {
     @Mock
     private HouseRepository houseRepository;
     @Mock
-    private AllowlistRepository allowlistRepository;
-    @Mock
     private InviteCodeGenerator inviteCodeGenerator;
 
     private InviteService inviteService;
 
     @BeforeEach
     void setUp() {
-        inviteService = new InviteService(inviteRepository, houseRepository, allowlistRepository, inviteCodeGenerator);
+        inviteService = new InviteService(inviteRepository, houseRepository, inviteCodeGenerator);
     }
 
     @Test
-    void acceptClaimsTheCodeAllowlistsTheUserAndAddsThemToTheHouse() {
+    void acceptClaimsTheCodeAndAddsTheUserToTheHouse() {
         var invite = new Invite("invite-1", "code1", HOUSE_ID, HouseRole.READ_ONLY, Instant.now(), null, null);
         var house = new House(HOUSE_ID, "My House", Instant.now());
         when(inviteRepository.claim("code1", "user-1")).thenReturn(Optional.of(invite));
@@ -55,7 +52,6 @@ class InviteServiceTest {
         var accepted = inviteService.accept("code1", "user-1");
 
         assertThat(accepted, is(Optional.of(house)));
-        verify(allowlistRepository).add("user-1");
         verify(houseRepository).addMember(HOUSE_ID, "user-1", HouseRole.READ_ONLY);
     }
 
@@ -66,7 +62,7 @@ class InviteServiceTest {
         var accepted = inviteService.accept("bad-code", "user-1");
 
         assertThat(accepted, is(Optional.empty()));
-        verify(allowlistRepository, never()).add(any());
+        verify(houseRepository, never()).addMember(any(), any(), any());
     }
 
     @Test
