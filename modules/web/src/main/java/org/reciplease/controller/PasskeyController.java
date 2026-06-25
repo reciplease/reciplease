@@ -37,6 +37,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
@@ -73,6 +76,8 @@ import java.util.UUID;
 @RequestMapping("api/passkey")
 @RequiredArgsConstructor
 public class PasskeyController {
+
+    private static final Logger log = LoggerFactory.getLogger(PasskeyController.class);
 
     // EdDSA, ES256, RS256 — the same algorithm set Webauthn4JRelyingPartyOperations itself
     // generates by default, since these reconstructed options must match what the browser
@@ -164,6 +169,7 @@ public class PasskeyController {
         try {
             userEntity = relyingPartyOperations.authenticate(new RelyingPartyAuthenticationRequest(requestOptions, request.credential()));
         } catch (final RuntimeException e) {
+            log.warn("Passkey login/finish authentication failed", e);
             return ResponseEntity.status(401).build();
         }
 
