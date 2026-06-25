@@ -91,6 +91,34 @@ class AuthControllerTest {
     }
 
     @Test
+    void loggingInAnExistingUserBackfillsTheStoredEmail() throws Exception {
+        when(userRepository.findByIdentity("google", "google-sub-1")).thenReturn(Optional.of(new User("user-1", "my-handle")));
+
+        mockMvc.perform(post("/api/auth/exchange")
+                        .header("X-Internal-Secret", SECRET)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"provider": "google", "providerId": "google-sub-1", "email": "me@gmail.com"}"""))
+                .andExpect(status().isOk());
+
+        verify(userRepository).updateIdentityEmail("google", "google-sub-1", "me@gmail.com");
+    }
+
+    @Test
+    void loggingInAnExistingUserWithoutAnEmailDoesNotClobberTheStoredEmail() throws Exception {
+        when(userRepository.findByIdentity("google", "google-sub-1")).thenReturn(Optional.of(new User("user-1", "my-handle")));
+
+        mockMvc.perform(post("/api/auth/exchange")
+                        .header("X-Internal-Secret", SECRET)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"provider": "google", "providerId": "google-sub-1"}"""))
+                .andExpect(status().isOk());
+
+        verify(userRepository, never()).updateIdentityEmail(any(), any(), any());
+    }
+
+    @Test
     void linksANewIdentityWhenAValidLinkTokenIsProvided() throws Exception {
         final var linkToken = jwtService.mint("user-1");
         when(userRepository.findById("user-1")).thenReturn(Optional.of(new User("user-1", "my-handle")));

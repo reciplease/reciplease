@@ -3,6 +3,8 @@ package org.reciplease.repository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.User;
+import org.reciplease.model.UserIdentityDocument;
+import org.reciplease.repository.mongo.UserIdentityMongoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.context.annotation.Import;
@@ -18,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class UserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserIdentityMongoRepository userIdentityMongoRepository;
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -109,6 +113,26 @@ class UserRepositoryTest {
 
         assertThrows(IdentityConflictException.class,
                 () -> userRepository.linkIdentity(userB.id(), "google", "google-sub-1", "user2@gmail.com"));
+    }
+
+    @Test
+    void updateIdentityEmailUpdatesTheStoredEmailWithoutChangingTheLinkedUser() {
+        var user = userRepository.createWithIdentity("google", "google-sub-1", "old@gmail.com");
+
+        userRepository.updateIdentityEmail("google", "google-sub-1", "new@gmail.com");
+
+        var identity = userIdentityMongoRepository.findById(UserIdentityDocument.idFor("google", "google-sub-1"));
+        assertThat(identity.isPresent(), is(true));
+        assertThat(identity.get().getEmail(), is("new@gmail.com"));
+        assertThat(identity.get().getUserId(), is(user.id()));
+    }
+
+    @Test
+    void updateIdentityEmailIsANoOpWhenTheIdentityIsntLinked() {
+        userRepository.updateIdentityEmail("google", "unknown-sub", "new@gmail.com");
+
+        var identity = userIdentityMongoRepository.findById(UserIdentityDocument.idFor("google", "unknown-sub"));
+        assertThat(identity.isPresent(), is(false));
     }
 
     @Test

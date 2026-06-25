@@ -69,8 +69,16 @@ public class AuthController {
     }
 
     private User loginOrSignup(final String provider, final String providerId, final String email) {
-        return userRepository.findByIdentity(provider, providerId)
-                .orElseGet(() -> userRepository.createWithIdentity(provider, providerId, email));
+        final var existingUser = userRepository.findByIdentity(provider, providerId);
+        if (existingUser.isPresent()) {
+            // Keep the stored email current — it's only ever set at link time otherwise, so it'd
+            // go stale (or stay null for identities linked before we captured email at all).
+            if (email != null) {
+                userRepository.updateIdentityEmail(provider, providerId, email);
+            }
+            return existingUser.get();
+        }
+        return userRepository.createWithIdentity(provider, providerId, email);
     }
 
     private boolean isValidSecret(final String providedSecret) {

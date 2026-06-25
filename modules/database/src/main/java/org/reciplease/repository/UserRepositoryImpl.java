@@ -73,6 +73,17 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public void updateIdentityEmail(final String provider, final String providerId, final String email) {
+        final var identityId = UserIdentityDocument.idFor(provider, providerId);
+        userIdentityMongoRepository.findById(identityId).ifPresent(identity ->
+                userIdentityMongoRepository.save(UserIdentityDocument.builder()
+                        .id(identity.getId())
+                        .userId(identity.getUserId())
+                        .email(email)
+                        .build()));
+    }
+
+    @Override
     public void setHandle(final String userId, final String handle) {
         final var holder = userMongoRepository.findByHandle(handle);
         if (holder.isPresent() && !holder.get().getId().equals(userId)) {

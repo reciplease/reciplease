@@ -29,6 +29,13 @@ public interface UserRepository {
      */
     void linkIdentity(String userId, String provider, String providerId, String email);
 
+    /**
+     * Updates the stored email for an already-linked {@code (provider, providerId)} identity,
+     * e.g. because the provider account's email changed since it was first linked. A no-op if
+     * the identity isn't linked to anyone.
+     */
+    void updateIdentityEmail(String provider, String providerId, String email);
+
     /** Sets {@code userId}'s handle; throws {@link HandleTakenException} if already in use by another user. */
     void setHandle(String userId, String handle);
 }
