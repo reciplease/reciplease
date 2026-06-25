@@ -12,6 +12,7 @@ import org.springframework.security.web.webauthn.api.Bytes;
 import org.springframework.security.web.webauthn.api.ImmutableCredentialRecord;
 import org.springframework.security.web.webauthn.api.ImmutablePublicKeyCose;
 import org.springframework.security.web.webauthn.api.PublicKeyCredentialType;
+import org.springframework.security.web.webauthn.management.UserCredentialRepository;
 
 import java.time.Instant;
 import java.util.Set;
@@ -28,7 +29,7 @@ import static org.hamcrest.Matchers.nullValue;
 class PasskeyUserCredentialRepositoryImplTest {
 
     @Autowired
-    private PasskeyUserCredentialRepositoryImpl repository;
+    private UserCredentialRepository repository;
     @Autowired
     private MongoTemplate mongoTemplate;
 
