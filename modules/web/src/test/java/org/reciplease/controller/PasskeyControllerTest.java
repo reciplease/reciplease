@@ -37,6 +37,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.mockito.ArgumentCaptor;
+import org.springframework.security.web.webauthn.api.ResidentKeyRequirement;
+import org.springframework.security.web.webauthn.api.UserVerificationRequirement;
+import org.springframework.security.web.webauthn.management.ImmutableRelyingPartyRegistrationRequest;
+import org.springframework.security.web.webauthn.management.RelyingPartyRegistrationRequest;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -138,6 +145,21 @@ class PasskeyControllerTest {
     }
 
     @Test
+    void signupFinishPassesAuthenticatorSelectionToRegisterCredential() throws Exception {
+        when(challengeLedger.consumeForRegistration("Y2hhbGxlbmdlLTE")).thenReturn(Optional.of("new-user-id"));
+        when(relyingPartyOperations.registerCredential(any())).thenReturn(credentialRecord("new-user-id"));
+
+        mockMvc.perform(post("/api/passkey/signup/finish")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(registerFinishJson("Y2hhbGxlbmdlLTE", null)))
+                .andExpect(status().isOk());
+
+        final var captor = ArgumentCaptor.forClass(RelyingPartyRegistrationRequest.class);
+        verify(relyingPartyOperations).registerCredential(captor.capture());
+        assertThat(captor.getValue().getCreationOptions().getAuthenticatorSelection()).isNotNull();
+    }
+
+    @Test
     void signupFinishRejectsAChallengeThatWasNeverIssuedOrAlreadyUsed() throws Exception {
         when(challengeLedger.consumeForRegistration(any())).thenReturn(Optional.empty());
 
@@ -168,6 +190,27 @@ class PasskeyControllerTest {
 
         verify(userRepository).linkIdentity("user-1", "passkey", "Y3JlZGVudGlhbC0x", null);
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @org.springframework.security.test.context.support.WithMockUser(username = "user-1")
+    void registerFinishPassesAuthenticatorSelectionToRegisterCredential() throws Exception {
+        // Webauthn4JRelyingPartyOperations.registerCredential unconditionally dereferences
+        // getAuthenticatorSelection().getUserVerification() — omitting it causes an NPE.
+        when(challengeLedger.consumeForRegistration("Y2hhbGxlbmdlLTE")).thenReturn(Optional.of("user-1"));
+        when(relyingPartyOperations.registerCredential(any())).thenReturn(credentialRecord("user-1"));
+
+        mockMvc.perform(post("/api/passkey/register/finish")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(registerFinishJson("Y2hhbGxlbmdlLTE", null)))
+                .andExpect(status().isOk());
+
+        final var captor = ArgumentCaptor.forClass(RelyingPartyRegistrationRequest.class);
+        verify(relyingPartyOperations).registerCredential(captor.capture());
+        final var selection = captor.getValue().getCreationOptions().getAuthenticatorSelection();
+        assertThat(selection).isNotNull();
+        assertThat(selection.getUserVerification()).isEqualTo(UserVerificationRequirement.PREFERRED);
+        assertThat(selection.getResidentKey()).isEqualTo(ResidentKeyRequirement.REQUIRED);
     }
 
     @Test
