@@ -2,6 +2,7 @@ package org.reciplease.controller;
 
 import org.junit.jupiter.api.Test;
 import org.reciplease.configuration.MethodSecurityTestSupport;
+import org.reciplease.model.LinkedIdentity;
 import org.reciplease.model.User;
 import org.reciplease.repository.HandleTakenException;
 import org.reciplease.repository.UserIdentityRepository;
@@ -63,30 +64,46 @@ class MeControllerTest {
     }
 
     @Test
-    void identitiesReturnsOnlyProviderNames() throws Exception {
-        when(userIdentityRepository.findProvidersForUser("user-1")).thenReturn(List.of("google", "github"));
+    void identitiesReturnsProviderAndEmailForEachLinkedIdentity() throws Exception {
+        when(userIdentityRepository.findIdentitiesForUser("user-1")).thenReturn(List.of(
+                new LinkedIdentity("google", "me@gmail.com"),
+                new LinkedIdentity("github", "me@users.noreply.github.com")));
 
         mockMvc.perform(get("/api/me/identities"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.providers", org.hamcrest.Matchers.contains("google", "github")));
+                .andExpect(jsonPath("$.identities[0].provider", is("google")))
+                .andExpect(jsonPath("$.identities[0].email", is("me@gmail.com")))
+                .andExpect(jsonPath("$.identities[1].provider", is("github")))
+                .andExpect(jsonPath("$.identities[1].email", is("me@users.noreply.github.com")));
+    }
+
+    @Test
+    void identitiesAllowsANullEmail() throws Exception {
+        when(userIdentityRepository.findIdentitiesForUser("user-1"))
+                .thenReturn(List.of(new LinkedIdentity("github", null)));
+
+        mockMvc.perform(get("/api/me/identities"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.identities[0].email", nullValue()));
     }
 
     @Test
     void unlinkRemovesTheProviderAndReturnsTheRemaining() throws Exception {
-        when(userIdentityRepository.findProvidersForUser("user-1"))
-                .thenReturn(List.of("google", "github"))
-                .thenReturn(List.of("google"));
+        when(userIdentityRepository.findIdentitiesForUser("user-1"))
+                .thenReturn(List.of(new LinkedIdentity("google", "me@gmail.com"), new LinkedIdentity("github", "me@github.com")))
+                .thenReturn(List.of(new LinkedIdentity("google", "me@gmail.com")));
 
         mockMvc.perform(delete("/api/me/identities/{provider}", "github").with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.providers", org.hamcrest.Matchers.contains("google")));
+                .andExpect(jsonPath("$.identities[0].provider", is("google")));
 
         verify(userIdentityRepository).removeForUser("user-1", "github");
     }
 
     @Test
     void unlinkRefusesToRemoveTheOnlyProvider() throws Exception {
-        when(userIdentityRepository.findProvidersForUser("user-1")).thenReturn(List.of("google"));
+        when(userIdentityRepository.findIdentitiesForUser("user-1"))
+                .thenReturn(List.of(new LinkedIdentity("google", "me@gmail.com")));
 
         mockMvc.perform(delete("/api/me/identities/{provider}", "google").with(csrf()))
                 .andExpect(status().isConflict());
@@ -96,7 +113,8 @@ class MeControllerTest {
 
     @Test
     void unlinkReturnsNotFoundForAProviderTheUserHasNotLinked() throws Exception {
-        when(userIdentityRepository.findProvidersForUser("user-1")).thenReturn(List.of("google", "github"));
+        when(userIdentityRepository.findIdentitiesForUser("user-1"))
+                .thenReturn(List.of(new LinkedIdentity("google", "me@gmail.com"), new LinkedIdentity("github", "me@github.com")));
 
         mockMvc.perform(delete("/api/me/identities/{provider}", "facebook").with(csrf()))
                 .andExpect(status().isNotFound());

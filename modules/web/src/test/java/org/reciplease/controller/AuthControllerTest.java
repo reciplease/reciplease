@@ -59,19 +59,19 @@ class AuthControllerTest {
     @Test
     void createsANewUserOnFirstLogin() throws Exception {
         when(userRepository.findByIdentity("google", "google-sub-1")).thenReturn(Optional.empty());
-        when(userRepository.createWithIdentity("google", "google-sub-1")).thenReturn(new User("user-1", null));
+        when(userRepository.createWithIdentity("google", "google-sub-1", "me@gmail.com")).thenReturn(new User("user-1", null));
 
         mockMvc.perform(post("/api/auth/exchange")
                         .header("X-Internal-Secret", SECRET)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"provider": "google", "providerId": "google-sub-1"}"""))
+                                {"provider": "google", "providerId": "google-sub-1", "email": "me@gmail.com"}"""))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId", org.hamcrest.Matchers.is("user-1")))
                 .andExpect(jsonPath("$.handle", org.hamcrest.Matchers.nullValue()))
                 .andExpect(jsonPath("$.token", org.hamcrest.Matchers.notNullValue()));
 
-        verify(userRepository).createWithIdentity("google", "google-sub-1");
+        verify(userRepository).createWithIdentity("google", "google-sub-1", "me@gmail.com");
     }
 
     @Test
@@ -87,7 +87,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.userId", org.hamcrest.Matchers.is("user-1")))
                 .andExpect(jsonPath("$.handle", org.hamcrest.Matchers.is("my-handle")));
 
-        verify(userRepository, never()).createWithIdentity(any(), any());
+        verify(userRepository, never()).createWithIdentity(any(), any(), any());
     }
 
     @Test
@@ -99,24 +99,24 @@ class AuthControllerTest {
                         .header("X-Internal-Secret", SECRET)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"provider": "github", "providerId": "github-sub-1", "linkToken": "%s"}""".formatted(linkToken)))
+                                {"provider": "github", "providerId": "github-sub-1", "linkToken": "%s", "email": "me@github.com"}""".formatted(linkToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId", org.hamcrest.Matchers.is("user-1")));
 
-        verify(userRepository).linkIdentity("user-1", "github", "github-sub-1");
+        verify(userRepository).linkIdentity("user-1", "github", "github-sub-1", "me@github.com");
     }
 
     @Test
     void returnsConflictWhenLinkingAnIdentityAlreadyLinkedToADifferentUser() throws Exception {
         final var linkToken = jwtService.mint("user-1");
         org.mockito.Mockito.doThrow(new IdentityConflictException("github", "github-sub-1"))
-                .when(userRepository).linkIdentity("user-1", "github", "github-sub-1");
+                .when(userRepository).linkIdentity("user-1", "github", "github-sub-1", "me@github.com");
 
         mockMvc.perform(post("/api/auth/exchange")
                         .header("X-Internal-Secret", SECRET)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"provider": "github", "providerId": "github-sub-1", "linkToken": "%s"}""".formatted(linkToken)))
+                                {"provider": "github", "providerId": "github-sub-1", "linkToken": "%s", "email": "me@github.com"}""".formatted(linkToken)))
                 .andExpect(status().isConflict());
     }
 }

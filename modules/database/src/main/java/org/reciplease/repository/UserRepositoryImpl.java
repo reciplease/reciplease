@@ -36,13 +36,14 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User createWithIdentity(final String provider, final String providerId) {
+    public User createWithIdentity(final String provider, final String providerId, final String email) {
         final var userId = UUID.randomUUID().toString();
         final var user = userMongoRepository.save(UserDocument.builder().id(userId).handle(null).build()).toModel();
         try {
             userIdentityMongoRepository.save(UserIdentityDocument.builder()
                     .id(UserIdentityDocument.idFor(provider, providerId))
                     .userId(userId)
+                    .email(email)
                     .build());
         } catch (final DuplicateKeyException e) {
             throw new IdentityConflictException(provider, providerId);
@@ -51,7 +52,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public void linkIdentity(final String userId, final String provider, final String providerId) {
+    public void linkIdentity(final String userId, final String provider, final String providerId, final String email) {
         final var identityId = UserIdentityDocument.idFor(provider, providerId);
         final var existing = userIdentityMongoRepository.findById(identityId);
         if (existing.isPresent()) {
@@ -61,7 +62,11 @@ public class UserRepositoryImpl implements UserRepository {
             return;
         }
         try {
-            userIdentityMongoRepository.save(UserIdentityDocument.builder().id(identityId).userId(userId).build());
+            userIdentityMongoRepository.save(UserIdentityDocument.builder()
+                    .id(identityId)
+                    .userId(userId)
+                    .email(email)
+                    .build());
         } catch (final DuplicateKeyException e) {
             throw new IdentityConflictException(provider, providerId);
         }

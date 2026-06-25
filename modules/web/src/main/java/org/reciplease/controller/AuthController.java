@@ -46,11 +46,12 @@ public class AuthController {
 
         final String provider = request.provider();
         final String providerId = request.providerId();
+        final String email = request.email();
 
         try {
             final User user = request.linkToken() != null
-                    ? link(request.linkToken(), provider, providerId)
-                    : loginOrSignup(provider, providerId);
+                    ? link(request.linkToken(), provider, providerId, email)
+                    : loginOrSignup(provider, providerId, email);
 
             final var token = jwtService.mint(user.id());
             return ResponseEntity.ok(new ExchangeResponse(token, user.id(), user.handle()));
@@ -59,17 +60,17 @@ public class AuthController {
         }
     }
 
-    private User link(final String linkToken, final String provider, final String providerId) {
+    private User link(final String linkToken, final String provider, final String providerId, final String email) {
         final var userId = jwtService.parse(linkToken)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid or expired linkToken"));
-        userRepository.linkIdentity(userId, provider, providerId);
+        userRepository.linkIdentity(userId, provider, providerId, email);
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalStateException("Missing user referenced by a valid linkToken: " + userId));
     }
 
-    private User loginOrSignup(final String provider, final String providerId) {
+    private User loginOrSignup(final String provider, final String providerId, final String email) {
         return userRepository.findByIdentity(provider, providerId)
-                .orElseGet(() -> userRepository.createWithIdentity(provider, providerId));
+                .orElseGet(() -> userRepository.createWithIdentity(provider, providerId, email));
     }
 
     private boolean isValidSecret(final String providedSecret) {

@@ -2,8 +2,10 @@ package org.reciplease.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.reciplease.dto.IdentitiesDto;
+import org.reciplease.dto.LinkedIdentityDto;
 import org.reciplease.dto.MeDto;
 import org.reciplease.dto.SetHandleRequest;
+import org.reciplease.model.LinkedIdentity;
 import org.reciplease.repository.HandleTakenException;
 import org.reciplease.repository.UserIdentityRepository;
 import org.reciplease.repository.UserRepository;
@@ -18,9 +20,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
- * The current authenticated user's own profile: their id/handle ({@code /api/me}), the
- * provider names (never provider ids) of their linked identities ({@code /api/me/identities}),
+ * The current authenticated user's own profile: their id/handle ({@code /api/me}), their
+ * linked identities (provider + email, never the provider id, {@code /api/me/identities}),
  * and setting their handle ({@code /api/me/handle}).
  */
 @RestController
@@ -42,23 +46,29 @@ public class MeController {
     @GetMapping("identities")
     @PreAuthorize("isAuthenticated()")
     public IdentitiesDto identities() {
-        return new IdentitiesDto(userIdentityRepository.findProvidersForUser(currentUserId()));
+        return toDto(userIdentityRepository.findIdentitiesForUser(currentUserId()));
     }
 
     @DeleteMapping("identities/{provider}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<IdentitiesDto> unlinkIdentity(@PathVariable final String provider) {
         final var userId = currentUserId();
-        final var providers = userIdentityRepository.findProvidersForUser(userId);
-        if (!providers.contains(provider)) {
+        final var identities = userIdentityRepository.findIdentitiesForUser(userId);
+        if (identities.stream().noneMatch(identity -> identity.provider().equals(provider))) {
             return ResponseEntity.notFound().build();
         }
         // Refuse to remove the only sign-in method — it would lock the user out.
-        if (providers.size() <= 1) {
+        if (identities.size() <= 1) {
             return ResponseEntity.status(409).build();
         }
         userIdentityRepository.removeForUser(userId, provider);
-        return ResponseEntity.ok(new IdentitiesDto(userIdentityRepository.findProvidersForUser(userId)));
+        return ResponseEntity.ok(toDto(userIdentityRepository.findIdentitiesForUser(userId)));
+    }
+
+    private static IdentitiesDto toDto(final List<LinkedIdentity> identities) {
+        return new IdentitiesDto(identities.stream()
+                .map(identity -> new LinkedIdentityDto(identity.provider(), identity.email()))
+                .toList());
     }
 
     @PostMapping("handle")

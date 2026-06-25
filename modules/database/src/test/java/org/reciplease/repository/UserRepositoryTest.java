@@ -65,7 +65,7 @@ class UserRepositoryTest {
 
     @Test
     void createWithIdentityCreatesANewUserWithNullHandleAndLinksTheIdentity() {
-        var created = userRepository.createWithIdentity("google", "google-sub-1");
+        var created = userRepository.createWithIdentity("google", "google-sub-1", "user1@gmail.com");
 
         assertThat(created.handle(), is(nullValue()));
 
@@ -83,9 +83,9 @@ class UserRepositoryTest {
 
     @Test
     void linkIdentityLinksANewIdentityToAnExistingUser() {
-        var user = userRepository.createWithIdentity("google", "google-sub-1");
+        var user = userRepository.createWithIdentity("google", "google-sub-1", "user1@gmail.com");
 
-        userRepository.linkIdentity(user.id(), "github", "github-sub-1");
+        userRepository.linkIdentity(user.id(), "github", "github-sub-1", "user1@github.com");
 
         var found = userRepository.findByIdentity("github", "github-sub-1");
         assertThat(found.isPresent(), is(true));
@@ -94,9 +94,9 @@ class UserRepositoryTest {
 
     @Test
     void linkIdentityIsANoOpWhenAlreadyLinkedToTheSameUser() {
-        var user = userRepository.createWithIdentity("google", "google-sub-1");
+        var user = userRepository.createWithIdentity("google", "google-sub-1", "user1@gmail.com");
 
-        userRepository.linkIdentity(user.id(), "google", "google-sub-1");
+        userRepository.linkIdentity(user.id(), "google", "google-sub-1", "user1@gmail.com");
 
         var found = userRepository.findByIdentity("google", "google-sub-1");
         assertThat(found.get().id(), is(user.id()));
@@ -104,11 +104,11 @@ class UserRepositoryTest {
 
     @Test
     void linkIdentityThrowsWhenAlreadyLinkedToADifferentUser() {
-        var userA = userRepository.createWithIdentity("google", "google-sub-1");
-        var userB = userRepository.createWithIdentity("github", "github-sub-1");
+        var userA = userRepository.createWithIdentity("google", "google-sub-1", "user1@gmail.com");
+        var userB = userRepository.createWithIdentity("github", "github-sub-1", "user2@github.com");
 
         assertThrows(IdentityConflictException.class,
-                () -> userRepository.linkIdentity(userB.id(), "google", "google-sub-1"));
+                () -> userRepository.linkIdentity(userB.id(), "google", "google-sub-1", "user2@gmail.com"));
     }
 
     @Test

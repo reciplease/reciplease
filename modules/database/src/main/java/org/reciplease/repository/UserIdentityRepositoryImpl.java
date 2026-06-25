@@ -1,6 +1,7 @@
 package org.reciplease.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.reciplease.model.LinkedIdentity;
 import org.reciplease.model.UserIdentityDocument;
 import org.reciplease.repository.mongo.UserIdentityMongoRepository;
 import org.springframework.stereotype.Repository;
@@ -13,9 +14,9 @@ public class UserIdentityRepositoryImpl implements UserIdentityRepository {
     private final UserIdentityMongoRepository userIdentityMongoRepository;
 
     @Override
-    public List<String> findProvidersForUser(final String userId) {
+    public List<LinkedIdentity> findIdentitiesForUser(final String userId) {
         return userIdentityMongoRepository.findAllByUserId(userId).stream()
-                .map(UserIdentityRepositoryImpl::providerOf)
+                .map(identity -> new LinkedIdentity(providerOf(identity), identity.getEmail()))
                 .toList();
     }
 

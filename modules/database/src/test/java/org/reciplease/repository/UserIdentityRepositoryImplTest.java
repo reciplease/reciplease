@@ -2,6 +2,7 @@ package org.reciplease.repository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.reciplease.model.LinkedIdentity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.context.annotation.Import;
@@ -29,49 +30,61 @@ class UserIdentityRepositoryImplTest {
     }
 
     @Test
-    void findProvidersForUserReturnsTheProviderPartOfEachLinkedIdentity() {
+    void findIdentitiesForUserReturnsTheProviderAndEmailOfEachLinkedIdentity() {
+        userIdentityMongoRepository.save(UserIdentityDocument.builder()
+                .id(UserIdentityDocument.idFor("google", "google-sub-1")).userId("user-1").email("user1@gmail.com").build());
+        userIdentityMongoRepository.save(UserIdentityDocument.builder()
+                .id(UserIdentityDocument.idFor("github", "github-sub-1")).userId("user-1").email("user1@github.com").build());
+        userIdentityMongoRepository.save(UserIdentityDocument.builder()
+                .id(UserIdentityDocument.idFor("google", "google-sub-2")).userId("user-2").email("user2@gmail.com").build());
+
+        var identities = userIdentityRepository.findIdentitiesForUser("user-1");
+
+        assertThat(identities, contains(
+                new LinkedIdentity("google", "user1@gmail.com"),
+                new LinkedIdentity("github", "user1@github.com")));
+    }
+
+    @Test
+    void findIdentitiesForUserAllowsANullEmail() {
         userIdentityMongoRepository.save(UserIdentityDocument.builder()
                 .id(UserIdentityDocument.idFor("google", "google-sub-1")).userId("user-1").build());
-        userIdentityMongoRepository.save(UserIdentityDocument.builder()
-                .id(UserIdentityDocument.idFor("github", "github-sub-1")).userId("user-1").build());
-        userIdentityMongoRepository.save(UserIdentityDocument.builder()
-                .id(UserIdentityDocument.idFor("google", "google-sub-2")).userId("user-2").build());
 
-        var providers = userIdentityRepository.findProvidersForUser("user-1");
+        var identities = userIdentityRepository.findIdentitiesForUser("user-1");
 
-        assertThat(providers, contains("google", "github"));
+        assertThat(identities, contains(new LinkedIdentity("google", null)));
     }
 
     @Test
-    void findProvidersForUserReturnsEmptyWhenNoneLinked() {
-        var providers = userIdentityRepository.findProvidersForUser("unknown-user");
+    void findIdentitiesForUserReturnsEmptyWhenNoneLinked() {
+        var identities = userIdentityRepository.findIdentitiesForUser("unknown-user");
 
-        assertThat(providers, empty());
+        assertThat(identities, empty());
     }
 
     @Test
-    void findProvidersForUserFallsBackToTheWholeIdWhenThereIsNoColon() {
+    void findIdentitiesForUserFallsBackToTheWholeIdWhenThereIsNoColon() {
         userIdentityMongoRepository.save(UserIdentityDocument.builder()
                 .id("no-separator-id").userId("user-1").build());
 
-        var providers = userIdentityRepository.findProvidersForUser("user-1");
+        var identities = userIdentityRepository.findIdentitiesForUser("user-1");
 
-        assertThat(providers, contains("no-separator-id"));
+        assertThat(identities, contains(new LinkedIdentity("no-separator-id", null)));
     }
 
     @Test
     void removeForUserDeletesOnlyThatUsersIdentityForThatProvider() {
         userIdentityMongoRepository.save(UserIdentityDocument.builder()
-                .id(UserIdentityDocument.idFor("google", "google-sub-1")).userId("user-1").build());
+                .id(UserIdentityDocument.idFor("google", "google-sub-1")).userId("user-1").email("user1@gmail.com").build());
         userIdentityMongoRepository.save(UserIdentityDocument.builder()
-                .id(UserIdentityDocument.idFor("github", "github-sub-1")).userId("user-1").build());
+                .id(UserIdentityDocument.idFor("github", "github-sub-1")).userId("user-1").email("user1@github.com").build());
         userIdentityMongoRepository.save(UserIdentityDocument.builder()
-                .id(UserIdentityDocument.idFor("github", "github-sub-2")).userId("user-2").build());
+                .id(UserIdentityDocument.idFor("github", "github-sub-2")).userId("user-2").email("user2@github.com").build());
 
         userIdentityRepository.removeForUser("user-1", "github");
 
-        assertThat(userIdentityRepository.findProvidersForUser("user-1"), contains("google"));
+        assertThat(userIdentityRepository.findIdentitiesForUser("user-1"), contains(new LinkedIdentity("google", "user1@gmail.com")));
         // Another user's github identity is untouched.
-        assertThat(userIdentityRepository.findProvidersForUser("user-2"), contains("github"));
+        assertThat(userIdentityRepository.findIdentitiesForUser("user-2"), contains(new LinkedIdentity("github", "user2@github.com")));
     }
 }

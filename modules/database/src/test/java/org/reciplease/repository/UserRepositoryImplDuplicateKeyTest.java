@@ -37,7 +37,7 @@ class UserRepositoryImplDuplicateKeyTest {
         when(userIdentityMongoRepository.save(any())).thenThrow(mock(DuplicateKeyException.class));
 
         assertThrows(IdentityConflictException.class,
-                () -> userRepository.createWithIdentity("google", "google-sub-1"));
+                () -> userRepository.createWithIdentity("google", "google-sub-1", "user1@gmail.com"));
     }
 
     @Test
@@ -47,6 +47,6 @@ class UserRepositoryImplDuplicateKeyTest {
         when(userIdentityMongoRepository.save(any())).thenThrow(mock(DuplicateKeyException.class));
 
         assertThrows(IdentityConflictException.class,
-                () -> userRepository.linkIdentity("user-1", "google", "google-sub-1"));
+                () -> userRepository.linkIdentity("user-1", "google", "google-sub-1", "user1@gmail.com"));
     }
 }
