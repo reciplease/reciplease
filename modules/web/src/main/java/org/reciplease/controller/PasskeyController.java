@@ -16,6 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.web.webauthn.api.AuthenticatorSelectionCriteria;
 import org.springframework.security.web.webauthn.api.Bytes;
 import org.springframework.security.web.webauthn.api.ImmutablePublicKeyCredentialUserEntity;
 import org.springframework.security.web.webauthn.api.PublicKeyCredentialCreationOptions;
@@ -23,6 +24,8 @@ import org.springframework.security.web.webauthn.api.PublicKeyCredentialParamete
 import org.springframework.security.web.webauthn.api.PublicKeyCredentialRequestOptions;
 import org.springframework.security.web.webauthn.api.PublicKeyCredentialRpEntity;
 import org.springframework.security.web.webauthn.api.PublicKeyCredentialUserEntity;
+import org.springframework.security.web.webauthn.api.ResidentKeyRequirement;
+import org.springframework.security.web.webauthn.api.UserVerificationRequirement;
 import org.springframework.security.web.webauthn.management.ImmutablePublicKeyCredentialCreationOptionsRequest;
 import org.springframework.security.web.webauthn.management.ImmutablePublicKeyCredentialRequestOptionsRequest;
 import org.springframework.security.web.webauthn.management.ImmutableRelyingPartyRegistrationRequest;
@@ -169,6 +172,15 @@ public class PasskeyController {
         return ResponseEntity.ok(new ExchangeResponse(jwtService.mint(userId), userId, handle));
     }
 
+    // These values match what Webauthn4JRelyingPartyOperations.createPublicKeyCredentialCreationOptions
+    // always emits — verified from bytecode — so the rebuilt options are equivalent to what the
+    // browser received during the options phase.
+    private static final AuthenticatorSelectionCriteria PASSKEY_AUTHENTICATOR_SELECTION =
+            AuthenticatorSelectionCriteria.builder()
+                    .userVerification(UserVerificationRequirement.PREFERRED)
+                    .residentKey(ResidentKeyRequirement.REQUIRED)
+                    .build();
+
     /** Registers {@code request}'s credential against a freshly rebuilt options object, returning the new credential's id. */
     private String registerCredential(final String userId, final PasskeyRegisterFinishRequest request) {
         final var creationOptions = PublicKeyCredentialCreationOptions.builder()
@@ -176,6 +188,7 @@ public class PasskeyController {
                 .user(userEntityFor(userId))
                 .challenge(Bytes.fromBase64(request.challenge()))
                 .pubKeyCredParams(PUB_KEY_CRED_PARAMS)
+                .authenticatorSelection(PASSKEY_AUTHENTICATOR_SELECTION)
                 .build();
         final var label = request.label() != null ? request.label() : "";
         final var credential = relyingPartyOperations.registerCredential(new ImmutableRelyingPartyRegistrationRequest(
