@@ -110,6 +110,7 @@ class PasskeyControllerTest {
                 .credentialId(Bytes.fromBase64("Y3JlZGVudGlhbC0x"))
                 .userEntityUserId(new Bytes(userId.getBytes()))
                 .publicKey(new ImmutablePublicKeyCose(new byte[]{1, 2, 3}))
+                .attestationObject(new Bytes(new byte[]{1, 2, 3}))
                 .signatureCount(0)
                 .transports(Set.of(AuthenticatorTransport.INTERNAL))
                 .created(Instant.now())

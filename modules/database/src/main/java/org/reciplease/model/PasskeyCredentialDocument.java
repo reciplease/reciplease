@@ -33,6 +33,9 @@ public class PasskeyCredentialDocument {
     private String id;
     private String userId;
     private String publicKeyCose;
+    // Raw CBOR attestation object — Webauthn4JRelyingPartyOperations.authenticate() reads the
+    // public key from here (rather than from publicKeyCose) to verify the assertion signature.
+    private String attestationObject;
     private long signatureCount;
     private boolean uvInitialized;
     private Set<String> transports;
@@ -47,6 +50,7 @@ public class PasskeyCredentialDocument {
                 .id(credential.getCredentialId().toBase64UrlString())
                 .userId(userId)
                 .publicKeyCose(new Bytes(credential.getPublicKey().getBytes()).toBase64UrlString())
+                .attestationObject(credential.getAttestationObject().toBase64UrlString())
                 .signatureCount(credential.getSignatureCount())
                 .uvInitialized(credential.isUvInitialized())
                 .transports(credential.getTransports().stream().map(AuthenticatorTransport::getValue).collect(Collectors.toSet()))
@@ -62,6 +66,7 @@ public class PasskeyCredentialDocument {
                 .credentialId(Bytes.fromBase64(id))
                 .userEntityUserId(PasskeyUserHandles.toHandle(userId))
                 .publicKey(ImmutablePublicKeyCose.fromBase64(publicKeyCose))
+                .attestationObject(Bytes.fromBase64(attestationObject))
                 .signatureCount(signatureCount)
                 .uvInitialized(uvInitialized)
                 .transports(transports.stream().map(AuthenticatorTransport::valueOf).collect(Collectors.toSet()))

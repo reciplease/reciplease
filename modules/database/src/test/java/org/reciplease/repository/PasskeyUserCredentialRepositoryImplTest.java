@@ -37,12 +37,17 @@ class PasskeyUserCredentialRepositoryImplTest {
         mongoTemplate.getCollectionNames().forEach(mongoTemplate::dropCollection);
     }
 
+    // Minimal valid-looking attestation object bytes (enough for round-trip; Webauthn4J parses
+    // them during authenticate(), which is exercised via integration test against the real library).
+    private static final Bytes FAKE_ATTESTATION_OBJECT = new Bytes(new byte[]{1, 2, 3, 4, 5});
+
     private static ImmutableCredentialRecord credentialFor(final String credentialId, final String userId) {
         return ImmutableCredentialRecord.builder()
                 .credentialType(PublicKeyCredentialType.PUBLIC_KEY)
                 .credentialId(Bytes.fromBase64(credentialId))
                 .userEntityUserId(PasskeyUserHandles.toHandle(userId))
                 .publicKey(new ImmutablePublicKeyCose(new byte[]{1, 2, 3}))
+                .attestationObject(FAKE_ATTESTATION_OBJECT)
                 .signatureCount(0)
                 .uvInitialized(true)
                 .transports(Set.of(AuthenticatorTransport.INTERNAL))
@@ -64,6 +69,7 @@ class PasskeyUserCredentialRepositoryImplTest {
         assertThat(found.getCredentialId(), is(credential.getCredentialId()));
         assertThat(found.getUserEntityUserId(), is(credential.getUserEntityUserId()));
         assertThat(found.getPublicKey().getBytes(), is(credential.getPublicKey().getBytes()));
+        assertThat(found.getAttestationObject().getBytes(), is(FAKE_ATTESTATION_OBJECT.getBytes()));
         assertThat(found.getSignatureCount(), is(0L));
         assertThat(found.isUvInitialized(), is(true));
         assertThat(found.getTransports(), contains(AuthenticatorTransport.INTERNAL));
