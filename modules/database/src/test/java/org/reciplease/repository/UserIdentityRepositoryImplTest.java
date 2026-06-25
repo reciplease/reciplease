@@ -3,16 +3,19 @@ package org.reciplease.repository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.LinkedIdentity;
+import org.reciplease.model.PasskeyCredentialDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.reciplease.model.UserIdentityDocument;
+import org.reciplease.repository.mongo.PasskeyCredentialMongoRepository;
 import org.reciplease.repository.mongo.UserIdentityMongoRepository;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 
 @DataMongoTest
 @Import(UserIdentityRepositoryImpl.class)
@@ -21,6 +24,8 @@ class UserIdentityRepositoryImplTest {
     private UserIdentityRepository userIdentityRepository;
     @Autowired
     private UserIdentityMongoRepository userIdentityMongoRepository;
+    @Autowired
+    private PasskeyCredentialMongoRepository passkeyCredentialMongoRepository;
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -86,5 +91,33 @@ class UserIdentityRepositoryImplTest {
         assertThat(userIdentityRepository.findIdentitiesForUser("user-1"), contains(new LinkedIdentity("google", "user1@gmail.com")));
         // Another user's github identity is untouched.
         assertThat(userIdentityRepository.findIdentitiesForUser("user-2"), contains(new LinkedIdentity("github", "user2@github.com")));
+    }
+
+    @Test
+    void removeForUserAlsoDeletesThatUsersPasskeyCredentialsSoTheyCantStillSignIn() {
+        userIdentityMongoRepository.save(UserIdentityDocument.builder()
+                .id(UserIdentityDocument.idFor("passkey", "credential-1")).userId("user-1").build());
+        passkeyCredentialMongoRepository.save(PasskeyCredentialDocument.builder()
+                .id("credential-1").userId("user-1").transports(java.util.Set.of()).build());
+        passkeyCredentialMongoRepository.save(PasskeyCredentialDocument.builder()
+                .id("credential-2").userId("user-2").transports(java.util.Set.of()).build());
+
+        userIdentityRepository.removeForUser("user-1", "passkey");
+
+        assertThat(passkeyCredentialMongoRepository.findAllByUserId("user-1"), empty());
+        // Another user's credential is untouched.
+        assertThat(passkeyCredentialMongoRepository.findAllByUserId("user-2"), org.hamcrest.Matchers.hasSize(1));
+    }
+
+    @Test
+    void removeForUserDoesNotTouchPasskeyCredentialsWhenRemovingADifferentProvider() {
+        userIdentityMongoRepository.save(UserIdentityDocument.builder()
+                .id(UserIdentityDocument.idFor("google", "google-sub-1")).userId("user-1").build());
+        passkeyCredentialMongoRepository.save(PasskeyCredentialDocument.builder()
+                .id("credential-1").userId("user-1").transports(java.util.Set.of()).build());
+
+        userIdentityRepository.removeForUser("user-1", "google");
+
+        assertThat(passkeyCredentialMongoRepository.findAllByUserId("user-1"), org.hamcrest.Matchers.hasSize(1));
     }
 }
