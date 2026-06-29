@@ -64,6 +64,29 @@ class RecipeDtoTest {
     }
 
     @Test
+    @DisplayName("sourceUrl round-trips through DTO")
+    void sourceUrlRoundTrips() {
+        var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("Pasta")
+                .sourceUrl("https://www.bbcgoodfood.com/recipes/pasta")
+                .build();
+
+        var dto = RecipeDto.from(recipe);
+        assertThat(dto.getSourceUrl(), is("https://www.bbcgoodfood.com/recipes/pasta"));
+
+        var entity = dto.toEntity();
+        assertThat(entity.sourceUrl(), is("https://www.bbcgoodfood.com/recipes/pasta"));
+    }
+
+    @Test
+    @DisplayName("sourceUrl is null when not set")
+    void sourceUrlNullByDefault() {
+        var recipe = Recipe.builder().id(UUID.randomUUID().toString()).name("Toast").build();
+        assertThat(RecipeDto.from(recipe).getSourceUrl(), is((String) null));
+    }
+
+    @Test
     @DisplayName("convert to entity")
     void toEntity() {
         var recipeId = UUID.randomUUID().toString();

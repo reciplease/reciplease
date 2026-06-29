@@ -27,6 +27,7 @@ public final class Recipe implements Audited, HouseScoped {
     private final boolean isPublic = false;
     private final String name;
     private final String description;
+    private final String sourceUrl;
     @Builder.Default
     private final List<String> steps = new ArrayList<>();
     @Builder.Default

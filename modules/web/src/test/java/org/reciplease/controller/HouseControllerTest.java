@@ -87,7 +87,7 @@ class HouseControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
                         [
-                          {"userId": "owner-id", "handle": null, "role": "OWNER"},
+                          {"userId": "owner-id", "role": "OWNER"},
                           {"userId": "member-id", "handle": "member-handle", "role": "READ_ONLY"}
                         ]""", true));
     }

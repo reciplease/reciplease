@@ -1,6 +1,5 @@
 package org.reciplease.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -36,11 +35,11 @@ public class RecipeDto {
     boolean isPublic = false;
     String name;
     String description;
+    String sourceUrl;
     List<String> steps;
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     Set<RecipeIngredientDto> ingredients;
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     Instant updatedAt;
 
     public static RecipeDto from(final Recipe recipe) {
@@ -50,6 +49,7 @@ public class RecipeDto {
                 .isPublic(recipe.isPublic())
                 .name(recipe.name())
                 .description(recipe.description())
+                .sourceUrl(recipe.sourceUrl())
                 .steps(recipe.steps())
                 .ingredients(recipe.recipeIngredients().stream()
                         .map(RecipeIngredientDto::from)
@@ -64,6 +64,7 @@ public class RecipeDto {
                 .isPublic(this.isPublic)
                 .name(this.name)
                 .description(this.description)
+                .sourceUrl(this.sourceUrl)
                 .steps(this.steps);
 
         if (this.ingredients != null) {

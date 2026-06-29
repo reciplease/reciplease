@@ -1,6 +1,5 @@
 package org.reciplease.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,10 +26,8 @@ public class InventoryItemDto {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate expiration;
     String barcode;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     byte[] image;
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     Instant updatedAt;
 
     public static InventoryItemDto from(final InventoryItem inventoryItem) {

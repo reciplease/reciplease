@@ -31,6 +31,7 @@ public class RecipeDocument {
     private boolean isPublic = false;
     private String name;
     private String description;
+    private String sourceUrl;
     @Builder.Default
     private List<String> steps = new ArrayList<>();
     @Builder.Default
@@ -49,6 +50,7 @@ public class RecipeDocument {
                 .isPublic(recipe.isPublic())
                 .name(recipe.name())
                 .description(recipe.description())
+                .sourceUrl(recipe.sourceUrl())
                 .steps(recipe.steps() != null ? recipe.steps() : new ArrayList<>())
                 .ingredients(recipe.recipeIngredients().stream()
                         .map(RecipeIngredientDocument::from)
@@ -66,6 +68,7 @@ public class RecipeDocument {
                 .isPublic(isPublic)
                 .name(name)
                 .description(description)
+                .sourceUrl(sourceUrl)
                 .steps(steps != null ? steps : new ArrayList<>())
                 .createdBy(createdBy)
                 .createdAt(createdAt)

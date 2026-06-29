@@ -68,7 +68,7 @@ class AuthControllerTest {
                                 {"provider": "google", "providerId": "google-sub-1", "email": "me@gmail.com"}"""))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId", org.hamcrest.Matchers.is("user-1")))
-                .andExpect(jsonPath("$.handle", org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$.handle").doesNotExist())
                 .andExpect(jsonPath("$.token", org.hamcrest.Matchers.notNullValue()));
 
         verify(userRepository).createWithIdentity("google", "google-sub-1", "me@gmail.com");

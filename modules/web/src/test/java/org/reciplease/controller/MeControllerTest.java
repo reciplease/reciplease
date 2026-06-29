@@ -60,7 +60,7 @@ class MeControllerTest {
 
         mockMvc.perform(get("/api/me"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.handle", nullValue()));
+                .andExpect(jsonPath("$.handle").doesNotExist());
     }
 
     @Test
@@ -84,7 +84,7 @@ class MeControllerTest {
 
         mockMvc.perform(get("/api/me/identities"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.identities[0].email", nullValue()));
+                .andExpect(jsonPath("$.identities[0].email").doesNotExist());
     }
 
     @Test

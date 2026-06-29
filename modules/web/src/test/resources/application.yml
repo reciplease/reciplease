@@ -1,7 +1,0 @@
-reciplease:
-  jwt:
-    signing-secret: test-signing-secret-not-for-prod
-  webauthn:
-    rp-id: localhost
-    rp-name: Reciplease
-    allowed-origins: http://localhost:3000
