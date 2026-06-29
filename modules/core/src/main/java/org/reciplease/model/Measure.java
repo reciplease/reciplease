@@ -24,7 +24,10 @@ public enum Measure {
     TEASPOON("teaspoon", "teaspoons", "tsp"),
     TABLESPOON("tablespoon", "tablespoons", "tbsp"),
     ITEM("item", "items", "item", "ITEMS"),
-    PIECE("piece", "pieces", "pc", "PIECES");
+    PIECE("piece", "pieces", "pc", "PIECES"),
+    OUNCE("ounce", "ounces", "oz"),
+    CUP("cup", "cups", "cup"),
+    POUND("pound", "pounds", "lb");
 
     private final String singular;
     private final String plural;
