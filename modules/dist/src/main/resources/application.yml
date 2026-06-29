@@ -1,7 +1,3 @@
-spring:
-  jackson:
-    default-property-inclusion: non_null
-
 reciplease:
   jwt:
     # Fake, non-secret default so local/dev runs work without setting an env var.
@@ -26,6 +22,8 @@ server:
   forward-headers-strategy: framework
 
 spring:
+  jackson:
+    default-property-inclusion: non_null
   cloud:
     gcp:
       core:
