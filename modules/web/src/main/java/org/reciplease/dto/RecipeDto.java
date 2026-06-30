@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.Value;
 import org.reciplease.model.Recipe;
 
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 @Value
 @AllArgsConstructor
 @Builder
+@Schema(name = "Recipe")
 public class RecipeDto {
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
@@ -30,7 +32,9 @@ public class RecipeDto {
     // isPublic() accessor to JSON key "public" on serialization, while the
     // constructor parameter is named "isPublic" — pin both to "isPublic" so
     // round-tripping doesn't silently drop the field or fail deserialization.
-    @JsonProperty("isPublic")
+    // The override has to live on the generated getter (not just the field) or
+    // swagger-core's schema scan picks up both names and emits the property twice.
+    @Getter(onMethod_ = @JsonProperty("isPublic"))
     @Builder.Default
     boolean isPublic = false;
     String name;

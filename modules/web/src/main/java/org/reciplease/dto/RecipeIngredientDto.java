@@ -1,5 +1,6 @@
 package org.reciplease.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
@@ -9,6 +10,7 @@ import org.reciplease.model.RecipeIngredient;
 @Value
 @AllArgsConstructor
 @Builder
+@Schema(name = "RecipeIngredient")
 public class RecipeIngredientDto {
 
     String name;

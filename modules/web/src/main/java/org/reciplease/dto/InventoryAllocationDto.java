@@ -9,6 +9,7 @@ import org.reciplease.model.InventoryAllocation;
 @Value
 @AllArgsConstructor
 @Builder
+@Schema(name = "InventoryAllocation")
 public class InventoryAllocationDto {
 
     String inventoryItemId;

@@ -1,5 +1,6 @@
 package org.reciplease.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 @Value
 @AllArgsConstructor
 @Builder
+@Schema(name = "PlannedRecipe")
 public class PlannedRecipeDto {
 
     String houseId;

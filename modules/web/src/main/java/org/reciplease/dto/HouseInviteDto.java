@@ -1,5 +1,6 @@
 package org.reciplease.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
@@ -12,6 +13,7 @@ import java.time.Instant;
 @Value
 @AllArgsConstructor
 @Builder
+@Schema(name = "HouseInvite")
 public class HouseInviteDto {
     String id;
     String code;

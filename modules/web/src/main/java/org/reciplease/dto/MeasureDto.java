@@ -1,11 +1,13 @@
 package org.reciplease.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.reciplease.model.Measure;
 
 /**
  * API representation of a {@link Measure}. The short name doubles as {@code measureId} and is
  * also exposed as {@code short} for display; {@code singular}/{@code plural} are the long forms.
  */
+@Schema(name = "Measure")
 public class MeasureDto {
 
     private final String shortName;

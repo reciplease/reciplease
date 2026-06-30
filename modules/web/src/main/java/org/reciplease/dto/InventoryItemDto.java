@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @Value
 @AllArgsConstructor
 @Builder(toBuilder = true)
+@Schema(name = "InventoryItem")
 public class InventoryItemDto {
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
