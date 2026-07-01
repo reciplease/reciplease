@@ -13,25 +13,25 @@ import java.util.stream.Collectors;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class IngredientPairingDocument {
+public class PlannedIngredientDocument {
 
-    private RecipeIngredientDocument recipeIngredient;
+    private RecipeIngredientDocument ingredient;
     @Builder.Default
     private List<InventoryAllocationDocument> allocations = new ArrayList<>();
 
-    public static IngredientPairingDocument from(final IngredientPairing pairing) {
-        return IngredientPairingDocument.builder()
-                .recipeIngredient(RecipeIngredientDocument.from(pairing.recipeIngredient()))
-                .allocations(pairing.allocations().stream()
+    public static PlannedIngredientDocument from(final PlannedIngredient plannedIngredient) {
+        return PlannedIngredientDocument.builder()
+                .ingredient(RecipeIngredientDocument.from(plannedIngredient.ingredient()))
+                .allocations(plannedIngredient.allocations().stream()
                         .map(InventoryAllocationDocument::from)
                         .collect(Collectors.toList()))
                 .build();
     }
 
-    public IngredientPairing toModel() {
+    public PlannedIngredient toModel() {
         var resolvedAllocations = allocations == null ? List.<InventoryAllocation>of() : allocations.stream()
                 .map(InventoryAllocationDocument::toModel)
                 .collect(Collectors.toList());
-        return new IngredientPairing(recipeIngredient.toModel(), resolvedAllocations);
+        return new PlannedIngredient(ingredient.toModel(), resolvedAllocations);
     }
 }

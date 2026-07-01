@@ -3,6 +3,7 @@ package org.reciplease.configuration;
 import io.mongock.runner.springboot.base.MongockApplicationRunner;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.InviteDocument;
+import org.reciplease.model.PlannedMealDocument;
 import org.reciplease.model.UserDocument;
 import org.reciplease.model.WebAuthnChallengeDocument;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,16 @@ class MongockConfigTest {
 
         final var indexes = mongoTemplate.indexOps(WebAuthnChallengeDocument.class).getIndexInfo();
         assertThat(indexes.stream().anyMatch(info -> info.getExpireAfter().isPresent()), is(true));
+    }
+
+    @Test
+    void createsThePlannedMealNameUniqueIndex() throws Exception {
+        mongockApplicationRunner.run(new DefaultApplicationArguments());
+
+        final var indexFields = mongoTemplate.indexOps(PlannedMealDocument.class).getIndexInfo().stream()
+                .map(info -> info.getIndexFields().toString())
+                .toList();
+        assertThat(indexFields, hasItem(containsString("name")));
     }
 
     @Test

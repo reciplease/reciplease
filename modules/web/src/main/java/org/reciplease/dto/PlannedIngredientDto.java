@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
-import org.reciplease.model.IngredientPairing;
+import org.reciplease.model.PlannedIngredient;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,23 +12,23 @@ import java.util.stream.Collectors;
 @Value
 @AllArgsConstructor
 @Builder
-@Schema(name = "IngredientPairing")
-public class IngredientPairingDto {
+@Schema(name = "PlannedIngredient")
+public class PlannedIngredientDto {
 
-    RecipeIngredientDto recipeIngredient;
+    RecipeIngredientDto ingredient;
     List<InventoryAllocationDto> allocations;
 
-    public static IngredientPairingDto from(final IngredientPairing pairing) {
-        return IngredientPairingDto.builder()
-                .recipeIngredient(RecipeIngredientDto.from(pairing.recipeIngredient()))
-                .allocations(pairing.allocations().stream()
+    public static PlannedIngredientDto from(final PlannedIngredient plannedIngredient) {
+        return PlannedIngredientDto.builder()
+                .ingredient(RecipeIngredientDto.from(plannedIngredient.ingredient()))
+                .allocations(plannedIngredient.allocations().stream()
                         .map(InventoryAllocationDto::from)
                         .collect(Collectors.toList()))
                 .build();
     }
 
-    public IngredientPairing toModel() {
-        return new IngredientPairing(recipeIngredient.toModel(),
+    public PlannedIngredient toModel() {
+        return new PlannedIngredient(ingredient.toModel(),
                 allocations == null ? List.of() : allocations.stream()
                         .map(InventoryAllocationDto::toModel)
                         .collect(Collectors.toList()));

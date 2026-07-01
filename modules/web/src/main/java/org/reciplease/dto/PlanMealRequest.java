@@ -1,5 +1,6 @@
 package org.reciplease.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,14 +13,16 @@ import java.util.List;
 @Value
 @AllArgsConstructor
 @Builder
-public class PlanRecipeRequest {
+public class PlanMealRequest {
 
-    @NotNull
     String recipeId;
+
+    @NotBlank
+    String name;
 
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate date;
 
-    List<IngredientPairingDto> pairings;
+    List<PlannedIngredientDto> items;
 }

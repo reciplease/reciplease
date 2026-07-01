@@ -13,8 +13,9 @@ import org.reciplease.repository.UserRepository;
 import org.reciplease.repository.WebAuthnChallengeLedger;
 import org.reciplease.service.InventoryService;
 import org.reciplease.service.InviteService;
-import org.reciplease.service.PlannedRecipeService;
+import org.reciplease.service.PlannedMealService;
 import org.reciplease.service.RecipeService;
+import org.reciplease.service.ShoppingListService;
 import org.springdoc.core.configuration.SpringDocConfiguration;
 import org.springdoc.core.properties.SpringDocConfigProperties;
 import org.springdoc.webmvc.core.configuration.MultipleOpenApiSupportConfiguration;
@@ -73,7 +74,9 @@ class OpenApiSpecExportTest {
     @MockitoBean
     private UserIdentityRepository userIdentityRepository;
     @MockitoBean
-    private PlannedRecipeService plannedRecipeService;
+    private PlannedMealService plannedMealService;
+    @MockitoBean
+    private ShoppingListService shoppingListService;
     @MockitoBean
     private WebAuthnRelyingPartyOperations relyingPartyOperations;
     @MockitoBean

@@ -2,9 +2,9 @@ package org.reciplease.model;
 
 import lombok.Value;
 
-import java.util.Set;
+import java.util.List;
 
 @Value
 public class ShoppingList {
-    Set<RecipeIngredient> items;
+    List<RecipeIngredient> items;
 }
