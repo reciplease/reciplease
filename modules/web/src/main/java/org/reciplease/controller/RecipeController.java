@@ -3,9 +3,12 @@ package org.reciplease.controller;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseOwner;
+import org.reciplease.dto.PublicRecipeDto;
 import org.reciplease.dto.RecipeDto;
 import org.reciplease.dto.RecipeIngredientDto;
+import org.reciplease.dto.UserSummaryDto;
 import org.reciplease.model.Recipe;
+import org.reciplease.repository.UserRepository;
 import org.reciplease.service.RecipeService;
 import org.reciplease.service.request.AddIngredient;
 import org.springframework.http.HttpStatus;
@@ -32,39 +35,40 @@ public class RecipeController {
 
     private final RecipeService recipeService;
     private final HouseAccess houseAccess;
+    private final UserRepository userRepository;
 
     @GetMapping("{uuid}")
     public ResponseEntity<RecipeDto> findById(@PathVariable final String uuid) {
         final var optionalRecipe = recipeService.findVisibleById(uuid, activeHouseId())
-                .map(RecipeDto::from);
+                .map(this::toDto);
         return ResponseEntity.of(optionalRecipe);
     }
 
     @GetMapping
     public ResponseEntity<List<RecipeDto>> findAll() {
         final var recipes = recipeService.findVisibleTo(activeHouseId()).stream()
-                .map(RecipeDto::from)
+                .map(this::toDto)
                 .collect(toList());
         return ResponseEntity.status(HttpStatus.OK).body(recipes);
     }
 
     @PostMapping
     @HouseOwner
-    public ResponseEntity<RecipeDto> create(@RequestBody final RecipeDto recipeDto) {
+    public ResponseEntity<RecipeDto> create(@RequestBody final PublicRecipeDto recipeDto) {
         final Recipe recipe = recipeService.create(houseAccess.requireHouseId(), recipeDto.toEntity());
-        return ResponseEntity.status(HttpStatus.CREATED).body(RecipeDto.from(recipe));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toDto(recipe));
     }
 
     @PutMapping("{uuid}")
     @HouseOwner
-    public ResponseEntity<RecipeDto> update(@PathVariable final String uuid, @RequestBody final RecipeDto recipeDto) {
+    public ResponseEntity<RecipeDto> update(@PathVariable final String uuid, @RequestBody final PublicRecipeDto recipeDto) {
         final var existing = recipeService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
             return ResponseEntity.notFound().build();
         }
 
         final var updated = recipeService.update(uuid, recipeDto.toEntity());
-        return ResponseEntity.ok(RecipeDto.from(updated));
+        return ResponseEntity.ok(toDto(updated));
     }
 
     @DeleteMapping("{uuid}")
@@ -97,5 +101,24 @@ public class RecipeController {
     /** Null for unauthenticated callers or callers with no active house — they only see public recipes. */
     private String activeHouseId() {
         return houseAccess.currentHouseIdOrNull();
+    }
+
+    /**
+     * Includes houseId/createdBy/updatedBy only for callers who are an authenticated
+     * member of the recipe's own house — everyone else (including anonymous public
+     * browsing) gets the recipe with no house or user info attached.
+     */
+    private RecipeDto toDto(final Recipe recipe) {
+        if (houseAccess.isMember() && houseAccess.belongsToHeaderHouse(recipe)) {
+            return RecipeDto.from(recipe, userSummary(recipe.createdBy()), userSummary(recipe.updatedBy()));
+        }
+        return RecipeDto.from(recipe);
+    }
+
+    private UserSummaryDto userSummary(final String userId) {
+        if (userId == null) {
+            return null;
+        }
+        return userRepository.findById(userId).map(UserSummaryDto::from).orElse(null);
     }
 }

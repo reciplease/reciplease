@@ -8,9 +8,13 @@ import org.reciplease.configuration.MethodSecurityTestSupport;
 import org.reciplease.configuration.WithHouseMember;
 import org.reciplease.configuration.WithHouseOwner;
 import org.reciplease.configuration.WithMockRecipleaseUser;
+import org.reciplease.dto.PublicRecipeDto;
 import org.reciplease.dto.RecipeDto;
+import org.reciplease.dto.UserSummaryDto;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
+import org.reciplease.model.User;
+import org.reciplease.repository.UserRepository;
 import org.reciplease.service.RecipeService;
 import org.reciplease.service.request.AddIngredient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +64,9 @@ class RecipeControllerTest {
     @MockitoBean(name = "houseAccess")
     private HouseAccess houseAccess;
 
+    @MockitoBean
+    private UserRepository userRepository;
+
     @Test
     @DisplayName("ID does not exist")
     void noRecipe() throws Exception {
@@ -104,9 +111,11 @@ class RecipeControllerTest {
     void createRecipe() throws Exception {
         final var newSoupDto = getNewSoupDto();
         final var savedSoup = getSavedSoup();
-        final var savedSoupDto = RecipeDto.from(savedSoup);
+        final var savedSoupDto = RecipeDto.from(savedSoup, null, null);
 
         when(houseAccess.isOwner()).thenReturn(true);
+        when(houseAccess.isMember()).thenReturn(true);
+        when(houseAccess.belongsToHeaderHouse(savedSoup)).thenReturn(true);
         when(houseAccess.requireHouseId()).thenReturn(HOUSE_ID);
         when(recipeService.create(HOUSE_ID, newSoupDto.toEntity())).thenReturn(savedSoup);
 
@@ -173,10 +182,12 @@ class RecipeControllerTest {
                 .houseId(HOUSE_ID)
                 .build();
         final var updated = recipe.toBuilder().name("tomato soup").build();
-        final var updateDto = RecipeDto.builder().recipeId(recipe.id()).name("tomato soup").build();
+        final var updateDto = PublicRecipeDto.builder().recipeId(recipe.id()).name("tomato soup").build();
 
         when(houseAccess.isOwner()).thenReturn(true);
+        when(houseAccess.isMember()).thenReturn(true);
         when(houseAccess.belongsToHeaderHouse(recipe)).thenReturn(true);
+        when(houseAccess.belongsToHeaderHouse(updated)).thenReturn(true);
         when(recipeService.findById(recipe.id())).thenReturn(Optional.of(recipe));
         when(recipeService.update(recipe.id(), updateDto.toEntity())).thenReturn(updated);
 
@@ -184,7 +195,7 @@ class RecipeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(RecipeDto.from(updated)), true));
+                .andExpect(content().json(mapper.writeValueAsString(RecipeDto.from(updated, null, null)), true));
     }
 
     @Test
@@ -196,7 +207,7 @@ class RecipeControllerTest {
                 .name("soup")
                 .houseId(HOUSE_ID)
                 .build();
-        final var updateDto = RecipeDto.builder().recipeId(recipe.id()).name("tomato soup").build();
+        final var updateDto = PublicRecipeDto.builder().recipeId(recipe.id()).name("tomato soup").build();
 
         when(houseAccess.isOwner()).thenReturn(false);
 
@@ -217,7 +228,7 @@ class RecipeControllerTest {
                 .name("soup")
                 .houseId("some-other-house")
                 .build();
-        final var updateDto = RecipeDto.builder().recipeId(recipe.id()).name("tomato soup").build();
+        final var updateDto = PublicRecipeDto.builder().recipeId(recipe.id()).name("tomato soup").build();
 
         when(houseAccess.isOwner()).thenReturn(true);
         when(houseAccess.belongsToHeaderHouse(recipe)).thenReturn(false);
@@ -229,6 +240,44 @@ class RecipeControllerTest {
                 .andExpect(status().isNotFound());
 
         verify(recipeService, never()).update(any(), any());
+    }
+
+    @Test
+    @DisplayName("get recipe by ID includes houseId and resolved owner handles for a house member")
+    @WithHouseMember
+    void recipeIncludesOwnerInfoForHouseMember() throws Exception {
+        final var soup = getSoup().toBuilder().houseId(HOUSE_ID).createdBy("user-1").updatedBy("user-2").build();
+        final var createdBy = new User("user-1", "alice");
+        final var updatedBy = new User("user-2", "bob");
+        final var expectedDto = RecipeDto.from(soup,
+                UserSummaryDto.builder().userId("user-1").handle("alice").build(),
+                UserSummaryDto.builder().userId("user-2").handle("bob").build());
+
+        when(recipeService.findVisibleById(soup.id(), HOUSE_ID)).thenReturn(Optional.of(soup));
+        when(houseAccess.isMember()).thenReturn(true);
+        when(houseAccess.belongsToHeaderHouse(soup)).thenReturn(true);
+        when(houseAccess.currentHouseIdOrNull()).thenReturn(HOUSE_ID);
+        when(userRepository.findById("user-1")).thenReturn(Optional.of(createdBy));
+        when(userRepository.findById("user-2")).thenReturn(Optional.of(updatedBy));
+
+        mockMvc.perform(get("/api/recipes/{uuid}", soup.id()))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(expectedDto), true));
+    }
+
+    @Test
+    @DisplayName("get recipe by ID omits houseId and owner info for a caller outside the recipe's house")
+    void recipeOmitsOwnerInfoForNonMember() throws Exception {
+        final var soup = getSoup().toBuilder().houseId(HOUSE_ID).createdBy("user-1").updatedBy("user-2").build();
+        final var expectedDto = RecipeDto.from(soup);
+
+        when(recipeService.findVisibleById(soup.id(), null)).thenReturn(Optional.of(soup));
+
+        mockMvc.perform(get("/api/recipes/{uuid}", soup.id()))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(expectedDto), true));
+
+        verify(userRepository, never()).findById(any());
     }
 
     @Test
@@ -256,7 +305,7 @@ class RecipeControllerTest {
     @WithHouseOwner
     void updateRecipeNotFound() throws Exception {
         final var id = UUID.randomUUID().toString();
-        final var updateDto = RecipeDto.builder().recipeId(id).name("tomato soup").build();
+        final var updateDto = PublicRecipeDto.builder().recipeId(id).name("tomato soup").build();
 
         when(houseAccess.isOwner()).thenReturn(true);
         when(recipeService.findById(id)).thenReturn(Optional.empty());
@@ -267,8 +316,8 @@ class RecipeControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    private RecipeDto getNewSoupDto() {
-        return RecipeDto.builder()
+    private PublicRecipeDto getNewSoupDto() {
+        return PublicRecipeDto.builder()
                 .name("soup")
                 .build();
     }

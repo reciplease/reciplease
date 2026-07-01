@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -40,6 +41,8 @@ public class RecipeDocument {
     private String createdBy;
     @CreatedDate
     private Instant createdAt;
+    @LastModifiedBy
+    private String updatedBy;
     @LastModifiedDate
     private Instant updatedAt;
 
@@ -57,6 +60,7 @@ public class RecipeDocument {
                         .collect(Collectors.toList()))
                 .createdBy(recipe.createdBy())
                 .createdAt(recipe.createdAt())
+                .updatedBy(recipe.updatedBy())
                 .updatedAt(recipe.updatedAt())
                 .build();
     }
@@ -72,6 +76,7 @@ public class RecipeDocument {
                 .steps(steps != null ? steps : new ArrayList<>())
                 .createdBy(createdBy)
                 .createdAt(createdAt)
+                .updatedBy(updatedBy)
                 .updatedAt(updatedAt)
                 .build();
         if (ingredients != null) {

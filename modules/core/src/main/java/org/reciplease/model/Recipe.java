@@ -14,13 +14,14 @@ import java.util.Set;
 
 @Getter
 @Accessors(fluent = true)
-@EqualsAndHashCode(exclude = {"createdBy", "createdAt", "updatedAt"})
+@EqualsAndHashCode(exclude = {"createdBy", "createdAt", "updatedBy", "updatedAt"})
 @ToString
 @Builder(toBuilder = true)
 public final class Recipe implements Audited, HouseScoped {
     private final String id;
     private final String createdBy;
     private final Instant createdAt;
+    private final String updatedBy;
     private final Instant updatedAt;
     private final String houseId;
     @Builder.Default

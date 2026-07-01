@@ -14,7 +14,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 
-class RecipeDtoTest {
+class PublicRecipeDtoTest {
 
     @Test
     @DisplayName("create DTO from entity")
@@ -26,12 +26,13 @@ class RecipeDtoTest {
                 .steps(List.of("Toast the bread", "Spread butter on toast"))
                 .build();
 
-        var recipeDto = RecipeDto.from(recipe);
+        var recipeDto = PublicRecipeDto.from(recipe);
 
         assertThat(recipeDto.getRecipeId(), is(recipe.id()));
         assertThat(recipeDto.getName(), is(recipe.name()));
         assertThat(recipeDto.getDescription(), is(recipe.description()));
         assertThat(recipeDto.getSteps(), is(recipe.steps()));
+        assertThat(recipeDto.isOwned(), is(false));
     }
 
     @Test
@@ -42,25 +43,27 @@ class RecipeDtoTest {
                 .name("Toast")
                 .build();
 
-        var recipeDto = RecipeDto.from(recipe);
+        var recipeDto = PublicRecipeDto.from(recipe);
 
         assertThat(recipeDto.getDescription(), is((String) null));
     }
 
     @Test
-    @DisplayName("carries houseId and public flag")
-    void carriesHouseAndVisibility() {
+    @DisplayName("carries the public flag but never house or owner info")
+    void carriesPublicFlagOnly() {
         var recipe = Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("Toast")
                 .houseId("house-1")
+                .createdBy("user-1")
+                .updatedBy("user-2")
                 .isPublic(true)
                 .build();
 
-        var recipeDto = RecipeDto.from(recipe);
+        var recipeDto = PublicRecipeDto.from(recipe);
 
-        assertThat(recipeDto.getHouseId(), is("house-1"));
         assertThat(recipeDto.isPublic(), is(true));
+        assertThat(recipeDto.isOwned(), is(false));
     }
 
     @Test
@@ -72,7 +75,7 @@ class RecipeDtoTest {
                 .sourceUrl("https://www.bbcgoodfood.com/recipes/pasta")
                 .build();
 
-        var dto = RecipeDto.from(recipe);
+        var dto = PublicRecipeDto.from(recipe);
         assertThat(dto.getSourceUrl(), is("https://www.bbcgoodfood.com/recipes/pasta"));
 
         var entity = dto.toEntity();
@@ -83,14 +86,14 @@ class RecipeDtoTest {
     @DisplayName("sourceUrl is null when not set")
     void sourceUrlNullByDefault() {
         var recipe = Recipe.builder().id(UUID.randomUUID().toString()).name("Toast").build();
-        assertThat(RecipeDto.from(recipe).getSourceUrl(), is((String) null));
+        assertThat(PublicRecipeDto.from(recipe).getSourceUrl(), is((String) null));
     }
 
     @Test
     @DisplayName("convert to entity")
     void toEntity() {
         var recipeId = UUID.randomUUID().toString();
-        var recipeDto = RecipeDto.builder()
+        var recipeDto = PublicRecipeDto.builder()
                 .recipeId(recipeId)
                 .name("Toast")
                 .description("A staple and classic")
@@ -109,7 +112,7 @@ class RecipeDtoTest {
     @Test
     @DisplayName("convert to entity including ingredients")
     void toEntityWithIngredients() {
-        var recipeDto = RecipeDto.builder()
+        var recipeDto = PublicRecipeDto.builder()
                 .name("Toast")
                 .ingredients(Set.of(RecipeIngredientDto.from(new RecipeIngredient("bread", "ITEMS", 2d))))
                 .build();

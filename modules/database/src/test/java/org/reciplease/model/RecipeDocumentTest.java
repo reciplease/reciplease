@@ -20,6 +20,8 @@ class RecipeDocumentTest {
                 .name("toast")
                 .description("A staple")
                 .steps(List.of("Toast it"))
+                .createdBy("user-1")
+                .updatedBy("user-2")
                 .build()
                 .addIngredient("bread", "ITEMS", 2d);
 
@@ -30,6 +32,8 @@ class RecipeDocumentTest {
         assertThat(document.getDescription(), is("A staple"));
         assertThat(document.getSteps(), is(List.of("Toast it")));
         assertThat(document.getIngredients().get(0).toModel(), is(new RecipeIngredient("bread", "ITEMS", 2d)));
+        assertThat(document.getCreatedBy(), is("user-1"));
+        assertThat(document.getUpdatedBy(), is("user-2"));
     }
 
     @Test
@@ -55,6 +59,8 @@ class RecipeDocumentTest {
                 .description("A staple")
                 .steps(List.of("Toast it"))
                 .ingredients(List.of(RecipeIngredientDocument.from(new RecipeIngredient("bread", "ITEMS", 2d))))
+                .createdBy("user-1")
+                .updatedBy("user-2")
                 .build();
 
         var recipe = document.toModel();
@@ -64,6 +70,8 @@ class RecipeDocumentTest {
         assertThat(recipe.description(), is("A staple"));
         assertThat(recipe.steps(), is(List.of("Toast it")));
         assertThat(recipe.recipeIngredients(), contains(new RecipeIngredient("bread", "ITEMS", 2d)));
+        assertThat(recipe.createdBy(), is("user-1"));
+        assertThat(recipe.updatedBy(), is("user-2"));
     }
 
     @Test

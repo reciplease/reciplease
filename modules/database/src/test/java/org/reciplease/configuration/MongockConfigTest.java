@@ -4,6 +4,7 @@ import io.mongock.runner.springboot.base.MongockApplicationRunner;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.InviteDocument;
 import org.reciplease.model.PlannedMealDocument;
+import org.reciplease.model.RecipeDocument;
 import org.reciplease.model.UserDocument;
 import org.reciplease.model.WebAuthnChallengeDocument;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +68,26 @@ class MongockConfigTest {
                 .map(info -> info.getIndexFields().toString())
                 .toList();
         assertThat(indexFields, hasItem(containsString("name")));
+    }
+
+    @Test
+    void backfillsRecipeUpdatedByFromCreatedBy() throws Exception {
+        // Other tests in this class already ran the migrations (with no recipes present
+        // yet), which permanently marks the backfill changeset as applied in Mongock's own
+        // ledger — drop everything, including that ledger, so it runs again against the
+        // recipe seeded below.
+        mongoTemplate.getCollectionNames().forEach(mongoTemplate::dropCollection);
+        final var recipe = RecipeDocument.builder()
+                .id("recipe-1")
+                .name("toast")
+                .createdBy("user-1")
+                .build();
+        mongoTemplate.save(recipe);
+
+        mongockApplicationRunner.run(new DefaultApplicationArguments());
+
+        final var migrated = mongoTemplate.findById("recipe-1", RecipeDocument.class);
+        assertThat(migrated.getUpdatedBy(), is("user-1"));
     }
 
     @Test

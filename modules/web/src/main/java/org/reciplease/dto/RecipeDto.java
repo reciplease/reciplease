@@ -1,11 +1,5 @@
 package org.reciplease.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Value;
 import org.reciplease.model.Recipe;
 
 import java.time.Instant;
@@ -14,65 +8,57 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Carries no per-recipe "editable" flag: the frontend determines edit access from the
- * caller's role on the active house (via {@code GET /api/houses}), not a field repeated
- * on every recipe. The backend still enforces it independently via {@code @HouseOwner}.
+ * A recipe as seen over the API — either the {@link PublicRecipeDto} view (no house or user
+ * info; safe for anonymous browsing and for callers outside the recipe's own house) or the
+ * {@link OwnedRecipeDto} view (adds houseId/createdBy/updatedBy, only for callers who are an
+ * authenticated member of the recipe's own house — see {@code RecipeController#toDto}).
+ * {@code owned} is the wire-level discriminant a client can switch on to narrow which shape
+ * it received.
  */
-@Value
-@AllArgsConstructor
-@Builder
-@Schema(name = "Recipe")
-public class RecipeDto {
+public sealed interface RecipeDto permits PublicRecipeDto, OwnedRecipeDto {
 
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-    String recipeId;
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-    String houseId;
-    // Without an explicit name, Jackson's getter-based property naming maps the
-    // isPublic() accessor to JSON key "public" on serialization, while the
-    // constructor parameter is named "isPublic" — pin both to "isPublic" so
-    // round-tripping doesn't silently drop the field or fail deserialization.
-    // The override has to live on the generated getter (not just the field) or
-    // swagger-core's schema scan picks up both names and emits the property twice.
-    @Getter(onMethod_ = @JsonProperty("isPublic"))
-    @Builder.Default
-    boolean isPublic = false;
-    String name;
-    String description;
-    String sourceUrl;
-    List<String> steps;
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-    Set<RecipeIngredientDto> ingredients;
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-    Instant updatedAt;
+    String getRecipeId();
 
-    public static RecipeDto from(final Recipe recipe) {
-        return RecipeDto.builder()
-                .recipeId(recipe.id())
-                .houseId(recipe.houseId())
-                .isPublic(recipe.isPublic())
-                .name(recipe.name())
-                .description(recipe.description())
-                .sourceUrl(recipe.sourceUrl())
-                .steps(recipe.steps())
-                .ingredients(recipe.recipeIngredients().stream()
-                        .map(RecipeIngredientDto::from)
-                        .collect(Collectors.toSet()))
-                .updatedAt(recipe.updatedAt())
-                .build();
+    boolean isPublic();
+
+    String getName();
+
+    String getDescription();
+
+    String getSourceUrl();
+
+    List<String> getSteps();
+
+    Set<RecipeIngredientDto> getIngredients();
+
+    Instant getUpdatedAt();
+
+    /** True for {@link OwnedRecipeDto} — the discriminant clients narrow the union on. */
+    default boolean isOwned() {
+        return false;
     }
 
-    public Recipe toEntity() {
-        final var builder = Recipe.builder()
-                .id(this.recipeId)
-                .isPublic(this.isPublic)
-                .name(this.name)
-                .description(this.description)
-                .sourceUrl(this.sourceUrl)
-                .steps(this.steps);
+    /** Public view: no house or user info. */
+    static RecipeDto from(final Recipe recipe) {
+        return PublicRecipeDto.from(recipe);
+    }
 
-        if (this.ingredients != null) {
-            builder.recipeIngredients(this.ingredients.stream()
+    /** Owner view, for callers who belong to the recipe's own house. */
+    static RecipeDto from(final Recipe recipe, final UserSummaryDto createdBy, final UserSummaryDto updatedBy) {
+        return OwnedRecipeDto.from(recipe, createdBy, updatedBy);
+    }
+
+    default Recipe toEntity() {
+        final var builder = Recipe.builder()
+                .id(getRecipeId())
+                .isPublic(isPublic())
+                .name(getName())
+                .description(getDescription())
+                .sourceUrl(getSourceUrl())
+                .steps(getSteps());
+
+        if (getIngredients() != null) {
+            builder.recipeIngredients(getIngredients().stream()
                     .map(RecipeIngredientDto::toModel)
                     .collect(Collectors.toSet()));
         }
