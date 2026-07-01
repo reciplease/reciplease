@@ -1,5 +1,6 @@
 package org.reciplease.configuration;
 
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reciplease.controller.MeasureController;
@@ -77,12 +78,28 @@ class CloudWebSecurityConfigTest {
                 .andExpect(status().isCreated());
     }
 
+    @Test
+    @DisplayName("a stale/invalid reciplease-session cookie must not 401 an anonymous passkey endpoint")
+    void anonymousPasskeyEndpointIgnoresAnInvalidBearerCookie() throws Exception {
+        // Simulates a signed-out user whose lingering NextAuth session still has the proxy
+        // forwarding an expired Reciplease JWT: the resource server would normally reject any
+        // request bearing a bad bearer token before authorizeHttpRequests() ever runs, which
+        // used to 401 this endpoint even though it's meant to work with no session at all.
+        mockMvc.perform(post("/api/passkey/login/test").cookie(new Cookie("reciplease-session", "not-a-real-jwt")))
+                .andExpect(status().isOk());
+    }
+
     @RestController
     static class TestController {
         @PostMapping("/api/test")
         @PreAuthorize("hasRole('RECIPLEASE')")
         ResponseEntity<Void> create() {
             return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
+
+        @PostMapping("/api/passkey/login/test")
+        ResponseEntity<Void> anonymousPasskeyProbe() {
+            return ResponseEntity.ok().build();
         }
     }
 }
