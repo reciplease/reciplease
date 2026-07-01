@@ -124,9 +124,9 @@ class InventoryServiceTest {
         @DisplayName("update merges editable fields but preserves id, createdBy and createdAt")
         void shouldUpdatePreservingAuditFields() {
             var createdAt = Instant.now().minusSeconds(60);
-            var existing = new InventoryItem(item.id(), "someone", HOUSE_ID, "bread", "ITEMS", 10d, LocalDate.now(), null,
+            var existing = new InventoryItem(item.id(), "someone", HOUSE_ID, "bread", "ITEMS", 10d, 4d, LocalDate.now(), null,
                     null, createdAt, createdAt);
-            var updates = new InventoryItem(null, null, HOUSE_ID, "sourdough", "ITEMS", 12d, LocalDate.now().plusDays(3),
+            var updates = new InventoryItem(null, null, HOUSE_ID, "sourdough", "ITEMS", 12d, 4d, LocalDate.now().plusDays(3),
                     "0123456789012", new byte[]{1, 2, 3});
 
             when(inventoryRepository.findById(item.id())).thenReturn(Optional.of(existing));
@@ -139,9 +139,26 @@ class InventoryServiceTest {
             assertThat(updated.createdAt(), is(existing.createdAt()));
             assertThat(updated.name(), is("sourdough"));
             assertThat(updated.amount(), is(12d));
+            assertThat(updated.remaining(), is(4d));
             assertThat(updated.expiration(), is(updates.expiration()));
             assertThat(updated.barcode(), is("0123456789012"));
             assertThat(updated.image(), is(equalTo(updates.image())));
+        }
+
+        @Test
+        @DisplayName("update resets remaining to the new amount if the caller doesn't resend it")
+        void shouldResetRemainingWhenCallerOmitsIt() {
+            var existing = new InventoryItem(item.id(), null, HOUSE_ID, "bread", "ITEMS", 10d, 4d, LocalDate.now(), null);
+            // Built via the overload that doesn't mention `remaining` at all, so it defaults to
+            // the new `amount` rather than carrying over the caller's intent to preserve it.
+            var updates = new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 12d, LocalDate.now(), null);
+
+            when(inventoryRepository.findById(item.id())).thenReturn(Optional.of(existing));
+            when(inventoryRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+            var updated = inventoryService.update(item.id(), updates);
+
+            assertThat(updated.remaining(), is(12d));
         }
     }
 

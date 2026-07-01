@@ -17,7 +17,7 @@ class InventoryItemDtoTest {
     @Test
     @DisplayName("create DTO from entity")
     void from() {
-        var item = new InventoryItem(UUID.randomUUID().toString(), null, "house-1", "bread", "ITEMS", 10d, LocalDate.now(), "0123456789012",
+        var item = new InventoryItem(UUID.randomUUID().toString(), null, "house-1", "bread", "ITEMS", 10d, 12d, LocalDate.now(), "0123456789012",
                 new byte[]{1, 2, 3}, Instant.now(), Instant.now());
 
         var itemDto = InventoryItemDto.from(item);
@@ -28,6 +28,7 @@ class InventoryItemDtoTest {
         // Legacy measure ids are normalized to their short form.
         assertThat(itemDto.getMeasure(), is("item"));
         assertThat(itemDto.getAmount(), is(item.amount()));
+        assertThat(itemDto.getRemaining(), is(item.remaining()));
         assertThat(itemDto.getExpiration(), is(item.expiration()));
         assertThat(itemDto.getBarcode(), is(item.barcode()));
         assertThat(itemDto.getImage(), is(equalTo(item.image())));
@@ -52,6 +53,7 @@ class InventoryItemDtoTest {
                 .name("bread")
                 .measure("g")
                 .amount(10d)
+                .remaining(6d)
                 .expiration(LocalDate.now())
                 .barcode("0123456789012")
                 .image(new byte[]{1, 2, 3})
@@ -65,6 +67,7 @@ class InventoryItemDtoTest {
         // A short id passes through unchanged.
         assertThat(item.measure(), is("g"));
         assertThat(item.amount(), is(itemDto.getAmount()));
+        assertThat(item.remaining(), is(itemDto.getRemaining()));
         assertThat(item.expiration(), is(itemDto.getExpiration()));
         assertThat(item.barcode(), is(itemDto.getBarcode()));
         assertThat(item.image(), is(equalTo(itemDto.getImage())));

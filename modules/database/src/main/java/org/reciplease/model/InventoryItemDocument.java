@@ -26,6 +26,7 @@ public class InventoryItemDocument {
     private String name;
     private String measure;
     private Double amount;
+    private Double remaining;
     private LocalDate expiration;
     private String barcode;
     private byte[] image;
@@ -43,6 +44,7 @@ public class InventoryItemDocument {
                 .name(item.name())
                 .measure(item.measure())
                 .amount(item.amount())
+                .remaining(item.remaining())
                 .expiration(item.expiration())
                 .barcode(item.barcode())
                 .image(item.image())
@@ -52,7 +54,10 @@ public class InventoryItemDocument {
                 .build();
     }
 
+    // Documents saved before `remaining` existed have none stored; InventoryItem's own
+    // constructor defaults a null `remaining` to `amount` (fully stocked), so nothing extra
+    // is needed here.
     public InventoryItem toModel() {
-        return new InventoryItem(id, createdBy, houseId, name, measure, amount, expiration, barcode, image, createdAt, updatedAt);
+        return new InventoryItem(id, createdBy, houseId, name, measure, amount, remaining, expiration, barcode, image, createdAt, updatedAt);
     }
 }

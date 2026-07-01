@@ -24,6 +24,7 @@ public class InventoryItemDto {
     String name;
     String measure;
     Double amount;
+    Double remaining;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate expiration;
     String barcode;
@@ -38,6 +39,7 @@ public class InventoryItemDto {
                 .name(inventoryItem.name())
                 .measure(Measure.normalizeId(inventoryItem.measure()))
                 .amount(inventoryItem.amount())
+                .remaining(inventoryItem.remaining())
                 .expiration(inventoryItem.expiration())
                 .barcode(inventoryItem.barcode())
                 .image(inventoryItem.image())
@@ -49,6 +51,6 @@ public class InventoryItemDto {
     // header, not trusted from the request body, so a member can't write into a house
     // they don't belong to by spoofing the field.
     public InventoryItem toEntity(final String houseId) {
-        return new InventoryItem(uuid, null, houseId, name, Measure.normalizeId(measure), amount, expiration, barcode, image);
+        return new InventoryItem(uuid, null, houseId, name, Measure.normalizeId(measure), amount, remaining, expiration, barcode, image);
     }
 }

@@ -110,6 +110,7 @@ class InventoryControllerTest {
                           "measure": "item",
                           "expiration": "2020-01-01",
                           "amount": 20.0,
+                          "remaining": 20.0,
                           "barcode": "0123456789012",
                           "image": "%s"
                         }""".formatted(HOUSE_ID, imageBase64), true));

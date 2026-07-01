@@ -175,7 +175,7 @@ class InventoryRepositoryTest {
         var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
 
         var updated = inventoryRepository.save(new InventoryItem(saved.id(), saved.createdBy(), saved.houseId(), saved.name(), saved.measure(), 12d,
-                saved.expiration(), saved.barcode(), saved.image(), saved.createdAt(), saved.updatedAt()));
+                saved.remaining(), saved.expiration(), saved.barcode(), saved.image(), saved.createdAt(), saved.updatedAt()));
 
         assertThat(updated.createdAt(), is(saved.createdAt()));
         assertThat(updated.updatedAt(), is(greaterThanOrEqualTo(saved.updatedAt())));
