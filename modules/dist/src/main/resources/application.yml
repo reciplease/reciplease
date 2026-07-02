@@ -7,6 +7,12 @@ reciplease:
     rp-id: localhost
     rp-name: Reciplease
     allowed-origins: http://localhost:3000
+  fitbit:
+    # Fake, non-secret defaults so local/dev runs boot without a real Fitbit app registered.
+    # NEVER use these values outside local development.
+    client-id: local-dev-only-fitbit-client-id
+    client-secret: local-dev-only-fitbit-client-secret
+    redirect-uri: http://localhost:3000/api/fitbit/callback
 
 springdoc:
   swagger-ui:

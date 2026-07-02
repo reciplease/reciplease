@@ -11,6 +11,12 @@ reciplease:
     rp-id: reciplease.org
     rp-name: Reciplease
     allowed-origins: https://next.reciplease.org
+  fitbit:
+    # Injected via Cloud Run --set-secrets as FITBIT_CLIENT_ID / FITBIT_CLIENT_SECRET;
+    # Spring Boot relaxed binding maps them automatically.
+    client-id: ${FITBIT_CLIENT_ID}
+    client-secret: ${FITBIT_CLIENT_SECRET}
+    redirect-uri: https://next.reciplease.org/api/fitbit/callback
 
 spring:
   # Mongo URI is injected as SPRING_MONGODB_URI (spring.mongodb.uri, renamed from
