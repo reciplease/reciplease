@@ -11,7 +11,7 @@ import org.reciplease.repository.InviteRepository;
 import org.reciplease.repository.UserIdentityRepository;
 import org.reciplease.repository.UserRepository;
 import org.reciplease.repository.WebAuthnChallengeLedger;
-import org.reciplease.service.FitbitService;
+import org.reciplease.service.GoogleHealthService;
 import org.reciplease.service.InventoryService;
 import org.reciplease.service.InviteService;
 import org.reciplease.service.PlannedMealService;
@@ -83,7 +83,7 @@ class OpenApiSpecExportTest {
     @MockitoBean
     private WebAuthnChallengeLedger challengeLedger;
     @MockitoBean
-    private FitbitService fitbitService;
+    private GoogleHealthService googleHealthService;
 
     @Test
     void exportsTheLiveSpecToTargetOpenapiJson() throws Exception {

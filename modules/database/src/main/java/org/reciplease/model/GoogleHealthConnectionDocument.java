@@ -10,43 +10,43 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.Instant;
 
 /**
- * A user's linked Fitbit account. {@code userId} is the {@code @Id} — one connection per
- * Reciplease user, unlike {@link PasskeyCredentialDocument} which is keyed by credential id.
+ * A user's linked Google Health account. {@code userId} is the {@code @Id} — one connection
+ * per Reciplease user, unlike {@link PasskeyCredentialDocument} which is keyed by credential id.
  * <p>
- * {@code createdAt}/{@code updatedAt} are stamped by {@link org.reciplease.service.FitbitService}
+ * {@code createdAt}/{@code updatedAt} are stamped by {@link org.reciplease.service.GoogleHealthService}
  * (via its injected {@code Clock}), not Spring Data auditing: auditing's default "is this new"
  * check treats an entity as new only when its {@code @Id} is null, but {@code userId} here is
  * always manually assigned before save, so {@code @CreatedDate} would never fire on first insert.
  */
-@Document("fitbit_connections")
+@Document("google_health_connections")
 @Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FitbitConnectionDocument {
+public class GoogleHealthConnectionDocument {
 
     @Id
     private String userId;
     private String accessToken;
     private String refreshToken;
     private Instant expiresAt;
-    private String fitbitUserId;
+    private String scope;
     private Instant createdAt;
     private Instant updatedAt;
 
-    public static FitbitConnectionDocument from(final FitbitConnection connection) {
-        return FitbitConnectionDocument.builder()
+    public static GoogleHealthConnectionDocument from(final GoogleHealthConnection connection) {
+        return GoogleHealthConnectionDocument.builder()
                 .userId(connection.userId())
                 .accessToken(connection.accessToken())
                 .refreshToken(connection.refreshToken())
                 .expiresAt(connection.expiresAt())
-                .fitbitUserId(connection.fitbitUserId())
+                .scope(connection.scope())
                 .createdAt(connection.createdAt())
                 .updatedAt(connection.updatedAt())
                 .build();
     }
 
-    public FitbitConnection toModel() {
-        return new FitbitConnection(userId, accessToken, refreshToken, expiresAt, fitbitUserId, createdAt, updatedAt);
+    public GoogleHealthConnection toModel() {
+        return new GoogleHealthConnection(userId, accessToken, refreshToken, expiresAt, scope, createdAt, updatedAt);
     }
 }

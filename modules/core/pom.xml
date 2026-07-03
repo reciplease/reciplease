@@ -25,8 +25,8 @@
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-common</artifactId>
     </dependency>
-    <!-- For FitbitService's outbound RestClient calls to the Fitbit Web API and JSON
-         parsing of its responses (see org.reciplease.service.FitbitService) — the first
+    <!-- For GoogleHealthService's outbound RestClient calls to the Google Health API and JSON
+         parsing of its responses (see org.reciplease.service.GoogleHealthService) — the first
          outbound HTTP client in this codebase, so these weren't previously needed in core. -->
     <dependency>
       <groupId>org.springframework</groupId>
