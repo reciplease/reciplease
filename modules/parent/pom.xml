@@ -58,6 +58,16 @@
         <artifactId>database</artifactId>
         <version>${revision}</version>
       </dependency>
+      <dependency>
+        <groupId>org.reciplease</groupId>
+        <artifactId>google-health</artifactId>
+        <version>${revision}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.reciplease</groupId>
+        <artifactId>open-food-facts</artifactId>
+        <version>${revision}</version>
+      </dependency>
 
       <dependency>
         <groupId>commons-io</groupId>

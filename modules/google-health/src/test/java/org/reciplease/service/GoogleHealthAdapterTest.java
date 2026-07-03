@@ -5,7 +5,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
+import org.reciplease.model.FoodConsumption;
 import org.reciplease.model.GoogleHealthConnection;
+import org.reciplease.model.MealType;
+import org.reciplease.model.Nutrients;
 import org.reciplease.repository.GoogleHealthConnectionRepository;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -18,6 +21,7 @@ import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,7 +34,7 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @MockitoSettings
-class GoogleHealthServiceTest {
+class GoogleHealthAdapterTest {
 
     private static final String USER_ID = "user-1";
 
@@ -41,7 +45,7 @@ class GoogleHealthServiceTest {
     private Clock clock;
     private RestClient.Builder restClientBuilder;
     private MockRestServiceServer mockServer;
-    private GoogleHealthService googleHealthService;
+    private GoogleHealthAdapter googleHealthAdapter;
 
     @BeforeEach
     void setUp() {
@@ -49,7 +53,7 @@ class GoogleHealthServiceTest {
         clock = Clock.fixed(now, ZoneOffset.UTC);
         restClientBuilder = RestClient.builder();
         mockServer = MockRestServiceServer.bindTo(restClientBuilder).build();
-        googleHealthService = new GoogleHealthService(googleHealthConnectionRepository, clock, restClientBuilder.build());
+        googleHealthAdapter = new GoogleHealthAdapter(googleHealthConnectionRepository, clock, restClientBuilder.build());
     }
 
     @Test
@@ -58,7 +62,7 @@ class GoogleHealthServiceTest {
         when(googleHealthConnectionRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
         when(googleHealthConnectionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        final var connection = googleHealthService.storeConnection(USER_ID, "access-1", "refresh-1", 3600, "nutrition.writeonly");
+        final var connection = googleHealthAdapter.storeConnection(USER_ID, "access-1", "refresh-1", 3600, "nutrition.writeonly");
 
         assertThat(connection.userId(), is(USER_ID));
         assertThat(connection.accessToken(), is("access-1"));
@@ -78,7 +82,7 @@ class GoogleHealthServiceTest {
         when(googleHealthConnectionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(existing));
         when(googleHealthConnectionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        final var connection = googleHealthService.storeConnection(USER_ID, "fresh-access", "fresh-refresh", 7200, "nutrition.readonly");
+        final var connection = googleHealthAdapter.storeConnection(USER_ID, "fresh-access", "fresh-refresh", 7200, "nutrition.readonly");
 
         assertThat(connection.accessToken(), is("fresh-access"));
         assertThat(connection.refreshToken(), is("fresh-refresh"));
@@ -88,27 +92,44 @@ class GoogleHealthServiceTest {
     }
 
     @Test
-    @DisplayName("searchFoods uses the stored access token as-is, with no expiry check or refresh")
-    void searchFoodsUsesStoredToken() {
+    @DisplayName("isConnected reflects whether the repository has a connection for the user")
+    void isConnectedReflectsRepository() {
+        when(googleHealthConnectionRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
+        assertThat(googleHealthAdapter.isConnected(USER_ID), is(false));
+
+        when(googleHealthConnectionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(
+                new GoogleHealthConnection(USER_ID, "a", "r", now, "nutrition.readonly", now, now)));
+        assertThat(googleHealthAdapter.isConnected(USER_ID), is(true));
+    }
+
+    @Test
+    @DisplayName("history lists the user's nutrition-log data points, mapping identified-food entries' food id and anonymous entries' display name")
+    void historyListsAndMapsDataPoints() {
         final var connection = new GoogleHealthConnection(USER_ID, "valid-access-token", "refresh-1",
                 now.plusSeconds(3600), "nutrition.readonly", now.minusSeconds(60), now.minusSeconds(60));
         when(googleHealthConnectionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(connection));
 
-        mockServer.expect(requestTo("https://health.googleapis.com/v4/users/me/dataTypes/food/dataPoints?filter=food.display_name%3D%22banana%22"))
+        mockServer.expect(requestTo("https://health.googleapis.com/v4/users/me/dataTypes/nutrition-log/dataPoints"))
                 .andExpect(method(org.springframework.http.HttpMethod.GET))
                 .andExpect(header("Authorization", "Bearer valid-access-token"))
-                .andRespond(withSuccess("{\"dataPoint\":[]}", MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess("""
+                        {"dataPoint": [
+                            {"food": "food/food-1", "foodDisplayName": "Banana"},
+                            {"foodDisplayName": "Homemade Soup"}
+                        ]}""", MediaType.APPLICATION_JSON));
 
-        final var body = googleHealthService.searchFoods(USER_ID, "banana");
+        final var history = googleHealthAdapter.history(USER_ID);
 
         mockServer.verify();
-        assertThat(body, is("{\"dataPoint\":[]}"));
+        assertThat(history, contains(
+                new org.reciplease.model.LoggedFoodHistoryEntry("food-1", "Banana"),
+                new org.reciplease.model.LoggedFoodHistoryEntry(null, "Homemade Soup")));
         verify(googleHealthConnectionRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("logFood PATCHes a NutritionLog data point referencing the identified food")
-    void logFoodSendsExpectedBodyForIdentifiedFood() {
+    @DisplayName("log PATCHes a NutritionLog data point referencing the identified food")
+    void logSendsExpectedBodyForIdentifiedFood() {
         final var connection = new GoogleHealthConnection(USER_ID, "valid-access-token", "refresh-1",
                 now.plusSeconds(3600), "nutrition.writeonly", now.minusSeconds(60), now.minusSeconds(60));
         when(googleHealthConnectionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(connection));
@@ -121,20 +142,45 @@ class GoogleHealthServiceTest {
                 .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.food").value(is("food/food-1")))
                 .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.mealType").value(is("LUNCH")))
                 .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.amount").value(is(2.5)))
+                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.nutrients").doesNotExist())
                 .andRespond(withSuccess());
 
-        googleHealthService.logFood(USER_ID, "food-1", "Banana", "LUNCH", 2.5, LocalDate.of(2026, 7, 2));
+        googleHealthAdapter.log(new FoodConsumption(USER_ID, Optional.of("food-1"), "Banana", Optional.empty(),
+                MealType.LUNCH, 2.5, LocalDate.of(2026, 7, 2)));
+
+        mockServer.verify();
+    }
+
+    @Test
+    @DisplayName("log PATCHes an anonymous NutritionLog data point with nutrients when picked from a catalog result")
+    void logSendsNutrientsForAnonymousFood() {
+        final var connection = new GoogleHealthConnection(USER_ID, "valid-access-token", "refresh-1",
+                now.plusSeconds(3600), "nutrition.writeonly", now.minusSeconds(60), now.minusSeconds(60));
+        when(googleHealthConnectionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(connection));
+
+        mockServer.expect(requestTo(org.hamcrest.Matchers.startsWith(
+                        "https://health.googleapis.com/v4/users/me/dataTypes/nutrition-log/dataPoints/")))
+                .andExpect(method(org.springframework.http.HttpMethod.PATCH))
+                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.food").doesNotExist())
+                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.foodDisplayName").value(is("Greek Yogurt")))
+                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.nutrients.energy").value(is(120.0)))
+                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.nutrients.protein").value(is(10.0)))
+                .andRespond(withSuccess());
+
+        googleHealthAdapter.log(new FoodConsumption(USER_ID, Optional.empty(), "Greek Yogurt",
+                Optional.of(new Nutrients(120.0, 10.0, 3.0, 5.0)), MealType.SNACK, 1.0, LocalDate.of(2026, 7, 2)));
 
         mockServer.verify();
     }
 
     @Test
     @DisplayName("throws when logging food for a user with no linked Google Health account")
-    void logFoodThrowsWhenNotConnected() {
+    void logThrowsWhenNotConnected() {
         when(googleHealthConnectionRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(GoogleHealthNotConnectedException.class,
-                () -> googleHealthService.logFood(USER_ID, "food-1", "Banana", "LUNCH", 2.5, LocalDate.of(2026, 7, 2)));
+        assertThrows(FoodConsumptionLoggerNotConnectedException.class,
+                () -> googleHealthAdapter.log(new FoodConsumption(USER_ID, Optional.of("food-1"), "Banana",
+                        Optional.empty(), MealType.LUNCH, 2.5, LocalDate.of(2026, 7, 2))));
     }
 
     @Test
@@ -143,9 +189,9 @@ class GoogleHealthServiceTest {
         final var connection = new GoogleHealthConnection(USER_ID, "a", "r", now, "nutrition.readonly", now, now);
         when(googleHealthConnectionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(connection));
 
-        assertThat(googleHealthService.connectionStatus(USER_ID), is(Optional.of(connection)));
+        assertThat(googleHealthAdapter.connectionStatus(USER_ID), is(Optional.of(connection)));
 
-        googleHealthService.disconnect(USER_ID);
+        googleHealthAdapter.disconnect(USER_ID);
 
         verify(googleHealthConnectionRepository).deleteByUserId(USER_ID);
     }

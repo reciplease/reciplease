@@ -22,6 +22,8 @@
     <module>modules/utils</module>
     <module>modules/core</module>
     <module>modules/database</module>
+    <module>modules/google-health</module>
+    <module>modules/open-food-facts</module>
     <module>modules/web</module>
     <module>modules/dist</module>
     <module>modules/webflux</module>

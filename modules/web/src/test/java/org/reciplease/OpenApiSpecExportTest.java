@@ -11,7 +11,8 @@ import org.reciplease.repository.InviteRepository;
 import org.reciplease.repository.UserIdentityRepository;
 import org.reciplease.repository.UserRepository;
 import org.reciplease.repository.WebAuthnChallengeLedger;
-import org.reciplease.service.GoogleHealthService;
+import org.reciplease.service.FoodSearchService;
+import org.reciplease.service.GoogleHealthAdapter;
 import org.reciplease.service.InventoryService;
 import org.reciplease.service.InviteService;
 import org.reciplease.service.PlannedMealService;
@@ -82,8 +83,14 @@ class OpenApiSpecExportTest {
     private WebAuthnRelyingPartyOperations relyingPartyOperations;
     @MockitoBean
     private WebAuthnChallengeLedger challengeLedger;
+    // GoogleHealthAdapter itself implements FoodConsumptionLoggerPort, so this single mock
+    // satisfies both the concrete-typed and port-typed dependencies GoogleHealthController
+    // needs — mirroring production, where one bean fulfills both roles. A separate
+    // FoodConsumptionLoggerPort mock would create a second, ambiguous candidate bean.
     @MockitoBean
-    private GoogleHealthService googleHealthService;
+    private GoogleHealthAdapter googleHealthAdapter;
+    @MockitoBean
+    private FoodSearchService foodSearchService;
 
     @Test
     void exportsTheLiveSpecToTargetOpenapiJson() throws Exception {

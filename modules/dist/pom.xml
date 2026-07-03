@@ -31,6 +31,14 @@
       <groupId>org.reciplease</groupId>
       <artifactId>database</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.reciplease</groupId>
+      <artifactId>google-health</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.reciplease</groupId>
+      <artifactId>open-food-facts</artifactId>
+    </dependency>
 
     <!-- Secret Manager starter removed: secrets are now injected as Cloud Run
          env vars via set-secrets, which Spring Boot relaxed binding picks up

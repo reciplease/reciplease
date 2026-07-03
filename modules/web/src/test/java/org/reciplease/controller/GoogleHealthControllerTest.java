@@ -2,9 +2,12 @@ package org.reciplease.controller;
 
 import org.junit.jupiter.api.Test;
 import org.reciplease.configuration.MethodSecurityTestSupport;
+import org.reciplease.model.FoodConsumption;
 import org.reciplease.model.GoogleHealthConnection;
-import org.reciplease.service.GoogleHealthNotConnectedException;
-import org.reciplease.service.GoogleHealthService;
+import org.reciplease.model.MealType;
+import org.reciplease.model.Nutrients;
+import org.reciplease.service.FoodConsumptionLoggerNotConnectedException;
+import org.reciplease.service.GoogleHealthAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -27,7 +30,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -39,13 +41,15 @@ class GoogleHealthControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    // GoogleHealthAdapter implements FoodConsumptionLoggerPort, so this single mock satisfies
+    // both the concrete-typed and port-typed constructor params GoogleHealthController needs.
     @MockitoBean
-    private GoogleHealthService googleHealthService;
+    private GoogleHealthAdapter googleHealthAdapter;
 
     @Test
     void connectionReportsConnectedWithExpiresAtAndRefreshTokenWhenALinkExists() throws Exception {
         final var expiresAt = Instant.parse("2026-07-02T13:00:00Z");
-        when(googleHealthService.connectionStatus("user-1")).thenReturn(Optional.of(
+        when(googleHealthAdapter.connectionStatus("user-1")).thenReturn(Optional.of(
                 new GoogleHealthConnection("user-1", "access", "refresh", expiresAt, "nutrition.readonly", Instant.now(), Instant.now())));
 
         mockMvc.perform(get("/api/google-health/connection"))
@@ -57,7 +61,7 @@ class GoogleHealthControllerTest {
 
     @Test
     void connectionReportsDisconnectedWhenNoLinkExists() throws Exception {
-        when(googleHealthService.connectionStatus("user-1")).thenReturn(Optional.empty());
+        when(googleHealthAdapter.connectionStatus("user-1")).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/google-health/connection"))
                 .andExpect(status().isOk())
@@ -69,7 +73,7 @@ class GoogleHealthControllerTest {
     @Test
     void putConnectionStoresTheTokensAndReturnsConnected() throws Exception {
         final var expiresAt = Instant.parse("2026-07-02T13:00:00Z");
-        when(googleHealthService.storeConnection("user-1", "access-1", "refresh-1", 3600, "nutrition.writeonly"))
+        when(googleHealthAdapter.storeConnection("user-1", "access-1", "refresh-1", 3600, "nutrition.writeonly"))
                 .thenReturn(new GoogleHealthConnection("user-1", "access-1", "refresh-1", expiresAt, "nutrition.writeonly", Instant.now(), Instant.now()));
 
         mockMvc.perform(put("/api/google-health/connection")
@@ -82,7 +86,7 @@ class GoogleHealthControllerTest {
                 .andExpect(jsonPath("$.expiresAt", is(expiresAt.toString())))
                 .andExpect(jsonPath("$.refreshToken", is("refresh-1")));
 
-        verify(googleHealthService).storeConnection("user-1", "access-1", "refresh-1", 3600, "nutrition.writeonly");
+        verify(googleHealthAdapter).storeConnection("user-1", "access-1", "refresh-1", 3600, "nutrition.writeonly");
     }
 
     @Test
@@ -90,29 +94,11 @@ class GoogleHealthControllerTest {
         mockMvc.perform(delete("/api/google-health/connection").with(csrf()))
                 .andExpect(status().isNoContent());
 
-        verify(googleHealthService).disconnect("user-1");
+        verify(googleHealthAdapter).disconnect("user-1");
     }
 
     @Test
-    void searchFoodsProxiesGoogleHealthsRawJsonResponse() throws Exception {
-        when(googleHealthService.searchFoods("user-1", "banana")).thenReturn("{\"dataPoint\":[{\"foodId\":\"1\",\"name\":\"Banana\"}]}");
-
-        mockMvc.perform(get("/api/google-health/foods/search").param("query", "banana"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json("{\"dataPoint\":[{\"foodId\":\"1\",\"name\":\"Banana\"}]}", true));
-    }
-
-    @Test
-    void searchFoodsReturnsNotFoundWhenNoGoogleHealthAccountIsLinked() throws Exception {
-        when(googleHealthService.searchFoods("user-1", "banana")).thenThrow(new GoogleHealthNotConnectedException("user-1"));
-
-        mockMvc.perform(get("/api/google-health/foods/search").param("query", "banana"))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void logFoodDelegatesToTheService() throws Exception {
+    void logFoodDelegatesToThePortForAnIdentifiedFood() throws Exception {
         mockMvc.perform(post("/api/google-health/foods/log")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -120,13 +106,29 @@ class GoogleHealthControllerTest {
                                 {"foodId": "food-1", "foodDisplayName": "Banana", "mealType": "LUNCH", "amount": 2.5, "date": "2026-07-02"}"""))
                 .andExpect(status().isOk());
 
-        verify(googleHealthService).logFood("user-1", "food-1", "Banana", "LUNCH", 2.5, LocalDate.of(2026, 7, 2));
+        verify(googleHealthAdapter).log(new FoodConsumption(
+                "user-1", Optional.of("food-1"), "Banana", Optional.empty(), MealType.LUNCH, 2.5, LocalDate.of(2026, 7, 2)));
     }
 
     @Test
-    void logFoodReturnsNotFoundWhenNoGoogleHealthAccountIsLinked() throws Exception {
-        doThrow(new GoogleHealthNotConnectedException("user-1"))
-                .when(googleHealthService).logFood(any(), any(), any(), any(), org.mockito.ArgumentMatchers.anyDouble(), any());
+    void logFoodDelegatesToThePortWithNutrientsForAnAnonymousCatalogFood() throws Exception {
+        mockMvc.perform(post("/api/google-health/foods/log")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"foodDisplayName": "Greek Yogurt", "mealType": "SNACK", "amount": 1, "date": "2026-07-02",
+                                 "nutrients": {"energyKcal": 120.0, "proteinG": 10.0, "fatG": 3.0, "carbohydrateG": 5.0}}"""))
+                .andExpect(status().isOk());
+
+        verify(googleHealthAdapter).log(new FoodConsumption(
+                "user-1", Optional.empty(), "Greek Yogurt", Optional.of(new Nutrients(120.0, 10.0, 3.0, 5.0)),
+                MealType.SNACK, 1, LocalDate.of(2026, 7, 2)));
+    }
+
+    @Test
+    void logFoodReturnsNotFoundWhenNoAccountIsLinked() throws Exception {
+        doThrow(new FoodConsumptionLoggerNotConnectedException("user-1"))
+                .when(googleHealthAdapter).log(any());
 
         mockMvc.perform(post("/api/google-health/foods/log")
                         .with(csrf())
