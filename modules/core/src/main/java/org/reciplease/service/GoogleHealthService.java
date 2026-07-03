@@ -95,16 +95,19 @@ public class GoogleHealthService {
      * Health has no dedicated food-search endpoint; foods are queried via the generic
      * data-points list resource for the {@code food} data type.
      * <p>
-     * The filter field name below ({@code food.display_name}) is confirmed against a live
-     * 400 response from the API — an earlier guess of {@code food.food_display_name} was
-     * rejected with "Member 'food.food_display_name' is not supported for filtering. Food
-     * only supports 'food.display_name' and 'food.language_code'." The {@code :} contains-style
-     * operator itself wasn't flagged as invalid, so it's kept as-is, but still unconfirmed.
+     * Both the filter field name ({@code food.display_name}) and the operator ({@code =}) are
+     * confirmed against live 400 responses from the API: an earlier guess of {@code
+     * food.food_display_name} was rejected ("Food only supports 'food.display_name' and
+     * 'food.language_code'"), and the {@code :} contains-style operator was then rejected too
+     * ("Member 'food.display_name' only supports the '=' comparator"). This means the search is
+     * an <strong>exact</strong> match on the food's display name, not a substring/prefix
+     * match — a partial query won't return anything. There's no documented alternative;
+     * Google Health's food data type just doesn't support fuzzy/contains search.
      */
     public String searchFoods(final String userId, final String query) {
         final var connection = requireConnection(userId);
         return restClient.get()
-                .uri(FOOD_SEARCH_URL + "?filter={filter}", "food.display_name:\"" + query + "\"")
+                .uri(FOOD_SEARCH_URL + "?filter={filter}", "food.display_name=\"" + query + "\"")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + connection.accessToken())
                 .retrieve()
                 .body(String.class);
