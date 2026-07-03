@@ -94,15 +94,17 @@ public class GoogleHealthService {
      * Searches Google's food database, returning its response body as-is (raw JSON). Google
      * Health has no dedicated food-search endpoint; foods are queried via the generic
      * data-points list resource for the {@code food} data type.
-     *
-     * TODO: verify against live API — the exact filter query syntax for searching foods by
-     * display name isn't documented anywhere; this is a best-effort guess at a Google
-     * "structured query" style filter and needs confirming once real credentials are available.
+     * <p>
+     * The filter field name below ({@code food.display_name}) is confirmed against a live
+     * 400 response from the API — an earlier guess of {@code food.food_display_name} was
+     * rejected with "Member 'food.food_display_name' is not supported for filtering. Food
+     * only supports 'food.display_name' and 'food.language_code'." The {@code :} contains-style
+     * operator itself wasn't flagged as invalid, so it's kept as-is, but still unconfirmed.
      */
     public String searchFoods(final String userId, final String query) {
         final var connection = requireConnection(userId);
         return restClient.get()
-                .uri(FOOD_SEARCH_URL + "?filter={filter}", "food.food_display_name:\"" + query + "\"")
+                .uri(FOOD_SEARCH_URL + "?filter={filter}", "food.display_name:\"" + query + "\"")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + connection.accessToken())
                 .retrieve()
                 .body(String.class);

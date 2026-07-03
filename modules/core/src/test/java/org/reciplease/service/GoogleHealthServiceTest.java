@@ -94,7 +94,7 @@ class GoogleHealthServiceTest {
                 now.plusSeconds(3600), "nutrition.readonly", now.minusSeconds(60), now.minusSeconds(60));
         when(googleHealthConnectionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(connection));
 
-        mockServer.expect(requestTo("https://health.googleapis.com/v4/users/me/dataTypes/food/dataPoints?filter=food.food_display_name%3A%22banana%22"))
+        mockServer.expect(requestTo("https://health.googleapis.com/v4/users/me/dataTypes/food/dataPoints?filter=food.display_name%3A%22banana%22"))
                 .andExpect(method(org.springframework.http.HttpMethod.GET))
                 .andExpect(header("Authorization", "Bearer valid-access-token"))
                 .andRespond(withSuccess("{\"dataPoint\":[]}", MediaType.APPLICATION_JSON));
