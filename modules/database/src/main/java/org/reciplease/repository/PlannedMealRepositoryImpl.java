@@ -23,7 +23,7 @@ public class PlannedMealRepositoryImpl implements PlannedMealRepository {
 
     @Override
     public List<PlannedMeal> findByDateIsBetween(final String houseId, final LocalDate start, final LocalDate end) {
-        return plannedMealMongoRepository.findByHouseIdAndDateBetween(houseId, start, end).stream()
+        return plannedMealMongoRepository.findByHouseIdAndDateBetweenInclusive(houseId, start, end).stream()
                 .map(PlannedMealDocument::toModel)
                 .collect(Collectors.toList());
     }

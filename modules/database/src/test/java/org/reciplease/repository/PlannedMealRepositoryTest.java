@@ -51,6 +51,26 @@ public class PlannedMealRepositoryTest {
     }
 
     @Test
+    public void shouldIncludeAMealDatedExactlyOnTheRangeEnd() {
+        var recipe = recipeRepository.save(Recipe.builder().build());
+        var plannedMeal = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2026, 7, 5), List.of()));
+
+        var plannedMeals = plannedMealRepository.findByDateIsBetween(HOUSE_ID, LocalDate.of(2026, 6, 29), LocalDate.of(2026, 7, 5));
+
+        assertThat(plannedMeals, contains(plannedMeal));
+    }
+
+    @Test
+    public void shouldIncludeAMealDatedExactlyOnTheRangeStart() {
+        var recipe = recipeRepository.save(Recipe.builder().build());
+        var plannedMeal = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2026, 6, 29), List.of()));
+
+        var plannedMeals = plannedMealRepository.findByDateIsBetween(HOUSE_ID, LocalDate.of(2026, 6, 29), LocalDate.of(2026, 7, 5));
+
+        assertThat(plannedMeals, contains(plannedMeal));
+    }
+
+    @Test
     public void shouldReturnEmptyList() {
         var recipe = recipeRepository.save(Recipe.builder().build());
         plannedMealRepository.save(new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2019, 2, 5), List.of()));
