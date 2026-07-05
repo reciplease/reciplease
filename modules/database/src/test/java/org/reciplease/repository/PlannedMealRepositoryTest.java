@@ -135,4 +135,22 @@ public class PlannedMealRepositoryTest {
         assertThat(plannedMealRepository.existsByHouseIdAndDateAndName(HOUSE_ID, LocalDate.of(2026, 6, 7), "Dinner"), is(false));
         assertThat(plannedMealRepository.existsByHouseIdAndDateAndName(HOUSE_ID, LocalDate.of(2026, 6, 6), "Lunch"), is(false));
     }
+
+    @Test
+    public void shouldFindById() {
+        var saved = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of()));
+
+        assertThat(plannedMealRepository.findById(saved.id()), is(java.util.Optional.of(saved)));
+        assertThat(plannedMealRepository.findById("does-not-exist"), is(java.util.Optional.empty()));
+    }
+
+    @Test
+    public void shouldReportExistingNameOnThatDateExcludingGivenId() {
+        var saved = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of()));
+
+        assertThat(plannedMealRepository.existsByHouseIdAndDateAndNameAndIdNot(HOUSE_ID, LocalDate.of(2026, 6, 6), "Dinner", saved.id()), is(false));
+
+        var other = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, null, "Lunch", LocalDate.of(2026, 6, 6), List.of()));
+        assertThat(plannedMealRepository.existsByHouseIdAndDateAndNameAndIdNot(HOUSE_ID, LocalDate.of(2026, 6, 6), "Dinner", other.id()), is(true));
+    }
 }

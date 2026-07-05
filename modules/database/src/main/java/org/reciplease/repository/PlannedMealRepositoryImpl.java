@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
@@ -19,6 +20,11 @@ public class PlannedMealRepositoryImpl implements PlannedMealRepository {
     public PlannedMeal save(final PlannedMeal plannedMeal) {
         final var saved = plannedMealMongoRepository.save(PlannedMealDocument.from(plannedMeal));
         return saved.toModel();
+    }
+
+    @Override
+    public Optional<PlannedMeal> findById(final String id) {
+        return plannedMealMongoRepository.findById(id).map(PlannedMealDocument::toModel);
     }
 
     @Override
@@ -45,5 +51,10 @@ public class PlannedMealRepositoryImpl implements PlannedMealRepository {
     @Override
     public boolean existsByHouseIdAndDateAndName(final String houseId, final LocalDate date, final String name) {
         return plannedMealMongoRepository.existsByHouseIdAndDateAndName(houseId, date, name);
+    }
+
+    @Override
+    public boolean existsByHouseIdAndDateAndNameAndIdNot(final String houseId, final LocalDate date, final String name, final String id) {
+        return plannedMealMongoRepository.existsByHouseIdAndDateAndNameAndIdNot(houseId, date, name, id);
     }
 }

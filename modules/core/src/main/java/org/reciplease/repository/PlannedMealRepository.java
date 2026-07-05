@@ -4,9 +4,12 @@ import org.reciplease.model.PlannedMeal;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface PlannedMealRepository {
     PlannedMeal save(PlannedMeal plannedMeal);
+
+    Optional<PlannedMeal> findById(String id);
 
     List<PlannedMeal> findByDateIsBetween(String houseId, LocalDate start, LocalDate end);
 
@@ -15,4 +18,6 @@ public interface PlannedMealRepository {
     List<PlannedMeal> findByIngredientName(String houseId, String ingredientName);
 
     boolean existsByHouseIdAndDateAndName(String houseId, LocalDate date, String name);
+
+    boolean existsByHouseIdAndDateAndNameAndIdNot(String houseId, LocalDate date, String name, String id);
 }

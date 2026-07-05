@@ -28,11 +28,15 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -138,6 +142,111 @@ class PlannedMealControllerTest {
         var body = "{\"name\":\"Dinner\",\"date\":\"2026-06-06\"}";
 
         mockMvc.perform(post("/api/planned-meals")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("finds a planned meal owned by the caller's house by id")
+    void findByIdReturnsMeal() throws Exception {
+        var meal = new PlannedMeal("meal-1", null, HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null);
+
+        when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(meal));
+        when(houseAccess.belongsToHeaderHouse(meal)).thenReturn(true);
+
+        mockMvc.perform(get("/api/planned-meals/{uuid}", "meal-1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Dinner"));
+    }
+
+    @Test
+    @DisplayName("find by id is not found when the meal doesn't exist")
+    void findByIdNotFound() throws Exception {
+        when(plannedMealService.findById("ghost")).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/planned-meals/{uuid}", "ghost"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("find by id is not found when the meal belongs to a different house than the header asserts")
+    void findByIdForbiddenForDifferentHouse() throws Exception {
+        var meal = new PlannedMeal("meal-1", null, "some-other-house", null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null);
+
+        when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(meal));
+        when(houseAccess.belongsToHeaderHouse(meal)).thenReturn(false);
+
+        mockMvc.perform(get("/api/planned-meals/{uuid}", "meal-1"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("updates a planned meal owned by the caller's house")
+    void update() throws Exception {
+        var existing = new PlannedMeal("meal-1", null, HOUSE_ID, "recipe-1", "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null);
+        var updated = new PlannedMeal("meal-1", null, HOUSE_ID, "recipe-1", "Supper", LocalDate.of(2026, 6, 6), List.of(), null, null);
+
+        when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(existing));
+        when(houseAccess.belongsToHeaderHouse(existing)).thenReturn(true);
+        when(plannedMealService.update(eq("meal-1"), eq("recipe-1"), eq("Supper"), eq(LocalDate.of(2026, 6, 6)), org.mockito.ArgumentMatchers.anyList()))
+                .thenReturn(updated);
+
+        var body = "{\"recipeId\":\"recipe-1\",\"name\":\"Supper\",\"date\":\"2026-06-06\"}";
+
+        mockMvc.perform(put("/api/planned-meals/{uuid}", "meal-1")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Supper"));
+    }
+
+    @Test
+    @DisplayName("update is not found when the meal doesn't exist")
+    void updateNotFound() throws Exception {
+        when(plannedMealService.findById("ghost")).thenReturn(Optional.empty());
+
+        var body = "{\"name\":\"Supper\",\"date\":\"2026-06-06\"}";
+
+        mockMvc.perform(put("/api/planned-meals/{uuid}", "ghost")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isNotFound());
+
+        verify(plannedMealService, never()).update(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("update is not found when the meal belongs to a different house than the header asserts")
+    void updateForbiddenForDifferentHouse() throws Exception {
+        var existing = new PlannedMeal("meal-1", null, "some-other-house", null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null);
+
+        when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(existing));
+        when(houseAccess.belongsToHeaderHouse(existing)).thenReturn(false);
+
+        var body = "{\"name\":\"Supper\",\"date\":\"2026-06-06\"}";
+
+        mockMvc.perform(put("/api/planned-meals/{uuid}", "meal-1")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isNotFound());
+
+        verify(plannedMealService, never()).update(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("update is forbidden for read-only members")
+    @WithHouseMember
+    void updateForbiddenForReadOnly() throws Exception {
+        when(houseAccess.isOwner()).thenReturn(false);
+
+        var body = "{\"name\":\"Supper\",\"date\":\"2026-06-06\"}";
+
+        mockMvc.perform(put("/api/planned-meals/{uuid}", "meal-1")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))

@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,6 +46,39 @@ public class PlannedMealService {
                 .collect(Collectors.toList());
 
         return plannedMealRepository.save(new PlannedMeal(houseId, recipeId, name, date, resolvedItems));
+    }
+
+    public Optional<PlannedMeal> findById(final String id) {
+        return plannedMealRepository.findById(id);
+    }
+
+    /**
+     * Updates an existing planned meal's recipe link, name, date and items, re-resolving
+     * item allocations the same way {@link #plan} does. The name-uniqueness check excludes
+     * the meal being updated, so keeping the same name/date doesn't clash with itself.
+     */
+    public PlannedMeal update(final String id, final String recipeId, final String name,
+                               final LocalDate date, final List<PlannedIngredient> items) {
+        final var existing = plannedMealRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Planned meal does not exist"));
+
+        if (recipeId != null) {
+            recipeRepository.findById(recipeId)
+                    .orElseThrow(() -> new IllegalArgumentException("Recipe does not exist"));
+        }
+
+        if (plannedMealRepository.existsByHouseIdAndDateAndNameAndIdNot(existing.houseId(), date, name, id)) {
+            throw new IllegalArgumentException("A meal named '" + name + "' is already planned for this date");
+        }
+
+        var resolvedItems = items.stream()
+                .map(this::resolveItem)
+                .collect(Collectors.toList());
+
+        var updated = new PlannedMeal(id, existing.createdBy(), existing.houseId(), recipeId, name, date,
+                resolvedItems, existing.createdAt(), existing.updatedAt());
+
+        return plannedMealRepository.save(updated);
     }
 
     private PlannedIngredient resolveItem(final PlannedIngredient item) {

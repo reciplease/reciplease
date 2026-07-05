@@ -22,4 +22,6 @@ public interface PlannedMealMongoRepository extends MongoRepository<PlannedMealD
     List<PlannedMealDocument> findByHouseIdAndItemsIngredientName(String houseId, String ingredientName);
 
     boolean existsByHouseIdAndDateAndName(String houseId, LocalDate date, String name);
+
+    boolean existsByHouseIdAndDateAndNameAndIdNot(String houseId, LocalDate date, String name, String id);
 }

@@ -19,7 +19,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -52,6 +54,33 @@ public class PlannedMealController {
                 request.getName(), request.getDate(), items);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(toDto(plannedMeal));
+    }
+
+    @GetMapping("{uuid}")
+    @HouseMember
+    public ResponseEntity<PlannedMealDto> findById(@PathVariable final String uuid) {
+        final var meal = plannedMealService.findById(uuid)
+                .filter(houseAccess::belongsToHeaderHouse);
+
+        return meal.map(this::toDto).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("{uuid}")
+    @HouseOwner
+    public ResponseEntity<PlannedMealDto> update(@PathVariable final String uuid, @Valid @RequestBody final PlanMealRequest request) {
+        final var existing = plannedMealService.findById(uuid);
+        if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
+            return ResponseEntity.notFound().build();
+        }
+
+        final List<PlannedIngredient> items = request.getItems() == null ? List.of()
+                : request.getItems().stream()
+                        .map(PlannedIngredientDto::toModel)
+                        .collect(toList());
+
+        final var updated = plannedMealService.update(uuid, request.getRecipeId(), request.getName(), request.getDate(), items);
+
+        return ResponseEntity.ok(toDto(updated));
     }
 
     @GetMapping("suggestions")

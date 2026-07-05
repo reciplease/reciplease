@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 @Schema(name = "PlannedMeal")
 public class PlannedMealDto {
 
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    String plannedMealId;
     String houseId;
     String name;
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
@@ -29,6 +31,7 @@ public class PlannedMealDto {
     /** {@code recipe} is null when the meal has no {@code recipeId}, or the caller doesn't resolve one. */
     public static PlannedMealDto from(final PlannedMeal plannedMeal, final Recipe recipe) {
         return PlannedMealDto.builder()
+                .plannedMealId(plannedMeal.id())
                 .houseId(plannedMeal.houseId())
                 .name(plannedMeal.name())
                 .recipe(recipe == null ? null : RecipeDto.from(recipe))

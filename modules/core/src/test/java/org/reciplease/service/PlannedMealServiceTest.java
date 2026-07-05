@@ -66,6 +66,15 @@ class PlannedMealServiceTest {
         assertThat(plannedMealService.findByDateIsBetween(HOUSE_ID, date, date), contains(meal));
     }
 
+    @Test
+    @DisplayName("delegates lookup by id to the repository")
+    void findById() {
+        var meal = new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", date, List.of());
+        when(plannedMealRepository.findById("meal-1")).thenReturn(Optional.of(meal));
+
+        assertThat(plannedMealService.findById("meal-1"), is(Optional.of(meal)));
+    }
+
     @Nested
     class Plan {
         @Test
@@ -152,6 +161,67 @@ class PlannedMealServiceTest {
                     () -> plannedMealService.plan(HOUSE_ID, null, "Dinner", date, List.of()));
 
             assertThat(exception.getMessage(), is("A meal named 'Dinner' is already planned for this date"));
+        }
+    }
+
+    @Nested
+    class Update {
+        @Test
+        @DisplayName("re-resolves items and saves the meal under its existing id")
+        void updateResolvesItemsAndKeepsId() {
+            var existing = new PlannedMeal("meal-1", "owner", HOUSE_ID, recipe.id(), "Dinner", date, List.of(),
+                    java.time.Instant.parse("2026-01-01T00:00:00Z"), java.time.Instant.parse("2026-01-01T00:00:00Z"));
+            var item = new InventoryItem("item-1", null, HOUSE_ID, "bread", "ITEMS", 2d, date, "111");
+
+            when(plannedMealRepository.findById("meal-1")).thenReturn(Optional.of(existing));
+            when(recipeRepository.findById(recipe.id())).thenReturn(Optional.of(recipe));
+            when(inventoryRepository.findById("item-1")).thenReturn(Optional.of(item));
+            when(plannedMealRepository.existsByHouseIdAndDateAndNameAndIdNot(HOUSE_ID, date, "Dinner", "meal-1")).thenReturn(false);
+            when(plannedMealRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+            var plannedIngredient = new PlannedIngredient(bread, List.of(new InventoryAllocation("item-1", null, 2d)));
+
+            var updated = plannedMealService.update("meal-1", recipe.id(), "Dinner", date, List.of(plannedIngredient));
+
+            assertThat(updated.id(), is("meal-1"));
+            assertThat(updated.createdBy(), is("owner"));
+            assertThat(updated.items().get(0).allocations().get(0).barcode(), is("111"));
+        }
+
+        @Test
+        void shouldFail_mealNotFound() {
+            when(plannedMealRepository.findById("ghost")).thenReturn(Optional.empty());
+
+            var exception = assertThrows(IllegalArgumentException.class,
+                    () -> plannedMealService.update("ghost", null, "Dinner", date, List.of()));
+
+            assertThat(exception.getMessage(), is("Planned meal does not exist"));
+        }
+
+        @Test
+        @DisplayName("fails when the recipe id given doesn't exist")
+        void shouldFail_recipeNotFound() {
+            var existing = new PlannedMeal("meal-1", null, HOUSE_ID, null, "Dinner", date, List.of(), null, null);
+            when(plannedMealRepository.findById("meal-1")).thenReturn(Optional.of(existing));
+            when(recipeRepository.findById("ghost-recipe")).thenReturn(Optional.empty());
+
+            var exception = assertThrows(IllegalArgumentException.class,
+                    () -> plannedMealService.update("meal-1", "ghost-recipe", "Dinner", date, List.of()));
+
+            assertThat(exception.getMessage(), is("Recipe does not exist"));
+        }
+
+        @Test
+        @DisplayName("fails when renaming to a name already used by another meal that day")
+        void shouldFail_nameClash() {
+            var existing = new PlannedMeal("meal-1", null, HOUSE_ID, null, "Dinner", date, List.of(), null, null);
+            when(plannedMealRepository.findById("meal-1")).thenReturn(Optional.of(existing));
+            when(plannedMealRepository.existsByHouseIdAndDateAndNameAndIdNot(HOUSE_ID, date, "Lunch", "meal-1")).thenReturn(true);
+
+            var exception = assertThrows(IllegalArgumentException.class,
+                    () -> plannedMealService.update("meal-1", null, "Lunch", date, List.of()));
+
+            assertThat(exception.getMessage(), is("A meal named 'Lunch' is already planned for this date"));
         }
     }
 
