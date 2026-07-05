@@ -11,6 +11,8 @@ public interface PlannedMealRepository {
 
     Optional<PlannedMeal> findById(String id);
 
+    void deleteById(String id);
+
     List<PlannedMeal> findByDateIsBetween(String houseId, LocalDate start, LocalDate end);
 
     List<PlannedMeal> findByRecipeId(String houseId, String recipeId);

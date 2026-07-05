@@ -29,6 +29,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @MockitoSettings
@@ -73,6 +74,14 @@ class PlannedMealServiceTest {
         when(plannedMealRepository.findById("meal-1")).thenReturn(Optional.of(meal));
 
         assertThat(plannedMealService.findById("meal-1"), is(Optional.of(meal)));
+    }
+
+    @Test
+    @DisplayName("delegates deletion by id to the repository")
+    void deleteById() {
+        plannedMealService.deleteById("meal-1");
+
+        verify(plannedMealRepository).deleteById("meal-1");
     }
 
     @Nested

@@ -52,6 +52,10 @@ public class PlannedMealService {
         return plannedMealRepository.findById(id);
     }
 
+    public void deleteById(final String id) {
+        plannedMealRepository.deleteById(id);
+    }
+
     /**
      * Updates an existing planned meal's recipe link, name, date and items, re-resolving
      * item allocations the same way {@link #plan} does. The name-uniqueness check excludes

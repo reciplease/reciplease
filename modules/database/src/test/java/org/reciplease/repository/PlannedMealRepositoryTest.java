@@ -145,6 +145,15 @@ public class PlannedMealRepositoryTest {
     }
 
     @Test
+    public void shouldDeleteById() {
+        var saved = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of()));
+
+        plannedMealRepository.deleteById(saved.id());
+
+        assertThat(plannedMealRepository.findById(saved.id()), is(java.util.Optional.empty()));
+    }
+
+    @Test
     public void shouldReportExistingNameOnThatDateExcludingGivenId() {
         var saved = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of()));
 

@@ -18,6 +18,7 @@ import org.reciplease.service.ShoppingListService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -81,6 +82,18 @@ public class PlannedMealController {
         final var updated = plannedMealService.update(uuid, request.getRecipeId(), request.getName(), request.getDate(), items);
 
         return ResponseEntity.ok(toDto(updated));
+    }
+
+    @DeleteMapping("{uuid}")
+    @HouseOwner
+    public ResponseEntity<Void> deleteById(@PathVariable final String uuid) {
+        final var existing = plannedMealService.findById(uuid);
+        if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
+            return ResponseEntity.notFound().build();
+        }
+
+        plannedMealService.deleteById(uuid);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("suggestions")

@@ -34,6 +34,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -250,6 +251,55 @@ class PlannedMealControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("deletes a planned meal owned by the caller's house")
+    void deleteMeal() throws Exception {
+        var existing = new PlannedMeal("meal-1", null, HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null);
+
+        when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(existing));
+        when(houseAccess.belongsToHeaderHouse(existing)).thenReturn(true);
+
+        mockMvc.perform(delete("/api/planned-meals/{uuid}", "meal-1").with(csrf()))
+                .andExpect(status().isNoContent());
+
+        verify(plannedMealService).deleteById("meal-1");
+    }
+
+    @Test
+    @DisplayName("delete is not found when the meal doesn't exist")
+    void deleteNotFound() throws Exception {
+        when(plannedMealService.findById("ghost")).thenReturn(Optional.empty());
+
+        mockMvc.perform(delete("/api/planned-meals/{uuid}", "ghost").with(csrf()))
+                .andExpect(status().isNotFound());
+
+        verify(plannedMealService, never()).deleteById(any());
+    }
+
+    @Test
+    @DisplayName("delete is not found when the meal belongs to a different house than the header asserts")
+    void deleteForbiddenForDifferentHouse() throws Exception {
+        var existing = new PlannedMeal("meal-1", null, "some-other-house", null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null);
+
+        when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(existing));
+        when(houseAccess.belongsToHeaderHouse(existing)).thenReturn(false);
+
+        mockMvc.perform(delete("/api/planned-meals/{uuid}", "meal-1").with(csrf()))
+                .andExpect(status().isNotFound());
+
+        verify(plannedMealService, never()).deleteById(any());
+    }
+
+    @Test
+    @DisplayName("delete is forbidden for read-only members")
+    @WithHouseMember
+    void deleteForbiddenForReadOnly() throws Exception {
+        when(houseAccess.isOwner()).thenReturn(false);
+
+        mockMvc.perform(delete("/api/planned-meals/{uuid}", "meal-1").with(csrf()))
                 .andExpect(status().isForbidden());
     }
 

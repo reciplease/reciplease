@@ -28,6 +28,11 @@ public class PlannedMealRepositoryImpl implements PlannedMealRepository {
     }
 
     @Override
+    public void deleteById(final String id) {
+        plannedMealMongoRepository.deleteById(id);
+    }
+
+    @Override
     public List<PlannedMeal> findByDateIsBetween(final String houseId, final LocalDate start, final LocalDate end) {
         return plannedMealMongoRepository.findByHouseIdAndDateBetweenInclusive(houseId, start, end).stream()
                 .map(PlannedMealDocument::toModel)
