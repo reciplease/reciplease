@@ -183,4 +183,44 @@ class InventoryServiceTest {
 
         verify(inventoryRepository).deleteById(itemId);
     }
+
+    @Nested
+    class Consume {
+        @Test
+        @DisplayName("reduces remaining by the given amount")
+        void reducesRemaining() {
+            var existing = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "bread", "ITEMS", 10d, 4d, LocalDate.now(), null);
+
+            when(inventoryRepository.findById(existing.id())).thenReturn(Optional.of(existing));
+            when(inventoryRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+            var updated = inventoryService.consume(existing.id(), 3d);
+
+            assertThat(updated.remaining(), is(1d));
+        }
+
+        @Test
+        @DisplayName("clamps remaining at zero rather than going negative")
+        void clampsAtZero() {
+            var existing = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "bread", "ITEMS", 10d, 2d, LocalDate.now(), null);
+
+            when(inventoryRepository.findById(existing.id())).thenReturn(Optional.of(existing));
+            when(inventoryRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+            var updated = inventoryService.consume(existing.id(), 5d);
+
+            assertThat(updated.remaining(), is(0d));
+        }
+
+        @Test
+        @DisplayName("throws when the item does not exist")
+        void shouldThrowWhenItemMissing() {
+            var itemId = UUID.randomUUID().toString();
+            when(inventoryRepository.findById(itemId)).thenReturn(Optional.empty());
+
+            assertThrows(IllegalArgumentException.class, () -> inventoryService.consume(itemId, 1d));
+
+            verify(inventoryRepository, never()).save(any());
+        }
+    }
 }

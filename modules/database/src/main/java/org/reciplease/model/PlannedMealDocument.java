@@ -37,6 +37,7 @@ public class PlannedMealDocument {
     private Instant createdAt;
     @LastModifiedDate
     private Instant updatedAt;
+    private Instant eatenAt;
 
     public static PlannedMealDocument from(final PlannedMeal plannedMeal) {
         return PlannedMealDocument.builder()
@@ -51,6 +52,7 @@ public class PlannedMealDocument {
                 .createdBy(plannedMeal.createdBy())
                 .createdAt(plannedMeal.createdAt())
                 .updatedAt(plannedMeal.updatedAt())
+                .eatenAt(plannedMeal.eatenAt())
                 .build();
     }
 
@@ -58,6 +60,6 @@ public class PlannedMealDocument {
         var resolvedItems = items == null ? List.<PlannedIngredient>of() : items.stream()
                 .map(PlannedIngredientDocument::toModel)
                 .collect(Collectors.toList());
-        return new PlannedMeal(id, createdBy, houseId, recipeId, name, date, resolvedItems, createdAt, updatedAt);
+        return new PlannedMeal(id, createdBy, houseId, recipeId, name, date, resolvedItems, createdAt, updatedAt, eatenAt);
     }
 }

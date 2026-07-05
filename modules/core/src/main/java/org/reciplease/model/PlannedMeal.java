@@ -14,7 +14,8 @@ public record PlannedMeal(
         LocalDate date,
         List<PlannedIngredient> items,
         Instant createdAt,
-        Instant updatedAt) implements Audited, HouseScoped {
+        Instant updatedAt,
+        Instant eatenAt) implements Audited, HouseScoped {
 
     public PlannedMeal {
         if (name == null || name.isBlank()) {
@@ -26,6 +27,10 @@ public record PlannedMeal(
 
     public PlannedMeal(final String houseId, final String recipeId, final String name,
                         final LocalDate date, final List<PlannedIngredient> items) {
-        this(null, null, houseId, recipeId, name, date, items, null, null);
+        this(null, null, houseId, recipeId, name, date, items, null, null, null);
+    }
+
+    public PlannedMeal withEatenAt(final Instant eatenAt) {
+        return new PlannedMeal(id, createdBy, houseId, recipeId, name, date, items, createdAt, updatedAt, eatenAt);
     }
 }

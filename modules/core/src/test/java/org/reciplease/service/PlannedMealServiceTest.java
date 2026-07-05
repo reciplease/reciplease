@@ -17,6 +17,8 @@ import org.reciplease.repository.InventoryRepository;
 import org.reciplease.repository.PlannedMealRepository;
 import org.reciplease.repository.RecipeRepository;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -29,12 +31,14 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @MockitoSettings
 class PlannedMealServiceTest {
     private static final String HOUSE_ID = "house-1";
+    private static final Instant NOW = Instant.parse("2026-06-06T12:00:00Z");
 
     @Mock
     private PlannedMealRepository plannedMealRepository;
@@ -42,6 +46,10 @@ class PlannedMealServiceTest {
     private RecipeRepository recipeRepository;
     @Mock
     private InventoryRepository inventoryRepository;
+    @Mock
+    private InventoryService inventoryService;
+    @Mock
+    private Clock clock;
 
     @InjectMocks
     private PlannedMealService plannedMealService;
@@ -179,7 +187,7 @@ class PlannedMealServiceTest {
         @DisplayName("re-resolves items and saves the meal under its existing id")
         void updateResolvesItemsAndKeepsId() {
             var existing = new PlannedMeal("meal-1", "owner", HOUSE_ID, recipe.id(), "Dinner", date, List.of(),
-                    java.time.Instant.parse("2026-01-01T00:00:00Z"), java.time.Instant.parse("2026-01-01T00:00:00Z"));
+                    Instant.parse("2026-01-01T00:00:00Z"), Instant.parse("2026-01-01T00:00:00Z"), null);
             var item = new InventoryItem("item-1", null, HOUSE_ID, "bread", "ITEMS", 2d, date, "111");
 
             when(plannedMealRepository.findById("meal-1")).thenReturn(Optional.of(existing));
@@ -210,7 +218,7 @@ class PlannedMealServiceTest {
         @Test
         @DisplayName("fails when the recipe id given doesn't exist")
         void shouldFail_recipeNotFound() {
-            var existing = new PlannedMeal("meal-1", null, HOUSE_ID, null, "Dinner", date, List.of(), null, null);
+            var existing = new PlannedMeal("meal-1", null, HOUSE_ID, null, "Dinner", date, List.of(), null, null, null);
             when(plannedMealRepository.findById("meal-1")).thenReturn(Optional.of(existing));
             when(recipeRepository.findById("ghost-recipe")).thenReturn(Optional.empty());
 
@@ -223,7 +231,7 @@ class PlannedMealServiceTest {
         @Test
         @DisplayName("fails when renaming to a name already used by another meal that day")
         void shouldFail_nameClash() {
-            var existing = new PlannedMeal("meal-1", null, HOUSE_ID, null, "Dinner", date, List.of(), null, null);
+            var existing = new PlannedMeal("meal-1", null, HOUSE_ID, null, "Dinner", date, List.of(), null, null, null);
             when(plannedMealRepository.findById("meal-1")).thenReturn(Optional.of(existing));
             when(plannedMealRepository.existsByHouseIdAndDateAndNameAndIdNot(HOUSE_ID, date, "Lunch", "meal-1")).thenReturn(true);
 
@@ -231,6 +239,70 @@ class PlannedMealServiceTest {
                     () -> plannedMealService.update("meal-1", null, "Lunch", date, List.of()));
 
             assertThat(exception.getMessage(), is("A meal named 'Lunch' is already planned for this date"));
+        }
+    }
+
+    @Nested
+    class MarkEaten {
+        @Test
+        @DisplayName("consumes every allocation across every item in the meal and records eatenAt")
+        void consumesAllAllocations() {
+            var itemA = new PlannedIngredient(bread, List.of(new InventoryAllocation("a", "111", 2d)));
+            var rice = new RecipeIngredient("rice", "GRAMS", 200d);
+            var itemB = new PlannedIngredient(rice, List.of(
+                    new InventoryAllocation("b", "222", 100d),
+                    new InventoryAllocation("c", "333", 100d)));
+            var meal = new PlannedMeal("meal-1", null, HOUSE_ID, recipe.id(), "Dinner", date, List.of(itemA, itemB), null, null, null);
+
+            when(plannedMealRepository.findById("meal-1")).thenReturn(Optional.of(meal));
+            when(clock.instant()).thenReturn(NOW);
+            when(plannedMealRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+            var result = plannedMealService.markEaten("meal-1");
+
+            verify(inventoryService).consume("a", 2d);
+            verify(inventoryService).consume("b", 100d);
+            verify(inventoryService).consume("c", 100d);
+            assertThat(result.eatenAt(), is(NOW));
+        }
+
+        @Test
+        @DisplayName("does nothing for ingredients with no allocation")
+        void skipsUnallocatedIngredients() {
+            var item = new PlannedIngredient(bread, List.of());
+            var meal = new PlannedMeal("meal-1", null, HOUSE_ID, null, "Dinner", date, List.of(item), null, null, null);
+
+            when(plannedMealRepository.findById("meal-1")).thenReturn(Optional.of(meal));
+            when(clock.instant()).thenReturn(NOW);
+            when(plannedMealRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+            plannedMealService.markEaten("meal-1");
+
+            verify(inventoryService, never()).consume(any(), any());
+        }
+
+        @Test
+        void shouldFail_mealNotFound() {
+            when(plannedMealRepository.findById("ghost")).thenReturn(Optional.empty());
+
+            var exception = assertThrows(IllegalArgumentException.class,
+                    () -> plannedMealService.markEaten("ghost"));
+
+            assertThat(exception.getMessage(), is("Planned meal does not exist"));
+        }
+
+        @Test
+        @DisplayName("fails when the meal has already been marked eaten, so allocations aren't double-consumed")
+        void shouldFail_alreadyEaten() {
+            var meal = new PlannedMeal("meal-1", null, HOUSE_ID, null, "Dinner", date, List.of(), null, null, NOW);
+
+            when(plannedMealRepository.findById("meal-1")).thenReturn(Optional.of(meal));
+
+            var exception = assertThrows(IllegalArgumentException.class,
+                    () -> plannedMealService.markEaten("meal-1"));
+
+            assertThat(exception.getMessage(), is("Meal has already been marked as eaten"));
+            verify(inventoryService, never()).consume(any(), any());
         }
     }
 

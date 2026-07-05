@@ -8,6 +8,7 @@ import org.reciplease.model.PlannedMeal;
 import org.reciplease.model.Recipe;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,6 +28,8 @@ public class PlannedMealDto {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate date;
     List<PlannedIngredientDto> items;
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    Instant eatenAt;
 
     /** {@code recipe} is null when the meal has no {@code recipeId}, or the caller doesn't resolve one. */
     public static PlannedMealDto from(final PlannedMeal plannedMeal, final Recipe recipe) {
@@ -39,6 +42,7 @@ public class PlannedMealDto {
                 .items(plannedMeal.items().stream()
                         .map(PlannedIngredientDto::from)
                         .collect(Collectors.toList()))
+                .eatenAt(plannedMeal.eatenAt())
                 .build();
     }
 }

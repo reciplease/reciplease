@@ -152,7 +152,7 @@ class PlannedMealControllerTest {
     @Test
     @DisplayName("finds a planned meal owned by the caller's house by id")
     void findByIdReturnsMeal() throws Exception {
-        var meal = new PlannedMeal("meal-1", null, HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null);
+        var meal = new PlannedMeal("meal-1", null, HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
 
         when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(meal));
         when(houseAccess.belongsToHeaderHouse(meal)).thenReturn(true);
@@ -174,7 +174,7 @@ class PlannedMealControllerTest {
     @Test
     @DisplayName("find by id is not found when the meal belongs to a different house than the header asserts")
     void findByIdForbiddenForDifferentHouse() throws Exception {
-        var meal = new PlannedMeal("meal-1", null, "some-other-house", null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null);
+        var meal = new PlannedMeal("meal-1", null, "some-other-house", null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
 
         when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(meal));
         when(houseAccess.belongsToHeaderHouse(meal)).thenReturn(false);
@@ -186,8 +186,8 @@ class PlannedMealControllerTest {
     @Test
     @DisplayName("updates a planned meal owned by the caller's house")
     void update() throws Exception {
-        var existing = new PlannedMeal("meal-1", null, HOUSE_ID, "recipe-1", "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null);
-        var updated = new PlannedMeal("meal-1", null, HOUSE_ID, "recipe-1", "Supper", LocalDate.of(2026, 6, 6), List.of(), null, null);
+        var existing = new PlannedMeal("meal-1", null, HOUSE_ID, "recipe-1", "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
+        var updated = new PlannedMeal("meal-1", null, HOUSE_ID, "recipe-1", "Supper", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
 
         when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(existing));
         when(houseAccess.belongsToHeaderHouse(existing)).thenReturn(true);
@@ -223,7 +223,7 @@ class PlannedMealControllerTest {
     @Test
     @DisplayName("update is not found when the meal belongs to a different house than the header asserts")
     void updateForbiddenForDifferentHouse() throws Exception {
-        var existing = new PlannedMeal("meal-1", null, "some-other-house", null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null);
+        var existing = new PlannedMeal("meal-1", null, "some-other-house", null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
 
         when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(existing));
         when(houseAccess.belongsToHeaderHouse(existing)).thenReturn(false);
@@ -257,7 +257,7 @@ class PlannedMealControllerTest {
     @Test
     @DisplayName("deletes a planned meal owned by the caller's house")
     void deleteMeal() throws Exception {
-        var existing = new PlannedMeal("meal-1", null, HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null);
+        var existing = new PlannedMeal("meal-1", null, HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
 
         when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(existing));
         when(houseAccess.belongsToHeaderHouse(existing)).thenReturn(true);
@@ -282,7 +282,7 @@ class PlannedMealControllerTest {
     @Test
     @DisplayName("delete is not found when the meal belongs to a different house than the header asserts")
     void deleteForbiddenForDifferentHouse() throws Exception {
-        var existing = new PlannedMeal("meal-1", null, "some-other-house", null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null);
+        var existing = new PlannedMeal("meal-1", null, "some-other-house", null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
 
         when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(existing));
         when(houseAccess.belongsToHeaderHouse(existing)).thenReturn(false);
@@ -300,6 +300,55 @@ class PlannedMealControllerTest {
         when(houseAccess.isOwner()).thenReturn(false);
 
         mockMvc.perform(delete("/api/planned-meals/{uuid}", "meal-1").with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("marks a planned meal owned by the caller's house as eaten")
+    void markEaten() throws Exception {
+        var existing = new PlannedMeal("meal-1", null, HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
+
+        when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(existing));
+        when(houseAccess.belongsToHeaderHouse(existing)).thenReturn(true);
+        when(plannedMealService.markEaten("meal-1")).thenReturn(existing);
+
+        mockMvc.perform(post("/api/planned-meals/{uuid}/eaten", "meal-1").with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Dinner"));
+    }
+
+    @Test
+    @DisplayName("mark eaten is not found when the meal doesn't exist")
+    void markEatenNotFound() throws Exception {
+        when(plannedMealService.findById("ghost")).thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/api/planned-meals/{uuid}/eaten", "ghost").with(csrf()))
+                .andExpect(status().isNotFound());
+
+        verify(plannedMealService, never()).markEaten(any());
+    }
+
+    @Test
+    @DisplayName("mark eaten is not found when the meal belongs to a different house than the header asserts")
+    void markEatenForbiddenForDifferentHouse() throws Exception {
+        var existing = new PlannedMeal("meal-1", null, "some-other-house", null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
+
+        when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(existing));
+        when(houseAccess.belongsToHeaderHouse(existing)).thenReturn(false);
+
+        mockMvc.perform(post("/api/planned-meals/{uuid}/eaten", "meal-1").with(csrf()))
+                .andExpect(status().isNotFound());
+
+        verify(plannedMealService, never()).markEaten(any());
+    }
+
+    @Test
+    @DisplayName("mark eaten is forbidden for read-only members")
+    @WithHouseMember
+    void markEatenForbiddenForReadOnly() throws Exception {
+        when(houseAccess.isOwner()).thenReturn(false);
+
+        mockMvc.perform(post("/api/planned-meals/{uuid}/eaten", "meal-1").with(csrf()))
                 .andExpect(status().isForbidden());
     }
 

@@ -96,6 +96,18 @@ public class PlannedMealController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("{uuid}/eaten")
+    @HouseOwner
+    public ResponseEntity<PlannedMealDto> markEaten(@PathVariable final String uuid) {
+        final var existing = plannedMealService.findById(uuid);
+        if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
+            return ResponseEntity.notFound().build();
+        }
+
+        final var meal = plannedMealService.markEaten(uuid);
+        return ResponseEntity.ok(toDto(meal));
+    }
+
     @GetMapping("suggestions")
     @HouseMember
     public ResponseEntity<List<InventoryItemDto>> suggestInventory(@RequestParam(required = false) final String recipeId,

@@ -60,4 +60,12 @@ public class InventoryService {
     public void deleteById(final String id) {
         inventoryRepository.deleteById(id);
     }
+
+    /** Reduces {@code remaining} by {@code amount}, clamped at zero rather than going negative. */
+    public InventoryItem consume(final String id, final Double amount) {
+        final var existing = inventoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Inventory item does not exist"));
+
+        return inventoryRepository.save(existing.withRemaining(Math.max(0, existing.remaining() - amount)));
+    }
 }

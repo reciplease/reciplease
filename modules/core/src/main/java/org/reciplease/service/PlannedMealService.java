@@ -10,6 +10,8 @@ import org.reciplease.repository.PlannedMealRepository;
 import org.reciplease.repository.RecipeRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,6 +26,8 @@ public class PlannedMealService {
     private final PlannedMealRepository plannedMealRepository;
     private final RecipeRepository recipeRepository;
     private final InventoryRepository inventoryRepository;
+    private final InventoryService inventoryService;
+    private final Clock clock;
 
     /**
      * Plans a meal for a date, optionally linked to a recipe, pairing ingredients with chosen
@@ -57,6 +61,27 @@ public class PlannedMealService {
     }
 
     /**
+     * Marks a meal as eaten: a shortcut for consuming every inventory item allocated across
+     * all of its ingredients, instead of marking each one as eaten individually. Records
+     * {@code eatenAt} so the meal isn't marked eaten twice (which would double-consume
+     * its allocations).
+     */
+    public PlannedMeal markEaten(final String id) {
+        final var meal = plannedMealRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Planned meal does not exist"));
+
+        if (meal.eatenAt() != null) {
+            throw new IllegalArgumentException("Meal has already been marked as eaten");
+        }
+
+        meal.items().stream()
+                .flatMap(item -> item.allocations().stream())
+                .forEach(allocation -> inventoryService.consume(allocation.inventoryItemId(), allocation.amount()));
+
+        return plannedMealRepository.save(meal.withEatenAt(Instant.now(clock)));
+    }
+
+    /**
      * Updates an existing planned meal's recipe link, name, date and items, re-resolving
      * item allocations the same way {@link #plan} does. The name-uniqueness check excludes
      * the meal being updated, so keeping the same name/date doesn't clash with itself.
@@ -80,7 +105,7 @@ public class PlannedMealService {
                 .collect(Collectors.toList());
 
         var updated = new PlannedMeal(id, existing.createdBy(), existing.houseId(), recipeId, name, date,
-                resolvedItems, existing.createdAt(), existing.updatedAt());
+                resolvedItems, existing.createdAt(), existing.updatedAt(), existing.eatenAt());
 
         return plannedMealRepository.save(updated);
     }

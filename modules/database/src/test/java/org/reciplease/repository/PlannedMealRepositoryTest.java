@@ -89,6 +89,19 @@ public class PlannedMealRepositoryTest {
         assertThat(saved.id(), is(notNullValue()));
         assertThat(saved.createdAt(), is(notNullValue()));
         assertThat(saved.updatedAt(), is(notNullValue()));
+        assertThat(saved.eatenAt(), is(nullValue()));
+    }
+
+    @Test
+    public void shouldRoundTripEatenAt() {
+        var recipe = recipeRepository.save(Recipe.builder().build());
+        var saved = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2026, 6, 10), List.of()));
+        var eatenAt = java.time.Instant.parse("2026-06-10T18:30:00Z");
+
+        var marked = plannedMealRepository.save(saved.withEatenAt(eatenAt));
+
+        assertThat(marked.eatenAt(), is(eatenAt));
+        assertThat(plannedMealRepository.findById(saved.id()).orElseThrow().eatenAt(), is(eatenAt));
     }
 
     @Test
