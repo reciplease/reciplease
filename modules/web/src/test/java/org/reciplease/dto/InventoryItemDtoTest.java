@@ -61,7 +61,9 @@ class InventoryItemDtoTest {
 
         var item = itemDto.toEntity("house-1");
 
-        assertThat(item.id(), is(itemDto.getUuid()));
+        // The body's uuid is never trusted — ids come from the server (create) or the
+        // already-checked path variable (update/complete).
+        assertThat(item.id(), is(nullValue()));
         assertThat(item.houseId(), is("house-1"));
         assertThat(item.name(), is(itemDto.getName()));
         // A short id passes through unchanged.

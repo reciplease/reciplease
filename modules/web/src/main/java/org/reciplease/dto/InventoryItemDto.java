@@ -49,8 +49,11 @@ public class InventoryItemDto {
 
     // houseId is supplied by the controller from the already-validated X-RCPLS-House-Id
     // header, not trusted from the request body, so a member can't write into a house
-    // they don't belong to by spoofing the field.
+    // they don't belong to by spoofing the field. The body's uuid is untrusted for the
+    // same reason: READ_ONLY only affects the OpenAPI schema, Jackson still binds it, and
+    // Mongo saves are upserts — a caller-chosen id could overwrite an arbitrary document.
+    // Callers that need an id (update, complete) supply the path's already-checked one.
     public InventoryItem toEntity(final String houseId) {
-        return new InventoryItem(uuid, null, houseId, name, Measure.normalizeId(measure), amount, remaining, expiration, barcode, image);
+        return new InventoryItem(null, null, houseId, name, Measure.normalizeId(measure), amount, remaining, expiration, barcode, image);
     }
 }

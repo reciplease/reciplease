@@ -15,6 +15,7 @@ import org.reciplease.service.FoodSearchService;
 import org.reciplease.service.GoogleHealthAdapter;
 import org.reciplease.service.InventoryService;
 import org.reciplease.service.InviteService;
+import org.reciplease.service.PendingInventoryService;
 import org.reciplease.service.PlannedMealService;
 import org.reciplease.service.RecipeService;
 import org.reciplease.service.ShoppingListService;
@@ -65,6 +66,8 @@ class OpenApiSpecExportTest {
     private HouseAccess houseAccess;
     @MockitoBean
     private InventoryService inventoryService;
+    @MockitoBean
+    private PendingInventoryService pendingInventoryService;
     @MockitoBean
     private HouseRepository houseRepository;
     @MockitoBean
