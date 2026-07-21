@@ -9,6 +9,8 @@ import org.reciplease.repository.IdentityConflictException;
 import org.reciplease.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -79,6 +81,21 @@ public class AuthController {
             return existingUser.get();
         }
         return userRepository.createWithIdentity(provider, providerId, email);
+    }
+
+    /**
+     * Mints a fresh Reciplease JWT for the already-authenticated caller — a sliding session:
+     * called by the frontend shortly before the current token expires so an active user is
+     * silently kept signed in, without a full provider re-auth. Runs through the normal
+     * bearer-JWT filter chain (unlike {@link #exchange}), so it requires a currently-valid
+     * token to begin with; there is no separate refresh token to fall back on.
+     */
+    @PostMapping("refresh")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ExchangeResponse> refresh() {
+        final String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        final String handle = userRepository.findById(userId).map(User::handle).orElse(null);
+        return ResponseEntity.ok(new ExchangeResponse(jwtService.mint(userId), userId, handle));
     }
 
     private boolean isValidSecret(final String providedSecret) {
