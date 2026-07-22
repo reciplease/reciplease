@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -75,8 +76,9 @@ public class InventoryController {
 
     @GetMapping
     @HouseMember
-    public ResponseEntity<List<InventoryItemDto>> findAll() {
-        final List<InventoryItemDto> items = inventoryService.findAll(houseAccess.requireHouseId()).stream()
+    public ResponseEntity<List<InventoryItemDto>> findAll(
+            @RequestParam(defaultValue = "false") final boolean excludeFullyConsumed) {
+        final List<InventoryItemDto> items = inventoryService.findAll(houseAccess.requireHouseId(), excludeFullyConsumed).stream()
                 .map(InventoryItemDto::from)
                 .collect(toList());
 

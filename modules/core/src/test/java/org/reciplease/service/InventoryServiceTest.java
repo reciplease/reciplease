@@ -101,6 +101,32 @@ class InventoryServiceTest {
         }
 
         @Test
+        @DisplayName("findAll(houseId, excludeFullyConsumed=false) includes items with nothing remaining")
+        void findAllIncludesFullyConsumedByDefault() {
+            var consumedItem = item.withRemaining(0d);
+            var today = now.atOffset(ZoneOffset.UTC).toLocalDate();
+            when(inventoryRepository.expiresAfter(HOUSE_ID, today)).thenReturn(List.of(consumedItem));
+            when(inventoryRepository.betweenDates(HOUSE_ID, today)).thenReturn(List.of());
+
+            var actual = inventoryService.findAll(HOUSE_ID, false);
+
+            assertThat(actual, contains(consumedItem));
+        }
+
+        @Test
+        @DisplayName("findAll(houseId, excludeFullyConsumed=true) drops items with nothing remaining")
+        void findAllCanExcludeFullyConsumed() {
+            var consumedItem = item.withRemaining(0d);
+            var today = now.atOffset(ZoneOffset.UTC).toLocalDate();
+            when(inventoryRepository.expiresAfter(HOUSE_ID, today)).thenReturn(List.of(item, consumedItem));
+            when(inventoryRepository.betweenDates(HOUSE_ID, today)).thenReturn(List.of());
+
+            var actual = inventoryService.findAll(HOUSE_ID, true);
+
+            assertThat(actual, contains(item));
+        }
+
+        @Test
         void shouldFindExpiredInventory() {
             when((inventoryRepository.betweenDates(HOUSE_ID, now.atOffset(ZoneOffset.UTC).toLocalDate())))
                     .thenReturn(List.of(item));

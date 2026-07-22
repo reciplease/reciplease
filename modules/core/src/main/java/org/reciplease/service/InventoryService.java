@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 @RequiredArgsConstructor
 public class InventoryService {
@@ -43,10 +45,24 @@ public class InventoryService {
     }
 
     public List<InventoryItem> findAll(final String houseId) {
+        return findAll(houseId, false);
+    }
+
+    /**
+     * {@code excludeFullyConsumed} drops items with nothing left ({@code remaining <= 0}) —
+     * used by the "expiring soon" view, where a fully-eaten/binned item has nothing left to
+     * expire and would otherwise show up as if it still needed attention. The pantry list
+     * keeps calling the single-arg overload: it deliberately keeps those items visible
+     * (greyed out) in case the user wants to restock.
+     */
+    public List<InventoryItem> findAll(final String houseId, final boolean excludeFullyConsumed) {
         final var today = LocalDate.now(clock);
         final var items = new ArrayList<InventoryItem>(inventoryRepository.expiresAfter(houseId, today));
         items.addAll(inventoryRepository.betweenDates(houseId, today));
-        return items;
+        if (!excludeFullyConsumed) {
+            return items;
+        }
+        return items.stream().filter(item -> item.remaining() > 0).collect(toList());
     }
 
     public List<InventoryItem> findAllUnexpired(final String houseId) {

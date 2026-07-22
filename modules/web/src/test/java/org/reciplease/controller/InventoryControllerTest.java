@@ -244,9 +244,21 @@ class InventoryControllerTest {
         void findAll() throws Exception {
             var itemsJson = readTestResource(WithItem.class, "items.json");
 
-            when(inventoryService.findAll(HOUSE_ID)).thenReturn(List.of(item));
+            when(inventoryService.findAll(HOUSE_ID, false)).thenReturn(List.of(item));
 
             mockMvc.perform(get("/api/inventory"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().json(itemsJson, true));
+        }
+
+        @Test
+        @DisplayName("should exclude fully-consumed items when excludeFullyConsumed=true")
+        void findAllExcludingFullyConsumed() throws Exception {
+            var itemsJson = readTestResource(WithItem.class, "items.json");
+
+            when(inventoryService.findAll(HOUSE_ID, true)).thenReturn(List.of(item));
+
+            mockMvc.perform(get("/api/inventory").param("excludeFullyConsumed", "true"))
                     .andExpect(status().isOk())
                     .andExpect(content().json(itemsJson, true));
         }
