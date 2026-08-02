@@ -18,6 +18,8 @@ import org.reciplease.model.HouseRole;
 @Schema(name = "ApiKeySelf")
 public class ApiKeySelfDto {
     String houseId;
+    // Null if the key's house has since been deleted but the key itself wasn't cleaned up.
+    @Schema(nullable = true)
     String houseName;
     HouseRole role;
 }
