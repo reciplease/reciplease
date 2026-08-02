@@ -73,7 +73,20 @@ public class HouseAccess {
         return houseIdHeader();
     }
 
+    /**
+     * An {@link ApiKeyAuthenticationToken} carries its own house/role assignment — that
+     * assignment <em>is</em> the authorization, not a lookup key into {@link HouseRepository} —
+     * so it's resolved directly rather than via {@link #currentUserId()}/{@code roleOf}. Still
+     * requires the request's house header to match the key's own house, mirroring the
+     * {@link #belongsToHeaderHouse} defense used elsewhere.
+     */
     private Optional<HouseRole> resolveRole() {
+        final var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof ApiKeyAuthenticationToken apiKeyAuthentication) {
+            final var principal = apiKeyAuthentication.getPrincipal();
+            return principal.houseId().equals(houseIdHeader()) ? Optional.of(principal.role()) : Optional.empty();
+        }
+
         final var houseId = houseIdHeader();
         final var userId = currentUserId();
         if (houseId == null || userId == null) {

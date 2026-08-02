@@ -43,4 +43,20 @@ class CookieBearerTokenResolverTest {
 
         assertThat(resolver.resolve(request), nullValue());
     }
+
+    @Test
+    void returnsNullForAnApiKeyBearerHeaderRatherThanHandingItToTheJwtDecoder() {
+        final var request = new MockHttpServletRequest();
+        request.addHeader("Authorization", "Bearer rcpl_someapikey1234567890");
+
+        assertThat(resolver.resolve(request), nullValue());
+    }
+
+    @Test
+    void returnsNullForAnApiKeyInTheSessionCookieToo() {
+        final var request = new MockHttpServletRequest();
+        request.setCookies(new Cookie("reciplease-session", "rcpl_someapikey1234567890"));
+
+        assertThat(resolver.resolve(request), nullValue());
+    }
 }
