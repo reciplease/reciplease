@@ -4,6 +4,8 @@ import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reciplease.controller.MeasureController;
+import org.reciplease.model.ApiKeyPrincipal;
+import org.reciplease.model.HouseRole;
 import org.reciplease.service.ApiKeyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -20,6 +22,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -80,6 +85,25 @@ class CloudWebSecurityConfigTest {
     void protectedEndpointAllowedWithRole() throws Exception {
         mockMvc.perform(post("/api/test").with(jwt().authorities(new SimpleGrantedAuthority("ROLE_RECIPLEASE"))))
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    @DisplayName("a valid rcpl_ API key bearer token authenticates through the real filter chain")
+    void apiKeyBearerTokenAuthenticatesThroughTheRealFilterChain() throws Exception {
+        when(apiKeyService.authenticate("rcpl_valid1234567890"))
+                .thenReturn(Optional.of(new ApiKeyPrincipal("key-1", "house-1", HouseRole.OWNER)));
+
+        mockMvc.perform(post("/api/test").header("Authorization", "Bearer rcpl_valid1234567890"))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    @DisplayName("an unrecognised rcpl_ API key is rejected rather than falling through to the JWT decoder")
+    void unknownApiKeyBearerTokenIsRejected() throws Exception {
+        when(apiKeyService.authenticate("rcpl_unknown")).thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/api/test").header("Authorization", "Bearer rcpl_unknown"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

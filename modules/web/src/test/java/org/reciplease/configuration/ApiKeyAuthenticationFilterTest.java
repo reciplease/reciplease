@@ -89,7 +89,14 @@ class ApiKeyAuthenticationFilterTest {
         verifyNoInteractions(apiKeyService);
     }
 
-    private static org.hamcrest.Matcher<Object> not(final org.hamcrest.Matcher<Object> matcher) {
-        return org.hamcrest.Matchers.not(matcher);
+    @Test
+    void ignoresNonBearerAuthorizationHeaders() throws Exception {
+        var request = new MockHttpServletRequest();
+        request.addHeader("Authorization", "Basic dXNlcjpwYXNz");
+
+        filter.doFilter(request, new MockHttpServletResponse(), filterChain);
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication(), is(nullValue()));
+        verifyNoInteractions(apiKeyService);
     }
 }
