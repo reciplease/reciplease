@@ -10,6 +10,7 @@ import org.reciplease.configuration.WithHouseOwner;
 import org.reciplease.model.ApiKey;
 import org.reciplease.model.CreatedApiKey;
 import org.reciplease.model.HouseRole;
+import org.reciplease.repository.HouseRepository;
 import org.reciplease.service.ApiKeyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -44,6 +45,8 @@ class ApiKeyControllerTest {
     private ApiKeyService apiKeyService;
     @MockitoBean(name = "houseAccess")
     private HouseAccess houseAccess;
+    @MockitoBean
+    private HouseRepository houseRepository;
 
     @Autowired
     private MockMvc mockMvc;
