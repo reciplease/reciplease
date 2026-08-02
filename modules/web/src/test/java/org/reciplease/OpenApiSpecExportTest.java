@@ -11,6 +11,7 @@ import org.reciplease.repository.InviteRepository;
 import org.reciplease.repository.UserIdentityRepository;
 import org.reciplease.repository.UserRepository;
 import org.reciplease.repository.WebAuthnChallengeLedger;
+import org.reciplease.service.ApiKeyService;
 import org.reciplease.service.FoodSearchService;
 import org.reciplease.service.GoogleHealthAdapter;
 import org.reciplease.service.InventoryService;
@@ -94,6 +95,8 @@ class OpenApiSpecExportTest {
     private GoogleHealthAdapter googleHealthAdapter;
     @MockitoBean
     private FoodSearchService foodSearchService;
+    @MockitoBean
+    private ApiKeyService apiKeyService;
 
     @Test
     void exportsTheLiveSpecToTargetOpenapiJson() throws Exception {

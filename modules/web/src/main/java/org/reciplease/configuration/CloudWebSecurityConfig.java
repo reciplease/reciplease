@@ -1,6 +1,7 @@
 package org.reciplease.configuration;
 
 import lombok.RequiredArgsConstructor;
+import org.reciplease.service.ApiKeyService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -25,6 +27,9 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
  * that, the {@code Authorization} header (see {@link CookieBearerTokenResolver}); authorization
  * (and any other per-endpoint check) is enforced via {@code @PreAuthorize} on individual
  * controller methods rather than URL-matcher rules here.
+ * <p>
+ * {@link ApiKeyAuthenticationFilter} runs ahead of the JWT-based {@code oauth2ResourceServer}
+ * filter to authenticate house service-account API keys instead, which aren't JWTs at all.
  * <p>
  * Missing/invalid tokens still yield 401 (the resource server rejects malformed bearer
  * tokens before a request reaches a controller); a valid token whose user belongs to no house
@@ -49,6 +54,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 public class CloudWebSecurityConfig {
 
     private final MembershipJwtAuthenticationConverter membershipJwtAuthenticationConverter;
+    private final ApiKeyService apiKeyService;
 
     @Value("${reciplease.jwt.signing-secret}")
     private String signingSecret;
@@ -83,6 +89,7 @@ public class CloudWebSecurityConfig {
                         .jwt(jwt -> jwt
                                 .decoder(jwtDecoder())
                                 .jwtAuthenticationConverter(membershipJwtAuthenticationConverter)))
+                .addFilterBefore(new ApiKeyAuthenticationFilter(apiKeyService), BearerTokenAuthenticationFilter.class)
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))

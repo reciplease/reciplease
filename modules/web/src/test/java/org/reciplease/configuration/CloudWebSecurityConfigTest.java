@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reciplease.controller.MeasureController;
+import org.reciplease.service.ApiKeyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -49,6 +50,9 @@ class CloudWebSecurityConfigTest {
 
     @MockitoBean
     private JwtDecoder jwtDecoder;
+
+    @MockitoBean
+    private ApiKeyService apiKeyService;
 
     @Test
     @DisplayName("permits unauthenticated GET access to public read endpoints")
