@@ -63,6 +63,15 @@ class HouseAccessTest {
         assertThat(houseAccess.isMember(), is(false));
     }
 
+    @Test
+    void isMemberIsFalseForAnApiKeyWhenTheRequestHasNoHouseHeaderAtAll() {
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(new MockHttpServletRequest()));
+        SecurityContextHolder.getContext().setAuthentication(
+                new ApiKeyAuthenticationToken(new ApiKeyPrincipal("key-1", "house-1", HouseRole.OWNER)));
+
+        assertThat(houseAccess.isMember(), is(false));
+    }
+
     private static void withHouseHeader(final String houseId) {
         final var request = new MockHttpServletRequest();
         request.addHeader(HouseAccess.HOUSE_HEADER, houseId);
