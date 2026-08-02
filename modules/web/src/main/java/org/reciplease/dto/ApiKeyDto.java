@@ -20,6 +20,8 @@ public class ApiKeyDto {
     HouseRole role;
     String keyPrefix;
     Instant createdAt;
+    // Null until the key is used for the first time.
+    @Schema(nullable = true)
     Instant lastUsedAt;
 
     public static ApiKeyDto from(final ApiKey apiKey) {
