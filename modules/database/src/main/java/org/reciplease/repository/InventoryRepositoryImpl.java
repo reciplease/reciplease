@@ -1,12 +1,15 @@
 package org.reciplease.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.reciplease.model.ArchivedInventoryItemDocument;
 import org.reciplease.model.InventoryItem;
 import org.reciplease.model.InventoryItemDocument;
+import org.reciplease.repository.mongo.InventoryArchiveMongoRepository;
 import org.reciplease.repository.mongo.InventoryMongoRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -17,6 +20,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class InventoryRepositoryImpl implements InventoryRepository {
     private final InventoryMongoRepository inventoryMongoRepository;
+    private final InventoryArchiveMongoRepository inventoryArchiveMongoRepository;
 
     @Override
     public Optional<InventoryItem> findById(final String id) {
@@ -64,7 +68,25 @@ public class InventoryRepositoryImpl implements InventoryRepository {
     }
 
     @Override
+    public List<InventoryItem> findAllZeroRemaining() {
+        return inventoryMongoRepository.findByRemainingLessThanEqual(0d).stream()
+                .map(InventoryItemDocument::toModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<InventoryItem> findAllById(final Collection<String> ids) {
+        return inventoryMongoRepository.findAllById(ids).stream()
+                .map(InventoryItemDocument::toModel)
+                .collect(Collectors.toList());
+    }
+
+    // Archives a snapshot of the item into a sibling collection before it's gone for good —
+    // a database-only concern, nothing above this layer needs to know it happens.
+    @Override
     public void deleteById(final String id) {
+        inventoryMongoRepository.findById(id)
+                .ifPresent(doc -> inventoryArchiveMongoRepository.save(ArchivedInventoryItemDocument.from(doc, Instant.now())));
         inventoryMongoRepository.deleteById(id);
     }
 }

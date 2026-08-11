@@ -22,5 +22,9 @@ public interface InventoryRepository {
 
     List<InventoryItem> findByName(String houseId, String name);
 
+    List<InventoryItem> findAllZeroRemaining();
+
+    List<InventoryItem> findAllById(Collection<String> ids);
+
     void deleteById(String id);
 }

@@ -158,7 +158,7 @@ class InventoryServiceTest {
             when(inventoryRepository.findById(item.id())).thenReturn(Optional.of(existing));
             when(inventoryRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-            var updated = inventoryService.update(item.id(), updates);
+            var updated = inventoryService.update(item.id(), updates).orElseThrow();
 
             assertThat(updated.id(), is(existing.id()));
             assertThat(updated.createdBy(), is(existing.createdBy()));
@@ -182,9 +182,24 @@ class InventoryServiceTest {
             when(inventoryRepository.findById(item.id())).thenReturn(Optional.of(existing));
             when(inventoryRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-            var updated = inventoryService.update(item.id(), updates);
+            var updated = inventoryService.update(item.id(), updates).orElseThrow();
 
             assertThat(updated.remaining(), is(12d));
+        }
+
+        @Test
+        @DisplayName("update archives and deletes instead of saving when the new remaining is zero")
+        void shouldArchiveWhenUpdateZerosRemaining() {
+            var existing = new InventoryItem(item.id(), null, HOUSE_ID, "bread", "ITEMS", 10d, 4d, LocalDate.now(), null);
+            var updates = new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 10d, 0d, LocalDate.now(), null);
+
+            when(inventoryRepository.findById(item.id())).thenReturn(Optional.of(existing));
+
+            var updated = inventoryService.update(item.id(), updates);
+
+            assertThat(updated.isEmpty(), is(true));
+            verify(inventoryRepository).deleteById(item.id());
+            verify(inventoryRepository, never()).save(any());
         }
     }
 
@@ -220,22 +235,23 @@ class InventoryServiceTest {
             when(inventoryRepository.findById(existing.id())).thenReturn(Optional.of(existing));
             when(inventoryRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-            var updated = inventoryService.consume(existing.id(), 3d);
+            var updated = inventoryService.consume(existing.id(), 3d).orElseThrow();
 
             assertThat(updated.remaining(), is(1d));
         }
 
         @Test
-        @DisplayName("clamps remaining at zero rather than going negative")
-        void clampsAtZero() {
+        @DisplayName("clamps remaining at zero and archives/deletes rather than saving a zeroed item")
+        void clampsAtZeroAndArchives() {
             var existing = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "bread", "ITEMS", 10d, 2d, LocalDate.now(), null);
 
             when(inventoryRepository.findById(existing.id())).thenReturn(Optional.of(existing));
-            when(inventoryRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
             var updated = inventoryService.consume(existing.id(), 5d);
 
-            assertThat(updated.remaining(), is(0d));
+            assertThat(updated.isEmpty(), is(true));
+            verify(inventoryRepository).deleteById(existing.id());
+            verify(inventoryRepository, never()).save(any());
         }
 
         @Test
@@ -248,5 +264,18 @@ class InventoryServiceTest {
 
             verify(inventoryRepository, never()).save(any());
         }
+    }
+
+    @Test
+    @DisplayName("archiveAllZeroRemainingItems deletes (and thereby archives) every zero-remaining item found")
+    void shouldArchiveAllZeroRemainingItems() {
+        var first = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "bread", "ITEMS", 10d, 0d, LocalDate.now(), null);
+        var second = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "milk", "MILLILITRES", 500d, 0d, LocalDate.now(), null);
+        when(inventoryRepository.findAllZeroRemaining()).thenReturn(List.of(first, second));
+
+        inventoryService.archiveAllZeroRemainingItems();
+
+        verify(inventoryRepository).deleteById(first.id());
+        verify(inventoryRepository).deleteById(second.id());
     }
 }

@@ -18,7 +18,7 @@ class PlannedIngredientDocumentTest {
         var document = PlannedIngredientDocument.from(item);
 
         assertThat(document.getIngredient().toModel(), is(bread));
-        assertThat(document.getAllocations().get(0).toModel(), is(new InventoryAllocation("item-1", "111", 2d)));
+        assertThat(document.getAllocations().getFirst().toModel(), is(new InventoryAllocation("item-1", "111", 2d)));
     }
 
     @Test

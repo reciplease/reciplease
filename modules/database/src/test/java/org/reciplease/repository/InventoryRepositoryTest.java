@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -33,6 +35,8 @@ class InventoryRepositoryTest {
     private InventoryRepository inventoryRepository;
     @Autowired
     private MongoTemplate mongoTemplate;
+    @Autowired
+    private org.reciplease.repository.mongo.InventoryArchiveMongoRepository inventoryArchiveMongoRepository;
 
     @BeforeEach
     void cleanDatabase() {
@@ -104,7 +108,7 @@ class InventoryRepositoryTest {
         var found = inventoryRepository.findByBarcode(HOUSE_ID, "5012345678900");
 
         assertThat(found, contains(saved));
-        assertThat(found.get(0).barcode(), is("5012345678900"));
+        assertThat(found.getFirst().barcode(), is("5012345678900"));
     }
 
     @Test
@@ -168,6 +172,50 @@ class InventoryRepositoryTest {
         inventoryRepository.deleteById(saved.id());
 
         assertThat(inventoryRepository.findById(saved.id()), is(Optional.empty()));
+    }
+
+    @Test
+    @DisplayName("deleteById archives a snapshot of the item before removing it")
+    void shouldArchiveOnDelete() {
+        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", "ITEMS", 6d, 2d, LocalDate.of(2026, Month.JUNE, 20), "5012345678900"));
+
+        inventoryRepository.deleteById(saved.id());
+
+        var archived = inventoryArchiveMongoRepository.findAll();
+        assertThat(archived, hasSize(1));
+        assertThat(archived.getFirst().getOriginalId(), is(saved.id()));
+        assertThat(archived.getFirst().getHouseId(), is(HOUSE_ID));
+        assertThat(archived.getFirst().getName(), is("eggs"));
+        assertThat(archived.getFirst().getRemaining(), is(2d));
+        assertThat(archived.getFirst().getBarcode(), is("5012345678900"));
+        assertThat(archived.getFirst().getArchivedAt(), is(notNullValue()));
+    }
+
+    @Test
+    @DisplayName("deleteById on an already-missing item is a no-op, not an error")
+    void shouldNotArchiveWhenDeletingUnknownItem() {
+        inventoryRepository.deleteById("does-not-exist");
+
+        assertThat(inventoryArchiveMongoRepository.findAll(), is(empty()));
+    }
+
+    @Test
+    void shouldFindAllZeroRemaining() {
+        var zero = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", "ITEMS", 6d, 0d, LocalDate.of(2026, Month.JUNE, 20), null));
+        inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "milk", "MILLILITRES", 500d, 100d, LocalDate.of(2026, Month.JUNE, 20), null));
+
+        assertThat(inventoryRepository.findAllZeroRemaining(), contains(zero));
+    }
+
+    @Test
+    void shouldFindAllById() {
+        var eggs = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
+        var milk = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "milk", "MILLILITRES", 500d, LocalDate.of(2026, Month.JUNE, 20), null));
+        inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 20), null));
+
+        var found = inventoryRepository.findAllById(List.of(eggs.id(), milk.id()));
+
+        assertThat(found, containsInAnyOrder(eggs, milk));
     }
 
     @Test

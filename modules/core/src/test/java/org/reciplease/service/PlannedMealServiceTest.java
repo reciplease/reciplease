@@ -109,7 +109,7 @@ class PlannedMealServiceTest {
 
             var planned = plannedMealService.plan(HOUSE_ID, recipe.id(), "Dinner", date, List.of(plannedIngredient));
 
-            var saved = planned.items().get(0).allocations().get(0);
+            var saved = planned.items().getFirst().allocations().getFirst();
             assertThat(saved.barcode(), is("111"));
             assertThat(saved.amount(), is(2d));
         }
@@ -130,7 +130,7 @@ class PlannedMealServiceTest {
 
             var planned = plannedMealService.plan(HOUSE_ID, recipe.id(), "Dinner", date, List.of(plannedIngredient));
 
-            assertThat(planned.items().get(0).allocations(), contains(
+            assertThat(planned.items().getFirst().allocations(), contains(
                     hasAllocation("a", "111", 2d),
                     hasAllocation("b", "222", 2d)));
         }
@@ -202,7 +202,7 @@ class PlannedMealServiceTest {
 
             assertThat(updated.id(), is("meal-1"));
             assertThat(updated.createdBy(), is("owner"));
-            assertThat(updated.items().get(0).allocations().get(0).barcode(), is("111"));
+            assertThat(updated.items().getFirst().allocations().getFirst().barcode(), is("111"));
         }
 
         @Test

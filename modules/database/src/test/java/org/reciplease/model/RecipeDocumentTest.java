@@ -31,7 +31,7 @@ class RecipeDocumentTest {
         assertThat(document.getName(), is("toast"));
         assertThat(document.getDescription(), is("A staple"));
         assertThat(document.getSteps(), is(List.of("Toast it")));
-        assertThat(document.getIngredients().get(0).toModel(), is(new RecipeIngredient("bread", "ITEMS", 2d)));
+        assertThat(document.getIngredients().getFirst().toModel(), is(new RecipeIngredient("bread", "ITEMS", 2d)));
         assertThat(document.getCreatedBy(), is("user-1"));
         assertThat(document.getUpdatedBy(), is("user-2"));
     }

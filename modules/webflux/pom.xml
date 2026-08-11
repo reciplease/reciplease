@@ -12,6 +12,9 @@
   </parent>
 
   <artifactId>webflux</artifactId>
+  <properties>
+    <argLine></argLine>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -44,5 +47,28 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>properties</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!--suppress MavenModelInspection -->
+          <argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar}</argLine>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>

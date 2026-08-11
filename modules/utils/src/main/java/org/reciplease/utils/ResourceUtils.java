@@ -1,17 +1,14 @@
 package org.reciplease.utils;
 
-import lombok.SneakyThrows;
-
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
 public class ResourceUtils {
-    @SneakyThrows
-    public static String readTestResource(final Class<?> aClass, final String fileName) {
+    public static String readTestResource(final Class<?> aClass, final String fileName) throws IOException {
         final var packagePath = aClass.getName()
                 .replace('.', '/')
                 .replace('$', '/');
-        return Files.readString(Paths.get("src/test/resources", packagePath, fileName), StandardCharsets.UTF_8);
+        return Files.readString(Path.of("src/test/resources", packagePath, fileName));
     }
 }

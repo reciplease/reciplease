@@ -115,7 +115,7 @@ public class PlannedMealRepositoryTest {
         var found = plannedMealRepository.findByRecipeId(HOUSE_ID, recipe.id());
 
         assertThat(found.size(), is(1));
-        assertThat(found.get(0).items(), contains(item));
+        assertThat(found.getFirst().items(), contains(item));
     }
 
     @Test
@@ -126,7 +126,7 @@ public class PlannedMealRepositoryTest {
         var found = plannedMealRepository.findByDateIsBetween(HOUSE_ID, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30));
 
         assertThat(found, contains(saved));
-        assertThat(found.get(0).recipeId(), is(nullValue()));
+        assertThat(found.getFirst().recipeId(), is(nullValue()));
     }
 
     @Test

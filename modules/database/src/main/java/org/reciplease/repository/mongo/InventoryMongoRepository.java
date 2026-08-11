@@ -14,4 +14,5 @@ public interface InventoryMongoRepository extends MongoRepository<InventoryItemD
     List<InventoryItemDocument> findByHouseIdAndBarcode(String houseId, String barcode);
     List<InventoryItemDocument> findByHouseIdAndBarcodeIn(String houseId, Collection<String> barcodes);
     List<InventoryItemDocument> findByHouseIdAndNameIgnoreCase(String houseId, String name);
+    List<InventoryItemDocument> findByRemainingLessThanEqual(Double remaining);
 }

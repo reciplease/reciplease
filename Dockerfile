@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=eclipse-temurin:21-jdk
+ARG BASE_IMAGE=eclipse-temurin:25-jdk
 
 FROM ${BASE_IMAGE} as builder
 WORKDIR /builder

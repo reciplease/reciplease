@@ -6,19 +6,25 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.reciplease.model.InventoryAllocation;
+import org.reciplease.model.InventoryItem;
 import org.reciplease.model.PlannedIngredient;
 import org.reciplease.model.PlannedMeal;
 import org.reciplease.model.RecipeIngredient;
+import org.reciplease.repository.InventoryRepository;
 import org.reciplease.repository.PlannedMealRepository;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @MockitoSettings
@@ -30,13 +36,29 @@ public class ShoppingListServiceTest {
     @Mock
     private PlannedMealRepository plannedMealRepository;
 
+    @Mock
+    private InventoryRepository inventoryRepository;
+
     private ShoppingListService shoppingListService;
 
     private static final String HOUSE_ID = "house-1";
 
+    /** Defaults every allocated inventory item to "still fully in stock" so existing gap tests are unaffected. */
     @BeforeEach
     public void setUp() {
-        shoppingListService = new ShoppingListService(plannedMealRepository);
+        shoppingListService = new ShoppingListService(plannedMealRepository, inventoryRepository);
+
+        // Guards against null: when(mock.findAllById(any())) itself primes the mock with a
+        // null argument before the overriding stub in individual tests is registered.
+        lenient().when(inventoryRepository.findAllById(any())).thenAnswer(invocation -> {
+            Collection<String> ids = invocation.getArgument(0);
+            if (ids == null) {
+                return List.of();
+            }
+            return ids.stream()
+                    .map(id -> new InventoryItem(id, null, HOUSE_ID, "item", "item", 999999d, LocalDate.of(2099, 1, 1), null))
+                    .collect(Collectors.toList());
+        });
     }
 
     @Test
@@ -152,5 +174,36 @@ public class ShoppingListServiceTest {
         assertThat(shoppingList.getItems(), containsInAnyOrder(
                 new RecipeIngredient("flour", "g", 200d),
                 new RecipeIngredient("flour", "handfuls", 2d)));
+    }
+
+    @Test
+    @DisplayName("reinstates the full gap when the allocated inventory item was since deleted (binned/eaten to nothing)")
+    public void shouldIgnoreAllocationsToDeletedInventoryItems() {
+        var plannedIngredient = new PlannedIngredient(new RecipeIngredient("bread", "item", 10d),
+                List.of(new InventoryAllocation("item-1", "111", 10d)));
+        var meal = new PlannedMeal(HOUSE_ID, null, "Dinner", date, List.of(plannedIngredient));
+        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate)).thenReturn(List.of(meal));
+        // item-1 no longer exists (deleted when it was binned/consumed) — findAllById returns nothing for it
+        when(inventoryRepository.findAllById(any())).thenReturn(List.of());
+
+        var shoppingList = shoppingListService.generateShoppingList(HOUSE_ID, startDate, endDate);
+
+        assertThat(shoppingList.getItems(), contains(new RecipeIngredient("bread", "item", 10d)));
+    }
+
+    @Test
+    @DisplayName("caps a stale allocation by the source item's current remaining, not its snapshot amount")
+    public void shouldCapAllocationByCurrentRemaining() {
+        var plannedIngredient = new PlannedIngredient(new RecipeIngredient("bread", "item", 10d),
+                List.of(new InventoryAllocation("item-1", "111", 10d)));
+        var meal = new PlannedMeal(HOUSE_ID, null, "Dinner", date, List.of(plannedIngredient));
+        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate)).thenReturn(List.of(meal));
+        // item-1 still exists but has since been partially consumed elsewhere — only 3 remain
+        when(inventoryRepository.findAllById(any()))
+                .thenReturn(List.of(new InventoryItem("item-1", null, HOUSE_ID, "bread", "item", 10d, 3d, LocalDate.of(2099, 1, 1), null)));
+
+        var shoppingList = shoppingListService.generateShoppingList(HOUSE_ID, startDate, endDate);
+
+        assertThat(shoppingList.getItems(), contains(new RecipeIngredient("bread", "item", 7d)));
     }
 }

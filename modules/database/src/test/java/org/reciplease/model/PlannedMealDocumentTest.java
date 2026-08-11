@@ -26,7 +26,7 @@ class PlannedMealDocumentTest {
         assertThat(document.getRecipeId(), is("recipe-1"));
         assertThat(document.getName(), is("Dinner"));
         assertThat(document.getDate(), is(LocalDate.of(2026, 6, 6)));
-        assertThat(document.getItems().get(0).toModel(), is(item));
+        assertThat(document.getItems().getFirst().toModel(), is(item));
     }
 
     @Test

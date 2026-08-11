@@ -146,7 +146,7 @@ class InventoryControllerTest {
             var updated = item.withId(item.id());
 
             when(inventoryService.findById(item.id())).thenReturn(Optional.of(item));
-            when(inventoryService.update(item.id(), updates)).thenReturn(updated);
+            when(inventoryService.update(item.id(), updates)).thenReturn(Optional.of(updated));
 
             mockMvc.perform(put("/api/inventory/{uuid}", item.id())
                             .with(csrf())
@@ -162,6 +162,29 @@ class InventoryControllerTest {
                     .andExpect(status().isOk());
 
             verify(inventoryService).update(item.id(), updates);
+        }
+
+        @Test
+        @DisplayName("should 204 when the update drives remaining to zero (item archived and removed)")
+        void updateToZeroRemaining() throws Exception {
+            var updates = new InventoryItem(null, null, HOUSE_ID, "bread", "item", 12d, 0d, LocalDate.of(2020, Month.JANUARY, 5), "0123456789012");
+
+            when(inventoryService.findById(item.id())).thenReturn(Optional.of(item));
+            when(inventoryService.update(item.id(), updates)).thenReturn(Optional.empty());
+
+            mockMvc.perform(put("/api/inventory/{uuid}", item.id())
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {
+                                      "name": "bread",
+                                      "measure": "item",
+                                      "expiration": "2020-01-05",
+                                      "amount": 12.0,
+                                      "remaining": 0.0,
+                                      "barcode": "0123456789012"
+                                    }"""))
+                    .andExpect(status().isNoContent());
         }
 
         @Test

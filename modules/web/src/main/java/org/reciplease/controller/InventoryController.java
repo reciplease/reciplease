@@ -48,8 +48,10 @@ public class InventoryController {
             return ResponseEntity.notFound().build();
         }
 
-        final var updated = inventoryService.update(uuid, itemDto.toEntity(houseAccess.requireHouseId()));
-        return ResponseEntity.ok(InventoryItemDto.from(updated));
+        return inventoryService.update(uuid, itemDto.toEntity(houseAccess.requireHouseId()))
+                .map(InventoryItemDto::from)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @DeleteMapping("{uuid}")

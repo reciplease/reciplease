@@ -29,7 +29,7 @@ public class InventoryService {
     // mean to change other fields must resend the item's current `remaining` (InventoryItem's
     // constructor otherwise defaults a missing one to `amount`, which would wipe out how much
     // has been used).
-    public InventoryItem update(final String id, final InventoryItem updates) {
+    public Optional<InventoryItem> update(final String id, final InventoryItem updates) {
         final var existing = inventoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Inventory item does not exist"));
 
@@ -37,7 +37,7 @@ public class InventoryService {
                 updates.amount(), updates.remaining(), updates.expiration(), updates.barcode(), updates.image(),
                 existing.createdAt(), existing.updatedAt());
 
-        return inventoryRepository.save(merged);
+        return saveOrArchive(merged);
     }
 
     public Optional<InventoryItem> findById(final String id) {
@@ -77,11 +77,33 @@ public class InventoryService {
         inventoryRepository.deleteById(id);
     }
 
-    /** Reduces {@code remaining} by {@code amount}, clamped at zero rather than going negative. */
-    public InventoryItem consume(final String id, final Double amount) {
+    /**
+     * Reduces {@code remaining} by {@code amount}, clamped at zero rather than going negative.
+     * Empty return means the item was fully consumed and has been deleted (see {@link
+     * #saveOrArchive}) rather than left behind as a live zero-remaining record.
+     */
+    public Optional<InventoryItem> consume(final String id, final Double amount) {
         final var existing = inventoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Inventory item does not exist"));
 
-        return inventoryRepository.save(existing.withRemaining(Math.max(0, existing.remaining() - amount)));
+        return saveOrArchive(existing.withRemaining(Math.max(0, existing.remaining() - amount)));
+    }
+
+    /** One-off cleanup for items already sitting at zero remaining from before this behavior existed. */
+    public void archiveAllZeroRemainingItems() {
+        inventoryRepository.findAllZeroRemaining().forEach(item -> inventoryRepository.deleteById(item.id()));
+    }
+
+    /**
+     * An item with nothing left has no reason to stay in the live pantry list — deleting it
+     * (which archives a snapshot at the repository layer) keeps that list from accumulating
+     * zeroed-out rows forever.
+     */
+    private Optional<InventoryItem> saveOrArchive(final InventoryItem item) {
+        if (item.remaining() <= 0) {
+            inventoryRepository.deleteById(item.id());
+            return Optional.empty();
+        }
+        return Optional.of(inventoryRepository.save(item));
     }
 }

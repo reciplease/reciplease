@@ -1,22 +1,27 @@
 package org.reciplease.service;
 
 import lombok.RequiredArgsConstructor;
+import org.reciplease.model.InventoryAllocation;
+import org.reciplease.model.InventoryItem;
 import org.reciplease.model.Measure;
 import org.reciplease.model.PlannedIngredient;
 import org.reciplease.model.RecipeIngredient;
 import org.reciplease.model.ShoppingList;
+import org.reciplease.repository.InventoryRepository;
 import org.reciplease.repository.PlannedMealRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class ShoppingListService {
     private final PlannedMealRepository plannedMealRepository;
+    private final InventoryRepository inventoryRepository;
 
     /**
      * Builds a shopping list for a date range: ingredients with the same name and a convertible
@@ -29,12 +34,16 @@ public class ShoppingListService {
      * don't need buying.
      */
     public ShoppingList generateShoppingList(final String houseId, final LocalDate start, final LocalDate end) {
-        var items = plannedMealRepository.findByDateIsBetween(houseId, start, end).stream()
+        var plannedIngredients = plannedMealRepository.findByDateIsBetween(houseId, start, end).stream()
                 .flatMap(meal -> meal.items().stream())
-                .collect(Collectors.groupingBy(item -> keyFor(item.ingredient())));
+                .collect(Collectors.toList());
 
-        var gaps = items.entrySet().stream()
-                .map(entry -> toGap(entry.getKey(), entry.getValue()))
+        var remainingByInventoryItemId = remainingByInventoryItemId(plannedIngredients);
+
+        var gaps = plannedIngredients.stream()
+                .collect(Collectors.groupingBy(item -> keyFor(item.ingredient())))
+                .entrySet().stream()
+                .map(entry -> toGap(entry.getKey(), entry.getValue(), remainingByInventoryItemId))
                 .filter(ingredient -> ingredient != null)
                 .sorted(Comparator.comparing(RecipeIngredient::name))
                 .collect(Collectors.toList());
@@ -42,15 +51,33 @@ public class ShoppingListService {
         return new ShoppingList(gaps);
     }
 
-    private RecipeIngredient toGap(final Key key, final List<PlannedIngredient> plannedIngredients) {
+    /** Current {@code remaining} per allocated inventory item id — missing/deleted items count as 0. */
+    private Map<String, Double> remainingByInventoryItemId(final List<PlannedIngredient> plannedIngredients) {
+        var ids = plannedIngredients.stream()
+                .flatMap(item -> item.allocations().stream())
+                .map(allocation -> allocation.inventoryItemId())
+                .collect(Collectors.toSet());
+
+        return inventoryRepository.findAllById(ids).stream()
+                .collect(Collectors.toMap(InventoryItem::id, InventoryItem::remaining));
+    }
+
+    private RecipeIngredient toGap(final Key key, final List<PlannedIngredient> plannedIngredients, final Map<String, Double> remainingByInventoryItemId) {
         var desired = plannedIngredients.stream().mapToDouble(this::toBaseAmount).sum();
         var covered = plannedIngredients.stream()
-                .mapToDouble(item -> item.allocations().stream().mapToDouble(allocation -> allocation.amount()).sum()
-                        * conversionFactor(item.ingredient().measure()))
+                .mapToDouble(item -> item.allocations().stream()
+                        .mapToDouble(allocation -> coveredAmount(allocation, remainingByInventoryItemId))
+                        .sum() * conversionFactor(item.ingredient().measure()))
                 .sum();
 
         var gap = desired - covered;
         return gap > 0 ? new RecipeIngredient(key.name(), key.displayMeasure(), gap) : null;
+    }
+
+    /** Caps a snapshotted allocation by however much of the source item is actually still left. */
+    private double coveredAmount(final InventoryAllocation allocation, final Map<String, Double> remainingByInventoryItemId) {
+        var remaining = remainingByInventoryItemId.getOrDefault(allocation.inventoryItemId(), 0d);
+        return Math.max(0, Math.min(allocation.amount(), remaining));
     }
 
     private double toBaseAmount(final PlannedIngredient item) {
