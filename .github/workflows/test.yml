@@ -33,6 +33,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      # Flapdoodle downloads a real mongod binary (~300MB) the first time any
+      # @DataMongoTest runs, to ~/.embedmongo — cache it the same way the
+      # Maven repo is cached, keyed on the pom.xml hash since that's what
+      # pins the flapdoodle/embedded-mongo version.
+      - name: Cache embedded MongoDB binary
+        uses: actions/cache@v5
+        with:
+          path: ~/.embedmongo
+          key: ${{ runner.os }}-embedmongo-${{ hashFiles('pom.xml') }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-embedmongo-
+
       - name: Download dependencies
         run: make init
 
