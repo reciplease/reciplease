@@ -30,6 +30,8 @@ public class InventoryItemDto {
     String barcode;
     byte[] image;
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    Instant createdAt;
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     Instant updatedAt;
 
     public static InventoryItemDto from(final InventoryItem inventoryItem) {
@@ -43,6 +45,7 @@ public class InventoryItemDto {
                 .expiration(inventoryItem.expiration())
                 .barcode(inventoryItem.barcode())
                 .image(inventoryItem.image())
+                .createdAt(inventoryItem.createdAt())
                 .updatedAt(inventoryItem.updatedAt())
                 .build();
     }

@@ -32,6 +32,7 @@ class InventoryItemDtoTest {
         assertThat(itemDto.getExpiration(), is(item.expiration()));
         assertThat(itemDto.getBarcode(), is(item.barcode()));
         assertThat(itemDto.getImage(), is(equalTo(item.image())));
+        assertThat(itemDto.getCreatedAt(), is(item.createdAt()));
         assertThat(itemDto.getUpdatedAt(), is(item.updatedAt()));
     }
 
