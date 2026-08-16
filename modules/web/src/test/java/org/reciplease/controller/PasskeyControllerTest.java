@@ -1,5 +1,6 @@
 package org.reciplease.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reciplease.configuration.MethodSecurityTestSupport;
 import org.reciplease.configuration.PasskeyConfig;
@@ -10,6 +11,7 @@ import org.reciplease.model.User;
 import org.reciplease.repository.IdentityConflictException;
 import org.reciplease.repository.UserRepository;
 import org.reciplease.repository.WebAuthnChallengeLedger;
+import org.reciplease.service.RefreshTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -65,6 +67,14 @@ class PasskeyControllerTest {
     private WebAuthnChallengeLedger challengeLedger;
     @MockitoBean
     private UserRepository userRepository;
+    @MockitoBean
+    private RefreshTokenService refreshTokenService;
+
+    @BeforeEach
+    void stubRefreshTokenIssuance() {
+        when(refreshTokenService.issue(any())).thenReturn(
+                new RefreshTokenService.IssuedRefreshToken("issued-raw-refresh-token", Instant.now().plusSeconds(3600)));
+    }
 
     private static PublicKeyCredentialCreationOptions creationOptions(final String challenge) {
         return PublicKeyCredentialCreationOptions.builder()
@@ -139,10 +149,12 @@ class PasskeyControllerTest {
                         .content(registerFinishJson("Y2hhbGxlbmdlLTE", "My device")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value("new-user-id"))
-                .andExpect(jsonPath("$.token").isNotEmpty());
+                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.refreshToken").value("issued-raw-refresh-token"));
 
         verify(userRepository).save(new User("new-user-id", null));
         verify(userRepository).linkIdentity("new-user-id", "passkey", "Y3JlZGVudGlhbC0x", null);
+        verify(refreshTokenService).issue("new-user-id");
     }
 
     @Test
@@ -268,7 +280,10 @@ class PasskeyControllerTest {
                         .content(loginFinishJson("Y2hhbGxlbmdlLTI")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value("user-1"))
-                .andExpect(jsonPath("$.handle").value("my-handle"));
+                .andExpect(jsonPath("$.handle").value("my-handle"))
+                .andExpect(jsonPath("$.refreshToken").value("issued-raw-refresh-token"));
+
+        verify(refreshTokenService).issue("user-1");
     }
 
     @Test

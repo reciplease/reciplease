@@ -9,6 +9,7 @@ import org.reciplease.model.User;
 import org.reciplease.repository.IdentityConflictException;
 import org.reciplease.repository.UserRepository;
 import org.reciplease.repository.WebAuthnChallengeLedger;
+import org.reciplease.service.RefreshTokenService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -90,6 +91,7 @@ public class PasskeyController {
     private final PublicKeyCredentialRpEntity passkeyRelyingParty;
     private final UserRepository userRepository;
     private final ReciplaseJwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
     @PostMapping("signup/options")
     public PublicKeyCredentialCreationOptions signupOptions() {
@@ -114,7 +116,8 @@ public class PasskeyController {
             return ResponseEntity.status(409).build();
         }
 
-        return ResponseEntity.ok(new ExchangeResponse(jwtService.mint(userId), userId, null));
+        final var refreshToken = refreshTokenService.issue(userId).rawToken();
+        return ResponseEntity.ok(new ExchangeResponse(jwtService.mint(userId), refreshToken, userId, null));
     }
 
     @PostMapping("register/options")
@@ -175,7 +178,8 @@ public class PasskeyController {
 
         final var userId = toUserId(userEntity.getId());
         final var handle = userRepository.findById(userId).map(User::handle).orElse(null);
-        return ResponseEntity.ok(new ExchangeResponse(jwtService.mint(userId), userId, handle));
+        final var refreshToken = refreshTokenService.issue(userId).rawToken();
+        return ResponseEntity.ok(new ExchangeResponse(jwtService.mint(userId), refreshToken, userId, handle));
     }
 
     // These values match what Webauthn4JRelyingPartyOperations.createPublicKeyCredentialCreationOptions

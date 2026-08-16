@@ -24,12 +24,14 @@ import java.util.Optional;
 @Component
 public class ReciplaseJwtService {
 
-    private static final Duration EXPIRY = Duration.ofHours(24);
-
     private final SecretKey signingKey;
+    private final Duration accessTokenTtl;
 
-    public ReciplaseJwtService(@Value("${reciplease.jwt.signing-secret}") final String signingSecret) {
+    public ReciplaseJwtService(
+            @Value("${reciplease.jwt.signing-secret}") final String signingSecret,
+            @Value("${reciplease.jwt.access-token-ttl:PT20M}") final Duration accessTokenTtl) {
         this.signingKey = Keys.hmacShaKeyFor(signingSecret.getBytes(StandardCharsets.UTF_8));
+        this.accessTokenTtl = accessTokenTtl;
     }
 
     /**
@@ -42,7 +44,7 @@ public class ReciplaseJwtService {
         return Jwts.builder()
                 .subject(userId)
                 .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plus(EXPIRY)))
+                .expiration(Date.from(now.plus(accessTokenTtl)))
                 .signWith(signingKey)
                 .compact();
     }

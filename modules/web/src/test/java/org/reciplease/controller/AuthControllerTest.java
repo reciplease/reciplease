@@ -1,27 +1,29 @@
 package org.reciplease.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reciplease.configuration.MethodSecurityTestSupport;
 import org.reciplease.configuration.ReciplaseJwtService;
 import org.reciplease.model.User;
 import org.reciplease.repository.IdentityConflictException;
 import org.reciplease.repository.UserRepository;
+import org.reciplease.service.RefreshTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -38,8 +40,17 @@ class AuthControllerTest {
     @MockitoBean
     private UserRepository userRepository;
 
+    @MockitoBean
+    private RefreshTokenService refreshTokenService;
+
     @Autowired
     private ReciplaseJwtService jwtService;
+
+    @BeforeEach
+    void stubRefreshTokenIssuance() {
+        when(refreshTokenService.issue(any())).thenReturn(
+                new RefreshTokenService.IssuedRefreshToken("issued-raw-refresh-token", Instant.parse("2026-02-01T00:00:00Z")));
+    }
 
     @Test
     void rejectsAMissingSharedSecret() throws Exception {
@@ -71,11 +82,13 @@ class AuthControllerTest {
                         .content("""
                                 {"provider": "google", "providerId": "google-sub-1", "email": "me@gmail.com"}"""))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId", org.hamcrest.Matchers.is("user-1")))
+                .andExpect(jsonPath("$.userId", is("user-1")))
                 .andExpect(jsonPath("$.handle").doesNotExist())
-                .andExpect(jsonPath("$.token", org.hamcrest.Matchers.notNullValue()));
+                .andExpect(jsonPath("$.token", org.hamcrest.Matchers.notNullValue()))
+                .andExpect(jsonPath("$.refreshToken", is("issued-raw-refresh-token")));
 
         verify(userRepository).createWithIdentity("google", "google-sub-1", "me@gmail.com");
+        verify(refreshTokenService).issue("user-1");
     }
 
     @Test
@@ -88,10 +101,12 @@ class AuthControllerTest {
                         .content("""
                                 {"provider": "google", "providerId": "google-sub-1"}"""))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId", org.hamcrest.Matchers.is("user-1")))
-                .andExpect(jsonPath("$.handle", org.hamcrest.Matchers.is("my-handle")));
+                .andExpect(jsonPath("$.userId", is("user-1")))
+                .andExpect(jsonPath("$.handle", is("my-handle")))
+                .andExpect(jsonPath("$.refreshToken", is("issued-raw-refresh-token")));
 
         verify(userRepository, never()).createWithIdentity(any(), any(), any());
+        verify(refreshTokenService).issue("user-1");
     }
 
     @Test
@@ -133,9 +148,11 @@ class AuthControllerTest {
                         .content("""
                                 {"provider": "github", "providerId": "github-sub-1", "linkToken": "%s", "email": "me@github.com"}""".formatted(linkToken)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId", org.hamcrest.Matchers.is("user-1")));
+                .andExpect(jsonPath("$.userId", is("user-1")))
+                .andExpect(jsonPath("$.refreshToken").doesNotExist());
 
         verify(userRepository).linkIdentity("user-1", "github", "github-sub-1", "me@github.com");
+        verify(refreshTokenService, never()).issue(any());
     }
 
     @Test
@@ -153,46 +170,58 @@ class AuthControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user-1", authorities = "ROLE_RECIPLEASE")
-    void refreshMintsAFreshTokenForTheAuthenticatedUser() throws Exception {
+    void refreshWithNoCookieIsUnauthorized() throws Exception {
+        mockMvc.perform(post("/api/auth/refresh"))
+                .andExpect(status().isUnauthorized());
+
+        verify(refreshTokenService, never()).rotate(any());
+    }
+
+    @Test
+    void refreshWithAValidCookieRotatesAndReturnsAFreshExchangeResponse() throws Exception {
+        when(refreshTokenService.rotate("valid-refresh-cookie")).thenReturn(
+                new RefreshTokenService.Rotated("user-1", "rotated-raw-refresh-token", Instant.parse("2026-03-01T00:00:00Z")));
         when(userRepository.findById("user-1")).thenReturn(Optional.of(new User("user-1", "my-handle")));
 
-        mockMvc.perform(post("/api/auth/refresh").with(csrf()))
+        mockMvc.perform(post("/api/auth/refresh").cookie(new jakarta.servlet.http.Cookie("reciplease-refresh", "valid-refresh-cookie")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId", is("user-1")))
                 .andExpect(jsonPath("$.handle", is("my-handle")))
-                .andExpect(jsonPath("$.token", org.hamcrest.Matchers.notNullValue()));
+                .andExpect(jsonPath("$.token", org.hamcrest.Matchers.notNullValue()))
+                .andExpect(jsonPath("$.refreshToken", is("rotated-raw-refresh-token")));
+
+        verify(refreshTokenService).rotate("valid-refresh-cookie");
     }
 
     @Test
-    @WithMockUser(username = "user-1", authorities = "ROLE_RECIPLEASE")
-    void refreshedTokenParsesBackToTheSameUser() throws Exception {
-        when(userRepository.findById("user-1")).thenReturn(Optional.of(new User("user-1", "my-handle")));
+    void refreshWithReuseDetectedIsUnauthorized() throws Exception {
+        when(refreshTokenService.rotate("reused-refresh-cookie")).thenReturn(new RefreshTokenService.ReuseDetected("user-1"));
 
-        final var response = mockMvc.perform(post("/api/auth/refresh").with(csrf()))
-                .andReturn().getResponse().getContentAsString();
-        final var token = com.jayway.jsonpath.JsonPath.<String>read(response, "$.token");
-
-        org.assertj.core.api.Assertions.assertThat(jwtService.parse(token)).contains("user-1");
-    }
-
-    @Test
-    @WithMockUser(username = "user-1", authorities = "ROLE_RECIPLEASE")
-    void refreshReturnsANullHandleWhenNotSet() throws Exception {
-        when(userRepository.findById("user-1")).thenReturn(Optional.of(new User("user-1", null)));
-
-        mockMvc.perform(post("/api/auth/refresh").with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.handle").doesNotExist());
-    }
-
-    @Test
-    void refreshRequiresAuthentication() throws Exception {
-        // No @WithMockUser here (unlike the tests above) — the security context is empty,
-        // matching an unauthenticated caller, distinct from @WithAnonymousUser's populated
-        // AnonymousAuthenticationToken (which @PreAuthorize("isAuthenticated()") treats as a
-        // 403, not a 401 — see MethodSecurityTestSupport).
-        mockMvc.perform(post("/api/auth/refresh").with(csrf()))
+        mockMvc.perform(post("/api/auth/refresh").cookie(new jakarta.servlet.http.Cookie("reciplease-refresh", "reused-refresh-cookie")))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void refreshWithAnInvalidCookieIsUnauthorized() throws Exception {
+        when(refreshTokenService.rotate("bad-refresh-cookie")).thenReturn(new RefreshTokenService.Invalid());
+
+        mockMvc.perform(post("/api/auth/refresh").cookie(new jakarta.servlet.http.Cookie("reciplease-refresh", "bad-refresh-cookie")))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void logoutWithCookiePresentRevokesTheRefreshToken() throws Exception {
+        mockMvc.perform(post("/api/auth/logout").cookie(new jakarta.servlet.http.Cookie("reciplease-refresh", "some-refresh-cookie")))
+                .andExpect(status().isOk());
+
+        verify(refreshTokenService).revokeByRawToken("some-refresh-cookie");
+    }
+
+    @Test
+    void logoutWithoutCookieDoesNotAttemptToRevokeAnything() throws Exception {
+        mockMvc.perform(post("/api/auth/logout"))
+                .andExpect(status().isOk());
+
+        verify(refreshTokenService, never()).revokeByRawToken(any());
     }
 }

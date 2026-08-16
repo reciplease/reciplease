@@ -14,7 +14,8 @@ import static org.hamcrest.Matchers.is;
 
 class ReciplaseJwtServiceTest {
 
-    private final ReciplaseJwtService jwtService = new ReciplaseJwtService("a-sufficiently-long-test-signing-secret");
+    private final ReciplaseJwtService jwtService =
+            new ReciplaseJwtService("a-sufficiently-long-test-signing-secret", Duration.ofHours(24));
 
     @Test
     void mintedTokenRoundTripsToTheSameUserId() {
@@ -35,7 +36,7 @@ class ReciplaseJwtServiceTest {
 
     @Test
     void parseReturnsEmptyForATokenSignedWithADifferentSecret() {
-        var otherService = new ReciplaseJwtService("a-completely-different-test-signing-secret");
+        var otherService = new ReciplaseJwtService("a-completely-different-test-signing-secret", Duration.ofHours(24));
         var token = otherService.mint("user-1");
 
         var parsed = jwtService.parse(token);
@@ -57,5 +58,23 @@ class ReciplaseJwtServiceTest {
         var parsed = jwtService.parse(expired);
 
         assertThat(parsed.isPresent(), is(false));
+    }
+
+    @Test
+    void mintRespectsTheConfiguredAccessTokenTtl() {
+        var shortLivedService = new ReciplaseJwtService("a-sufficiently-long-test-signing-secret", Duration.ofMinutes(20));
+        var before = Instant.now();
+
+        var token = shortLivedService.mint("user-1");
+
+        var claims = Jwts.parser()
+                .verifyWith(Keys.hmacShaKeyFor("a-sufficiently-long-test-signing-secret".getBytes(StandardCharsets.UTF_8)))
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        var expiry = claims.getExpiration().toInstant();
+
+        assertThat(expiry.isAfter(before.plus(Duration.ofMinutes(19))), is(true));
+        assertThat(expiry.isBefore(before.plus(Duration.ofMinutes(21))), is(true));
     }
 }

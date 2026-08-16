@@ -3,6 +3,8 @@ reciplease:
     # Fake, non-secret default so local/dev runs work without setting an env var.
     # NEVER use this value outside local development.
     signing-secret: local-dev-only-secret-do-not-use-in-prod
+    access-token-ttl: PT20M
+    refresh-token-ttl: P30D
   webauthn:
     rp-id: localhost
     rp-name: Reciplease

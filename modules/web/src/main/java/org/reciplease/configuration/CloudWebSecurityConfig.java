@@ -38,13 +38,17 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
  * <p>
  * That "invalid token yields 401 before authorization runs" behaviour is exactly why the truly
  * anonymous endpoints — {@code /api/auth/exchange} (how a caller obtains a Reciplease JWT in the
- * first place, authenticated via the {@code X-Internal-Secret} header instead) and the passkey
- * signup/login ceremonies (which must work with no session at all) — get their own filter chain
- * ({@link #anonymousFilterChain}) with no {@code oauth2ResourceServer} configured, rather than
- * just a {@code permitAll()} rule in the main one: a stale/expired {@code reciplease-session}
- * cookie forwarded alongside an otherwise-anonymous request (e.g. by a signed-out user with a
- * lingering expired session) must not be able to 401 it — {@code BearerTokenAuthenticationFilter}
- * runs ahead of {@code authorizeHttpRequests}, so {@code permitAll()} alone doesn't help.
+ * first place, authenticated via the {@code X-Internal-Secret} header instead), {@code
+ * /api/auth/refresh}/{@code /api/auth/logout} (authenticated via the {@code reciplease-refresh}
+ * cookie instead of a bearer access token — the whole point of a refresh token is to recover a
+ * session once the access token has expired, so requiring a still-valid one would defeat it),
+ * and the passkey signup/login ceremonies (which must work with no session at all) — get their
+ * own filter chain ({@link #anonymousFilterChain}) with no {@code oauth2ResourceServer}
+ * configured, rather than just a {@code permitAll()} rule in the main one: a stale/expired
+ * {@code reciplease-session} cookie forwarded alongside an otherwise-anonymous request (e.g. by
+ * a signed-out user with a lingering expired session) must not be able to 401 it — {@code
+ * BearerTokenAuthenticationFilter} runs ahead of {@code authorizeHttpRequests}, so {@code
+ * permitAll()} alone doesn't help.
  */
 @Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
@@ -69,7 +73,9 @@ public class CloudWebSecurityConfig {
     @Order(1)
     public SecurityFilterChain anonymousFilterChain(final HttpSecurity http) throws Exception {
         return http
-                .securityMatcher("/api/auth/exchange", "/api/passkey/signup/**", "/api/passkey/login/**")
+                .securityMatcher(
+                        "/api/auth/exchange", "/api/auth/refresh", "/api/auth/logout",
+                        "/api/passkey/signup/**", "/api/passkey/login/**")
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .csrf(csrf -> csrf.disable())

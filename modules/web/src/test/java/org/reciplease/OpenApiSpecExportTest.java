@@ -19,6 +19,7 @@ import org.reciplease.service.InviteService;
 import org.reciplease.service.PendingInventoryService;
 import org.reciplease.service.PlannedMealService;
 import org.reciplease.service.RecipeService;
+import org.reciplease.service.RefreshTokenService;
 import org.reciplease.service.ShoppingListService;
 import org.springdoc.core.configuration.SpringDocConfiguration;
 import org.springdoc.core.properties.SpringDocConfigProperties;
@@ -97,6 +98,8 @@ class OpenApiSpecExportTest {
     private FoodSearchService foodSearchService;
     @MockitoBean
     private ApiKeyService apiKeyService;
+    @MockitoBean
+    private RefreshTokenService refreshTokenService;
 
     @Test
     void exportsTheLiveSpecToTargetOpenapiJson() throws Exception {
