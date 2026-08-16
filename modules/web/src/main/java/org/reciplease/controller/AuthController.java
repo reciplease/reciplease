@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,6 +41,11 @@ import java.security.MessageDigest;
  * {@code /api/auth/logout}, also run outside the normal bearer-JWT filter chain: a still-valid
  * access token is not required (and a stale/expired one must not 401 them), since the whole
  * point of a refresh token is to recover a session once the access token has expired.
+ * <p>
+ * {@code /api/auth/refresh-token} is the opposite case: a caller with a still-valid access token
+ * but no refresh token at all (e.g. a session that predates refresh-token support) can backfill
+ * one without a full re-login. Unlike {@code exchange}/{@code refresh}, it runs through the
+ * normal bearer-JWT filter chain and requires the caller to already be authenticated.
  */
 @RestController
 @RequestMapping("api/auth")
@@ -123,6 +130,22 @@ public class AuthController {
         final var handle = userRepository.findById(rotated.userId()).map(User::handle).orElse(null);
         return ResponseEntity.ok(new ExchangeResponse(
                 jwtService.mint(rotated.userId()), rotated.rawToken(), rotated.userId(), handle));
+    }
+
+    /**
+     * Backfills a refresh token for an already-authenticated caller who doesn't have one yet —
+     * chiefly a session that predates refresh-token support existing at all, which otherwise has
+     * no way to obtain one short of a full re-login once its access token expires. Runs through
+     * the normal bearer-JWT filter chain (unlike {@link #exchange}/{@link #refresh}), so it
+     * requires a currently-valid access token to begin with.
+     */
+    @PostMapping("refresh-token")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ExchangeResponse> issueRefreshToken() {
+        final String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        final var issued = refreshTokenService.issue(userId);
+        final var handle = userRepository.findById(userId).map(User::handle).orElse(null);
+        return ResponseEntity.ok(new ExchangeResponse(jwtService.mint(userId), issued.rawToken(), userId, handle));
     }
 
     /** Revokes the refresh token carried by the {@code reciplease-refresh} cookie, if any. */
