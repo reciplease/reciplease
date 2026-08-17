@@ -33,7 +33,7 @@ public class InventoryService {
         final var existing = inventoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Inventory item does not exist"));
 
-        final var merged = new InventoryItem(existing.id(), existing.createdBy(), existing.houseId(), updates.name(), updates.measure(),
+        final var merged = new InventoryItem(existing.id(), existing.createdBy(), existing.houseId(), updates.name(), updates.brand(), updates.measure(),
                 updates.amount(), updates.remaining(), updates.expiration(), updates.barcode(), updates.image(),
                 existing.createdAt(), existing.updatedAt());
 

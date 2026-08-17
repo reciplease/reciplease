@@ -69,7 +69,7 @@ public class PendingInventoryService {
         // Mongo auditing only populates @CreatedBy/@CreatedDate on inserts, and reusing the
         // pending id makes this save an upsert — so creation metadata is carried over from the
         // pending capture explicitly (the capture is when this item came into existence).
-        final var merged = new InventoryItem(pendingId, pending.createdBy(), item.houseId(), item.name(), item.measure(),
+        final var merged = new InventoryItem(pendingId, pending.createdBy(), item.houseId(), item.name(), item.brand(), item.measure(),
                 item.amount(), item.remaining(), item.expiration(), item.barcode(), item.image(),
                 pending.createdAt(), null);
 

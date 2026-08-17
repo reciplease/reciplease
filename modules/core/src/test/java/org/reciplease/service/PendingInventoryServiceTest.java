@@ -46,7 +46,7 @@ class PendingInventoryServiceTest {
     @Test
     @DisplayName("should save pending item")
     void save() {
-        var pending = new PendingInventoryItem(null, null, HOUSE_ID, "0123456789012", new byte[]{1}, new byte[]{2});
+        var pending = new PendingInventoryItem(null, null, HOUSE_ID, "0123456789012".getBytes(), new byte[]{1}, new byte[]{2});
         var saved = pending.withId(UUID.randomUUID().toString());
 
         when(pendingInventoryRepository.save(pending)).thenReturn(saved);
@@ -70,7 +70,7 @@ class PendingInventoryServiceTest {
     @Test
     @DisplayName("should list all pending items for a house")
     void findAll() {
-        var pending = new PendingInventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "0123456789012", null, null);
+        var pending = new PendingInventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "0123456789012".getBytes(), null, null);
         when(pendingInventoryRepository.findAllByHouseId(HOUSE_ID)).thenReturn(List.of(pending));
         when(inventoryRepository.findById(pending.id())).thenReturn(Optional.empty());
 
@@ -82,9 +82,9 @@ class PendingInventoryServiceTest {
     @Test
     @DisplayName("findAll silently deletes and excludes pending items already completed into inventory")
     void findAllSweepsCompletedPendingItems() {
-        var pending = new PendingInventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "0123456789012", null, null);
-        var alreadyCompleted = new PendingInventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "9999999999999", null, null);
-        var completedItem = new InventoryItem(alreadyCompleted.id(), null, HOUSE_ID, "bread", "ITEMS", 10d, LocalDate.now(), "9999999999999");
+        var pending = new PendingInventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "0123456789012".getBytes(), null, null);
+        var alreadyCompleted = new PendingInventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "9999999999999".getBytes(), null, null);
+        var completedItem = new InventoryItem(alreadyCompleted.id(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, LocalDate.now(), "9999999999999");
 
         when(pendingInventoryRepository.findAllByHouseId(HOUSE_ID)).thenReturn(List.of(pending, alreadyCompleted));
         when(inventoryRepository.findById(pending.id())).thenReturn(Optional.empty());
@@ -111,8 +111,8 @@ class PendingInventoryServiceTest {
     @DisplayName("complete saves the inventory item under the pending item's id, then deletes the pending item")
     void completeSavesThenDeletes() {
         var pendingId = UUID.randomUUID().toString();
-        var pending = new PendingInventoryItem(pendingId, null, HOUSE_ID, "0123456789012", null, null);
-        var item = new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 10d, LocalDate.now(), "0123456789012");
+        var pending = new PendingInventoryItem(pendingId, null, HOUSE_ID, "0123456789012".getBytes(), null, null);
+        var item = new InventoryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 10d, LocalDate.now(), "0123456789012");
         var savedItem = item.withId(pendingId);
 
         when(pendingInventoryRepository.findById(pendingId)).thenReturn(Optional.of(pending));
@@ -131,9 +131,9 @@ class PendingInventoryServiceTest {
     void completeCarriesAuditFields() {
         var pendingId = UUID.randomUUID().toString();
         var capturedAt = Instant.parse("2026-07-01T10:15:30Z");
-        var pending = new PendingInventoryItem(pendingId, "user-1", HOUSE_ID, "0123456789012", null, null, capturedAt, capturedAt);
-        var item = new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 10d, LocalDate.now(), "0123456789012");
-        var expectedSave = new InventoryItem(pendingId, "user-1", HOUSE_ID, item.name(), item.measure(),
+        var pending = new PendingInventoryItem(pendingId, "user-1", HOUSE_ID, "0123456789012".getBytes(), null, null, null, capturedAt, capturedAt);
+        var item = new InventoryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 10d, LocalDate.now(), "0123456789012");
+        var expectedSave = new InventoryItem(pendingId, "user-1", HOUSE_ID, item.name(), null, item.measure(),
                 item.amount(), item.remaining(), item.expiration(), item.barcode(), item.image(), capturedAt, null);
 
         when(pendingInventoryRepository.findById(pendingId)).thenReturn(Optional.of(pending));
@@ -149,9 +149,9 @@ class PendingInventoryServiceTest {
     @DisplayName("complete refuses to overwrite an inventory item belonging to another house")
     void completeRefusesCrossHouseOverwrite() {
         var pendingId = UUID.randomUUID().toString();
-        var pending = new PendingInventoryItem(pendingId, null, HOUSE_ID, "0123456789012", null, null);
-        var item = new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 10d, LocalDate.now(), "0123456789012");
-        var otherHouseItem = new InventoryItem(pendingId, null, "house-2", "milk", "LITRES", 1d, LocalDate.now(), null);
+        var pending = new PendingInventoryItem(pendingId, null, HOUSE_ID, "0123456789012".getBytes(), null, null);
+        var item = new InventoryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 10d, LocalDate.now(), "0123456789012");
+        var otherHouseItem = new InventoryItem(pendingId, null, "house-2", "milk", null, "LITRES", 1d, LocalDate.now(), null);
 
         when(pendingInventoryRepository.findById(pendingId)).thenReturn(Optional.of(pending));
         when(inventoryRepository.findById(pendingId)).thenReturn(Optional.of(otherHouseItem));
@@ -166,8 +166,8 @@ class PendingInventoryServiceTest {
     @DisplayName("complete overwrites a same-house inventory item under the same id (retry after a failed delete)")
     void completeRetriesSameHouseOverwrite() {
         var pendingId = UUID.randomUUID().toString();
-        var pending = new PendingInventoryItem(pendingId, null, HOUSE_ID, "0123456789012", null, null);
-        var item = new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 10d, LocalDate.now(), "0123456789012");
+        var pending = new PendingInventoryItem(pendingId, null, HOUSE_ID, "0123456789012".getBytes(), null, null);
+        var item = new InventoryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 10d, LocalDate.now(), "0123456789012");
         var previousAttempt = item.withId(pendingId);
 
         when(pendingInventoryRepository.findById(pendingId)).thenReturn(Optional.of(pending));
@@ -184,7 +184,7 @@ class PendingInventoryServiceTest {
     @DisplayName("complete throws when the pending item does not exist and saves nothing")
     void completeThrowsWhenPendingMissing() {
         var pendingId = UUID.randomUUID().toString();
-        var item = new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 10d, LocalDate.now(), null);
+        var item = new InventoryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 10d, LocalDate.now(), null);
         when(pendingInventoryRepository.findById(pendingId)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, () -> pendingInventoryService.complete(pendingId, item));

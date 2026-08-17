@@ -355,7 +355,7 @@ class PlannedMealControllerTest {
     @Test
     @DisplayName("returns inventory suggestions for an ingredient, scoped to a recipe")
     void suggestionsForRecipe() throws Exception {
-        var item = new InventoryItem("item-1", null, HOUSE_ID, "bread", "ITEMS", 5d, LocalDate.of(2026, 6, 30), "111");
+        var item = new InventoryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 5d, LocalDate.of(2026, 6, 30), "111");
 
         when(plannedMealService.suggestInventory(HOUSE_ID, "recipe-1", "bread")).thenReturn(List.of(item));
 
@@ -369,7 +369,7 @@ class PlannedMealControllerTest {
     @Test
     @DisplayName("returns inventory suggestions for an ingredient with no recipe given")
     void suggestionsWithoutRecipe() throws Exception {
-        var item = new InventoryItem("item-1", null, HOUSE_ID, "bread", "ITEMS", 5d, LocalDate.of(2026, 6, 30), "111");
+        var item = new InventoryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 5d, LocalDate.of(2026, 6, 30), "111");
 
         when(plannedMealService.suggestInventory(HOUSE_ID, null, "bread")).thenReturn(List.of(item));
 

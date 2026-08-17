@@ -56,7 +56,7 @@ public class ShoppingListServiceTest {
                 return List.of();
             }
             return ids.stream()
-                    .map(id -> new InventoryItem(id, null, HOUSE_ID, "item", "item", 999999d, LocalDate.of(2099, 1, 1), null))
+                    .map(id -> new InventoryItem(id, null, HOUSE_ID, "item", null, "item", 999999d, LocalDate.of(2099, 1, 1), null))
                     .collect(Collectors.toList());
         });
     }
@@ -200,7 +200,7 @@ public class ShoppingListServiceTest {
         when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate)).thenReturn(List.of(meal));
         // item-1 still exists but has since been partially consumed elsewhere — only 3 remain
         when(inventoryRepository.findAllById(any()))
-                .thenReturn(List.of(new InventoryItem("item-1", null, HOUSE_ID, "bread", "item", 10d, 3d, LocalDate.of(2099, 1, 1), null)));
+                .thenReturn(List.of(new InventoryItem("item-1", null, HOUSE_ID, "bread", null, "item", 10d, 3d, LocalDate.of(2099, 1, 1), null)));
 
         var shoppingList = shoppingListService.generateShoppingList(HOUSE_ID, startDate, endDate);
 

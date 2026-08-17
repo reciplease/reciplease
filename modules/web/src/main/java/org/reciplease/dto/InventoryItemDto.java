@@ -22,6 +22,7 @@ public class InventoryItemDto {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     String houseId;
     String name;
+    String brand;
     String measure;
     Double amount;
     Double remaining;
@@ -39,6 +40,7 @@ public class InventoryItemDto {
                 .uuid(inventoryItem.id())
                 .houseId(inventoryItem.houseId())
                 .name(inventoryItem.name())
+                .brand(inventoryItem.brand())
                 .measure(Measure.normalizeId(inventoryItem.measure()))
                 .amount(inventoryItem.amount())
                 .remaining(inventoryItem.remaining())
@@ -57,6 +59,6 @@ public class InventoryItemDto {
     // Mongo saves are upserts — a caller-chosen id could overwrite an arbitrary document.
     // Callers that need an id (update, complete) supply the path's already-checked one.
     public InventoryItem toEntity(final String houseId) {
-        return new InventoryItem(null, null, houseId, name, Measure.normalizeId(measure), amount, remaining, expiration, barcode, image);
+        return new InventoryItem(null, null, houseId, name, brand, Measure.normalizeId(measure), amount, remaining, expiration, barcode, image);
     }
 }

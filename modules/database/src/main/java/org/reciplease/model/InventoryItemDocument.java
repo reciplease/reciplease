@@ -24,6 +24,7 @@ public class InventoryItemDocument {
     private String id;
     private String houseId;
     private String name;
+    private String brand;
     private String measure;
     private Double amount;
     private Double remaining;
@@ -42,6 +43,7 @@ public class InventoryItemDocument {
                 .id(item.id())
                 .houseId(item.houseId())
                 .name(item.name())
+                .brand(item.brand())
                 .measure(item.measure())
                 .amount(item.amount())
                 .remaining(item.remaining())
@@ -56,8 +58,8 @@ public class InventoryItemDocument {
 
     // Documents saved before `remaining` existed have none stored; InventoryItem's own
     // constructor defaults a null `remaining` to `amount` (fully stocked), so nothing extra
-    // is needed here.
+    // is needed here. Same for `brand` — simply null on documents saved before it existed.
     public InventoryItem toModel() {
-        return new InventoryItem(id, createdBy, houseId, name, measure, amount, remaining, expiration, barcode, image, createdAt, updatedAt);
+        return new InventoryItem(id, createdBy, houseId, name, brand, measure, amount, remaining, expiration, barcode, image, createdAt, updatedAt);
     }
 }

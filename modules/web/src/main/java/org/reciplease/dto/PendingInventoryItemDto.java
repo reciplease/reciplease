@@ -18,7 +18,12 @@ public class PendingInventoryItemDto {
     String uuid;
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     String houseId;
-    String barcode;
+    byte[] barcodeImage;
+    // Read-only echo of a pre-existing decoded barcode for items captured before barcodeImage
+    // existed — see PendingInventoryItem.legacyBarcode. Never accepted on create (absent from
+    // toEntity below), so this can only ever be non-null on an item this API didn't create.
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    String legacyBarcode;
     byte[] expirationImage;
     byte[] measureImage;
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
@@ -28,7 +33,8 @@ public class PendingInventoryItemDto {
         return PendingInventoryItemDto.builder()
                 .uuid(item.id())
                 .houseId(item.houseId())
-                .barcode(item.barcode())
+                .barcodeImage(item.barcodeImage())
+                .legacyBarcode(item.legacyBarcode())
                 .expirationImage(item.expirationImage())
                 .measureImage(item.measureImage())
                 .updatedAt(item.updatedAt())
@@ -42,6 +48,6 @@ public class PendingInventoryItemDto {
     // Mongo saves are upserts — a caller-chosen id could overwrite an arbitrary document
     // (and, via complete()'s id reuse, even another house's inventory item).
     public PendingInventoryItem toEntity(final String houseId) {
-        return new PendingInventoryItem(null, null, houseId, barcode, expirationImage, measureImage);
+        return new PendingInventoryItem(null, null, houseId, barcodeImage, expirationImage, measureImage);
     }
 }

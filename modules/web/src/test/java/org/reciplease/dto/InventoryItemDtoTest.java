@@ -17,7 +17,7 @@ class InventoryItemDtoTest {
     @Test
     @DisplayName("create DTO from entity")
     void from() {
-        var item = new InventoryItem(UUID.randomUUID().toString(), null, "house-1", "bread", "ITEMS", 10d, 12d, LocalDate.now(), "0123456789012",
+        var item = new InventoryItem(UUID.randomUUID().toString(), null, "house-1", "bread", "Warburtons", "ITEMS", 10d, 12d, LocalDate.now(), "0123456789012",
                 new byte[]{1, 2, 3}, Instant.now(), Instant.now());
 
         var itemDto = InventoryItemDto.from(item);
@@ -25,6 +25,7 @@ class InventoryItemDtoTest {
         assertThat(itemDto.getUuid(), is(item.id()));
         assertThat(itemDto.getHouseId(), is(item.houseId()));
         assertThat(itemDto.getName(), is(item.name()));
+        assertThat(itemDto.getBrand(), is(item.brand()));
         // Legacy measure ids are normalized to their short form.
         assertThat(itemDto.getMeasure(), is("item"));
         assertThat(itemDto.getAmount(), is(item.amount()));
@@ -39,7 +40,7 @@ class InventoryItemDtoTest {
     @Test
     @DisplayName("create DTO from entity with no image")
     void fromWithNoImage() {
-        var item = new InventoryItem(UUID.randomUUID().toString(), null, "house-1", "bread", "ITEMS", 10d, LocalDate.now(), "0123456789012");
+        var item = new InventoryItem(UUID.randomUUID().toString(), null, "house-1", "bread", null, "ITEMS", 10d, LocalDate.now(), "0123456789012");
 
         var itemDto = InventoryItemDto.from(item);
 
@@ -52,6 +53,7 @@ class InventoryItemDtoTest {
         var itemDto = InventoryItemDto.builder()
                 .uuid(UUID.randomUUID().toString())
                 .name("bread")
+                .brand("Warburtons")
                 .measure("g")
                 .amount(10d)
                 .remaining(6d)
@@ -67,6 +69,7 @@ class InventoryItemDtoTest {
         assertThat(item.id(), is(nullValue()));
         assertThat(item.houseId(), is("house-1"));
         assertThat(item.name(), is(itemDto.getName()));
+        assertThat(item.brand(), is(itemDto.getBrand()));
         // A short id passes through unchanged.
         assertThat(item.measure(), is("g"));
         assertThat(item.amount(), is(itemDto.getAmount()));

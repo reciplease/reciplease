@@ -45,7 +45,7 @@ class InventoryServiceTest {
     @Test
     @DisplayName("should save item")
     void save() {
-        var item = new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 10d, LocalDate.now(), "0123456789012");
+        var item = new InventoryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 10d, LocalDate.now(), "0123456789012");
         var savedItem = item.withId(UUID.randomUUID().toString());
 
         when(inventoryRepository.save(item)).thenReturn(savedItem);
@@ -72,7 +72,7 @@ class InventoryServiceTest {
 
         @BeforeEach
         void setUp() {
-            item = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "bread", "ITEMS", 10d, LocalDate.now(), null);
+            item = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, LocalDate.now(), null);
         }
 
         @Test
@@ -89,7 +89,7 @@ class InventoryServiceTest {
         @Test
         @DisplayName("findAll returns unexpired items followed by expired items")
         void findAll() {
-            var expiredItem = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "milk", "MILLILITRES", 500d, LocalDate.now().minusDays(1), null);
+            var expiredItem = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "milk", null, "MILLILITRES", 500d, LocalDate.now().minusDays(1), null);
             var today = now.atOffset(ZoneOffset.UTC).toLocalDate();
 
             when(inventoryRepository.expiresAfter(HOUSE_ID, today)).thenReturn(List.of(item));
@@ -150,9 +150,9 @@ class InventoryServiceTest {
         @DisplayName("update merges editable fields but preserves id, createdBy and createdAt")
         void shouldUpdatePreservingAuditFields() {
             var createdAt = Instant.now().minusSeconds(60);
-            var existing = new InventoryItem(item.id(), "someone", HOUSE_ID, "bread", "ITEMS", 10d, 4d, LocalDate.now(), null,
+            var existing = new InventoryItem(item.id(), "someone", HOUSE_ID, "bread", null, "ITEMS", 10d, 4d, LocalDate.now(), null,
                     null, createdAt, createdAt);
-            var updates = new InventoryItem(null, null, HOUSE_ID, "sourdough", "ITEMS", 12d, 4d, LocalDate.now().plusDays(3),
+            var updates = new InventoryItem(null, null, HOUSE_ID, "sourdough", "Warburtons", "ITEMS", 12d, 4d, LocalDate.now().plusDays(3),
                     "0123456789012", new byte[]{1, 2, 3});
 
             when(inventoryRepository.findById(item.id())).thenReturn(Optional.of(existing));
@@ -164,6 +164,7 @@ class InventoryServiceTest {
             assertThat(updated.createdBy(), is(existing.createdBy()));
             assertThat(updated.createdAt(), is(existing.createdAt()));
             assertThat(updated.name(), is("sourdough"));
+            assertThat(updated.brand(), is("Warburtons"));
             assertThat(updated.amount(), is(12d));
             assertThat(updated.remaining(), is(4d));
             assertThat(updated.expiration(), is(updates.expiration()));
@@ -174,10 +175,10 @@ class InventoryServiceTest {
         @Test
         @DisplayName("update resets remaining to the new amount if the caller doesn't resend it")
         void shouldResetRemainingWhenCallerOmitsIt() {
-            var existing = new InventoryItem(item.id(), null, HOUSE_ID, "bread", "ITEMS", 10d, 4d, LocalDate.now(), null);
+            var existing = new InventoryItem(item.id(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, 4d, LocalDate.now(), null);
             // Built via the overload that doesn't mention `remaining` at all, so it defaults to
             // the new `amount` rather than carrying over the caller's intent to preserve it.
-            var updates = new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 12d, LocalDate.now(), null);
+            var updates = new InventoryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 12d, LocalDate.now(), null);
 
             when(inventoryRepository.findById(item.id())).thenReturn(Optional.of(existing));
             when(inventoryRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -190,8 +191,8 @@ class InventoryServiceTest {
         @Test
         @DisplayName("update archives and deletes instead of saving when the new remaining is zero")
         void shouldArchiveWhenUpdateZerosRemaining() {
-            var existing = new InventoryItem(item.id(), null, HOUSE_ID, "bread", "ITEMS", 10d, 4d, LocalDate.now(), null);
-            var updates = new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 10d, 0d, LocalDate.now(), null);
+            var existing = new InventoryItem(item.id(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, 4d, LocalDate.now(), null);
+            var updates = new InventoryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 10d, 0d, LocalDate.now(), null);
 
             when(inventoryRepository.findById(item.id())).thenReturn(Optional.of(existing));
 
@@ -210,7 +211,7 @@ class InventoryServiceTest {
         when(inventoryRepository.findById(itemId)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
-                () -> inventoryService.update(itemId, new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 10d, LocalDate.now(), null)));
+                () -> inventoryService.update(itemId, new InventoryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 10d, LocalDate.now(), null)));
 
         verify(inventoryRepository, never()).save(any());
     }
@@ -230,7 +231,7 @@ class InventoryServiceTest {
         @Test
         @DisplayName("reduces remaining by the given amount")
         void reducesRemaining() {
-            var existing = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "bread", "ITEMS", 10d, 4d, LocalDate.now(), null);
+            var existing = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, 4d, LocalDate.now(), null);
 
             when(inventoryRepository.findById(existing.id())).thenReturn(Optional.of(existing));
             when(inventoryRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -243,7 +244,7 @@ class InventoryServiceTest {
         @Test
         @DisplayName("clamps remaining at zero and archives/deletes rather than saving a zeroed item")
         void clampsAtZeroAndArchives() {
-            var existing = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "bread", "ITEMS", 10d, 2d, LocalDate.now(), null);
+            var existing = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, 2d, LocalDate.now(), null);
 
             when(inventoryRepository.findById(existing.id())).thenReturn(Optional.of(existing));
 
@@ -269,8 +270,8 @@ class InventoryServiceTest {
     @Test
     @DisplayName("archiveAllZeroRemainingItems deletes (and thereby archives) every zero-remaining item found")
     void shouldArchiveAllZeroRemainingItems() {
-        var first = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "bread", "ITEMS", 10d, 0d, LocalDate.now(), null);
-        var second = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "milk", "MILLILITRES", 500d, 0d, LocalDate.now(), null);
+        var first = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, 0d, LocalDate.now(), null);
+        var second = new InventoryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "milk", null, "MILLILITRES", 500d, 0d, LocalDate.now(), null);
         when(inventoryRepository.findAllZeroRemaining()).thenReturn(List.of(first, second));
 
         inventoryService.archiveAllZeroRemainingItems();

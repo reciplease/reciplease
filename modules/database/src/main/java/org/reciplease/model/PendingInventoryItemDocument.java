@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.Instant;
 
@@ -22,7 +23,12 @@ public class PendingInventoryItemDocument {
     @Id
     private String id;
     private String houseId;
-    private String barcode;
+    private byte[] barcodeImage;
+    // Predates barcodeImage — a decoded barcode string from when capture scanned live instead of
+    // taking a photo. Still named "barcode" in Mongo (the pre-existing field), read here under a
+    // clearer name; never written by new saves. See PendingInventoryItem.legacyBarcode.
+    @Field("barcode")
+    private String legacyBarcode;
     private byte[] expirationImage;
     private byte[] measureImage;
     @CreatedBy
@@ -36,7 +42,8 @@ public class PendingInventoryItemDocument {
         return PendingInventoryItemDocument.builder()
                 .id(item.id())
                 .houseId(item.houseId())
-                .barcode(item.barcode())
+                .barcodeImage(item.barcodeImage())
+                .legacyBarcode(item.legacyBarcode())
                 .expirationImage(item.expirationImage())
                 .measureImage(item.measureImage())
                 .createdBy(item.createdBy())
@@ -46,6 +53,6 @@ public class PendingInventoryItemDocument {
     }
 
     public PendingInventoryItem toModel() {
-        return new PendingInventoryItem(id, createdBy, houseId, barcode, expirationImage, measureImage, createdAt, updatedAt);
+        return new PendingInventoryItem(id, createdBy, houseId, barcodeImage, legacyBarcode, expirationImage, measureImage, createdAt, updatedAt);
     }
 }

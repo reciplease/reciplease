@@ -26,6 +26,7 @@ public class ArchivedInventoryItemDocument {
     private String originalId;
     private String houseId;
     private String name;
+    private String brand;
     private String measure;
     private Double amount;
     private Double remaining;
@@ -42,6 +43,7 @@ public class ArchivedInventoryItemDocument {
                 .originalId(item.getId())
                 .houseId(item.getHouseId())
                 .name(item.getName())
+                .brand(item.getBrand())
                 .measure(item.getMeasure())
                 .amount(item.getAmount())
                 .remaining(item.getRemaining())

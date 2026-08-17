@@ -97,7 +97,7 @@ class PlannedMealServiceTest {
         @Test
         @DisplayName("snapshots inventory barcodes onto the saved plan")
         void planSnapshotsBarcode() {
-            var item = new InventoryItem("item-1", null, HOUSE_ID, "bread", "ITEMS", 2d, date, "111");
+            var item = new InventoryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 2d, date, "111");
 
             when(recipeRepository.findById(recipe.id())).thenReturn(Optional.of(recipe));
             when(inventoryRepository.findById("item-1")).thenReturn(Optional.of(item));
@@ -117,8 +117,8 @@ class PlannedMealServiceTest {
         @Test
         @DisplayName("supports multiple inventory items for one ingredient")
         void planAllowsMultipleAllocations() {
-            var itemA = new InventoryItem("a", null, HOUSE_ID, "bread", "ITEMS", 2d, date, "111");
-            var itemB = new InventoryItem("b", null, HOUSE_ID, "bread", "ITEMS", 2d, date, "222");
+            var itemA = new InventoryItem("a", null, HOUSE_ID, "bread", null, "ITEMS", 2d, date, "111");
+            var itemB = new InventoryItem("b", null, HOUSE_ID, "bread", null, "ITEMS", 2d, date, "222");
 
             when(recipeRepository.findById(recipe.id())).thenReturn(Optional.of(recipe));
             when(inventoryRepository.findById("a")).thenReturn(Optional.of(itemA));
@@ -188,7 +188,7 @@ class PlannedMealServiceTest {
         void updateResolvesItemsAndKeepsId() {
             var existing = new PlannedMeal("meal-1", "owner", HOUSE_ID, recipe.id(), "Dinner", date, List.of(),
                     Instant.parse("2026-01-01T00:00:00Z"), Instant.parse("2026-01-01T00:00:00Z"), null);
-            var item = new InventoryItem("item-1", null, HOUSE_ID, "bread", "ITEMS", 2d, date, "111");
+            var item = new InventoryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 2d, date, "111");
 
             when(plannedMealRepository.findById("meal-1")).thenReturn(Optional.of(existing));
             when(recipeRepository.findById(recipe.id())).thenReturn(Optional.of(recipe));
@@ -313,7 +313,7 @@ class PlannedMealServiceTest {
         void suggestsByHistoricBarcodeForRecipe() {
             var historicPlan = new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", date,
                     List.of(new PlannedIngredient(bread, List.of(new InventoryAllocation("old", "111", 2d)))));
-            var current = new InventoryItem("new", null, HOUSE_ID, "bread", "ITEMS", 5d, date, "111");
+            var current = new InventoryItem("new", null, HOUSE_ID, "bread", null, "ITEMS", 5d, date, "111");
 
             when(plannedMealRepository.findByRecipeId(HOUSE_ID, recipe.id())).thenReturn(List.of(historicPlan));
             when(inventoryRepository.findByBarcodeIn(HOUSE_ID, Set.of("111"))).thenReturn(List.of(current));
@@ -328,7 +328,7 @@ class PlannedMealServiceTest {
         void suggestsByHistoricBarcodeAcrossAllMeals() {
             var historicPlan = new PlannedMeal(HOUSE_ID, null, "Leftover rice night", date,
                     List.of(new PlannedIngredient(bread, List.of(new InventoryAllocation("old", "111", 2d)))));
-            var current = new InventoryItem("new", null, HOUSE_ID, "bread", "ITEMS", 5d, date, "111");
+            var current = new InventoryItem("new", null, HOUSE_ID, "bread", null, "ITEMS", 5d, date, "111");
 
             when(plannedMealRepository.findByIngredientName(HOUSE_ID, "bread")).thenReturn(List.of(historicPlan));
             when(inventoryRepository.findByBarcodeIn(HOUSE_ID, Set.of("111"))).thenReturn(List.of(current));
@@ -342,7 +342,7 @@ class PlannedMealServiceTest {
         @DisplayName("falls back to name match when no barcode history")
         void fallsBackToName() {
             when(plannedMealRepository.findByRecipeId(HOUSE_ID, recipe.id())).thenReturn(List.of());
-            var byName = new InventoryItem("n", null, HOUSE_ID, "bread", "ITEMS", 1d, date, null);
+            var byName = new InventoryItem("n", null, HOUSE_ID, "bread", null, "ITEMS", 1d, date, null);
             when(inventoryRepository.findByName(HOUSE_ID, "bread")).thenReturn(List.of(byName));
 
             var suggestions = plannedMealService.suggestInventory(HOUSE_ID, recipe.id(), "bread");

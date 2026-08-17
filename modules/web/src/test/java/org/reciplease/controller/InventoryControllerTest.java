@@ -62,7 +62,7 @@ class InventoryControllerTest {
     @Test
     @DisplayName("should create inventory item")
     void shouldCreateInventoryItem() throws Exception {
-        var mockRequestItem = new InventoryItem(null, null, HOUSE_ID, "bread", "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
+        var mockRequestItem = new InventoryItem(null, null, HOUSE_ID, "bread", null, "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
         var mockResponseItem = mockRequestItem.withId("b465af6e-2465-4436-84c1-14f35db68dbf");
 
         when(inventoryService.save(mockRequestItem)).thenReturn(mockResponseItem);
@@ -84,7 +84,7 @@ class InventoryControllerTest {
     void shouldCreateInventoryItemWithImage() throws Exception {
         var imageBytes = new byte[]{1, 2, 3};
         var imageBase64 = java.util.Base64.getEncoder().encodeToString(imageBytes);
-        var mockRequestItem = new InventoryItem(null, null, HOUSE_ID, "bread", "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012", imageBytes);
+        var mockRequestItem = new InventoryItem(null, null, HOUSE_ID, "bread", null, "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012", imageBytes);
         var mockResponseItem = mockRequestItem.withId("b465af6e-2465-4436-84c1-14f35db68dbf");
 
         when(inventoryService.save(mockRequestItem)).thenReturn(mockResponseItem);
@@ -117,6 +117,41 @@ class InventoryControllerTest {
     }
 
     @Test
+    @DisplayName("should create inventory item with a brand")
+    void shouldCreateInventoryItemWithBrand() throws Exception {
+        var mockRequestItem = new InventoryItem(null, null, HOUSE_ID, "tomato ketchup", "Heinz", "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
+        var mockResponseItem = mockRequestItem.withId("b465af6e-2465-4436-84c1-14f35db68dbf");
+
+        when(inventoryService.save(mockRequestItem)).thenReturn(mockResponseItem);
+
+        mockMvc.perform(post("/api/inventory")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "tomato ketchup",
+                                  "brand": "Heinz",
+                                  "measure": "item",
+                                  "expiration": "2020-01-01",
+                                  "amount": 20.0,
+                                  "barcode": "0123456789012"
+                                }"""))
+                .andExpect(status().isCreated())
+                .andExpect(content().json("""
+                        {
+                          "uuid": "b465af6e-2465-4436-84c1-14f35db68dbf",
+                          "houseId": "%s",
+                          "name": "tomato ketchup",
+                          "brand": "Heinz",
+                          "measure": "item",
+                          "expiration": "2020-01-01",
+                          "amount": 20.0,
+                          "remaining": 20.0,
+                          "barcode": "0123456789012"
+                        }""".formatted(HOUSE_ID), true));
+    }
+
+    @Test
     @DisplayName("create is forbidden for read-only members")
     @WithHouseMember
     void createForbiddenForReadOnly() throws Exception {
@@ -136,13 +171,13 @@ class InventoryControllerTest {
 
         @BeforeEach
         void setUp() {
-            item = new InventoryItem("b465af6e-2465-4436-84c1-14f35db68dbf", null, HOUSE_ID, "bread", "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
+            item = new InventoryItem("b465af6e-2465-4436-84c1-14f35db68dbf", null, HOUSE_ID, "bread", null, "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
         }
 
         @Test
         @DisplayName("should update item")
         void update() throws Exception {
-            var updates = new InventoryItem(null, null, HOUSE_ID, "sourdough", "item", 12d, LocalDate.of(2020, Month.JANUARY, 5), "0123456789012");
+            var updates = new InventoryItem(null, null, HOUSE_ID, "sourdough", null, "item", 12d, LocalDate.of(2020, Month.JANUARY, 5), "0123456789012");
             var updated = item.withId(item.id());
 
             when(inventoryService.findById(item.id())).thenReturn(Optional.of(item));
@@ -167,7 +202,7 @@ class InventoryControllerTest {
         @Test
         @DisplayName("should 204 when the update drives remaining to zero (item archived and removed)")
         void updateToZeroRemaining() throws Exception {
-            var updates = new InventoryItem(null, null, HOUSE_ID, "bread", "item", 12d, 0d, LocalDate.of(2020, Month.JANUARY, 5), "0123456789012");
+            var updates = new InventoryItem(null, null, HOUSE_ID, "bread", null, "item", 12d, 0d, LocalDate.of(2020, Month.JANUARY, 5), "0123456789012");
 
             when(inventoryService.findById(item.id())).thenReturn(Optional.of(item));
             when(inventoryService.update(item.id(), updates)).thenReturn(Optional.empty());

@@ -55,9 +55,9 @@ class InventoryRepositoryTest {
         void setUp() {
             today = LocalDate.of(2020, Month.JANUARY, 2);
 
-            slice_Jan1 = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 1d, LocalDate.of(2020, Month.JANUARY, 1), null));
-            slice_Jan2 = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 1d, LocalDate.of(2020, Month.JANUARY, 2), null));
-            slice_Jan3 = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 1d, LocalDate.of(2020, Month.JANUARY, 3), null));
+            slice_Jan1 = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2020, Month.JANUARY, 1), null));
+            slice_Jan2 = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2020, Month.JANUARY, 2), null));
+            slice_Jan3 = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2020, Month.JANUARY, 3), null));
         }
 
         @Test
@@ -79,9 +79,9 @@ class InventoryRepositoryTest {
     @DisplayName("expiresAfter orders results alphabetically by name")
     void shouldOrderUnexpiredAlphabeticallyByName() {
         var today = LocalDate.of(2026, Month.JUNE, 1);
-        var milk = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "milk", "MILLILITRES", 500d, LocalDate.of(2026, Month.JUNE, 10), null));
-        var eggs = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 10), null));
-        var bread = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 10), null));
+        var milk = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "milk", null, "MILLILITRES", 500d, LocalDate.of(2026, Month.JUNE, 10), null));
+        var eggs = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 10), null));
+        var bread = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 10), null));
 
         var unexpired = inventoryRepository.expiresAfter(HOUSE_ID, today);
 
@@ -92,9 +92,9 @@ class InventoryRepositoryTest {
     @DisplayName("betweenDates orders results alphabetically by name")
     void shouldOrderExpiredAlphabeticallyByName() {
         var today = LocalDate.of(2026, Month.JUNE, 10);
-        var milk = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "milk", "MILLILITRES", 500d, LocalDate.of(2026, Month.JUNE, 1), null));
-        var eggs = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 1), null));
-        var bread = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 1), null));
+        var milk = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "milk", null, "MILLILITRES", 500d, LocalDate.of(2026, Month.JUNE, 1), null));
+        var eggs = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 1), null));
+        var bread = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 1), null));
 
         var expired = inventoryRepository.betweenDates(HOUSE_ID, today);
 
@@ -103,7 +103,7 @@ class InventoryRepositoryTest {
 
     @Test
     void shouldFindByBarcodeAndPreserveIt() {
-        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "milk", "MILLILITRES", 1000d, LocalDate.of(2026, Month.JUNE, 6), "5012345678900"));
+        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "milk", null, "MILLILITRES", 1000d, LocalDate.of(2026, Month.JUNE, 6), "5012345678900"));
 
         var found = inventoryRepository.findByBarcode(HOUSE_ID, "5012345678900");
 
@@ -113,9 +113,9 @@ class InventoryRepositoryTest {
 
     @Test
     void shouldFindByBarcodeIn() {
-        var milk = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "milk", "MILLILITRES", 1000d, LocalDate.of(2026, Month.JUNE, 6), "5012345678900"));
-        var eggs = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 6), "5012345678901"));
-        inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 6), "5012345678902"));
+        var milk = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "milk", null, "MILLILITRES", 1000d, LocalDate.of(2026, Month.JUNE, 6), "5012345678900"));
+        var eggs = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 6), "5012345678901"));
+        inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 6), "5012345678902"));
 
         var found = inventoryRepository.findByBarcodeIn(HOUSE_ID, Set.of("5012345678900", "5012345678901"));
 
@@ -123,9 +123,19 @@ class InventoryRepositoryTest {
     }
 
     @Test
+    void shouldPersistAndRetrieveBrand() {
+        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "tomato ketchup", "Heinz", "MILLILITRES", 500d, LocalDate.of(2026, Month.JUNE, 6), null));
+
+        var found = inventoryRepository.findById(saved.id());
+
+        assertThat(found.isPresent(), is(true));
+        assertThat(found.get().brand(), is("Heinz"));
+    }
+
+    @Test
     void shouldPersistAndRetrieveImageBytes() {
         var imageBytes = new byte[]{1, 2, 3, 4};
-        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "milk", "MILLILITRES", 1000d, LocalDate.of(2026, Month.JUNE, 6), null, imageBytes));
+        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "milk", null, "MILLILITRES", 1000d, LocalDate.of(2026, Month.JUNE, 6), null, imageBytes));
 
         var found = inventoryRepository.findById(saved.id());
 
@@ -135,7 +145,7 @@ class InventoryRepositoryTest {
 
     @Test
     void shouldFindByNameIgnoringCase() {
-        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "Bread", "ITEMS", 2d, LocalDate.of(2026, Month.JUNE, 6), null));
+        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "Bread", null, "ITEMS", 2d, LocalDate.of(2026, Month.JUNE, 6), null));
 
         assertThat(inventoryRepository.findByName(HOUSE_ID, "bread"), contains(saved));
     }
@@ -147,7 +157,7 @@ class InventoryRepositoryTest {
 
     @Test
     void shouldFindById() {
-        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
+        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
 
         assertThat(inventoryRepository.findById(saved.id()), is(Optional.of(saved)));
     }
@@ -159,7 +169,7 @@ class InventoryRepositoryTest {
 
     @Test
     void shouldSetCreatedAtAndUpdatedAtOnCreate() {
-        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
+        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
 
         assertThat(saved.createdAt(), is(notNullValue()));
         assertThat(saved.updatedAt(), is(notNullValue()));
@@ -167,7 +177,7 @@ class InventoryRepositoryTest {
 
     @Test
     void shouldDeleteById() {
-        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
+        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
 
         inventoryRepository.deleteById(saved.id());
 
@@ -177,7 +187,7 @@ class InventoryRepositoryTest {
     @Test
     @DisplayName("deleteById archives a snapshot of the item before removing it")
     void shouldArchiveOnDelete() {
-        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", "ITEMS", 6d, 2d, LocalDate.of(2026, Month.JUNE, 20), "5012345678900"));
+        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, 2d, LocalDate.of(2026, Month.JUNE, 20), "5012345678900"));
 
         inventoryRepository.deleteById(saved.id());
 
@@ -201,17 +211,17 @@ class InventoryRepositoryTest {
 
     @Test
     void shouldFindAllZeroRemaining() {
-        var zero = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", "ITEMS", 6d, 0d, LocalDate.of(2026, Month.JUNE, 20), null));
-        inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "milk", "MILLILITRES", 500d, 100d, LocalDate.of(2026, Month.JUNE, 20), null));
+        var zero = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, 0d, LocalDate.of(2026, Month.JUNE, 20), null));
+        inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "milk", null, "MILLILITRES", 500d, 100d, LocalDate.of(2026, Month.JUNE, 20), null));
 
         assertThat(inventoryRepository.findAllZeroRemaining(), contains(zero));
     }
 
     @Test
     void shouldFindAllById() {
-        var eggs = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
-        var milk = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "milk", "MILLILITRES", 500d, LocalDate.of(2026, Month.JUNE, 20), null));
-        inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "bread", "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 20), null));
+        var eggs = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
+        var milk = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "milk", null, "MILLILITRES", 500d, LocalDate.of(2026, Month.JUNE, 20), null));
+        inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 20), null));
 
         var found = inventoryRepository.findAllById(List.of(eggs.id(), milk.id()));
 
@@ -220,9 +230,9 @@ class InventoryRepositoryTest {
 
     @Test
     void shouldPreserveCreatedAtAndAdvanceUpdatedAtOnUpdate() {
-        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
+        var saved = inventoryRepository.save(new InventoryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
 
-        var updated = inventoryRepository.save(new InventoryItem(saved.id(), saved.createdBy(), saved.houseId(), saved.name(), saved.measure(), 12d,
+        var updated = inventoryRepository.save(new InventoryItem(saved.id(), saved.createdBy(), saved.houseId(), saved.name(), null, saved.measure(), 12d,
                 saved.remaining(), saved.expiration(), saved.barcode(), saved.image(), saved.createdAt(), saved.updatedAt()));
 
         assertThat(updated.createdAt(), is(saved.createdAt()));

@@ -58,8 +58,10 @@ class PendingInventoryControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    private final byte[] barcodeImageBytes = new byte[]{7, 8, 9};
     private final byte[] expirationImageBytes = new byte[]{1, 2, 3};
     private final byte[] measureImageBytes = new byte[]{4, 5, 6};
+    private final String barcodeImageBase64 = Base64.getEncoder().encodeToString(barcodeImageBytes);
     private final String expirationImageBase64 = Base64.getEncoder().encodeToString(expirationImageBytes);
     private final String measureImageBase64 = Base64.getEncoder().encodeToString(measureImageBytes);
 
@@ -72,9 +74,9 @@ class PendingInventoryControllerTest {
     }
 
     @Test
-    @DisplayName("should create a pending item with barcode and both images")
+    @DisplayName("should create a pending item with a barcode photo and both other images")
     void shouldCreatePendingItem() throws Exception {
-        var requestItem = new PendingInventoryItem(null, null, HOUSE_ID, "0123456789012", expirationImageBytes, measureImageBytes);
+        var requestItem = new PendingInventoryItem(null, null, HOUSE_ID, barcodeImageBytes, expirationImageBytes, measureImageBytes);
         var savedItem = requestItem.withId(PENDING_ID);
 
         when(pendingInventoryService.save(requestItem)).thenReturn(savedItem);
@@ -84,19 +86,19 @@ class PendingInventoryControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "barcode": "0123456789012",
+                                  "barcodeImage": "%s",
                                   "expirationImage": "%s",
                                   "measureImage": "%s"
-                                }""".formatted(expirationImageBase64, measureImageBase64)))
+                                }""".formatted(barcodeImageBase64, expirationImageBase64, measureImageBase64)))
                 .andExpect(status().isCreated())
                 .andExpect(content().json("""
                         {
                           "uuid": "%s",
                           "houseId": "%s",
-                          "barcode": "0123456789012",
+                          "barcodeImage": "%s",
                           "expirationImage": "%s",
                           "measureImage": "%s"
-                        }""".formatted(PENDING_ID, HOUSE_ID, expirationImageBase64, measureImageBase64), true));
+                        }""".formatted(PENDING_ID, HOUSE_ID, barcodeImageBase64, expirationImageBase64, measureImageBase64), true));
     }
 
     @Test
@@ -122,7 +124,7 @@ class PendingInventoryControllerTest {
     @Test
     @DisplayName("create ignores a caller-supplied uuid — ids are always server-generated")
     void createIgnoresBodyUuid() throws Exception {
-        var requestItem = new PendingInventoryItem(null, null, HOUSE_ID, "0123456789012", null, null);
+        var requestItem = new PendingInventoryItem(null, null, HOUSE_ID, barcodeImageBytes, null, null);
         when(pendingInventoryService.save(requestItem)).thenReturn(requestItem.withId(PENDING_ID));
 
         mockMvc.perform(post("/api/inventory/pending")
@@ -131,8 +133,8 @@ class PendingInventoryControllerTest {
                         .content("""
                                 {
                                   "uuid": "attacker-chosen-id",
-                                  "barcode": "0123456789012"
-                                }"""))
+                                  "barcodeImage": "%s"
+                                }""".formatted(barcodeImageBase64)))
                 .andExpect(status().isCreated())
                 .andExpect(content().json("""
                         {
@@ -158,7 +160,7 @@ class PendingInventoryControllerTest {
     @Test
     @DisplayName("should list the house's pending items")
     void shouldListPendingItems() throws Exception {
-        var pending = new PendingInventoryItem(PENDING_ID, null, HOUSE_ID, "0123456789012", expirationImageBytes, null);
+        var pending = new PendingInventoryItem(PENDING_ID, null, HOUSE_ID, barcodeImageBytes, expirationImageBytes, null);
 
         when(pendingInventoryService.findAll(HOUSE_ID)).thenReturn(List.of(pending));
 
@@ -168,15 +170,15 @@ class PendingInventoryControllerTest {
                         [{
                           "uuid": "%s",
                           "houseId": "%s",
-                          "barcode": "0123456789012",
+                          "barcodeImage": "%s",
                           "expirationImage": "%s"
-                        }]""".formatted(PENDING_ID, HOUSE_ID, expirationImageBase64), true));
+                        }]""".formatted(PENDING_ID, HOUSE_ID, barcodeImageBase64, expirationImageBase64), true));
     }
 
     @Test
     @DisplayName("should find a pending item by ID")
     void shouldFindPendingItemById() throws Exception {
-        var pending = new PendingInventoryItem(PENDING_ID, null, HOUSE_ID, "0123456789012", null, measureImageBytes);
+        var pending = new PendingInventoryItem(PENDING_ID, null, HOUSE_ID, barcodeImageBytes, null, measureImageBytes);
 
         when(pendingInventoryService.findById(PENDING_ID)).thenReturn(Optional.of(pending));
 
@@ -186,9 +188,9 @@ class PendingInventoryControllerTest {
                         {
                           "uuid": "%s",
                           "houseId": "%s",
-                          "barcode": "0123456789012",
+                          "barcodeImage": "%s",
                           "measureImage": "%s"
-                        }""".formatted(PENDING_ID, HOUSE_ID, measureImageBase64), true));
+                        }""".formatted(PENDING_ID, HOUSE_ID, barcodeImageBase64, measureImageBase64), true));
     }
 
     @Test
@@ -241,8 +243,8 @@ class PendingInventoryControllerTest {
     @Test
     @DisplayName("complete creates the inventory item and returns it")
     void shouldCompletePendingItem() throws Exception {
-        var pending = new PendingInventoryItem(PENDING_ID, null, HOUSE_ID, "0123456789012", null, null);
-        var item = new InventoryItem(null, null, HOUSE_ID, "bread", "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
+        var pending = new PendingInventoryItem(PENDING_ID, null, HOUSE_ID, barcodeImageBytes, null, null);
+        var item = new InventoryItem(null, null, HOUSE_ID, "bread", null, "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
         var savedItem = item.withId(PENDING_ID);
 
         when(pendingInventoryService.findById(PENDING_ID)).thenReturn(Optional.of(pending));
