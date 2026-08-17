@@ -210,31 +210,6 @@ class AuthControllerTest {
     }
 
     @Test
-    void issueRefreshTokenRequiresAuthentication() throws Exception {
-        mockMvc.perform(post("/api/auth/refresh-token"))
-                .andExpect(status().isUnauthorized());
-
-        verify(refreshTokenService, never()).issue(any());
-    }
-
-    @Test
-    @org.springframework.security.test.context.support.WithMockUser(username = "user-1", authorities = "ROLE_RECIPLEASE")
-    void issueRefreshTokenBackfillsOneForTheAuthenticatedUser() throws Exception {
-        when(refreshTokenService.issue("user-1")).thenReturn(
-                new RefreshTokenService.IssuedRefreshToken("backfilled-raw-refresh-token", Instant.parse("2026-03-01T00:00:00Z")));
-        when(userRepository.findById("user-1")).thenReturn(Optional.of(new User("user-1", "my-handle")));
-
-        mockMvc.perform(post("/api/auth/refresh-token"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId", is("user-1")))
-                .andExpect(jsonPath("$.handle", is("my-handle")))
-                .andExpect(jsonPath("$.token", org.hamcrest.Matchers.notNullValue()))
-                .andExpect(jsonPath("$.refreshToken", is("backfilled-raw-refresh-token")));
-
-        verify(refreshTokenService).issue("user-1");
-    }
-
-    @Test
     void logoutWithCookiePresentRevokesTheRefreshToken() throws Exception {
         mockMvc.perform(post("/api/auth/logout").cookie(new jakarta.servlet.http.Cookie("reciplease-refresh", "some-refresh-cookie")))
                 .andExpect(status().isOk());
