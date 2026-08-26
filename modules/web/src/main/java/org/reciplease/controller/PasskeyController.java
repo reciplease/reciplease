@@ -116,8 +116,9 @@ public class PasskeyController {
             return ResponseEntity.status(409).build();
         }
 
-        final var refreshToken = refreshTokenService.issue(userId).rawToken();
-        return ResponseEntity.ok(new ExchangeResponse(jwtService.mint(userId), refreshToken, userId, null));
+        final var issued = refreshTokenService.issue(userId);
+        return ResponseEntity.ok(new ExchangeResponse(
+                jwtService.mint(userId), issued.rawToken(), issued.expiresAt(), userId, null));
     }
 
     @PostMapping("register/options")
@@ -178,8 +179,9 @@ public class PasskeyController {
 
         final var userId = toUserId(userEntity.getId());
         final var handle = userRepository.findById(userId).map(User::handle).orElse(null);
-        final var refreshToken = refreshTokenService.issue(userId).rawToken();
-        return ResponseEntity.ok(new ExchangeResponse(jwtService.mint(userId), refreshToken, userId, handle));
+        final var issued = refreshTokenService.issue(userId);
+        return ResponseEntity.ok(new ExchangeResponse(
+                jwtService.mint(userId), issued.rawToken(), issued.expiresAt(), userId, handle));
     }
 
     // These values match what Webauthn4JRelyingPartyOperations.createPublicKeyCredentialCreationOptions

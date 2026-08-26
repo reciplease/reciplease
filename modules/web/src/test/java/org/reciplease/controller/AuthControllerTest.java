@@ -85,7 +85,8 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.userId", is("user-1")))
                 .andExpect(jsonPath("$.handle").doesNotExist())
                 .andExpect(jsonPath("$.token", org.hamcrest.Matchers.notNullValue()))
-                .andExpect(jsonPath("$.refreshToken", is("issued-raw-refresh-token")));
+                .andExpect(jsonPath("$.refreshToken", is("issued-raw-refresh-token")))
+                .andExpect(jsonPath("$.refreshTokenExpiresAt", is("2026-02-01T00:00:00Z")));
 
         verify(userRepository).createWithIdentity("google", "google-sub-1", "me@gmail.com");
         verify(refreshTokenService).issue("user-1");
@@ -149,7 +150,8 @@ class AuthControllerTest {
                                 {"provider": "github", "providerId": "github-sub-1", "linkToken": "%s", "email": "me@github.com"}""".formatted(linkToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId", is("user-1")))
-                .andExpect(jsonPath("$.refreshToken").doesNotExist());
+                .andExpect(jsonPath("$.refreshToken").doesNotExist())
+                .andExpect(jsonPath("$.refreshTokenExpiresAt").doesNotExist());
 
         verify(userRepository).linkIdentity("user-1", "github", "github-sub-1", "me@github.com");
         verify(refreshTokenService, never()).issue(any());
@@ -188,7 +190,8 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.userId", is("user-1")))
                 .andExpect(jsonPath("$.handle", is("my-handle")))
                 .andExpect(jsonPath("$.token", org.hamcrest.Matchers.notNullValue()))
-                .andExpect(jsonPath("$.refreshToken", is("rotated-raw-refresh-token")));
+                .andExpect(jsonPath("$.refreshToken", is("rotated-raw-refresh-token")))
+                .andExpect(jsonPath("$.refreshTokenExpiresAt", is("2026-03-01T00:00:00Z")));
 
         verify(refreshTokenService).rotate("valid-refresh-cookie");
     }

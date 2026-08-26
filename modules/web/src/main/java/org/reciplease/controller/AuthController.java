@@ -73,8 +73,13 @@ public class AuthController {
                     : loginOrSignup(provider, providerId, email);
 
             final var token = jwtService.mint(user.id());
-            final var refreshToken = linking ? null : refreshTokenService.issue(user.id()).rawToken();
-            return ResponseEntity.ok(new ExchangeResponse(token, refreshToken, user.id(), user.handle()));
+            final var issued = linking ? null : refreshTokenService.issue(user.id());
+            return ResponseEntity.ok(new ExchangeResponse(
+                    token,
+                    issued != null ? issued.rawToken() : null,
+                    issued != null ? issued.expiresAt() : null,
+                    user.id(),
+                    user.handle()));
         } catch (final IdentityConflictException e) {
             return ResponseEntity.status(409).build();
         }
@@ -122,7 +127,7 @@ public class AuthController {
         }
         final var handle = userRepository.findById(rotated.userId()).map(User::handle).orElse(null);
         return ResponseEntity.ok(new ExchangeResponse(
-                jwtService.mint(rotated.userId()), rotated.rawToken(), rotated.userId(), handle));
+                jwtService.mint(rotated.userId()), rotated.rawToken(), rotated.expiresAt(), rotated.userId(), handle));
     }
 
     /** Revokes the refresh token carried by the {@code reciplease-refresh} cookie, if any. */
