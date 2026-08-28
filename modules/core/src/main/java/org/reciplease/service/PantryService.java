@@ -1,8 +1,8 @@
 package org.reciplease.service;
 
 import lombok.RequiredArgsConstructor;
-import org.reciplease.model.InventoryItem;
-import org.reciplease.repository.InventoryRepository;
+import org.reciplease.model.PantryItem;
+import org.reciplease.repository.PantryRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -15,36 +15,36 @@ import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
-public class InventoryService {
-    private final InventoryRepository inventoryRepository;
+public class PantryService {
+    private final PantryRepository pantryRepository;
     private final Clock clock;
 
-    public InventoryItem save(final InventoryItem item) {
-        return inventoryRepository.save(item);
+    public PantryItem save(final PantryItem item) {
+        return pantryRepository.save(item);
     }
 
     // Merges editable fields from `updates` onto the existing item, preserving its id,
     // createdBy, houseId and createdAt so an edit (e.g. attaching a photo after the fact)
     // can't clobber audit/ownership fields the way a plain re-save would. Callers that only
-    // mean to change other fields must resend the item's current `remaining` (InventoryItem's
+    // mean to change other fields must resend the item's current `remaining` (PantryItem's
     // constructor otherwise defaults a missing one to `amount`, which would wipe out how much
     // has been used).
-    public Optional<InventoryItem> update(final String id, final InventoryItem updates) {
-        final var existing = inventoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Inventory item does not exist"));
+    public Optional<PantryItem> update(final String id, final PantryItem updates) {
+        final var existing = pantryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Pantry item does not exist"));
 
-        final var merged = new InventoryItem(existing.id(), existing.createdBy(), existing.houseId(), updates.name(), updates.brand(), updates.measure(),
+        final var merged = new PantryItem(existing.id(), existing.createdBy(), existing.houseId(), updates.name(), updates.brand(), updates.measure(),
                 updates.amount(), updates.remaining(), updates.expiration(), updates.barcode(), updates.image(),
                 existing.createdAt(), existing.updatedAt());
 
         return saveOrArchive(merged);
     }
 
-    public Optional<InventoryItem> findById(final String id) {
-        return inventoryRepository.findById(id);
+    public Optional<PantryItem> findById(final String id) {
+        return pantryRepository.findById(id);
     }
 
-    public List<InventoryItem> findAll(final String houseId) {
+    public List<PantryItem> findAll(final String houseId) {
         return findAll(houseId, false);
     }
 
@@ -55,26 +55,26 @@ public class InventoryService {
      * keeps calling the single-arg overload: it deliberately keeps those items visible
      * (greyed out) in case the user wants to restock.
      */
-    public List<InventoryItem> findAll(final String houseId, final boolean excludeFullyConsumed) {
+    public List<PantryItem> findAll(final String houseId, final boolean excludeFullyConsumed) {
         final var today = LocalDate.now(clock);
-        final var items = new ArrayList<InventoryItem>(inventoryRepository.expiresAfter(houseId, today));
-        items.addAll(inventoryRepository.betweenDates(houseId, today));
+        final var items = new ArrayList<PantryItem>(pantryRepository.expiresAfter(houseId, today));
+        items.addAll(pantryRepository.betweenDates(houseId, today));
         if (!excludeFullyConsumed) {
             return items;
         }
         return items.stream().filter(item -> item.remaining() > 0).collect(toList());
     }
 
-    public List<InventoryItem> findAllUnexpired(final String houseId) {
-        return inventoryRepository.expiresAfter(houseId, LocalDate.now(clock));
+    public List<PantryItem> findAllUnexpired(final String houseId) {
+        return pantryRepository.expiresAfter(houseId, LocalDate.now(clock));
     }
 
-    public List<InventoryItem> findAllExpired(final String houseId) {
-        return inventoryRepository.betweenDates(houseId, LocalDate.now(clock));
+    public List<PantryItem> findAllExpired(final String houseId) {
+        return pantryRepository.betweenDates(houseId, LocalDate.now(clock));
     }
 
     public void deleteById(final String id) {
-        inventoryRepository.deleteById(id);
+        pantryRepository.deleteById(id);
     }
 
     /**
@@ -82,16 +82,16 @@ public class InventoryService {
      * Empty return means the item was fully consumed and has been deleted (see {@link
      * #saveOrArchive}) rather than left behind as a live zero-remaining record.
      */
-    public Optional<InventoryItem> consume(final String id, final Double amount) {
-        final var existing = inventoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Inventory item does not exist"));
+    public Optional<PantryItem> consume(final String id, final Double amount) {
+        final var existing = pantryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Pantry item does not exist"));
 
         return saveOrArchive(existing.withRemaining(Math.max(0, existing.remaining() - amount)));
     }
 
     /** One-off cleanup for items already sitting at zero remaining from before this behavior existed. */
     public void archiveAllZeroRemainingItems() {
-        inventoryRepository.findAllZeroRemaining().forEach(item -> inventoryRepository.deleteById(item.id()));
+        pantryRepository.findAllZeroRemaining().forEach(item -> pantryRepository.deleteById(item.id()));
     }
 
     /**
@@ -99,11 +99,11 @@ public class InventoryService {
      * (which archives a snapshot at the repository layer) keeps that list from accumulating
      * zeroed-out rows forever.
      */
-    private Optional<InventoryItem> saveOrArchive(final InventoryItem item) {
+    private Optional<PantryItem> saveOrArchive(final PantryItem item) {
         if (item.remaining() <= 0) {
-            inventoryRepository.deleteById(item.id());
+            pantryRepository.deleteById(item.id());
             return Optional.empty();
         }
-        return Optional.of(inventoryRepository.save(item));
+        return Optional.of(pantryRepository.save(item));
     }
 }

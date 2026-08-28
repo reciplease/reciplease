@@ -13,7 +13,7 @@ import java.util.Objects;
  * eggs"); {@link #remaining} tracks how much of that is left as it's used up, defaulting to
  * {@link #amount} (fully stocked) whenever it isn't supplied.
  */
-public record InventoryItem(
+public record PantryItem(
         String id,
         String createdBy,
         String houseId,
@@ -28,7 +28,7 @@ public record InventoryItem(
         Instant createdAt,
         Instant updatedAt) implements Audited, HouseScoped {
 
-    public InventoryItem {
+    public PantryItem {
         Objects.requireNonNull(name, "name");
         Objects.requireNonNull(measure, "measure");
         Objects.requireNonNull(amount, "amount");
@@ -41,33 +41,33 @@ public record InventoryItem(
     // Convenience overloads that don't mention `remaining` at all (e.g. for freshly created
     // items, or callers that don't care about the amount/remaining split) — it defaults to
     // `amount` via the compact constructor above.
-    public InventoryItem(final String id, final String createdBy, final String houseId, final String name, final String brand, final String measure,
+    public PantryItem(final String id, final String createdBy, final String houseId, final String name, final String brand, final String measure,
                           final Double amount, final LocalDate expiration, final String barcode) {
         this(id, createdBy, houseId, name, brand, measure, amount, null, expiration, barcode, null, null, null);
     }
 
-    public InventoryItem(final String id, final String createdBy, final String houseId, final String name, final String brand, final String measure,
+    public PantryItem(final String id, final String createdBy, final String houseId, final String name, final String brand, final String measure,
                           final Double amount, final LocalDate expiration, final String barcode, final byte[] image) {
         this(id, createdBy, houseId, name, brand, measure, amount, null, expiration, barcode, image, null, null);
     }
 
     // Overloads for callers that do care about the amount/remaining split but not audit fields.
-    public InventoryItem(final String id, final String createdBy, final String houseId, final String name, final String brand, final String measure,
+    public PantryItem(final String id, final String createdBy, final String houseId, final String name, final String brand, final String measure,
                           final Double amount, final Double remaining, final LocalDate expiration, final String barcode) {
         this(id, createdBy, houseId, name, brand, measure, amount, remaining, expiration, barcode, null, null, null);
     }
 
-    public InventoryItem(final String id, final String createdBy, final String houseId, final String name, final String brand, final String measure,
+    public PantryItem(final String id, final String createdBy, final String houseId, final String name, final String brand, final String measure,
                           final Double amount, final Double remaining, final LocalDate expiration, final String barcode, final byte[] image) {
         this(id, createdBy, houseId, name, brand, measure, amount, remaining, expiration, barcode, image, null, null);
     }
 
-    public InventoryItem withId(final String id) {
-        return new InventoryItem(id, createdBy, houseId, name, brand, measure, amount, remaining, expiration, barcode, image, createdAt, updatedAt);
+    public PantryItem withId(final String id) {
+        return new PantryItem(id, createdBy, houseId, name, brand, measure, amount, remaining, expiration, barcode, image, createdAt, updatedAt);
     }
 
-    public InventoryItem withRemaining(final Double remaining) {
-        return new InventoryItem(id, createdBy, houseId, name, brand, measure, amount, remaining, expiration, barcode, image, createdAt, updatedAt);
+    public PantryItem withRemaining(final Double remaining) {
+        return new PantryItem(id, createdBy, houseId, name, brand, measure, amount, remaining, expiration, barcode, image, createdAt, updatedAt);
     }
 
     // The generated record equals()/hashCode() would compare `image` by array identity rather
@@ -77,7 +77,7 @@ public record InventoryItem(
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof InventoryItem other)) {
+        if (!(obj instanceof PantryItem other)) {
             return false;
         }
         return Objects.equals(id, other.id)

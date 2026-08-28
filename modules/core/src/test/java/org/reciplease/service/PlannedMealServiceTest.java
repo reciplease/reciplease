@@ -7,13 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
-import org.reciplease.model.InventoryAllocation;
-import org.reciplease.model.InventoryItem;
+import org.reciplease.model.PantryAllocation;
+import org.reciplease.model.PantryItem;
 import org.reciplease.model.PlannedIngredient;
 import org.reciplease.model.PlannedMeal;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
-import org.reciplease.repository.InventoryRepository;
+import org.reciplease.repository.PantryRepository;
 import org.reciplease.repository.PlannedMealRepository;
 import org.reciplease.repository.RecipeRepository;
 
@@ -45,9 +45,9 @@ class PlannedMealServiceTest {
     @Mock
     private RecipeRepository recipeRepository;
     @Mock
-    private InventoryRepository inventoryRepository;
+    private PantryRepository pantryRepository;
     @Mock
-    private InventoryService inventoryService;
+    private PantryService pantryService;
     @Mock
     private Clock clock;
 
@@ -95,17 +95,17 @@ class PlannedMealServiceTest {
     @Nested
     class Plan {
         @Test
-        @DisplayName("snapshots inventory barcodes onto the saved plan")
+        @DisplayName("snapshots pantry barcodes onto the saved plan")
         void planSnapshotsBarcode() {
-            var item = new InventoryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 2d, date, "111");
+            var item = new PantryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 2d, date, "111");
 
             when(recipeRepository.findById(recipe.id())).thenReturn(Optional.of(recipe));
-            when(inventoryRepository.findById("item-1")).thenReturn(Optional.of(item));
+            when(pantryRepository.findById("item-1")).thenReturn(Optional.of(item));
             when(plannedMealRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
             var plannedIngredient = new PlannedIngredient(bread,
                     // amount snapshotted from request; barcode should be filled from the item
-                    List.of(new InventoryAllocation("item-1", null, 2d)));
+                    List.of(new PantryAllocation("item-1", null, 2d)));
 
             var planned = plannedMealService.plan(HOUSE_ID, recipe.id(), "Dinner", date, List.of(plannedIngredient));
 
@@ -115,18 +115,18 @@ class PlannedMealServiceTest {
         }
 
         @Test
-        @DisplayName("supports multiple inventory items for one ingredient")
+        @DisplayName("supports multiple pantry items for one ingredient")
         void planAllowsMultipleAllocations() {
-            var itemA = new InventoryItem("a", null, HOUSE_ID, "bread", null, "ITEMS", 2d, date, "111");
-            var itemB = new InventoryItem("b", null, HOUSE_ID, "bread", null, "ITEMS", 2d, date, "222");
+            var itemA = new PantryItem("a", null, HOUSE_ID, "bread", null, "ITEMS", 2d, date, "111");
+            var itemB = new PantryItem("b", null, HOUSE_ID, "bread", null, "ITEMS", 2d, date, "222");
 
             when(recipeRepository.findById(recipe.id())).thenReturn(Optional.of(recipe));
-            when(inventoryRepository.findById("a")).thenReturn(Optional.of(itemA));
-            when(inventoryRepository.findById("b")).thenReturn(Optional.of(itemB));
+            when(pantryRepository.findById("a")).thenReturn(Optional.of(itemA));
+            when(pantryRepository.findById("b")).thenReturn(Optional.of(itemB));
             when(plannedMealRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
             var plannedIngredient = new PlannedIngredient(bread,
-                    List.of(new InventoryAllocation("a", null, 2d), new InventoryAllocation("b", null, 2d)));
+                    List.of(new PantryAllocation("a", null, 2d), new PantryAllocation("b", null, 2d)));
 
             var planned = plannedMealService.plan(HOUSE_ID, recipe.id(), "Dinner", date, List.of(plannedIngredient));
 
@@ -157,16 +157,16 @@ class PlannedMealServiceTest {
         }
 
         @Test
-        void failsWhenInventoryItemMissing() {
+        void failsWhenPantryItemMissing() {
             when(recipeRepository.findById(recipe.id())).thenReturn(Optional.of(recipe));
-            when(inventoryRepository.findById("ghost")).thenReturn(Optional.empty());
+            when(pantryRepository.findById("ghost")).thenReturn(Optional.empty());
 
-            var plannedIngredient = new PlannedIngredient(bread, List.of(new InventoryAllocation("ghost", null, 1d)));
+            var plannedIngredient = new PlannedIngredient(bread, List.of(new PantryAllocation("ghost", null, 1d)));
 
             var exception = assertThrows(IllegalArgumentException.class,
                     () -> plannedMealService.plan(HOUSE_ID, recipe.id(), "Dinner", date, List.of(plannedIngredient)));
 
-            assertThat(exception.getMessage(), is("Inventory item does not exist"));
+            assertThat(exception.getMessage(), is("Pantry item does not exist"));
         }
 
         @Test
@@ -188,15 +188,15 @@ class PlannedMealServiceTest {
         void updateResolvesItemsAndKeepsId() {
             var existing = new PlannedMeal("meal-1", "owner", HOUSE_ID, recipe.id(), "Dinner", date, List.of(),
                     Instant.parse("2026-01-01T00:00:00Z"), Instant.parse("2026-01-01T00:00:00Z"), null);
-            var item = new InventoryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 2d, date, "111");
+            var item = new PantryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 2d, date, "111");
 
             when(plannedMealRepository.findById("meal-1")).thenReturn(Optional.of(existing));
             when(recipeRepository.findById(recipe.id())).thenReturn(Optional.of(recipe));
-            when(inventoryRepository.findById("item-1")).thenReturn(Optional.of(item));
+            when(pantryRepository.findById("item-1")).thenReturn(Optional.of(item));
             when(plannedMealRepository.existsByHouseIdAndDateAndNameAndIdNot(HOUSE_ID, date, "Dinner", "meal-1")).thenReturn(false);
             when(plannedMealRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-            var plannedIngredient = new PlannedIngredient(bread, List.of(new InventoryAllocation("item-1", null, 2d)));
+            var plannedIngredient = new PlannedIngredient(bread, List.of(new PantryAllocation("item-1", null, 2d)));
 
             var updated = plannedMealService.update("meal-1", recipe.id(), "Dinner", date, List.of(plannedIngredient));
 
@@ -247,11 +247,11 @@ class PlannedMealServiceTest {
         @Test
         @DisplayName("consumes every allocation across every item in the meal and records eatenAt")
         void consumesAllAllocations() {
-            var itemA = new PlannedIngredient(bread, List.of(new InventoryAllocation("a", "111", 2d)));
+            var itemA = new PlannedIngredient(bread, List.of(new PantryAllocation("a", "111", 2d)));
             var rice = new RecipeIngredient("rice", "GRAMS", 200d);
             var itemB = new PlannedIngredient(rice, List.of(
-                    new InventoryAllocation("b", "222", 100d),
-                    new InventoryAllocation("c", "333", 100d)));
+                    new PantryAllocation("b", "222", 100d),
+                    new PantryAllocation("c", "333", 100d)));
             var meal = new PlannedMeal("meal-1", null, HOUSE_ID, recipe.id(), "Dinner", date, List.of(itemA, itemB), null, null, null);
 
             when(plannedMealRepository.findById("meal-1")).thenReturn(Optional.of(meal));
@@ -260,9 +260,9 @@ class PlannedMealServiceTest {
 
             var result = plannedMealService.markEaten("meal-1");
 
-            verify(inventoryService).consume("a", 2d);
-            verify(inventoryService).consume("b", 100d);
-            verify(inventoryService).consume("c", 100d);
+            verify(pantryService).consume("a", 2d);
+            verify(pantryService).consume("b", 100d);
+            verify(pantryService).consume("c", 100d);
             assertThat(result.eatenAt(), is(NOW));
         }
 
@@ -278,7 +278,7 @@ class PlannedMealServiceTest {
 
             plannedMealService.markEaten("meal-1");
 
-            verify(inventoryService, never()).consume(any(), any());
+            verify(pantryService, never()).consume(any(), any());
         }
 
         @Test
@@ -302,38 +302,38 @@ class PlannedMealServiceTest {
                     () -> plannedMealService.markEaten("meal-1"));
 
             assertThat(exception.getMessage(), is("Meal has already been marked as eaten"));
-            verify(inventoryService, never()).consume(any(), any());
+            verify(pantryService, never()).consume(any(), any());
         }
     }
 
     @Nested
     class Suggest {
         @Test
-        @DisplayName("suggests current inventory matching barcodes paired before, scoped to a recipe")
+        @DisplayName("suggests current pantry matching barcodes paired before, scoped to a recipe")
         void suggestsByHistoricBarcodeForRecipe() {
             var historicPlan = new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", date,
-                    List.of(new PlannedIngredient(bread, List.of(new InventoryAllocation("old", "111", 2d)))));
-            var current = new InventoryItem("new", null, HOUSE_ID, "bread", null, "ITEMS", 5d, date, "111");
+                    List.of(new PlannedIngredient(bread, List.of(new PantryAllocation("old", "111", 2d)))));
+            var current = new PantryItem("new", null, HOUSE_ID, "bread", null, "ITEMS", 5d, date, "111");
 
             when(plannedMealRepository.findByRecipeId(HOUSE_ID, recipe.id())).thenReturn(List.of(historicPlan));
-            when(inventoryRepository.findByBarcodeIn(HOUSE_ID, Set.of("111"))).thenReturn(List.of(current));
+            when(pantryRepository.findByBarcodeIn(HOUSE_ID, Set.of("111"))).thenReturn(List.of(current));
 
-            var suggestions = plannedMealService.suggestInventory(HOUSE_ID, recipe.id(), "bread");
+            var suggestions = plannedMealService.suggestPantryItems(HOUSE_ID, recipe.id(), "bread");
 
             assertThat(suggestions, contains(current));
         }
 
         @Test
-        @DisplayName("suggests current inventory matching barcodes paired before, across all meals when no recipe given")
+        @DisplayName("suggests current pantry matching barcodes paired before, across all meals when no recipe given")
         void suggestsByHistoricBarcodeAcrossAllMeals() {
             var historicPlan = new PlannedMeal(HOUSE_ID, null, "Leftover rice night", date,
-                    List.of(new PlannedIngredient(bread, List.of(new InventoryAllocation("old", "111", 2d)))));
-            var current = new InventoryItem("new", null, HOUSE_ID, "bread", null, "ITEMS", 5d, date, "111");
+                    List.of(new PlannedIngredient(bread, List.of(new PantryAllocation("old", "111", 2d)))));
+            var current = new PantryItem("new", null, HOUSE_ID, "bread", null, "ITEMS", 5d, date, "111");
 
             when(plannedMealRepository.findByIngredientName(HOUSE_ID, "bread")).thenReturn(List.of(historicPlan));
-            when(inventoryRepository.findByBarcodeIn(HOUSE_ID, Set.of("111"))).thenReturn(List.of(current));
+            when(pantryRepository.findByBarcodeIn(HOUSE_ID, Set.of("111"))).thenReturn(List.of(current));
 
-            var suggestions = plannedMealService.suggestInventory(HOUSE_ID, null, "bread");
+            var suggestions = plannedMealService.suggestPantryItems(HOUSE_ID, null, "bread");
 
             assertThat(suggestions, contains(current));
         }
@@ -342,10 +342,10 @@ class PlannedMealServiceTest {
         @DisplayName("falls back to name match when no barcode history")
         void fallsBackToName() {
             when(plannedMealRepository.findByRecipeId(HOUSE_ID, recipe.id())).thenReturn(List.of());
-            var byName = new InventoryItem("n", null, HOUSE_ID, "bread", null, "ITEMS", 1d, date, null);
-            when(inventoryRepository.findByName(HOUSE_ID, "bread")).thenReturn(List.of(byName));
+            var byName = new PantryItem("n", null, HOUSE_ID, "bread", null, "ITEMS", 1d, date, null);
+            when(pantryRepository.findByName(HOUSE_ID, "bread")).thenReturn(List.of(byName));
 
-            var suggestions = plannedMealService.suggestInventory(HOUSE_ID, recipe.id(), "bread");
+            var suggestions = plannedMealService.suggestPantryItems(HOUSE_ID, recipe.id(), "bread");
 
             assertThat(suggestions, contains(byName));
         }
@@ -353,13 +353,13 @@ class PlannedMealServiceTest {
         @Test
         void emptyWhenNothingMatches() {
             when(plannedMealRepository.findByRecipeId(HOUSE_ID, recipe.id())).thenReturn(List.of());
-            when(inventoryRepository.findByName(HOUSE_ID, "bread")).thenReturn(List.of());
+            when(pantryRepository.findByName(HOUSE_ID, "bread")).thenReturn(List.of());
 
-            assertThat(plannedMealService.suggestInventory(HOUSE_ID, recipe.id(), "bread"), is(empty()));
+            assertThat(plannedMealService.suggestPantryItems(HOUSE_ID, recipe.id(), "bread"), is(empty()));
         }
     }
 
-    private static org.hamcrest.Matcher<InventoryAllocation> hasAllocation(final String id, final String barcode, final Double amount) {
-        return is(new InventoryAllocation(id, barcode, amount));
+    private static org.hamcrest.Matcher<PantryAllocation> hasAllocation(final String id, final String barcode, final Double amount) {
+        return is(new PantryAllocation(id, barcode, amount));
     }
 }

@@ -17,7 +17,7 @@ class PlannedMealDocumentTest {
     @DisplayName("create document from entity")
     void fromModel() {
         var bread = new RecipeIngredient("bread", "ITEMS", 2d);
-        var item = new PlannedIngredient(bread, List.of(new InventoryAllocation("item-1", "111", 2d)));
+        var item = new PlannedIngredient(bread, List.of(new PantryAllocation("item-1", "111", 2d)));
         var plannedMeal = new PlannedMeal("house-1", "recipe-1", "Dinner", LocalDate.of(2026, 6, 6), List.of(item));
 
         var document = PlannedMealDocument.from(plannedMeal);
@@ -33,7 +33,7 @@ class PlannedMealDocumentTest {
     @DisplayName("round-trips to model")
     void toModel() {
         var bread = new RecipeIngredient("bread", "ITEMS", 2d);
-        var item = new PlannedIngredient(bread, List.of(new InventoryAllocation("item-1", "111", 2d)));
+        var item = new PlannedIngredient(bread, List.of(new PantryAllocation("item-1", "111", 2d)));
         var document = PlannedMealDocument.builder()
                 .id("planned-1")
                 .recipeId("recipe-1")

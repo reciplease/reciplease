@@ -78,25 +78,25 @@ public class HouseInviteSteps {
                 .with(jwt().jwt(builder -> builder.subject(userId)))));
     }
 
-    @When("{string} creates an inventory item named {string} in the house")
-    public void createsInventoryItem(final String userId, final String itemName) throws Exception {
-        createsInventoryItemInHouse(userId, itemName, "Test House");
+    @When("{string} creates a pantry item named {string} in the house")
+    public void createsPantryItem(final String userId, final String itemName) throws Exception {
+        createsPantryItemInHouse(userId, itemName, "Test House");
     }
 
-    @And("{string} creates an inventory item named {string} in house {string}")
-    public void createsInventoryItemInHouse(final String userId, final String itemName, final String houseName) throws Exception {
+    @And("{string} creates a pantry item named {string} in house {string}")
+    public void createsPantryItemInHouse(final String userId, final String itemName, final String houseName) throws Exception {
         final var body = """
                 {"name": "%s", "measure": "ITEMS", "amount": 1, "expiration": "2030-01-01"}
                 """.formatted(itemName);
 
-        state.setLastResult(mockMvc.perform(houseScopedRequest(post("/api/inventory"), userId, houseName)
+        state.setLastResult(mockMvc.perform(houseScopedRequest(post("/api/pantry"), userId, houseName)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body)));
     }
 
-    @When("{string} lists inventory in the house")
-    public void listsInventory(final String userId) throws Exception {
-        state.setLastResult(mockMvc.perform(houseScopedRequest(get("/api/inventory"), userId, "Test House")));
+    @When("{string} lists pantry in the house")
+    public void listsPantry(final String userId) throws Exception {
+        state.setLastResult(mockMvc.perform(houseScopedRequest(get("/api/pantry"), userId, "Test House")));
     }
 
     @Then("the response status is {int}")
@@ -112,15 +112,15 @@ public class HouseInviteSteps {
         assertThat(actualRole.get().name()).isEqualTo(role);
     }
 
-    @Then("the inventory list contains {string}")
-    public void theInventoryListContains(final String itemName) throws Exception {
+    @Then("the pantry list contains {string}")
+    public void thePantryListContains(final String itemName) throws Exception {
         state.lastResult().andExpect(
                 org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(
                         org.hamcrest.Matchers.containsString(itemName)));
     }
 
-    @Then("the inventory list does not contain {string}")
-    public void theInventoryListDoesNotContain(final String itemName) throws Exception {
+    @Then("the pantry list does not contain {string}")
+    public void thePantryListDoesNotContain(final String itemName) throws Exception {
         state.lastResult().andExpect(
                 org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(
                         org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString(itemName))));

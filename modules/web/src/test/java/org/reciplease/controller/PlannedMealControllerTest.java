@@ -7,8 +7,8 @@ import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.MethodSecurityTestSupport;
 import org.reciplease.configuration.WithHouseMember;
 import org.reciplease.configuration.WithHouseOwner;
-import org.reciplease.model.InventoryAllocation;
-import org.reciplease.model.InventoryItem;
+import org.reciplease.model.PantryAllocation;
+import org.reciplease.model.PantryItem;
 import org.reciplease.model.PlannedIngredient;
 import org.reciplease.model.PlannedMeal;
 import org.reciplease.model.Recipe;
@@ -72,12 +72,12 @@ class PlannedMealControllerTest {
     }
 
     @Test
-    @DisplayName("plans a meal linked to a recipe with inventory allocations")
+    @DisplayName("plans a meal linked to a recipe with pantry allocations")
     void plan() throws Exception {
         var recipe = Recipe.builder().id("recipe-1").name("toast").build();
         var bread = new RecipeIngredient("bread", "ITEMS", 2d);
         var planned = new PlannedMeal(HOUSE_ID, "recipe-1", "Dinner", LocalDate.of(2026, 6, 6),
-                List.of(new PlannedIngredient(bread, List.of(new InventoryAllocation("item-1", "111", 2d)))));
+                List.of(new PlannedIngredient(bread, List.of(new PantryAllocation("item-1", "111", 2d)))));
 
         when(plannedMealService.plan(eq(HOUSE_ID), eq("recipe-1"), eq("Dinner"), eq(LocalDate.of(2026, 6, 6)), org.mockito.ArgumentMatchers.anyList()))
                 .thenReturn(planned);
@@ -89,7 +89,7 @@ class PlannedMealControllerTest {
                 + "\"date\":\"2026-06-06\","
                 + "\"items\":[{"
                 + "\"ingredient\":{\"name\":\"bread\",\"measure\":\"ITEMS\",\"amount\":2.0},"
-                + "\"allocations\":[{\"inventoryItemId\":\"item-1\",\"amount\":2.0}]"
+                + "\"allocations\":[{\"pantryItemId\":\"item-1\",\"amount\":2.0}]"
                 + "}]}";
 
         mockMvc.perform(post("/api/planned-meals")
@@ -353,11 +353,11 @@ class PlannedMealControllerTest {
     }
 
     @Test
-    @DisplayName("returns inventory suggestions for an ingredient, scoped to a recipe")
+    @DisplayName("returns pantry suggestions for an ingredient, scoped to a recipe")
     void suggestionsForRecipe() throws Exception {
-        var item = new InventoryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 5d, LocalDate.of(2026, 6, 30), "111");
+        var item = new PantryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 5d, LocalDate.of(2026, 6, 30), "111");
 
-        when(plannedMealService.suggestInventory(HOUSE_ID, "recipe-1", "bread")).thenReturn(List.of(item));
+        when(plannedMealService.suggestPantryItems(HOUSE_ID, "recipe-1", "bread")).thenReturn(List.of(item));
 
         mockMvc.perform(get("/api/planned-meals/suggestions")
                         .param("recipeId", "recipe-1")
@@ -367,11 +367,11 @@ class PlannedMealControllerTest {
     }
 
     @Test
-    @DisplayName("returns inventory suggestions for an ingredient with no recipe given")
+    @DisplayName("returns pantry suggestions for an ingredient with no recipe given")
     void suggestionsWithoutRecipe() throws Exception {
-        var item = new InventoryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 5d, LocalDate.of(2026, 6, 30), "111");
+        var item = new PantryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 5d, LocalDate.of(2026, 6, 30), "111");
 
-        when(plannedMealService.suggestInventory(HOUSE_ID, null, "bread")).thenReturn(List.of(item));
+        when(plannedMealService.suggestPantryItems(HOUSE_ID, null, "bread")).thenReturn(List.of(item));
 
         mockMvc.perform(get("/api/planned-meals/suggestions")
                         .param("ingredient", "bread"))

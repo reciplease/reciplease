@@ -17,20 +17,20 @@ public class PlannedIngredientDocument {
 
     private RecipeIngredientDocument ingredient;
     @Builder.Default
-    private List<InventoryAllocationDocument> allocations = new ArrayList<>();
+    private List<PantryAllocationDocument> allocations = new ArrayList<>();
 
     public static PlannedIngredientDocument from(final PlannedIngredient plannedIngredient) {
         return PlannedIngredientDocument.builder()
                 .ingredient(RecipeIngredientDocument.from(plannedIngredient.ingredient()))
                 .allocations(plannedIngredient.allocations().stream()
-                        .map(InventoryAllocationDocument::from)
+                        .map(PantryAllocationDocument::from)
                         .collect(Collectors.toList()))
                 .build();
     }
 
     public PlannedIngredient toModel() {
-        var resolvedAllocations = allocations == null ? List.<InventoryAllocation>of() : allocations.stream()
-                .map(InventoryAllocationDocument::toModel)
+        var resolvedAllocations = allocations == null ? List.<PantryAllocation>of() : allocations.stream()
+                .map(PantryAllocationDocument::toModel)
                 .collect(Collectors.toList());
         return new PlannedIngredient(ingredient.toModel(), resolvedAllocations);
     }

@@ -5,14 +5,14 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * A shopping-trip capture awaiting digitisation into an {@link InventoryItem}. Created during
+ * A shopping-trip capture awaiting digitisation into an {@link PantryItem}. Created during
  * the fast "add a whole shop" loop, which records at most a photo of the barcode plus photos
  * of the printed expiration date and the pack measure/size — every field is optional because each
  * capture step can be skipped. The barcode itself is decoded later, during processing, rather
  * than in real time while shopping. The item's existence is what marks it as pending; completing
- * it creates a real {@link InventoryItem} and deletes this one.
+ * it creates a real {@link PantryItem} and deletes this one.
  */
-public record PendingInventoryItem(
+public record PendingPantryItem(
         String id,
         String createdBy,
         String houseId,
@@ -28,13 +28,13 @@ public record PendingInventoryItem(
         Instant createdAt,
         Instant updatedAt) implements Audited, HouseScoped {
 
-    public PendingInventoryItem(final String id, final String createdBy, final String houseId, final byte[] barcodeImage,
+    public PendingPantryItem(final String id, final String createdBy, final String houseId, final byte[] barcodeImage,
                                  final byte[] expirationImage, final byte[] measureImage) {
         this(id, createdBy, houseId, barcodeImage, null, expirationImage, measureImage, null, null);
     }
 
-    public PendingInventoryItem withId(final String id) {
-        return new PendingInventoryItem(id, createdBy, houseId, barcodeImage, legacyBarcode, expirationImage, measureImage, createdAt, updatedAt);
+    public PendingPantryItem withId(final String id) {
+        return new PendingPantryItem(id, createdBy, houseId, barcodeImage, legacyBarcode, expirationImage, measureImage, createdAt, updatedAt);
     }
 
     // The generated record equals()/hashCode() would compare the image fields by array identity
@@ -44,7 +44,7 @@ public record PendingInventoryItem(
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof PendingInventoryItem other)) {
+        if (!(obj instanceof PendingPantryItem other)) {
             return false;
         }
         return Objects.equals(id, other.id)

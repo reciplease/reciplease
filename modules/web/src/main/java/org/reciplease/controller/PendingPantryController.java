@@ -5,9 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseMember;
 import org.reciplease.configuration.HouseOwner;
-import org.reciplease.dto.InventoryItemDto;
-import org.reciplease.dto.PendingInventoryItemDto;
-import org.reciplease.service.PendingInventoryService;
+import org.reciplease.dto.PantryItemDto;
+import org.reciplease.dto.PendingPantryItemDto;
+import org.reciplease.service.PendingPantryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,29 +26,29 @@ import static java.util.stream.Collectors.toList;
 /**
  * The shopping-trip capture backlog: barcode + photos captured in the fast "add a whole shop"
  * loop, digitised later via {@link #complete}. The literal {@code pending} segment takes
- * precedence over {@link InventoryController}'s {@code api/inventory/{uuid}} mapping, so the two
+ * precedence over {@link PantryController}'s {@code api/pantry/{uuid}} mapping, so the two
  * controllers don't clash.
  */
 @RestController
-@RequestMapping("api/inventory/pending")
+@RequestMapping("api/pantry/pending")
 @RequiredArgsConstructor
-public class PendingInventoryController {
+public class PendingPantryController {
 
-    final PendingInventoryService pendingInventoryService;
+    final PendingPantryService pendingPantryService;
     final HouseAccess houseAccess;
 
     @PostMapping
     @HouseOwner
-    public ResponseEntity<PendingInventoryItemDto> create(@Valid @RequestBody final PendingInventoryItemDto itemDto) {
-        final var savedItem = pendingInventoryService.save(itemDto.toEntity(houseAccess.requireHouseId()));
-        return ResponseEntity.status(HttpStatus.CREATED).body(PendingInventoryItemDto.from(savedItem));
+    public ResponseEntity<PendingPantryItemDto> create(@Valid @RequestBody final PendingPantryItemDto itemDto) {
+        final var savedItem = pendingPantryService.save(itemDto.toEntity(houseAccess.requireHouseId()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(PendingPantryItemDto.from(savedItem));
     }
 
     @GetMapping
     @HouseMember
-    public ResponseEntity<List<PendingInventoryItemDto>> findAll() {
-        final List<PendingInventoryItemDto> items = pendingInventoryService.findAll(houseAccess.requireHouseId()).stream()
-                .map(PendingInventoryItemDto::from)
+    public ResponseEntity<List<PendingPantryItemDto>> findAll() {
+        final List<PendingPantryItemDto> items = pendingPantryService.findAll(houseAccess.requireHouseId()).stream()
+                .map(PendingPantryItemDto::from)
                 .collect(toList());
 
         return ResponseEntity.ok(items);
@@ -56,10 +56,10 @@ public class PendingInventoryController {
 
     @GetMapping("{uuid}")
     @HouseMember
-    public ResponseEntity<PendingInventoryItemDto> findById(@PathVariable final String uuid) {
-        final Optional<PendingInventoryItemDto> foundItem = pendingInventoryService.findById(uuid)
+    public ResponseEntity<PendingPantryItemDto> findById(@PathVariable final String uuid) {
+        final Optional<PendingPantryItemDto> foundItem = pendingPantryService.findById(uuid)
                 .filter(houseAccess::belongsToHeaderHouse)
-                .map(PendingInventoryItemDto::from);
+                .map(PendingPantryItemDto::from);
 
         return ResponseEntity.of(foundItem);
     }
@@ -67,24 +67,24 @@ public class PendingInventoryController {
     @DeleteMapping("{uuid}")
     @HouseOwner
     public ResponseEntity<Void> deleteById(@PathVariable final String uuid) {
-        final var existing = pendingInventoryService.findById(uuid);
+        final var existing = pendingPantryService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
             return ResponseEntity.notFound().build();
         }
 
-        pendingInventoryService.deleteById(uuid);
+        pendingPantryService.deleteById(uuid);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("{uuid}/complete")
     @HouseOwner
-    public ResponseEntity<InventoryItemDto> complete(@PathVariable final String uuid, @Valid @RequestBody final InventoryItemDto itemDto) {
-        final var existing = pendingInventoryService.findById(uuid);
+    public ResponseEntity<PantryItemDto> complete(@PathVariable final String uuid, @Valid @RequestBody final PantryItemDto itemDto) {
+        final var existing = pendingPantryService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
             return ResponseEntity.notFound().build();
         }
 
-        final var savedItem = pendingInventoryService.complete(uuid, itemDto.toEntity(houseAccess.requireHouseId()));
-        return ResponseEntity.status(HttpStatus.CREATED).body(InventoryItemDto.from(savedItem));
+        final var savedItem = pendingPantryService.complete(uuid, itemDto.toEntity(houseAccess.requireHouseId()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(PantryItemDto.from(savedItem));
     }
 }

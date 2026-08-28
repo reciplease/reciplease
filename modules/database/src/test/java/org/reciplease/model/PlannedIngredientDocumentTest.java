@@ -13,12 +13,12 @@ class PlannedIngredientDocumentTest {
     @DisplayName("create document from entity")
     void fromModel() {
         var bread = new RecipeIngredient("bread", "ITEMS", 2d);
-        var item = new PlannedIngredient(bread, java.util.List.of(new InventoryAllocation("item-1", "111", 2d)));
+        var item = new PlannedIngredient(bread, java.util.List.of(new PantryAllocation("item-1", "111", 2d)));
 
         var document = PlannedIngredientDocument.from(item);
 
         assertThat(document.getIngredient().toModel(), is(bread));
-        assertThat(document.getAllocations().getFirst().toModel(), is(new InventoryAllocation("item-1", "111", 2d)));
+        assertThat(document.getAllocations().getFirst().toModel(), is(new PantryAllocation("item-1", "111", 2d)));
     }
 
     @Test
@@ -26,13 +26,13 @@ class PlannedIngredientDocumentTest {
     void toModel() {
         var document = PlannedIngredientDocument.builder()
                 .ingredient(RecipeIngredientDocument.from(new RecipeIngredient("bread", "ITEMS", 2d)))
-                .allocations(java.util.List.of(InventoryAllocationDocument.from(new InventoryAllocation("item-1", "111", 2d))))
+                .allocations(java.util.List.of(PantryAllocationDocument.from(new PantryAllocation("item-1", "111", 2d))))
                 .build();
 
         var item = document.toModel();
 
         assertThat(item.ingredient(), is(new RecipeIngredient("bread", "ITEMS", 2d)));
-        assertThat(item.allocations(), is(java.util.List.of(new InventoryAllocation("item-1", "111", 2d))));
+        assertThat(item.allocations(), is(java.util.List.of(new PantryAllocation("item-1", "111", 2d))));
     }
 
     @Test

@@ -15,27 +15,27 @@ Feature: House invites and role-based access
     When "newcomer-2" accepts invite "INVITE-2"
     Then the response status is 404
 
-  Scenario: An owner can create inventory in their house
-    When "owner-1" creates an inventory item named "Milk" in the house
+  Scenario: An owner can create pantry in their house
+    When "owner-1" creates a pantry item named "Milk" in the house
     Then the response status is 201
 
-  Scenario: A read-only member cannot create inventory
+  Scenario: A read-only member cannot create pantry
     Given an invite code "INVITE-3" for the house with role "READ_ONLY"
     And "member-1" accepts invite "INVITE-3"
-    When "member-1" creates an inventory item named "Milk" in the house
+    When "member-1" creates a pantry item named "Milk" in the house
     Then the response status is 403
 
-  Scenario: A read-only member can list inventory in their own house
+  Scenario: A read-only member can list pantry in their own house
     Given an invite code "INVITE-4" for the house with role "READ_ONLY"
     And "member-2" accepts invite "INVITE-4"
-    And "owner-1" creates an inventory item named "Eggs" in the house
-    When "member-2" lists inventory in the house
+    And "owner-1" creates a pantry item named "Eggs" in the house
+    When "member-2" lists pantry in the house
     Then the response status is 200
-    And the inventory list contains "Eggs"
+    And the pantry list contains "Eggs"
 
-  Scenario: A member of one house cannot see another house's inventory
+  Scenario: A member of one house cannot see another house's pantry
     Given a house "Other House" owned by "owner-2"
-    And "owner-2" creates an inventory item named "Secret Sauce" in house "Other House"
-    When "owner-1" lists inventory in the house
+    And "owner-2" creates a pantry item named "Secret Sauce" in house "Other House"
+    When "owner-1" lists pantry in the house
     Then the response status is 200
-    And the inventory list does not contain "Secret Sauce"
+    And the pantry list does not contain "Secret Sauce"

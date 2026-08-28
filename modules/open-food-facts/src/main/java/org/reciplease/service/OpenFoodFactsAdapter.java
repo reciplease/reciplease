@@ -16,7 +16,7 @@ import java.util.Optional;
  * FoodCatalogPort}. Stateless: nothing is persisted locally.
  * <p>
  * Barcode lookup reuses the same v2 product-by-barcode endpoint the frontend's
- * {@code reciplease-nextjs/src/lib/openfoodfacts.ts} already calls for inventory scanning
+ * {@code reciplease-nextjs/src/lib/openfoodfacts.ts} already calls for pantry scanning
  * (adding a {@code nutriments} field request, which that name/measure-only use case never
  * needed). Name search uses the legacy {@code /cgi/search.pl} endpoint instead of {@code
  * /api/v2/search}, since v2 only supports structured tag/category filtering — full-text search

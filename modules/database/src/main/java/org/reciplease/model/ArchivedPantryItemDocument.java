@@ -11,15 +11,15 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 /**
- * A snapshot of an {@link InventoryItemDocument} taken right before it's deleted (binned, eaten
+ * A snapshot of an {@link PantryItemDocument} taken right before it's deleted (binned, eaten
  * down to nothing, or explicitly removed) — history only, nothing in core reads these back.
  */
-@Document("inventoryArchive")
+@Document("pantryArchive")
 @Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ArchivedInventoryItemDocument {
+public class ArchivedPantryItemDocument {
 
     @Id
     private String id;
@@ -38,8 +38,8 @@ public class ArchivedInventoryItemDocument {
     private Instant updatedAt;
     private Instant archivedAt;
 
-    public static ArchivedInventoryItemDocument from(final InventoryItemDocument item, final Instant archivedAt) {
-        return ArchivedInventoryItemDocument.builder()
+    public static ArchivedPantryItemDocument from(final PantryItemDocument item, final Instant archivedAt) {
+        return ArchivedPantryItemDocument.builder()
                 .originalId(item.getId())
                 .houseId(item.getHouseId())
                 .name(item.getName())

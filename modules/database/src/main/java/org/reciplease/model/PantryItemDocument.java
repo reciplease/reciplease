@@ -13,12 +13,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.Instant;
 import java.time.LocalDate;
 
-@Document("inventory")
+@Document("pantry")
 @Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class InventoryItemDocument {
+public class PantryItemDocument {
 
     @Id
     private String id;
@@ -38,8 +38,8 @@ public class InventoryItemDocument {
     @LastModifiedDate
     private Instant updatedAt;
 
-    public static InventoryItemDocument from(final InventoryItem item) {
-        return InventoryItemDocument.builder()
+    public static PantryItemDocument from(final PantryItem item) {
+        return PantryItemDocument.builder()
                 .id(item.id())
                 .houseId(item.houseId())
                 .name(item.name())
@@ -56,10 +56,10 @@ public class InventoryItemDocument {
                 .build();
     }
 
-    // Documents saved before `remaining` existed have none stored; InventoryItem's own
+    // Documents saved before `remaining` existed have none stored; PantryItem's own
     // constructor defaults a null `remaining` to `amount` (fully stocked), so nothing extra
     // is needed here. Same for `brand` — simply null on documents saved before it existed.
-    public InventoryItem toModel() {
-        return new InventoryItem(id, createdBy, houseId, name, brand, measure, amount, remaining, expiration, barcode, image, createdAt, updatedAt);
+    public PantryItem toModel() {
+        return new PantryItem(id, createdBy, houseId, name, brand, measure, amount, remaining, expiration, barcode, image, createdAt, updatedAt);
     }
 }

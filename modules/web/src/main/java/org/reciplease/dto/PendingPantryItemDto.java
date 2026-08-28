@@ -4,15 +4,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
-import org.reciplease.model.PendingInventoryItem;
+import org.reciplease.model.PendingPantryItem;
 
 import java.time.Instant;
 
 @Value
 @AllArgsConstructor
 @Builder(toBuilder = true)
-@Schema(name = "PendingInventoryItem")
-public class PendingInventoryItemDto {
+@Schema(name = "PendingPantryItem")
+public class PendingPantryItemDto {
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     String uuid;
@@ -20,7 +20,7 @@ public class PendingInventoryItemDto {
     String houseId;
     byte[] barcodeImage;
     // Read-only echo of a pre-existing decoded barcode for items captured before barcodeImage
-    // existed — see PendingInventoryItem.legacyBarcode. Never accepted on create (absent from
+    // existed — see PendingPantryItem.legacyBarcode. Never accepted on create (absent from
     // toEntity below), so this can only ever be non-null on an item this API didn't create.
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     String legacyBarcode;
@@ -29,8 +29,8 @@ public class PendingInventoryItemDto {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     Instant updatedAt;
 
-    public static PendingInventoryItemDto from(final PendingInventoryItem item) {
-        return PendingInventoryItemDto.builder()
+    public static PendingPantryItemDto from(final PendingPantryItem item) {
+        return PendingPantryItemDto.builder()
                 .uuid(item.id())
                 .houseId(item.houseId())
                 .barcodeImage(item.barcodeImage())
@@ -46,8 +46,8 @@ public class PendingInventoryItemDto {
     // they don't belong to by spoofing the field. The body's uuid is untrusted for the
     // same reason: READ_ONLY only affects the OpenAPI schema, Jackson still binds it, and
     // Mongo saves are upserts — a caller-chosen id could overwrite an arbitrary document
-    // (and, via complete()'s id reuse, even another house's inventory item).
-    public PendingInventoryItem toEntity(final String houseId) {
-        return new PendingInventoryItem(null, null, houseId, barcodeImage, expirationImage, measureImage);
+    // (and, via complete()'s id reuse, even another house's pantry item).
+    public PendingPantryItem toEntity(final String houseId) {
+        return new PendingPantryItem(null, null, houseId, barcodeImage, expirationImage, measureImage);
     }
 }

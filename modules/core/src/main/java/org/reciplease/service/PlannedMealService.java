@@ -1,11 +1,11 @@
 package org.reciplease.service;
 
 import lombok.RequiredArgsConstructor;
-import org.reciplease.model.InventoryAllocation;
-import org.reciplease.model.InventoryItem;
+import org.reciplease.model.PantryAllocation;
+import org.reciplease.model.PantryItem;
 import org.reciplease.model.PlannedIngredient;
 import org.reciplease.model.PlannedMeal;
-import org.reciplease.repository.InventoryRepository;
+import org.reciplease.repository.PantryRepository;
 import org.reciplease.repository.PlannedMealRepository;
 import org.reciplease.repository.RecipeRepository;
 import org.springframework.stereotype.Service;
@@ -25,13 +25,13 @@ import java.util.stream.Collectors;
 public class PlannedMealService {
     private final PlannedMealRepository plannedMealRepository;
     private final RecipeRepository recipeRepository;
-    private final InventoryRepository inventoryRepository;
-    private final InventoryService inventoryService;
+    private final PantryRepository pantryRepository;
+    private final PantryService pantryService;
     private final Clock clock;
 
     /**
      * Plans a meal for a date, optionally linked to a recipe, pairing ingredients with chosen
-     * inventory items. Each referenced inventory item is validated and its barcode snapshotted so
+     * pantry items. Each referenced pantry item is validated and its barcode snapshotted so
      * future plans can suggest matching items. The meal's name must be unique for that date.
      */
     public PlannedMeal plan(final String houseId, final String recipeId, final String name,
@@ -61,7 +61,7 @@ public class PlannedMealService {
     }
 
     /**
-     * Marks a meal as eaten: a shortcut for consuming every inventory item allocated across
+     * Marks a meal as eaten: a shortcut for consuming every pantry item allocated across
      * all of its ingredients, instead of marking each one as eaten individually. Records
      * {@code eatenAt} so the meal isn't marked eaten twice (which would double-consume
      * its allocations).
@@ -76,7 +76,7 @@ public class PlannedMealService {
 
         meal.items().stream()
                 .flatMap(item -> item.allocations().stream())
-                .forEach(allocation -> inventoryService.consume(allocation.inventoryItemId(), allocation.amount()));
+                .forEach(allocation -> pantryService.consume(allocation.pantryItemId(), allocation.amount()));
 
         return plannedMealRepository.save(meal.withEatenAt(Instant.now(clock)));
     }
@@ -113,9 +113,9 @@ public class PlannedMealService {
     private PlannedIngredient resolveItem(final PlannedIngredient item) {
         var allocations = item.allocations().stream()
                 .map(allocation -> {
-                    var inventoryItem = inventoryRepository.findById(allocation.inventoryItemId())
-                            .orElseThrow(() -> new IllegalArgumentException("Inventory item does not exist"));
-                    return new InventoryAllocation(inventoryItem.id(), inventoryItem.barcode(), allocation.amount());
+                    var pantryItem = pantryRepository.findById(allocation.pantryItemId())
+                            .orElseThrow(() -> new IllegalArgumentException("Pantry item does not exist"));
+                    return new PantryAllocation(pantryItem.id(), pantryItem.barcode(), allocation.amount());
                 })
                 .collect(Collectors.toList());
 
@@ -127,13 +127,13 @@ public class PlannedMealService {
     }
 
     /**
-     * Suggests inventory items for an ingredient using the history of how it was previously
-     * planned: barcodes paired with this ingredient before are matched against current inventory.
+     * Suggests pantry items for an ingredient using the history of how it was previously
+     * planned: barcodes paired with this ingredient before are matched against current pantry.
      * When {@code recipeId} is given, history is scoped to that recipe; otherwise it's searched
      * across all planned meals for the house. Falls back to matching the ingredient name when no
      * barcode history is available.
      */
-    public List<InventoryItem> suggestInventory(final String houseId, final String recipeId, final String ingredientName) {
+    public List<PantryItem> suggestPantryItems(final String houseId, final String recipeId, final String ingredientName) {
         var historicMeals = recipeId != null
                 ? plannedMealRepository.findByRecipeId(houseId, recipeId)
                 : plannedMealRepository.findByIngredientName(houseId, ingredientName);
@@ -142,21 +142,21 @@ public class PlannedMealService {
                 .flatMap(meal -> meal.items().stream())
                 .filter(item -> item.ingredient().name().equals(ingredientName))
                 .flatMap(item -> item.allocations().stream())
-                .map(InventoryAllocation::barcode)
+                .map(PantryAllocation::barcode)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
-        var byBarcode = inventoryRepository.findByBarcodeIn(houseId, historicBarcodes);
+        var byBarcode = pantryRepository.findByBarcodeIn(houseId, historicBarcodes);
 
         if (!byBarcode.isEmpty()) {
             return distinctById(byBarcode);
         }
 
-        return distinctById(inventoryRepository.findByName(houseId, ingredientName));
+        return distinctById(pantryRepository.findByName(houseId, ingredientName));
     }
 
-    private List<InventoryItem> distinctById(final List<InventoryItem> items) {
-        Map<String, InventoryItem> byId = new LinkedHashMap<>();
+    private List<PantryItem> distinctById(final List<PantryItem> items) {
+        Map<String, PantryItem> byId = new LinkedHashMap<>();
         items.forEach(item -> byId.putIfAbsent(item.id(), item));
         return List.copyOf(byId.values());
     }

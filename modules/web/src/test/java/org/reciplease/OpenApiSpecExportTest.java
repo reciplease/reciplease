@@ -14,9 +14,9 @@ import org.reciplease.repository.WebAuthnChallengeLedger;
 import org.reciplease.service.ApiKeyService;
 import org.reciplease.service.FoodSearchService;
 import org.reciplease.service.GoogleHealthAdapter;
-import org.reciplease.service.InventoryService;
+import org.reciplease.service.PantryService;
 import org.reciplease.service.InviteService;
-import org.reciplease.service.PendingInventoryService;
+import org.reciplease.service.PendingPantryService;
 import org.reciplease.service.PlannedMealService;
 import org.reciplease.service.RecipeService;
 import org.reciplease.service.RefreshTokenService;
@@ -67,9 +67,9 @@ class OpenApiSpecExportTest {
     @MockitoBean(name = "houseAccess")
     private HouseAccess houseAccess;
     @MockitoBean
-    private InventoryService inventoryService;
+    private PantryService pantryService;
     @MockitoBean
-    private PendingInventoryService pendingInventoryService;
+    private PendingPantryService pendingPantryService;
     @MockitoBean
     private HouseRepository houseRepository;
     @MockitoBean

@@ -7,10 +7,10 @@ import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.MethodSecurityTestSupport;
 import org.reciplease.configuration.WithHouseMember;
 import org.reciplease.configuration.WithHouseOwner;
-import org.reciplease.model.InventoryItem;
-import org.reciplease.model.PendingInventoryItem;
-import org.reciplease.service.InventoryService;
-import org.reciplease.service.PendingInventoryService;
+import org.reciplease.model.PantryItem;
+import org.reciplease.model.PendingPantryItem;
+import org.reciplease.service.PantryService;
+import org.reciplease.service.PendingPantryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -36,21 +36,21 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-// InventoryController is loaded alongside so the tests prove the literal `pending` segment
-// wins over its `api/inventory/{uuid}` mapping rather than being captured as a uuid.
-@WebMvcTest({PendingInventoryController.class, InventoryController.class})
+// PantryController is loaded alongside so the tests prove the literal `pending` segment
+// wins over its `api/pantry/{uuid}` mapping rather than being captured as a uuid.
+@WebMvcTest({PendingPantryController.class, PantryController.class})
 @WithHouseOwner
 @Import(MethodSecurityTestSupport.class)
-class PendingInventoryControllerTest {
+class PendingPantryControllerTest {
 
     private static final String HOUSE_ID = "house-1";
     private static final String PENDING_ID = "b465af6e-2465-4436-84c1-14f35db68dbf";
 
     @MockitoBean
-    PendingInventoryService pendingInventoryService;
+    PendingPantryService pendingPantryService;
 
     @MockitoBean
-    InventoryService inventoryService;
+    PantryService pantryService;
 
     @MockitoBean(name = "houseAccess")
     HouseAccess houseAccess;
@@ -70,18 +70,18 @@ class PendingInventoryControllerTest {
         when(houseAccess.isOwner()).thenReturn(true);
         when(houseAccess.isMember()).thenReturn(true);
         when(houseAccess.requireHouseId()).thenReturn(HOUSE_ID);
-        when(houseAccess.belongsToHeaderHouse(any(PendingInventoryItem.class))).thenReturn(true);
+        when(houseAccess.belongsToHeaderHouse(any(PendingPantryItem.class))).thenReturn(true);
     }
 
     @Test
     @DisplayName("should create a pending item with a barcode photo and both other images")
     void shouldCreatePendingItem() throws Exception {
-        var requestItem = new PendingInventoryItem(null, null, HOUSE_ID, barcodeImageBytes, expirationImageBytes, measureImageBytes);
+        var requestItem = new PendingPantryItem(null, null, HOUSE_ID, barcodeImageBytes, expirationImageBytes, measureImageBytes);
         var savedItem = requestItem.withId(PENDING_ID);
 
-        when(pendingInventoryService.save(requestItem)).thenReturn(savedItem);
+        when(pendingPantryService.save(requestItem)).thenReturn(savedItem);
 
-        mockMvc.perform(post("/api/inventory/pending")
+        mockMvc.perform(post("/api/pantry/pending")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -104,12 +104,12 @@ class PendingInventoryControllerTest {
     @Test
     @DisplayName("should create a pending item with every field skipped")
     void shouldCreateEmptyPendingItem() throws Exception {
-        var requestItem = new PendingInventoryItem(null, null, HOUSE_ID, null, null, null);
+        var requestItem = new PendingPantryItem(null, null, HOUSE_ID, null, null, null);
         var savedItem = requestItem.withId(PENDING_ID);
 
-        when(pendingInventoryService.save(requestItem)).thenReturn(savedItem);
+        when(pendingPantryService.save(requestItem)).thenReturn(savedItem);
 
-        mockMvc.perform(post("/api/inventory/pending")
+        mockMvc.perform(post("/api/pantry/pending")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
@@ -124,10 +124,10 @@ class PendingInventoryControllerTest {
     @Test
     @DisplayName("create ignores a caller-supplied uuid — ids are always server-generated")
     void createIgnoresBodyUuid() throws Exception {
-        var requestItem = new PendingInventoryItem(null, null, HOUSE_ID, barcodeImageBytes, null, null);
-        when(pendingInventoryService.save(requestItem)).thenReturn(requestItem.withId(PENDING_ID));
+        var requestItem = new PendingPantryItem(null, null, HOUSE_ID, barcodeImageBytes, null, null);
+        when(pendingPantryService.save(requestItem)).thenReturn(requestItem.withId(PENDING_ID));
 
-        mockMvc.perform(post("/api/inventory/pending")
+        mockMvc.perform(post("/api/pantry/pending")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -141,7 +141,7 @@ class PendingInventoryControllerTest {
                           "uuid": "%s"
                         }""".formatted(PENDING_ID)));
 
-        verify(pendingInventoryService).save(requestItem);
+        verify(pendingPantryService).save(requestItem);
     }
 
     @Test
@@ -150,7 +150,7 @@ class PendingInventoryControllerTest {
     void createForbiddenForReadOnly() throws Exception {
         when(houseAccess.isOwner()).thenReturn(false);
 
-        mockMvc.perform(post("/api/inventory/pending")
+        mockMvc.perform(post("/api/pantry/pending")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
@@ -160,11 +160,11 @@ class PendingInventoryControllerTest {
     @Test
     @DisplayName("should list the house's pending items")
     void shouldListPendingItems() throws Exception {
-        var pending = new PendingInventoryItem(PENDING_ID, null, HOUSE_ID, barcodeImageBytes, expirationImageBytes, null);
+        var pending = new PendingPantryItem(PENDING_ID, null, HOUSE_ID, barcodeImageBytes, expirationImageBytes, null);
 
-        when(pendingInventoryService.findAll(HOUSE_ID)).thenReturn(List.of(pending));
+        when(pendingPantryService.findAll(HOUSE_ID)).thenReturn(List.of(pending));
 
-        mockMvc.perform(get("/api/inventory/pending"))
+        mockMvc.perform(get("/api/pantry/pending"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
                         [{
@@ -178,11 +178,11 @@ class PendingInventoryControllerTest {
     @Test
     @DisplayName("should find a pending item by ID")
     void shouldFindPendingItemById() throws Exception {
-        var pending = new PendingInventoryItem(PENDING_ID, null, HOUSE_ID, barcodeImageBytes, null, measureImageBytes);
+        var pending = new PendingPantryItem(PENDING_ID, null, HOUSE_ID, barcodeImageBytes, null, measureImageBytes);
 
-        when(pendingInventoryService.findById(PENDING_ID)).thenReturn(Optional.of(pending));
+        when(pendingPantryService.findById(PENDING_ID)).thenReturn(Optional.of(pending));
 
-        mockMvc.perform(get("/api/inventory/pending/{uuid}", PENDING_ID))
+        mockMvc.perform(get("/api/pantry/pending/{uuid}", PENDING_ID))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
                         {
@@ -196,61 +196,61 @@ class PendingInventoryControllerTest {
     @Test
     @DisplayName("should 404 finding a pending item belonging to another house")
     void findByIdOtherHouse() throws Exception {
-        var pending = new PendingInventoryItem(PENDING_ID, null, "other-house", null, null, null);
-        when(houseAccess.belongsToHeaderHouse(any(PendingInventoryItem.class))).thenReturn(false);
-        when(pendingInventoryService.findById(PENDING_ID)).thenReturn(Optional.of(pending));
+        var pending = new PendingPantryItem(PENDING_ID, null, "other-house", null, null, null);
+        when(houseAccess.belongsToHeaderHouse(any(PendingPantryItem.class))).thenReturn(false);
+        when(pendingPantryService.findById(PENDING_ID)).thenReturn(Optional.of(pending));
 
-        mockMvc.perform(get("/api/inventory/pending/{uuid}", PENDING_ID))
+        mockMvc.perform(get("/api/pantry/pending/{uuid}", PENDING_ID))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("should delete a pending item")
     void shouldDeletePendingItem() throws Exception {
-        var pending = new PendingInventoryItem(PENDING_ID, null, HOUSE_ID, null, null, null);
-        when(pendingInventoryService.findById(PENDING_ID)).thenReturn(Optional.of(pending));
+        var pending = new PendingPantryItem(PENDING_ID, null, HOUSE_ID, null, null, null);
+        when(pendingPantryService.findById(PENDING_ID)).thenReturn(Optional.of(pending));
 
-        mockMvc.perform(delete("/api/inventory/pending/{uuid}", PENDING_ID).with(csrf()))
+        mockMvc.perform(delete("/api/pantry/pending/{uuid}", PENDING_ID).with(csrf()))
                 .andExpect(status().isNoContent());
 
-        verify(pendingInventoryService).deleteById(PENDING_ID);
+        verify(pendingPantryService).deleteById(PENDING_ID);
     }
 
     @Test
     @DisplayName("should 404 when deleting an unknown pending item")
     void deleteUnknown() throws Exception {
-        when(pendingInventoryService.findById(PENDING_ID)).thenReturn(Optional.empty());
+        when(pendingPantryService.findById(PENDING_ID)).thenReturn(Optional.empty());
 
-        mockMvc.perform(delete("/api/inventory/pending/{uuid}", PENDING_ID).with(csrf()))
+        mockMvc.perform(delete("/api/pantry/pending/{uuid}", PENDING_ID).with(csrf()))
                 .andExpect(status().isNotFound());
 
-        verify(pendingInventoryService, never()).deleteById(any());
+        verify(pendingPantryService, never()).deleteById(any());
     }
 
     @Test
     @DisplayName("should 404 when deleting a pending item belonging to another house")
     void deleteOtherHouse() throws Exception {
-        var pending = new PendingInventoryItem(PENDING_ID, null, "other-house", null, null, null);
-        when(houseAccess.belongsToHeaderHouse(any(PendingInventoryItem.class))).thenReturn(false);
-        when(pendingInventoryService.findById(PENDING_ID)).thenReturn(Optional.of(pending));
+        var pending = new PendingPantryItem(PENDING_ID, null, "other-house", null, null, null);
+        when(houseAccess.belongsToHeaderHouse(any(PendingPantryItem.class))).thenReturn(false);
+        when(pendingPantryService.findById(PENDING_ID)).thenReturn(Optional.of(pending));
 
-        mockMvc.perform(delete("/api/inventory/pending/{uuid}", PENDING_ID).with(csrf()))
+        mockMvc.perform(delete("/api/pantry/pending/{uuid}", PENDING_ID).with(csrf()))
                 .andExpect(status().isNotFound());
 
-        verify(pendingInventoryService, never()).deleteById(any());
+        verify(pendingPantryService, never()).deleteById(any());
     }
 
     @Test
-    @DisplayName("complete creates the inventory item and returns it")
+    @DisplayName("complete creates the pantry item and returns it")
     void shouldCompletePendingItem() throws Exception {
-        var pending = new PendingInventoryItem(PENDING_ID, null, HOUSE_ID, barcodeImageBytes, null, null);
-        var item = new InventoryItem(null, null, HOUSE_ID, "bread", null, "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
+        var pending = new PendingPantryItem(PENDING_ID, null, HOUSE_ID, barcodeImageBytes, null, null);
+        var item = new PantryItem(null, null, HOUSE_ID, "bread", null, "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
         var savedItem = item.withId(PENDING_ID);
 
-        when(pendingInventoryService.findById(PENDING_ID)).thenReturn(Optional.of(pending));
-        when(pendingInventoryService.complete(eq(PENDING_ID), any(InventoryItem.class))).thenReturn(savedItem);
+        when(pendingPantryService.findById(PENDING_ID)).thenReturn(Optional.of(pending));
+        when(pendingPantryService.complete(eq(PENDING_ID), any(PantryItem.class))).thenReturn(savedItem);
 
-        mockMvc.perform(post("/api/inventory/pending/{uuid}/complete", PENDING_ID)
+        mockMvc.perform(post("/api/pantry/pending/{uuid}/complete", PENDING_ID)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -274,15 +274,15 @@ class PendingInventoryControllerTest {
                           "barcode": "0123456789012"
                         }""".formatted(PENDING_ID, HOUSE_ID), true));
 
-        verify(pendingInventoryService).complete(eq(PENDING_ID), any(InventoryItem.class));
+        verify(pendingPantryService).complete(eq(PENDING_ID), any(PantryItem.class));
     }
 
     @Test
     @DisplayName("complete 404s when the pending item is unknown")
     void completeUnknown() throws Exception {
-        when(pendingInventoryService.findById(PENDING_ID)).thenReturn(Optional.empty());
+        when(pendingPantryService.findById(PENDING_ID)).thenReturn(Optional.empty());
 
-        mockMvc.perform(post("/api/inventory/pending/{uuid}/complete", PENDING_ID)
+        mockMvc.perform(post("/api/pantry/pending/{uuid}/complete", PENDING_ID)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -294,17 +294,17 @@ class PendingInventoryControllerTest {
                                 }"""))
                 .andExpect(status().isNotFound());
 
-        verify(pendingInventoryService, never()).complete(any(), any());
+        verify(pendingPantryService, never()).complete(any(), any());
     }
 
     @Test
     @DisplayName("complete 404s for a pending item belonging to another house")
     void completeOtherHouse() throws Exception {
-        var pending = new PendingInventoryItem(PENDING_ID, null, "other-house", null, null, null);
-        when(houseAccess.belongsToHeaderHouse(any(PendingInventoryItem.class))).thenReturn(false);
-        when(pendingInventoryService.findById(PENDING_ID)).thenReturn(Optional.of(pending));
+        var pending = new PendingPantryItem(PENDING_ID, null, "other-house", null, null, null);
+        when(houseAccess.belongsToHeaderHouse(any(PendingPantryItem.class))).thenReturn(false);
+        when(pendingPantryService.findById(PENDING_ID)).thenReturn(Optional.of(pending));
 
-        mockMvc.perform(post("/api/inventory/pending/{uuid}/complete", PENDING_ID)
+        mockMvc.perform(post("/api/pantry/pending/{uuid}/complete", PENDING_ID)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -316,7 +316,7 @@ class PendingInventoryControllerTest {
                                 }"""))
                 .andExpect(status().isNotFound());
 
-        verify(pendingInventoryService, never()).complete(any(), any());
+        verify(pendingPantryService, never()).complete(any(), any());
     }
 
     @Test
@@ -325,7 +325,7 @@ class PendingInventoryControllerTest {
     void completeForbiddenForReadOnly() throws Exception {
         when(houseAccess.isOwner()).thenReturn(false);
 
-        mockMvc.perform(post("/api/inventory/pending/{uuid}/complete", PENDING_ID)
+        mockMvc.perform(post("/api/pantry/pending/{uuid}/complete", PENDING_ID)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""

@@ -3,7 +3,7 @@ package org.reciplease.repository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reciplease.configuration.MongoAuditingConfig;
-import org.reciplease.model.InventoryAllocation;
+import org.reciplease.model.PantryAllocation;
 import org.reciplease.model.PlannedIngredient;
 import org.reciplease.model.PlannedMeal;
 import org.reciplease.model.Recipe;
@@ -109,7 +109,7 @@ public class PlannedMealRepositoryTest {
         var recipe = recipeRepository.save(Recipe.builder().name("toast").build());
         var item = new PlannedIngredient(
                 new RecipeIngredient("bread", "ITEMS", 2d),
-                List.of(new InventoryAllocation("item-1", "111", 2d)));
+                List.of(new PantryAllocation("item-1", "111", 2d)));
         plannedMealRepository.save(new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2026, 6, 6), List.of(item)));
 
         var found = plannedMealRepository.findByRecipeId(HOUSE_ID, recipe.id());
@@ -132,7 +132,7 @@ public class PlannedMealRepositoryTest {
     @Test
     public void shouldFindByIngredientName() {
         var item = new PlannedIngredient(new RecipeIngredient("bread", "ITEMS", 2d),
-                List.of(new InventoryAllocation("item-1", "111", 2d)));
+                List.of(new PantryAllocation("item-1", "111", 2d)));
         var saved = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of(item)));
 
         var found = plannedMealRepository.findByIngredientName(HOUSE_ID, "bread");

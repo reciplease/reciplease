@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseMember;
 import org.reciplease.configuration.HouseOwner;
-import org.reciplease.dto.InventoryItemDto;
+import org.reciplease.dto.PantryItemDto;
 import org.reciplease.dto.PlanMealRequest;
 import org.reciplease.dto.PlannedIngredientDto;
 import org.reciplease.dto.PlannedMealDto;
@@ -110,10 +110,10 @@ public class PlannedMealController {
 
     @GetMapping("suggestions")
     @HouseMember
-    public ResponseEntity<List<InventoryItemDto>> suggestInventory(@RequestParam(required = false) final String recipeId,
+    public ResponseEntity<List<PantryItemDto>> suggestPantryItems(@RequestParam(required = false) final String recipeId,
                                                                     @RequestParam final String ingredient) {
-        final List<InventoryItemDto> suggestions = plannedMealService.suggestInventory(houseAccess.requireHouseId(), recipeId, ingredient).stream()
-                .map(InventoryItemDto::from)
+        final List<PantryItemDto> suggestions = plannedMealService.suggestPantryItems(houseAccess.requireHouseId(), recipeId, ingredient).stream()
+                .map(PantryItemDto::from)
                 .collect(toList());
 
         return ResponseEntity.ok(suggestions);

@@ -16,13 +16,13 @@ import java.util.stream.Collectors;
 public class PlannedIngredientDto {
 
     RecipeIngredientDto ingredient;
-    List<InventoryAllocationDto> allocations;
+    List<PantryAllocationDto> allocations;
 
     public static PlannedIngredientDto from(final PlannedIngredient plannedIngredient) {
         return PlannedIngredientDto.builder()
                 .ingredient(RecipeIngredientDto.from(plannedIngredient.ingredient()))
                 .allocations(plannedIngredient.allocations().stream()
-                        .map(InventoryAllocationDto::from)
+                        .map(PantryAllocationDto::from)
                         .collect(Collectors.toList()))
                 .build();
     }
@@ -30,7 +30,7 @@ public class PlannedIngredientDto {
     public PlannedIngredient toModel() {
         return new PlannedIngredient(ingredient.toModel(),
                 allocations == null ? List.of() : allocations.stream()
-                        .map(InventoryAllocationDto::toModel)
+                        .map(PantryAllocationDto::toModel)
                         .collect(Collectors.toList()));
     }
 }

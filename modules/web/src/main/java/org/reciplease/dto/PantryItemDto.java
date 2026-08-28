@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
-import org.reciplease.model.InventoryItem;
+import org.reciplease.model.PantryItem;
 import org.reciplease.model.Measure;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -14,8 +14,8 @@ import java.time.LocalDate;
 @Value
 @AllArgsConstructor
 @Builder(toBuilder = true)
-@Schema(name = "InventoryItem")
-public class InventoryItemDto {
+@Schema(name = "PantryItem")
+public class PantryItemDto {
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     String uuid;
@@ -35,20 +35,20 @@ public class InventoryItemDto {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     Instant updatedAt;
 
-    public static InventoryItemDto from(final InventoryItem inventoryItem) {
-        return InventoryItemDto.builder()
-                .uuid(inventoryItem.id())
-                .houseId(inventoryItem.houseId())
-                .name(inventoryItem.name())
-                .brand(inventoryItem.brand())
-                .measure(Measure.normalizeId(inventoryItem.measure()))
-                .amount(inventoryItem.amount())
-                .remaining(inventoryItem.remaining())
-                .expiration(inventoryItem.expiration())
-                .barcode(inventoryItem.barcode())
-                .image(inventoryItem.image())
-                .createdAt(inventoryItem.createdAt())
-                .updatedAt(inventoryItem.updatedAt())
+    public static PantryItemDto from(final PantryItem pantryItem) {
+        return PantryItemDto.builder()
+                .uuid(pantryItem.id())
+                .houseId(pantryItem.houseId())
+                .name(pantryItem.name())
+                .brand(pantryItem.brand())
+                .measure(Measure.normalizeId(pantryItem.measure()))
+                .amount(pantryItem.amount())
+                .remaining(pantryItem.remaining())
+                .expiration(pantryItem.expiration())
+                .barcode(pantryItem.barcode())
+                .image(pantryItem.image())
+                .createdAt(pantryItem.createdAt())
+                .updatedAt(pantryItem.updatedAt())
                 .build();
     }
 
@@ -58,7 +58,7 @@ public class InventoryItemDto {
     // same reason: READ_ONLY only affects the OpenAPI schema, Jackson still binds it, and
     // Mongo saves are upserts — a caller-chosen id could overwrite an arbitrary document.
     // Callers that need an id (update, complete) supply the path's already-checked one.
-    public InventoryItem toEntity(final String houseId) {
-        return new InventoryItem(null, null, houseId, name, brand, Measure.normalizeId(measure), amount, remaining, expiration, barcode, image);
+    public PantryItem toEntity(final String houseId) {
+        return new PantryItem(null, null, houseId, name, brand, Measure.normalizeId(measure), amount, remaining, expiration, barcode, image);
     }
 }
