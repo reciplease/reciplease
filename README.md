@@ -1,6 +1,6 @@
 # Reciplease
 
-> Making the world a better place through recipe and inventory management.
+> Making the world a better place through recipe and pantry management.
 
 ![Github Actions](https://github.com/reciplease/reciplease/actions/workflows/codeql-analysis.yml/badge.svg)
 ![Github Actions](https://github.com/reciplease/reciplease/actions/workflows/test.yml/badge.svg)
