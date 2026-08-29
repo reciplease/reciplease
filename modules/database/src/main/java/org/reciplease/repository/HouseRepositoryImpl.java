@@ -1,5 +1,13 @@
 package org.reciplease.repository;
 
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.core.query.Query.query;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.model.House;
 import org.reciplease.model.HouseDocument;
@@ -12,15 +20,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static org.springframework.data.mongodb.core.query.Criteria.where;
-import static org.springframework.data.mongodb.core.query.Query.query;
 
 @Repository
 @RequiredArgsConstructor
@@ -74,7 +73,9 @@ public class HouseRepositoryImpl implements HouseRepository {
     @Override
     public List<HouseMembership> members(final String houseId) {
         final var document = houseMongoRepository.findById(houseId).orElse(null);
-        if (document == null || document.getMembers() == null || document.getMembers().isEmpty()) {
+        if (document == null
+                || document.getMembers() == null
+                || document.getMembers().isEmpty()) {
             return List.of();
         }
 
@@ -88,8 +89,7 @@ public class HouseRepositoryImpl implements HouseRepository {
                     final var handle = user != null ? user.getHandle() : null;
                     return new HouseMembership(entry.getKey(), handle, HouseRole.valueOf(entry.getValue()));
                 })
-                .sorted(Comparator.comparing(HouseMembership::role)
-                        .thenComparing(membership -> membership.userId()))
+                .sorted(Comparator.comparing(HouseMembership::role).thenComparing(membership -> membership.userId()))
                 .collect(Collectors.toList());
     }
 }

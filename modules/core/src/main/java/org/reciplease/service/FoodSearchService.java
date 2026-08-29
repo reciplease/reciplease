@@ -1,13 +1,12 @@
 package org.reciplease.service;
 
-import lombok.RequiredArgsConstructor;
-import org.reciplease.model.Nutrients;
-import org.springframework.stereotype.Service;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import lombok.RequiredArgsConstructor;
+import org.reciplease.model.Nutrients;
+import org.springframework.stereotype.Service;
 
 /**
  * Composes {@link FoodConsumptionLoggerPort} and {@link FoodCatalogPort} into a single "what
@@ -24,24 +23,27 @@ public class FoodSearchService {
     private final FoodConsumptionLoggerPort foodConsumptionLoggerPort;
     private final FoodCatalogPort foodCatalogPort;
 
-    public enum FoodSearchResultSource { HISTORY, CATALOG }
+    public enum FoodSearchResultSource {
+        HISTORY,
+        CATALOG
+    }
 
     public record FoodSearchResult(
-            FoodSearchResultSource source,
-            String displayName,
-            String identifiedFoodId,
-            Nutrients nutrients) {}
+            FoodSearchResultSource source, String displayName, String identifiedFoodId, Nutrients nutrients) {}
 
     public List<FoodSearchResult> search(final String userId, final String query) {
         final var historyResults = historyResults(userId, query);
         final var catalogResults = foodCatalogPort.searchByName(query).stream()
-                .map(entry -> new FoodSearchResult(FoodSearchResultSource.CATALOG, entry.displayName(), null, entry.nutrients()));
+                .map(entry -> new FoodSearchResult(
+                        FoodSearchResultSource.CATALOG, entry.displayName(), null, entry.nutrients()));
         return Stream.concat(historyResults, catalogResults).toList();
     }
 
     public Optional<FoodSearchResult> searchByBarcode(final String barcode) {
-        return foodCatalogPort.lookupByBarcode(barcode)
-                .map(entry -> new FoodSearchResult(FoodSearchResultSource.CATALOG, entry.displayName(), null, entry.nutrients()));
+        return foodCatalogPort
+                .lookupByBarcode(barcode)
+                .map(entry -> new FoodSearchResult(
+                        FoodSearchResultSource.CATALOG, entry.displayName(), null, entry.nutrients()));
     }
 
     private Stream<FoodSearchResult> historyResults(final String userId, final String query) {
@@ -50,7 +52,8 @@ public class FoodSearchService {
         }
         return foodConsumptionLoggerPort.history(userId).stream()
                 .filter(entry -> fuzzyMatches(entry.displayName(), query))
-                .map(entry -> new FoodSearchResult(FoodSearchResultSource.HISTORY, entry.displayName(), entry.consumptionId(), null));
+                .map(entry -> new FoodSearchResult(
+                        FoodSearchResultSource.HISTORY, entry.displayName(), entry.consumptionId(), null));
     }
 
     /** Case-insensitive: every whitespace-separated word in {@code query} must appear as a substring of {@code displayName}. */

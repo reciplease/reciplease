@@ -1,17 +1,16 @@
 package org.reciplease.dto;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.PantryAllocation;
 import org.reciplease.model.PlannedIngredient;
 import org.reciplease.model.RecipeIngredient;
-
-import java.util.List;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
 
 class PlannedIngredientDtoTest {
 
@@ -31,8 +30,15 @@ class PlannedIngredientDtoTest {
     @DisplayName("round-trips to model")
     void toModel() {
         var dto = PlannedIngredientDto.builder()
-                .ingredient(RecipeIngredientDto.builder().name("bread").measure("item").amount(2d).build())
-                .allocations(List.of(PantryAllocationDto.builder().pantryItemId("item-1").amount(2d).build()))
+                .ingredient(RecipeIngredientDto.builder()
+                        .name("bread")
+                        .measure("item")
+                        .amount(2d)
+                        .build())
+                .allocations(List.of(PantryAllocationDto.builder()
+                        .pantryItemId("item-1")
+                        .amount(2d)
+                        .build()))
                 .build();
 
         var item = dto.toModel();
@@ -45,7 +51,11 @@ class PlannedIngredientDtoTest {
     @DisplayName("round-trips to model with no allocations")
     void toModelWithoutAllocations() {
         var dto = PlannedIngredientDto.builder()
-                .ingredient(RecipeIngredientDto.builder().name("bread").measure("item").amount(2d).build())
+                .ingredient(RecipeIngredientDto.builder()
+                        .name("bread")
+                        .measure("item")
+                        .amount(2d)
+                        .build())
                 .build();
 
         var item = dto.toModel();

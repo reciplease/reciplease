@@ -1,11 +1,10 @@
 package org.reciplease.repository;
 
+import java.util.List;
+import java.util.Optional;
 import org.reciplease.model.House;
 import org.reciplease.model.HouseMembership;
 import org.reciplease.model.HouseRole;
-
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Stores houses and the Google-subject-id-to-role membership relationship for each one.

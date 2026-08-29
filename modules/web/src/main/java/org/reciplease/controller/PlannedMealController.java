@@ -1,6 +1,10 @@
 package org.reciplease.controller;
 
+import static java.util.stream.Collectors.toList;
+
 import jakarta.validation.Valid;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseMember;
@@ -28,11 +32,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
-
 @RestController
 @RequestMapping("api/planned-meals")
 @RequiredArgsConstructor
@@ -46,13 +45,12 @@ public class PlannedMealController {
     @PostMapping
     @HouseOwner
     public ResponseEntity<PlannedMealDto> plan(@Valid @RequestBody final PlanMealRequest request) {
-        final List<PlannedIngredient> items = request.getItems() == null ? List.of()
-                : request.getItems().stream()
-                        .map(PlannedIngredientDto::toModel)
-                        .collect(toList());
+        final List<PlannedIngredient> items = request.getItems() == null
+                ? List.of()
+                : request.getItems().stream().map(PlannedIngredientDto::toModel).collect(toList());
 
-        final var plannedMeal = plannedMealService.plan(houseAccess.requireHouseId(), request.getRecipeId(),
-                request.getName(), request.getDate(), items);
+        final var plannedMeal = plannedMealService.plan(
+                houseAccess.requireHouseId(), request.getRecipeId(), request.getName(), request.getDate(), items);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(toDto(plannedMeal));
     }
@@ -60,26 +58,28 @@ public class PlannedMealController {
     @GetMapping("{uuid}")
     @HouseMember
     public ResponseEntity<PlannedMealDto> findById(@PathVariable final String uuid) {
-        final var meal = plannedMealService.findById(uuid)
-                .filter(houseAccess::belongsToHeaderHouse);
+        final var meal = plannedMealService.findById(uuid).filter(houseAccess::belongsToHeaderHouse);
 
-        return meal.map(this::toDto).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return meal.map(this::toDto)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("{uuid}")
     @HouseOwner
-    public ResponseEntity<PlannedMealDto> update(@PathVariable final String uuid, @Valid @RequestBody final PlanMealRequest request) {
+    public ResponseEntity<PlannedMealDto> update(
+            @PathVariable final String uuid, @Valid @RequestBody final PlanMealRequest request) {
         final var existing = plannedMealService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
             return ResponseEntity.notFound().build();
         }
 
-        final List<PlannedIngredient> items = request.getItems() == null ? List.of()
-                : request.getItems().stream()
-                        .map(PlannedIngredientDto::toModel)
-                        .collect(toList());
+        final List<PlannedIngredient> items = request.getItems() == null
+                ? List.of()
+                : request.getItems().stream().map(PlannedIngredientDto::toModel).collect(toList());
 
-        final var updated = plannedMealService.update(uuid, request.getRecipeId(), request.getName(), request.getDate(), items);
+        final var updated =
+                plannedMealService.update(uuid, request.getRecipeId(), request.getName(), request.getDate(), items);
 
         return ResponseEntity.ok(toDto(updated));
     }
@@ -110,11 +110,12 @@ public class PlannedMealController {
 
     @GetMapping("suggestions")
     @HouseMember
-    public ResponseEntity<List<PantryItemDto>> suggestPantryItems(@RequestParam(required = false) final String recipeId,
-                                                                    @RequestParam final String ingredient) {
-        final List<PantryItemDto> suggestions = plannedMealService.suggestPantryItems(houseAccess.requireHouseId(), recipeId, ingredient).stream()
-                .map(PantryItemDto::from)
-                .collect(toList());
+    public ResponseEntity<List<PantryItemDto>> suggestPantryItems(
+            @RequestParam(required = false) final String recipeId, @RequestParam final String ingredient) {
+        final List<PantryItemDto> suggestions =
+                plannedMealService.suggestPantryItems(houseAccess.requireHouseId(), recipeId, ingredient).stream()
+                        .map(PantryItemDto::from)
+                        .collect(toList());
 
         return ResponseEntity.ok(suggestions);
     }
@@ -124,9 +125,10 @@ public class PlannedMealController {
     public ResponseEntity<List<PlannedMealDto>> findByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate end) {
-        final List<PlannedMealDto> meals = plannedMealService.findByDateIsBetween(houseAccess.requireHouseId(), start, end).stream()
-                .map(this::toDto)
-                .collect(toList());
+        final List<PlannedMealDto> meals =
+                plannedMealService.findByDateIsBetween(houseAccess.requireHouseId(), start, end).stream()
+                        .map(this::toDto)
+                        .collect(toList());
 
         return ResponseEntity.ok(meals);
     }
@@ -142,7 +144,9 @@ public class PlannedMealController {
     }
 
     private PlannedMealDto toDto(final PlannedMeal plannedMeal) {
-        final var recipe = plannedMeal.recipeId() == null ? null : recipeService.findById(plannedMeal.recipeId()).orElse(null);
+        final var recipe = plannedMeal.recipeId() == null
+                ? null
+                : recipeService.findById(plannedMeal.recipeId()).orElse(null);
         return PlannedMealDto.from(plannedMeal, recipe);
     }
 }

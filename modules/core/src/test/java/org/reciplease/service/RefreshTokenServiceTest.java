@@ -1,24 +1,22 @@
 package org.reciplease.service;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.reciplease.model.RefreshTokenRecord;
-import org.reciplease.repository.RefreshTokenRepository;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.reciplease.model.RefreshTokenRecord;
+import org.reciplease.repository.RefreshTokenRepository;
 
 class RefreshTokenServiceTest {
 
@@ -38,8 +36,15 @@ class RefreshTokenServiceTest {
         when(repository.save(any())).thenAnswer(invocation -> {
             final RefreshTokenRecord record = invocation.getArgument(0);
             return new RefreshTokenRecord(
-                    "generated-id", record.userId(), record.familyId(), record.tokenPrefix(), record.tokenHash(),
-                    record.issuedAt(), record.expiresAt(), record.usedAt(), record.revokedAt());
+                    "generated-id",
+                    record.userId(),
+                    record.familyId(),
+                    record.tokenPrefix(),
+                    record.tokenHash(),
+                    record.issuedAt(),
+                    record.expiresAt(),
+                    record.usedAt(),
+                    record.revokedAt());
         });
     }
 
@@ -103,8 +108,15 @@ class RefreshTokenServiceTest {
         final var issued = service.issue("user-1");
         final var record = savedRecordFor("original-raw-token1");
         final var expired = new RefreshTokenRecord(
-                record.id(), record.userId(), record.familyId(), record.tokenPrefix(), record.tokenHash(),
-                record.issuedAt(), NOW.minusSeconds(1), record.usedAt(), record.revokedAt());
+                record.id(),
+                record.userId(),
+                record.familyId(),
+                record.tokenPrefix(),
+                record.tokenHash(),
+                record.issuedAt(),
+                NOW.minusSeconds(1),
+                record.usedAt(),
+                record.revokedAt());
         when(repository.findByPrefix(record.tokenPrefix())).thenReturn(Optional.of(expired));
 
         final var result = service.rotate(issued.rawToken());
@@ -118,8 +130,15 @@ class RefreshTokenServiceTest {
         final var issued = service.issue("user-1");
         final var record = savedRecordFor("original-raw-token1");
         final var revoked = new RefreshTokenRecord(
-                record.id(), record.userId(), record.familyId(), record.tokenPrefix(), record.tokenHash(),
-                record.issuedAt(), record.expiresAt(), record.usedAt(), NOW);
+                record.id(),
+                record.userId(),
+                record.familyId(),
+                record.tokenPrefix(),
+                record.tokenHash(),
+                record.issuedAt(),
+                record.expiresAt(),
+                record.usedAt(),
+                NOW);
         when(repository.findByPrefix(record.tokenPrefix())).thenReturn(Optional.of(revoked));
 
         final var result = service.rotate(issued.rawToken());
@@ -133,8 +152,15 @@ class RefreshTokenServiceTest {
         final var issued = service.issue("user-1");
         final var record = savedRecordFor("original-raw-token1");
         final var alreadyUsed = new RefreshTokenRecord(
-                record.id(), record.userId(), record.familyId(), record.tokenPrefix(), record.tokenHash(),
-                record.issuedAt(), record.expiresAt(), NOW.minusSeconds(10), record.revokedAt());
+                record.id(),
+                record.userId(),
+                record.familyId(),
+                record.tokenPrefix(),
+                record.tokenHash(),
+                record.issuedAt(),
+                record.expiresAt(),
+                NOW.minusSeconds(10),
+                record.revokedAt());
         when(repository.findByPrefix(record.tokenPrefix())).thenReturn(Optional.of(alreadyUsed));
 
         final var result = service.rotate(issued.rawToken());

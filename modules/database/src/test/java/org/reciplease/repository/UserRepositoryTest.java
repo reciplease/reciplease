@@ -1,5 +1,10 @@
 package org.reciplease.repository;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.User;
@@ -10,18 +15,15 @@ import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 @DataMongoTest
 @Import(UserRepositoryImpl.class)
 class UserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private UserIdentityMongoRepository userIdentityMongoRepository;
+
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -111,7 +113,8 @@ class UserRepositoryTest {
         var userA = userRepository.createWithIdentity("google", "google-sub-1", "user1@gmail.com");
         var userB = userRepository.createWithIdentity("github", "github-sub-1", "user2@github.com");
 
-        assertThrows(IdentityConflictException.class,
+        assertThrows(
+                IdentityConflictException.class,
                 () -> userRepository.linkIdentity(userB.id(), "google", "google-sub-1", "user2@gmail.com"));
     }
 

@@ -9,9 +9,9 @@ import org.reciplease.service.InviteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,7 +32,8 @@ public class InviteController {
 
     @GetMapping("{code}")
     public ResponseEntity<InviteDto> preview(@PathVariable final String code) {
-        final var preview = inviteRepository.findByCode(code)
+        final var preview = inviteRepository
+                .findByCode(code)
                 .filter(invite -> invite.usedAt() == null)
                 .flatMap(invite -> houseRepository.findById(invite.houseId()))
                 .map(InviteDto::from);
@@ -47,9 +48,10 @@ public class InviteController {
             return ResponseEntity.status(401).build();
         }
 
-        final var accepted = inviteService.accept(code, userId)
-                .map(house -> HouseDto.from(house, null));
-        return accepted.isPresent() ? ResponseEntity.ok(accepted.get()) : ResponseEntity.notFound().build();
+        final var accepted = inviteService.accept(code, userId).map(house -> HouseDto.from(house, null));
+        return accepted.isPresent()
+                ? ResponseEntity.ok(accepted.get())
+                : ResponseEntity.notFound().build();
     }
 
     private String currentUserId() {

@@ -1,5 +1,22 @@
 package org.reciplease.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,24 +40,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PlannedMealController.class)
 @WithHouseOwner
@@ -76,10 +75,19 @@ class PlannedMealControllerTest {
     void plan() throws Exception {
         var recipe = Recipe.builder().id("recipe-1").name("toast").build();
         var bread = new RecipeIngredient("bread", "ITEMS", 2d);
-        var planned = new PlannedMeal(HOUSE_ID, "recipe-1", "Dinner", LocalDate.of(2026, 6, 6),
+        var planned = new PlannedMeal(
+                HOUSE_ID,
+                "recipe-1",
+                "Dinner",
+                LocalDate.of(2026, 6, 6),
                 List.of(new PlannedIngredient(bread, List.of(new PantryAllocation("item-1", "111", 2d)))));
 
-        when(plannedMealService.plan(eq(HOUSE_ID), eq("recipe-1"), eq("Dinner"), eq(LocalDate.of(2026, 6, 6)), org.mockito.ArgumentMatchers.anyList()))
+        when(plannedMealService.plan(
+                        eq(HOUSE_ID),
+                        eq("recipe-1"),
+                        eq("Dinner"),
+                        eq(LocalDate.of(2026, 6, 6)),
+                        org.mockito.ArgumentMatchers.anyList()))
                 .thenReturn(planned);
         when(recipeService.findById("recipe-1")).thenReturn(Optional.of(recipe));
 
@@ -152,7 +160,8 @@ class PlannedMealControllerTest {
     @Test
     @DisplayName("finds a planned meal owned by the caller's house by id")
     void findByIdReturnsMeal() throws Exception {
-        var meal = new PlannedMeal("meal-1", null, HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
+        var meal = new PlannedMeal(
+                "meal-1", null, HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
 
         when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(meal));
         when(houseAccess.belongsToHeaderHouse(meal)).thenReturn(true);
@@ -167,31 +176,46 @@ class PlannedMealControllerTest {
     void findByIdNotFound() throws Exception {
         when(plannedMealService.findById("ghost")).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/planned-meals/{uuid}", "ghost"))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/planned-meals/{uuid}", "ghost")).andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("find by id is not found when the meal belongs to a different house than the header asserts")
     void findByIdForbiddenForDifferentHouse() throws Exception {
-        var meal = new PlannedMeal("meal-1", null, "some-other-house", null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
+        var meal = new PlannedMeal(
+                "meal-1",
+                null,
+                "some-other-house",
+                null,
+                "Dinner",
+                LocalDate.of(2026, 6, 6),
+                List.of(),
+                null,
+                null,
+                null);
 
         when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(meal));
         when(houseAccess.belongsToHeaderHouse(meal)).thenReturn(false);
 
-        mockMvc.perform(get("/api/planned-meals/{uuid}", "meal-1"))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/planned-meals/{uuid}", "meal-1")).andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("updates a planned meal owned by the caller's house")
     void update() throws Exception {
-        var existing = new PlannedMeal("meal-1", null, HOUSE_ID, "recipe-1", "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
-        var updated = new PlannedMeal("meal-1", null, HOUSE_ID, "recipe-1", "Supper", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
+        var existing = new PlannedMeal(
+                "meal-1", null, HOUSE_ID, "recipe-1", "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
+        var updated = new PlannedMeal(
+                "meal-1", null, HOUSE_ID, "recipe-1", "Supper", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
 
         when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(existing));
         when(houseAccess.belongsToHeaderHouse(existing)).thenReturn(true);
-        when(plannedMealService.update(eq("meal-1"), eq("recipe-1"), eq("Supper"), eq(LocalDate.of(2026, 6, 6)), org.mockito.ArgumentMatchers.anyList()))
+        when(plannedMealService.update(
+                        eq("meal-1"),
+                        eq("recipe-1"),
+                        eq("Supper"),
+                        eq(LocalDate.of(2026, 6, 6)),
+                        org.mockito.ArgumentMatchers.anyList()))
                 .thenReturn(updated);
 
         var body = "{\"recipeId\":\"recipe-1\",\"name\":\"Supper\",\"date\":\"2026-06-06\"}";
@@ -223,7 +247,17 @@ class PlannedMealControllerTest {
     @Test
     @DisplayName("update is not found when the meal belongs to a different house than the header asserts")
     void updateForbiddenForDifferentHouse() throws Exception {
-        var existing = new PlannedMeal("meal-1", null, "some-other-house", null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
+        var existing = new PlannedMeal(
+                "meal-1",
+                null,
+                "some-other-house",
+                null,
+                "Dinner",
+                LocalDate.of(2026, 6, 6),
+                List.of(),
+                null,
+                null,
+                null);
 
         when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(existing));
         when(houseAccess.belongsToHeaderHouse(existing)).thenReturn(false);
@@ -257,7 +291,8 @@ class PlannedMealControllerTest {
     @Test
     @DisplayName("deletes a planned meal owned by the caller's house")
     void deleteMeal() throws Exception {
-        var existing = new PlannedMeal("meal-1", null, HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
+        var existing = new PlannedMeal(
+                "meal-1", null, HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
 
         when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(existing));
         when(houseAccess.belongsToHeaderHouse(existing)).thenReturn(true);
@@ -282,7 +317,17 @@ class PlannedMealControllerTest {
     @Test
     @DisplayName("delete is not found when the meal belongs to a different house than the header asserts")
     void deleteForbiddenForDifferentHouse() throws Exception {
-        var existing = new PlannedMeal("meal-1", null, "some-other-house", null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
+        var existing = new PlannedMeal(
+                "meal-1",
+                null,
+                "some-other-house",
+                null,
+                "Dinner",
+                LocalDate.of(2026, 6, 6),
+                List.of(),
+                null,
+                null,
+                null);
 
         when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(existing));
         when(houseAccess.belongsToHeaderHouse(existing)).thenReturn(false);
@@ -306,7 +351,8 @@ class PlannedMealControllerTest {
     @Test
     @DisplayName("marks a planned meal owned by the caller's house as eaten")
     void markEaten() throws Exception {
-        var existing = new PlannedMeal("meal-1", null, HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
+        var existing = new PlannedMeal(
+                "meal-1", null, HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
 
         when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(existing));
         when(houseAccess.belongsToHeaderHouse(existing)).thenReturn(true);
@@ -331,7 +377,17 @@ class PlannedMealControllerTest {
     @Test
     @DisplayName("mark eaten is not found when the meal belongs to a different house than the header asserts")
     void markEatenForbiddenForDifferentHouse() throws Exception {
-        var existing = new PlannedMeal("meal-1", null, "some-other-house", null, "Dinner", LocalDate.of(2026, 6, 6), List.of(), null, null, null);
+        var existing = new PlannedMeal(
+                "meal-1",
+                null,
+                "some-other-house",
+                null,
+                "Dinner",
+                LocalDate.of(2026, 6, 6),
+                List.of(),
+                null,
+                null,
+                null);
 
         when(plannedMealService.findById("meal-1")).thenReturn(Optional.of(existing));
         when(houseAccess.belongsToHeaderHouse(existing)).thenReturn(false);
@@ -355,26 +411,31 @@ class PlannedMealControllerTest {
     @Test
     @DisplayName("returns pantry suggestions for an ingredient, scoped to a recipe")
     void suggestionsForRecipe() throws Exception {
-        var item = new PantryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 5d, LocalDate.of(2026, 6, 30), "111");
+        var item =
+                new PantryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 5d, LocalDate.of(2026, 6, 30), "111");
 
-        when(plannedMealService.suggestPantryItems(HOUSE_ID, "recipe-1", "bread")).thenReturn(List.of(item));
+        when(plannedMealService.suggestPantryItems(HOUSE_ID, "recipe-1", "bread"))
+                .thenReturn(List.of(item));
 
         mockMvc.perform(get("/api/planned-meals/suggestions")
                         .param("recipeId", "recipe-1")
                         .param("ingredient", "bread"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("[{\"uuid\":\"item-1\",\"houseId\":\"house-1\",\"name\":\"bread\",\"measure\":\"item\",\"amount\":5.0,\"remaining\":5.0,\"expiration\":\"2026-06-30\",\"barcode\":\"111\"}]", true));
+                .andExpect(content()
+                        .json(
+                                "[{\"uuid\":\"item-1\",\"houseId\":\"house-1\",\"name\":\"bread\",\"measure\":\"item\",\"amount\":5.0,\"remaining\":5.0,\"expiration\":\"2026-06-30\",\"barcode\":\"111\"}]",
+                                true));
     }
 
     @Test
     @DisplayName("returns pantry suggestions for an ingredient with no recipe given")
     void suggestionsWithoutRecipe() throws Exception {
-        var item = new PantryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 5d, LocalDate.of(2026, 6, 30), "111");
+        var item =
+                new PantryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 5d, LocalDate.of(2026, 6, 30), "111");
 
         when(plannedMealService.suggestPantryItems(HOUSE_ID, null, "bread")).thenReturn(List.of(item));
 
-        mockMvc.perform(get("/api/planned-meals/suggestions")
-                        .param("ingredient", "bread"))
+        mockMvc.perform(get("/api/planned-meals/suggestions").param("ingredient", "bread"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].uuid").value("item-1"));
     }
@@ -387,9 +448,7 @@ class PlannedMealControllerTest {
         when(plannedMealService.findByDateIsBetween(HOUSE_ID, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30)))
                 .thenReturn(List.of(planned));
 
-        mockMvc.perform(get("/api/planned-meals")
-                        .param("start", "2026-06-01")
-                        .param("end", "2026-06-30"))
+        mockMvc.perform(get("/api/planned-meals").param("start", "2026-06-01").param("end", "2026-06-30"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Leftover rice night"));
     }

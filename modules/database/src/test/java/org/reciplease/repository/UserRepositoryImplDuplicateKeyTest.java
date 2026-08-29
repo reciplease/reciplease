@@ -1,18 +1,17 @@
 package org.reciplease.repository;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.mongodb.DuplicateKeyException;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.reciplease.repository.mongo.UserIdentityMongoRepository;
 import org.reciplease.repository.mongo.UserMongoRepository;
-
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * {@link UserRepositoryTest} covers the happy paths against a real (embedded) Mongo;
@@ -25,6 +24,7 @@ class UserRepositoryImplDuplicateKeyTest {
 
     @Mock
     private UserMongoRepository userMongoRepository;
+
     @Mock
     private UserIdentityMongoRepository userIdentityMongoRepository;
 
@@ -36,7 +36,8 @@ class UserRepositoryImplDuplicateKeyTest {
         when(userMongoRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(userIdentityMongoRepository.save(any())).thenThrow(mock(DuplicateKeyException.class));
 
-        assertThrows(IdentityConflictException.class,
+        assertThrows(
+                IdentityConflictException.class,
                 () -> userRepository.createWithIdentity("google", "google-sub-1", "user1@gmail.com"));
     }
 
@@ -46,7 +47,8 @@ class UserRepositoryImplDuplicateKeyTest {
         when(userIdentityMongoRepository.findById(any())).thenReturn(Optional.empty());
         when(userIdentityMongoRepository.save(any())).thenThrow(mock(DuplicateKeyException.class));
 
-        assertThrows(IdentityConflictException.class,
+        assertThrows(
+                IdentityConflictException.class,
                 () -> userRepository.linkIdentity("user-1", "google", "google-sub-1", "user1@gmail.com"));
     }
 }

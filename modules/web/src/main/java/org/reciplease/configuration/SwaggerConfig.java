@@ -15,7 +15,8 @@ public class SwaggerConfig {
         // request, so "Try it out" targets the right base both directly and when
         // reverse-proxied under a prefix such as /swagger by the web app.
         return new OpenAPI()
-                .info(new Info().title("Reciplease API")
+                .info(new Info()
+                        .title("Reciplease API")
                         .description("Recipe management and more!")
                         .version(version));
     }

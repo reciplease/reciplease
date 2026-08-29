@@ -1,6 +1,10 @@
 package org.reciplease.controller;
 
+import static java.util.stream.Collectors.toList;
+
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseMember;
@@ -18,11 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
 
 @RestController
 @RequestMapping("api/pantry")
@@ -42,13 +41,15 @@ public class PantryController {
 
     @PutMapping("{uuid}")
     @HouseOwner
-    public ResponseEntity<PantryItemDto> update(@PathVariable final String uuid, @Valid @RequestBody final PantryItemDto itemDto) {
+    public ResponseEntity<PantryItemDto> update(
+            @PathVariable final String uuid, @Valid @RequestBody final PantryItemDto itemDto) {
         final var existing = pantryService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
             return ResponseEntity.notFound().build();
         }
 
-        return pantryService.update(uuid, itemDto.toEntity(houseAccess.requireHouseId()))
+        return pantryService
+                .update(uuid, itemDto.toEntity(houseAccess.requireHouseId()))
                 .map(PantryItemDto::from)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.noContent().build());
@@ -69,7 +70,8 @@ public class PantryController {
     @GetMapping("{uuid}")
     @HouseMember
     public ResponseEntity<PantryItemDto> findById(@PathVariable final String uuid) {
-        final Optional<PantryItemDto> foundItem = pantryService.findById(uuid)
+        final Optional<PantryItemDto> foundItem = pantryService
+                .findById(uuid)
                 .filter(houseAccess::belongsToHeaderHouse)
                 .map(PantryItemDto::from);
 
@@ -80,9 +82,10 @@ public class PantryController {
     @HouseMember
     public ResponseEntity<List<PantryItemDto>> findAll(
             @RequestParam(defaultValue = "false") final boolean excludeFullyConsumed) {
-        final List<PantryItemDto> items = pantryService.findAll(houseAccess.requireHouseId(), excludeFullyConsumed).stream()
-                .map(PantryItemDto::from)
-                .collect(toList());
+        final List<PantryItemDto> items =
+                pantryService.findAll(houseAccess.requireHouseId(), excludeFullyConsumed).stream()
+                        .map(PantryItemDto::from)
+                        .collect(toList());
 
         return ResponseEntity.ok(items);
     }

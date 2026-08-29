@@ -1,15 +1,14 @@
 package org.reciplease.repository;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.model.PlannedMeal;
 import org.reciplease.model.PlannedMealDocument;
 import org.reciplease.repository.mongo.PlannedMealMongoRepository;
 import org.springframework.stereotype.Repository;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -59,7 +58,8 @@ public class PlannedMealRepositoryImpl implements PlannedMealRepository {
     }
 
     @Override
-    public boolean existsByHouseIdAndDateAndNameAndIdNot(final String houseId, final LocalDate date, final String name, final String id) {
+    public boolean existsByHouseIdAndDateAndNameAndIdNot(
+            final String houseId, final LocalDate date, final String name, final String id) {
         return plannedMealMongoRepository.existsByHouseIdAndDateAndNameAndIdNot(houseId, date, name, id);
     }
 }

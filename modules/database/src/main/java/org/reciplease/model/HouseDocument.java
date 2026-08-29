@@ -1,5 +1,8 @@
 package org.reciplease.model;
 
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -7,10 +10,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * {@code members} (Google subject id -> role name) is storage-only: it is read and
@@ -26,9 +25,12 @@ public class HouseDocument {
 
     @Id
     private String id;
+
     private String name;
+
     @Builder.Default
     private Map<String, String> members = new HashMap<>();
+
     @CreatedDate
     private Instant createdAt;
 

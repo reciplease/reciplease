@@ -28,14 +28,12 @@ public class UserDocument {
 
     @Id
     private String id;
+
     @Indexed(unique = true, sparse = true)
     private String handle;
 
     public static UserDocument from(final User user) {
-        return UserDocument.builder()
-                .id(user.id())
-                .handle(user.handle())
-                .build();
+        return UserDocument.builder().id(user.id()).handle(user.handle()).build();
     }
 
     public User toModel() {

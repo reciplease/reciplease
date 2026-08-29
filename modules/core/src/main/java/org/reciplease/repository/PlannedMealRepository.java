@@ -1,10 +1,9 @@
 package org.reciplease.repository;
 
-import org.reciplease.model.PlannedMeal;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.reciplease.model.PlannedMeal;
 
 public interface PlannedMealRepository {
     PlannedMeal save(PlannedMeal plannedMeal);

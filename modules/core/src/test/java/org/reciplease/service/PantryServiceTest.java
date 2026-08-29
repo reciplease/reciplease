@@ -1,22 +1,5 @@
 package org.reciplease.service;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.reciplease.model.PantryItem;
-import org.reciplease.repository.PantryRepository;
-
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
@@ -27,10 +10,27 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.reciplease.model.PantryItem;
+import org.reciplease.repository.PantryRepository;
+
 @MockitoSettings
 class PantryServiceTest {
     @Mock
     private PantryRepository pantryRepository;
+
     private Instant now;
     private static final String HOUSE_ID = "house-1";
 
@@ -72,7 +72,8 @@ class PantryServiceTest {
 
         @BeforeEach
         void setUp() {
-            item = new PantryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, LocalDate.now(), null);
+            item = new PantryItem(
+                    UUID.randomUUID().toString(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, LocalDate.now(), null);
         }
 
         @Test
@@ -89,7 +90,16 @@ class PantryServiceTest {
         @Test
         @DisplayName("findAll returns unexpired items followed by expired items")
         void findAll() {
-            var expiredItem = new PantryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "milk", null, "MILLILITRES", 500d, LocalDate.now().minusDays(1), null);
+            var expiredItem = new PantryItem(
+                    UUID.randomUUID().toString(),
+                    null,
+                    HOUSE_ID,
+                    "milk",
+                    null,
+                    "MILLILITRES",
+                    500d,
+                    LocalDate.now().minusDays(1),
+                    null);
             var today = now.atOffset(ZoneOffset.UTC).toLocalDate();
 
             when(pantryRepository.expiresAfter(HOUSE_ID, today)).thenReturn(List.of(item));
@@ -128,7 +138,8 @@ class PantryServiceTest {
 
         @Test
         void shouldFindExpiredPantry() {
-            when((pantryRepository.betweenDates(HOUSE_ID, now.atOffset(ZoneOffset.UTC).toLocalDate())))
+            when((pantryRepository.betweenDates(
+                            HOUSE_ID, now.atOffset(ZoneOffset.UTC).toLocalDate())))
                     .thenReturn(List.of(item));
 
             var allExpired = pantryService.findAllExpired(HOUSE_ID);
@@ -138,7 +149,8 @@ class PantryServiceTest {
 
         @Test
         void shouldFindUnexpiredPantry() {
-            when(pantryRepository.expiresAfter(HOUSE_ID, now.atOffset(ZoneOffset.UTC).toLocalDate()))
+            when(pantryRepository.expiresAfter(
+                            HOUSE_ID, now.atOffset(ZoneOffset.UTC).toLocalDate()))
                     .thenReturn(List.of(item));
 
             var allUnexpired = pantryService.findAllUnexpired(HOUSE_ID);
@@ -150,10 +162,32 @@ class PantryServiceTest {
         @DisplayName("update merges editable fields but preserves id, createdBy and createdAt")
         void shouldUpdatePreservingAuditFields() {
             var createdAt = Instant.now().minusSeconds(60);
-            var existing = new PantryItem(item.id(), "someone", HOUSE_ID, "bread", null, "ITEMS", 10d, 4d, LocalDate.now(), null,
-                    null, createdAt, createdAt);
-            var updates = new PantryItem(null, null, HOUSE_ID, "sourdough", "Warburtons", "ITEMS", 12d, 4d, LocalDate.now().plusDays(3),
-                    "0123456789012", new byte[]{1, 2, 3});
+            var existing = new PantryItem(
+                    item.id(),
+                    "someone",
+                    HOUSE_ID,
+                    "bread",
+                    null,
+                    "ITEMS",
+                    10d,
+                    4d,
+                    LocalDate.now(),
+                    null,
+                    null,
+                    createdAt,
+                    createdAt);
+            var updates = new PantryItem(
+                    null,
+                    null,
+                    HOUSE_ID,
+                    "sourdough",
+                    "Warburtons",
+                    "ITEMS",
+                    12d,
+                    4d,
+                    LocalDate.now().plusDays(3),
+                    "0123456789012",
+                    new byte[] {1, 2, 3});
 
             when(pantryRepository.findById(item.id())).thenReturn(Optional.of(existing));
             when(pantryRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -175,7 +209,8 @@ class PantryServiceTest {
         @Test
         @DisplayName("update resets remaining to the new amount if the caller doesn't resend it")
         void shouldResetRemainingWhenCallerOmitsIt() {
-            var existing = new PantryItem(item.id(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, 4d, LocalDate.now(), null);
+            var existing =
+                    new PantryItem(item.id(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, 4d, LocalDate.now(), null);
             // Built via the overload that doesn't mention `remaining` at all, so it defaults to
             // the new `amount` rather than carrying over the caller's intent to preserve it.
             var updates = new PantryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 12d, LocalDate.now(), null);
@@ -191,7 +226,8 @@ class PantryServiceTest {
         @Test
         @DisplayName("update archives and deletes instead of saving when the new remaining is zero")
         void shouldArchiveWhenUpdateZerosRemaining() {
-            var existing = new PantryItem(item.id(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, 4d, LocalDate.now(), null);
+            var existing =
+                    new PantryItem(item.id(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, 4d, LocalDate.now(), null);
             var updates = new PantryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 10d, 0d, LocalDate.now(), null);
 
             when(pantryRepository.findById(item.id())).thenReturn(Optional.of(existing));
@@ -210,8 +246,11 @@ class PantryServiceTest {
         var itemId = UUID.randomUUID().toString();
         when(pantryRepository.findById(itemId)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class,
-                () -> pantryService.update(itemId, new PantryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 10d, LocalDate.now(), null)));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> pantryService.update(
+                        itemId,
+                        new PantryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 10d, LocalDate.now(), null)));
 
         verify(pantryRepository, never()).save(any());
     }
@@ -231,7 +270,17 @@ class PantryServiceTest {
         @Test
         @DisplayName("reduces remaining by the given amount")
         void reducesRemaining() {
-            var existing = new PantryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, 4d, LocalDate.now(), null);
+            var existing = new PantryItem(
+                    UUID.randomUUID().toString(),
+                    null,
+                    HOUSE_ID,
+                    "bread",
+                    null,
+                    "ITEMS",
+                    10d,
+                    4d,
+                    LocalDate.now(),
+                    null);
 
             when(pantryRepository.findById(existing.id())).thenReturn(Optional.of(existing));
             when(pantryRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -244,7 +293,17 @@ class PantryServiceTest {
         @Test
         @DisplayName("clamps remaining at zero and archives/deletes rather than saving a zeroed item")
         void clampsAtZeroAndArchives() {
-            var existing = new PantryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, 2d, LocalDate.now(), null);
+            var existing = new PantryItem(
+                    UUID.randomUUID().toString(),
+                    null,
+                    HOUSE_ID,
+                    "bread",
+                    null,
+                    "ITEMS",
+                    10d,
+                    2d,
+                    LocalDate.now(),
+                    null);
 
             when(pantryRepository.findById(existing.id())).thenReturn(Optional.of(existing));
 
@@ -270,8 +329,19 @@ class PantryServiceTest {
     @Test
     @DisplayName("archiveAllZeroRemainingItems deletes (and thereby archives) every zero-remaining item found")
     void shouldArchiveAllZeroRemainingItems() {
-        var first = new PantryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, 0d, LocalDate.now(), null);
-        var second = new PantryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "milk", null, "MILLILITRES", 500d, 0d, LocalDate.now(), null);
+        var first = new PantryItem(
+                UUID.randomUUID().toString(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, 0d, LocalDate.now(), null);
+        var second = new PantryItem(
+                UUID.randomUUID().toString(),
+                null,
+                HOUSE_ID,
+                "milk",
+                null,
+                "MILLILITRES",
+                500d,
+                0d,
+                LocalDate.now(),
+                null);
         when(pantryRepository.findAllZeroRemaining()).thenReturn(List.of(first, second));
 
         pantryService.archiveAllZeroRemainingItems();

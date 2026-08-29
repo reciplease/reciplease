@@ -1,10 +1,9 @@
 package org.reciplease.repository;
 
-import org.reciplease.model.ApiKey;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import org.reciplease.model.ApiKey;
 
 public interface ApiKeyRepository {
 

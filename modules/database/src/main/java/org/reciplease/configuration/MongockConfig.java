@@ -4,12 +4,11 @@ import io.mongock.api.config.MongockConfiguration;
 import io.mongock.driver.mongodb.springdata.v4.SpringDataMongoV4Driver;
 import io.mongock.runner.springboot.MongockSpringboot;
 import io.mongock.runner.springboot.base.MongockApplicationRunner;
+import java.util.List;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoTemplate;
-
-import java.util.List;
 
 /**
  * Runs versioned migration changesets (see {@code org.reciplease.migration}) on every startup —
@@ -22,7 +21,8 @@ import java.util.List;
 public class MongockConfig {
 
     @Bean
-    public MongockApplicationRunner mongockApplicationRunner(final ApplicationContext context, final MongoTemplate mongoTemplate) {
+    public MongockApplicationRunner mongockApplicationRunner(
+            final ApplicationContext context, final MongoTemplate mongoTemplate) {
         final var config = new MongockConfiguration();
         config.setMigrationScanPackage(List.of("org.reciplease.migration"));
 

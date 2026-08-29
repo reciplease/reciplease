@@ -2,14 +2,13 @@ package org.reciplease.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
+import java.util.Optional;
 import org.reciplease.model.FoodCatalogEntry;
 import org.reciplease.model.Nutrients;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
-
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Looks up foods on Open Food Facts (world.openfoodfacts.org) — implements core's {@link
@@ -31,8 +30,8 @@ public class OpenFoodFactsAdapter implements FoodCatalogPort {
     private static final String SEARCH_URL = "https://world.openfoodfacts.org/cgi/search.pl"
             + "?search_terms={query}&search_simple=1&action=process&json=1&page_size=20"
             + "&fields=code,product_name,brands,nutriments";
-    private static final String BARCODE_URL = "https://world.openfoodfacts.org/api/v2/product/{barcode}"
-            + "?fields=code,product_name,brands,nutriments";
+    private static final String BARCODE_URL =
+            "https://world.openfoodfacts.org/api/v2/product/{barcode}" + "?fields=code,product_name,brands,nutriments";
 
     private final RestClient restClient;
 
@@ -48,10 +47,8 @@ public class OpenFoodFactsAdapter implements FoodCatalogPort {
     @Override
     public List<FoodCatalogEntry> searchByName(final String query) {
         try {
-            final var response = restClient.get()
-                    .uri(SEARCH_URL, query)
-                    .retrieve()
-                    .body(SearchResponse.class);
+            final var response =
+                    restClient.get().uri(SEARCH_URL, query).retrieve().body(SearchResponse.class);
             if (response == null || response.products() == null) {
                 return List.of();
             }
@@ -67,10 +64,8 @@ public class OpenFoodFactsAdapter implements FoodCatalogPort {
     @Override
     public Optional<FoodCatalogEntry> lookupByBarcode(final String barcode) {
         try {
-            final var response = restClient.get()
-                    .uri(BARCODE_URL, barcode)
-                    .retrieve()
-                    .body(ProductLookupResponse.class);
+            final var response =
+                    restClient.get().uri(BARCODE_URL, barcode).retrieve().body(ProductLookupResponse.class);
             if (response == null || response.status() != 1 || response.product() == null) {
                 return Optional.empty();
             }
@@ -81,7 +76,8 @@ public class OpenFoodFactsAdapter implements FoodCatalogPort {
     }
 
     private static FoodCatalogEntry toCatalogEntry(final Product product) {
-        return new FoodCatalogEntry(product.code(), product.productName(), firstBrand(product.brands()), toNutrients(product.nutriments()));
+        return new FoodCatalogEntry(
+                product.code(), product.productName(), firstBrand(product.brands()), toNutrients(product.nutriments()));
     }
 
     private static String firstBrand(final String brands) {
@@ -92,14 +88,20 @@ public class OpenFoodFactsAdapter implements FoodCatalogPort {
         if (nutriments == null) {
             return null;
         }
-        return new Nutrients(nutriments.energyKcal100g(), nutriments.proteins100g(), nutriments.fat100g(), nutriments.carbohydrates100g());
+        return new Nutrients(
+                nutriments.energyKcal100g(),
+                nutriments.proteins100g(),
+                nutriments.fat100g(),
+                nutriments.carbohydrates100g());
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private record SearchResponse(@JsonProperty("products") List<Product> products) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private record ProductLookupResponse(@JsonProperty("status") int status, @JsonProperty("product") Product product) {}
+    private record ProductLookupResponse(
+            @JsonProperty("status") int status,
+            @JsonProperty("product") Product product) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private record Product(

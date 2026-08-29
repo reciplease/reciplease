@@ -1,21 +1,20 @@
 package org.reciplease.service;
 
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.reciplease.model.Measure;
 import org.reciplease.model.PantryAllocation;
 import org.reciplease.model.PantryItem;
-import org.reciplease.model.Measure;
 import org.reciplease.model.PlannedIngredient;
 import org.reciplease.model.RecipeIngredient;
 import org.reciplease.model.ShoppingList;
 import org.reciplease.repository.PantryRepository;
 import org.reciplease.repository.PlannedMealRepository;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -40,13 +39,15 @@ public class ShoppingListService {
 
         var remainingByPantryItemId = remainingByPantryItemId(plannedIngredients);
 
-        var gaps = plannedIngredients.stream()
-                .collect(Collectors.groupingBy(item -> keyFor(item.ingredient())))
-                .entrySet().stream()
-                .map(entry -> toGap(entry.getKey(), entry.getValue(), remainingByPantryItemId))
-                .filter(ingredient -> ingredient != null)
-                .sorted(Comparator.comparing(RecipeIngredient::name))
-                .collect(Collectors.toList());
+        var gaps =
+                plannedIngredients.stream()
+                        .collect(Collectors.groupingBy(item -> keyFor(item.ingredient())))
+                        .entrySet()
+                        .stream()
+                        .map(entry -> toGap(entry.getKey(), entry.getValue(), remainingByPantryItemId))
+                        .filter(ingredient -> ingredient != null)
+                        .sorted(Comparator.comparing(RecipeIngredient::name))
+                        .collect(Collectors.toList());
 
         return new ShoppingList(gaps);
     }
@@ -62,12 +63,17 @@ public class ShoppingListService {
                 .collect(Collectors.toMap(PantryItem::id, PantryItem::remaining));
     }
 
-    private RecipeIngredient toGap(final Key key, final List<PlannedIngredient> plannedIngredients, final Map<String, Double> remainingByPantryItemId) {
-        var desired = plannedIngredients.stream().mapToDouble(this::toBaseAmount).sum();
+    private RecipeIngredient toGap(
+            final Key key,
+            final List<PlannedIngredient> plannedIngredients,
+            final Map<String, Double> remainingByPantryItemId) {
+        var desired =
+                plannedIngredients.stream().mapToDouble(this::toBaseAmount).sum();
         var covered = plannedIngredients.stream()
                 .mapToDouble(item -> item.allocations().stream()
-                        .mapToDouble(allocation -> coveredAmount(allocation, remainingByPantryItemId))
-                        .sum() * conversionFactor(item.ingredient().measure()))
+                                .mapToDouble(allocation -> coveredAmount(allocation, remainingByPantryItemId))
+                                .sum()
+                        * conversionFactor(item.ingredient().measure()))
                 .sum();
 
         var gap = desired - covered;
@@ -91,11 +97,12 @@ public class ShoppingListService {
 
     private static Key keyFor(final RecipeIngredient ingredient) {
         return Measure.fromId(ingredient.measure())
-                .map(measure -> new Key(ingredient.name(), measure.getFamily().name(),
+                .map(measure -> new Key(
+                        ingredient.name(),
+                        measure.getFamily().name(),
                         Measure.baseMeasureFor(measure.getFamily()).getMeasureId()))
                 .orElseGet(() -> new Key(ingredient.name(), "RAW:" + ingredient.measure(), ingredient.measure()));
     }
 
-    private record Key(String name, String unit, String displayMeasure) {
-    }
+    private record Key(String name, String unit, String displayMeasure) {}
 }

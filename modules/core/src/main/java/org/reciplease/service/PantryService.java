@@ -1,17 +1,16 @@
 package org.reciplease.service;
 
-import lombok.RequiredArgsConstructor;
-import org.reciplease.model.PantryItem;
-import org.reciplease.repository.PantryRepository;
-import org.springframework.stereotype.Service;
+import static java.util.stream.Collectors.toList;
 
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
+import lombok.RequiredArgsConstructor;
+import org.reciplease.model.PantryItem;
+import org.reciplease.repository.PantryRepository;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -30,12 +29,24 @@ public class PantryService {
     // constructor otherwise defaults a missing one to `amount`, which would wipe out how much
     // has been used).
     public Optional<PantryItem> update(final String id, final PantryItem updates) {
-        final var existing = pantryRepository.findById(id)
+        final var existing = pantryRepository
+                .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Pantry item does not exist"));
 
-        final var merged = new PantryItem(existing.id(), existing.createdBy(), existing.houseId(), updates.name(), updates.brand(), updates.measure(),
-                updates.amount(), updates.remaining(), updates.expiration(), updates.barcode(), updates.image(),
-                existing.createdAt(), existing.updatedAt());
+        final var merged = new PantryItem(
+                existing.id(),
+                existing.createdBy(),
+                existing.houseId(),
+                updates.name(),
+                updates.brand(),
+                updates.measure(),
+                updates.amount(),
+                updates.remaining(),
+                updates.expiration(),
+                updates.barcode(),
+                updates.image(),
+                existing.createdAt(),
+                existing.updatedAt());
 
         return saveOrArchive(merged);
     }
@@ -83,7 +94,8 @@ public class PantryService {
      * #saveOrArchive}) rather than left behind as a live zero-remaining record.
      */
     public Optional<PantryItem> consume(final String id, final Double amount) {
-        final var existing = pantryRepository.findById(id)
+        final var existing = pantryRepository
+                .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Pantry item does not exist"));
 
         return saveOrArchive(existing.withRemaining(Math.max(0, existing.remaining() - amount)));

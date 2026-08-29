@@ -1,11 +1,10 @@
 package org.reciplease.configuration;
 
-import org.springframework.security.test.context.support.WithMockUser;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.springframework.security.test.context.support.WithMockUser;
 
 /**
  * An allowlisted Reciplease user — shorthand for {@code @WithMockUser(authorities =
@@ -16,5 +15,4 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @WithMockUser(authorities = "ROLE_RECIPLEASE")
-public @interface WithMockRecipleaseUser {
-}
+public @interface WithMockRecipleaseUser {}

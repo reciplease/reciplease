@@ -37,7 +37,9 @@ public enum Measure {
 
     /** A group of measures that can be converted between one another. */
     public enum Family {
-        MASS, VOLUME, COUNT
+        MASS,
+        VOLUME,
+        COUNT
     }
 
     private final Family family;
@@ -47,8 +49,13 @@ public enum Measure {
     private final double factorToBase;
     private final String[] legacyIds;
 
-    Measure(final Family family, final String singular, final String plural, final String shortName,
-            final double factorToBase, final String... legacyIds) {
+    Measure(
+            final Family family,
+            final String singular,
+            final String plural,
+            final String shortName,
+            final double factorToBase,
+            final String... legacyIds) {
         this.family = family;
         this.singular = singular;
         this.plural = plural;

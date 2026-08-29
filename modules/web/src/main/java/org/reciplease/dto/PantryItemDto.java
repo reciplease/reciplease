@@ -1,15 +1,16 @@
 package org.reciplease.dto;
 
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
+
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.Instant;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
-import org.reciplease.model.PantryItem;
 import org.reciplease.model.Measure;
+import org.reciplease.model.PantryItem;
 import org.springframework.format.annotation.DateTimeFormat;
-
-import java.time.Instant;
-import java.time.LocalDate;
 
 @Value
 @AllArgsConstructor
@@ -17,22 +18,36 @@ import java.time.LocalDate;
 @Schema(name = "PantryItem")
 public class PantryItemDto {
 
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
     String uuid;
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
     String houseId;
+
+    @Schema(requiredMode = REQUIRED)
     String name;
+
     String brand;
+
+    @Schema(requiredMode = REQUIRED)
     String measure;
+
+    @Schema(requiredMode = REQUIRED)
     Double amount;
+
+    @Schema(requiredMode = REQUIRED)
     Double remaining;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate expiration;
+
     String barcode;
     byte[] image;
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
     Instant createdAt;
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
     Instant updatedAt;
 
     public static PantryItemDto from(final PantryItem pantryItem) {
@@ -59,6 +74,17 @@ public class PantryItemDto {
     // Mongo saves are upserts — a caller-chosen id could overwrite an arbitrary document.
     // Callers that need an id (update, complete) supply the path's already-checked one.
     public PantryItem toEntity(final String houseId) {
-        return new PantryItem(null, null, houseId, name, brand, Measure.normalizeId(measure), amount, remaining, expiration, barcode, image);
+        return new PantryItem(
+                null,
+                null,
+                houseId,
+                name,
+                brand,
+                Measure.normalizeId(measure),
+                amount,
+                remaining,
+                expiration,
+                barcode,
+                image);
     }
 }

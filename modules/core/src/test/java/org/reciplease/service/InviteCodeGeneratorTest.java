@@ -1,11 +1,10 @@
 package org.reciplease.service;
 
-import org.junit.jupiter.api.Test;
-
-import java.util.stream.IntStream;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.matchesPattern;
+
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
 
 class InviteCodeGeneratorTest {
 

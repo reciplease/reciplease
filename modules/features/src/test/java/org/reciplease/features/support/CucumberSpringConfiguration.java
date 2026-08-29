@@ -16,5 +16,4 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 @SpringBootTest(classes = FeaturesTestApplication.class, webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @AutoConfigureDataMongo
-public class CucumberSpringConfiguration {
-}
+public class CucumberSpringConfiguration {}

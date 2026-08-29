@@ -1,5 +1,17 @@
 package org.reciplease.service;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -12,19 +24,6 @@ import org.reciplease.model.RecipeIngredient;
 import org.reciplease.repository.RecipeRepository;
 import org.reciplease.service.request.AddIngredient;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @MockitoSettings
 class RecipeServiceTest {
     @Mock
@@ -36,10 +35,8 @@ class RecipeServiceTest {
     @Test
     @DisplayName("get recipe by id")
     void getRecipe() {
-        var toast = Recipe.builder()
-                .id(UUID.randomUUID().toString())
-                .name("toast")
-                .build();
+        var toast =
+                Recipe.builder().id(UUID.randomUUID().toString()).name("toast").build();
 
         when(recipeRepository.findById(toast.id())).thenReturn(Optional.of(toast));
 
@@ -52,14 +49,10 @@ class RecipeServiceTest {
     @Test
     @DisplayName("get all recipes")
     void findAll() {
-        var recipe1 = Recipe.builder()
-                .id(UUID.randomUUID().toString())
-                .name("toast")
-                .build();
-        var recipe2 = Recipe.builder()
-                .id(UUID.randomUUID().toString())
-                .name("soup")
-                .build();
+        var recipe1 =
+                Recipe.builder().id(UUID.randomUUID().toString()).name("toast").build();
+        var recipe2 =
+                Recipe.builder().id(UUID.randomUUID().toString()).name("soup").build();
         var recipes = List.of(recipe1, recipe2);
 
         when(recipeRepository.findAll()).thenReturn(recipes);
@@ -71,14 +64,11 @@ class RecipeServiceTest {
 
     @Test
     void createRecipe() {
-        var newRecipe = Recipe.builder()
-                .name("toast")
-                .build();
-        var savedRecipe = newRecipe.toBuilder()
-                .id(UUID.randomUUID().toString())
-                .build();
+        var newRecipe = Recipe.builder().name("toast").build();
+        var savedRecipe = newRecipe.toBuilder().id(UUID.randomUUID().toString()).build();
 
-        when(recipeRepository.save(newRecipe.toBuilder().houseId("house-1").build())).thenReturn(savedRecipe);
+        when(recipeRepository.save(newRecipe.toBuilder().houseId("house-1").build()))
+                .thenReturn(savedRecipe);
 
         var actualRecipe = recipeService.create("house-1", newRecipe);
 
@@ -133,8 +123,10 @@ class RecipeServiceTest {
             var id = UUID.randomUUID().toString();
             when(recipeRepository.findById(id)).thenReturn(Optional.empty());
 
-            var exception = assertThrows(IllegalArgumentException.class,
-                    () -> recipeService.update(id, Recipe.builder().name("toast").build()));
+            var exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> recipeService.update(
+                            id, Recipe.builder().name("toast").build()));
 
             assertThat(exception.getMessage(), is("Recipe does not exist"));
         }
@@ -157,8 +149,7 @@ class RecipeServiceTest {
             when(recipeRepository.findById(recipe.id())).thenReturn(Optional.of(recipe));
             when(recipeRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-            var recipeIngredients = recipeService.addIngredient(recipe.id(),
-                    new AddIngredient("bread", "ITEMS", 10d));
+            var recipeIngredients = recipeService.addIngredient(recipe.id(), new AddIngredient("bread", "ITEMS", 10d));
 
             assertThat(recipeIngredients, contains(new RecipeIngredient("bread", "ITEMS", 10d)));
         }
@@ -167,7 +158,8 @@ class RecipeServiceTest {
         void shouldFail_recipeNotFound() {
             when(recipeRepository.findById(recipe.id())).thenReturn(Optional.empty());
 
-            var exception = assertThrows(IllegalArgumentException.class,
+            var exception = assertThrows(
+                    IllegalArgumentException.class,
                     () -> recipeService.addIngredient(recipe.id(), new AddIngredient("bread", "ITEMS", 10d)));
 
             assertThat(exception.getMessage(), is("Recipe does not exist"));

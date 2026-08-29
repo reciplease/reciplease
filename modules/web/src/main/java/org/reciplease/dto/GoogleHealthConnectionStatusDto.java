@@ -1,5 +1,8 @@
 package org.reciplease.dto;
 
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 
 /**
@@ -13,7 +16,8 @@ import java.time.Instant;
  * frontend exposes a separate, public-facing route that strips these two fields before
  * anything reaches client-side code. Do not reuse this DTO for a browser-facing response.
  */
-public record GoogleHealthConnectionStatusDto(boolean connected, Instant expiresAt, String refreshToken) {
+public record GoogleHealthConnectionStatusDto(
+        @Schema(requiredMode = REQUIRED) boolean connected, Instant expiresAt, String refreshToken) {
 
     public static GoogleHealthConnectionStatusDto disconnected() {
         return new GoogleHealthConnectionStatusDto(false, null, null);

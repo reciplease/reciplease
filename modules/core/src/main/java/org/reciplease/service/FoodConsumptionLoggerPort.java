@@ -1,9 +1,8 @@
 package org.reciplease.service;
 
+import java.util.List;
 import org.reciplease.model.FoodConsumption;
 import org.reciplease.model.LoggedFoodHistoryEntry;
-
-import java.util.List;
 
 /**
  * Registers food consumption against whatever service actually stores it — core only knows

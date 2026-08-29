@@ -1,5 +1,23 @@
 package org.reciplease.service;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,25 +31,6 @@ import org.reciplease.repository.GoogleHealthConnectionRepository;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
-
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.util.Optional;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @MockitoSettings
 class GoogleHealthAdapterTest {
@@ -53,7 +52,8 @@ class GoogleHealthAdapterTest {
         clock = Clock.fixed(now, ZoneOffset.UTC);
         restClientBuilder = RestClient.builder();
         mockServer = MockRestServiceServer.bindTo(restClientBuilder).build();
-        googleHealthAdapter = new GoogleHealthAdapter(googleHealthConnectionRepository, clock, restClientBuilder.build());
+        googleHealthAdapter =
+                new GoogleHealthAdapter(googleHealthConnectionRepository, clock, restClientBuilder.build());
     }
 
     @Test
@@ -62,7 +62,8 @@ class GoogleHealthAdapterTest {
         when(googleHealthConnectionRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
         when(googleHealthConnectionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        final var connection = googleHealthAdapter.storeConnection(USER_ID, "access-1", "refresh-1", 3600, "nutrition.writeonly");
+        final var connection =
+                googleHealthAdapter.storeConnection(USER_ID, "access-1", "refresh-1", 3600, "nutrition.writeonly");
 
         assertThat(connection.userId(), is(USER_ID));
         assertThat(connection.accessToken(), is("access-1"));
@@ -74,15 +75,23 @@ class GoogleHealthAdapterTest {
     }
 
     @Test
-    @DisplayName("storeConnection upserts an existing connection, preserving createdAt but replacing tokens/expiresAt/updatedAt")
+    @DisplayName(
+            "storeConnection upserts an existing connection, preserving createdAt but replacing tokens/expiresAt/updatedAt")
     void storeConnectionUpdatesExistingConnectionPreservingCreatedAt() {
         final var originalCreatedAt = now.minusSeconds(86_400);
-        final var existing = new GoogleHealthConnection(USER_ID, "stale-access", "stale-refresh",
-                now.minusSeconds(1), "nutrition.readonly", originalCreatedAt, now.minusSeconds(3600));
+        final var existing = new GoogleHealthConnection(
+                USER_ID,
+                "stale-access",
+                "stale-refresh",
+                now.minusSeconds(1),
+                "nutrition.readonly",
+                originalCreatedAt,
+                now.minusSeconds(3600));
         when(googleHealthConnectionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(existing));
         when(googleHealthConnectionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        final var connection = googleHealthAdapter.storeConnection(USER_ID, "fresh-access", "fresh-refresh", 7200, "nutrition.readonly");
+        final var connection = googleHealthAdapter.storeConnection(
+                USER_ID, "fresh-access", "fresh-refresh", 7200, "nutrition.readonly");
 
         assertThat(connection.accessToken(), is("fresh-access"));
         assertThat(connection.refreshToken(), is("fresh-refresh"));
@@ -97,19 +106,28 @@ class GoogleHealthAdapterTest {
         when(googleHealthConnectionRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
         assertThat(googleHealthAdapter.isConnected(USER_ID), is(false));
 
-        when(googleHealthConnectionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(
-                new GoogleHealthConnection(USER_ID, "a", "r", now, "nutrition.readonly", now, now)));
+        when(googleHealthConnectionRepository.findByUserId(USER_ID))
+                .thenReturn(Optional.of(
+                        new GoogleHealthConnection(USER_ID, "a", "r", now, "nutrition.readonly", now, now)));
         assertThat(googleHealthAdapter.isConnected(USER_ID), is(true));
     }
 
     @Test
-    @DisplayName("history lists the user's nutrition-log data points, mapping identified-food entries' food id and anonymous entries' display name")
+    @DisplayName(
+            "history lists the user's nutrition-log data points, mapping identified-food entries' food id and anonymous entries' display name")
     void historyListsAndMapsDataPoints() {
-        final var connection = new GoogleHealthConnection(USER_ID, "valid-access-token", "refresh-1",
-                now.plusSeconds(3600), "nutrition.readonly", now.minusSeconds(60), now.minusSeconds(60));
+        final var connection = new GoogleHealthConnection(
+                USER_ID,
+                "valid-access-token",
+                "refresh-1",
+                now.plusSeconds(3600),
+                "nutrition.readonly",
+                now.minusSeconds(60),
+                now.minusSeconds(60));
         when(googleHealthConnectionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(connection));
 
-        mockServer.expect(requestTo("https://health.googleapis.com/v4/users/me/dataTypes/nutrition-log/dataPoints"))
+        mockServer
+                .expect(requestTo("https://health.googleapis.com/v4/users/me/dataTypes/nutrition-log/dataPoints"))
                 .andExpect(method(org.springframework.http.HttpMethod.GET))
                 .andExpect(header("Authorization", "Bearer valid-access-token"))
                 .andRespond(withSuccess("""
@@ -121,32 +139,52 @@ class GoogleHealthAdapterTest {
         final var history = googleHealthAdapter.history(USER_ID);
 
         mockServer.verify();
-        assertThat(history, contains(
-                new org.reciplease.model.LoggedFoodHistoryEntry("food-1", "Banana"),
-                new org.reciplease.model.LoggedFoodHistoryEntry(null, "Homemade Soup")));
+        assertThat(
+                history,
+                contains(
+                        new org.reciplease.model.LoggedFoodHistoryEntry("food-1", "Banana"),
+                        new org.reciplease.model.LoggedFoodHistoryEntry(null, "Homemade Soup")));
         verify(googleHealthConnectionRepository, never()).save(any());
     }
 
     @Test
     @DisplayName("log PATCHes a NutritionLog data point referencing the identified food")
     void logSendsExpectedBodyForIdentifiedFood() {
-        final var connection = new GoogleHealthConnection(USER_ID, "valid-access-token", "refresh-1",
-                now.plusSeconds(3600), "nutrition.writeonly", now.minusSeconds(60), now.minusSeconds(60));
+        final var connection = new GoogleHealthConnection(
+                USER_ID,
+                "valid-access-token",
+                "refresh-1",
+                now.plusSeconds(3600),
+                "nutrition.writeonly",
+                now.minusSeconds(60),
+                now.minusSeconds(60));
         when(googleHealthConnectionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(connection));
 
-        mockServer.expect(requestTo(org.hamcrest.Matchers.startsWith(
+        mockServer
+                .expect(requestTo(org.hamcrest.Matchers.startsWith(
                         "https://health.googleapis.com/v4/users/me/dataTypes/nutrition-log/dataPoints/")))
                 .andExpect(method(org.springframework.http.HttpMethod.PATCH))
                 .andExpect(header("Authorization", "Bearer valid-access-token"))
-                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.food").value(is("food/food-1")))
-                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.mealType").value(is("LUNCH")))
-                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.amount").value(is(2.5)))
-                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.nutrients").doesNotExist())
+                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.content()
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.food")
+                        .value(is("food/food-1")))
+                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.mealType")
+                        .value(is("LUNCH")))
+                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.amount")
+                        .value(is(2.5)))
+                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.nutrients")
+                        .doesNotExist())
                 .andRespond(withSuccess());
 
-        googleHealthAdapter.log(new FoodConsumption(USER_ID, Optional.of("food-1"), "Banana", Optional.empty(),
-                MealType.LUNCH, 2.5, LocalDate.of(2026, 7, 2)));
+        googleHealthAdapter.log(new FoodConsumption(
+                USER_ID,
+                Optional.of("food-1"),
+                "Banana",
+                Optional.empty(),
+                MealType.LUNCH,
+                2.5,
+                LocalDate.of(2026, 7, 2)));
 
         mockServer.verify();
     }
@@ -154,21 +192,41 @@ class GoogleHealthAdapterTest {
     @Test
     @DisplayName("log PATCHes an anonymous NutritionLog data point with nutrients when picked from a catalog result")
     void logSendsNutrientsForAnonymousFood() {
-        final var connection = new GoogleHealthConnection(USER_ID, "valid-access-token", "refresh-1",
-                now.plusSeconds(3600), "nutrition.writeonly", now.minusSeconds(60), now.minusSeconds(60));
+        final var connection = new GoogleHealthConnection(
+                USER_ID,
+                "valid-access-token",
+                "refresh-1",
+                now.plusSeconds(3600),
+                "nutrition.writeonly",
+                now.minusSeconds(60),
+                now.minusSeconds(60));
         when(googleHealthConnectionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(connection));
 
-        mockServer.expect(requestTo(org.hamcrest.Matchers.startsWith(
+        mockServer
+                .expect(requestTo(org.hamcrest.Matchers.startsWith(
                         "https://health.googleapis.com/v4/users/me/dataTypes/nutrition-log/dataPoints/")))
                 .andExpect(method(org.springframework.http.HttpMethod.PATCH))
-                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.food").doesNotExist())
-                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.foodDisplayName").value(is("Greek Yogurt")))
-                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.nutrients.energy").value(is(120.0)))
-                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.nutrients.protein").value(is(10.0)))
+                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.food")
+                        .doesNotExist())
+                .andExpect(
+                        org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.foodDisplayName")
+                                .value(is("Greek Yogurt")))
+                .andExpect(
+                        org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath("$.nutrients.energy")
+                                .value(is(120.0)))
+                .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath(
+                                "$.nutrients.protein")
+                        .value(is(10.0)))
                 .andRespond(withSuccess());
 
-        googleHealthAdapter.log(new FoodConsumption(USER_ID, Optional.empty(), "Greek Yogurt",
-                Optional.of(new Nutrients(120.0, 10.0, 3.0, 5.0)), MealType.SNACK, 1.0, LocalDate.of(2026, 7, 2)));
+        googleHealthAdapter.log(new FoodConsumption(
+                USER_ID,
+                Optional.empty(),
+                "Greek Yogurt",
+                Optional.of(new Nutrients(120.0, 10.0, 3.0, 5.0)),
+                MealType.SNACK,
+                1.0,
+                LocalDate.of(2026, 7, 2)));
 
         mockServer.verify();
     }
@@ -178,9 +236,16 @@ class GoogleHealthAdapterTest {
     void logThrowsWhenNotConnected() {
         when(googleHealthConnectionRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(FoodConsumptionLoggerNotConnectedException.class,
-                () -> googleHealthAdapter.log(new FoodConsumption(USER_ID, Optional.of("food-1"), "Banana",
-                        Optional.empty(), MealType.LUNCH, 2.5, LocalDate.of(2026, 7, 2))));
+        assertThrows(
+                FoodConsumptionLoggerNotConnectedException.class,
+                () -> googleHealthAdapter.log(new FoodConsumption(
+                        USER_ID,
+                        Optional.of("food-1"),
+                        "Banana",
+                        Optional.empty(),
+                        MealType.LUNCH,
+                        2.5,
+                        LocalDate.of(2026, 7, 2))));
     }
 
     @Test

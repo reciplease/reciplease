@@ -1,10 +1,5 @@
 package org.reciplease.service;
 
-import org.reciplease.model.RefreshTokenRecord;
-import org.reciplease.repository.RefreshTokenRepository;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Clock;
@@ -12,6 +7,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+import org.reciplease.model.RefreshTokenRecord;
+import org.reciplease.repository.RefreshTokenRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 /**
  * Issues and rotates refresh tokens: a rotating, revocable, reuse-detected credential redeemed
@@ -102,7 +101,8 @@ public class RefreshTokenService {
             return false;
         }
         final var candidateHash = ApiKeyHasher.hash(rawToken);
-        final Optional<RefreshTokenRecord> found = repository.findByPrefix(prefixOf(rawToken))
+        final Optional<RefreshTokenRecord> found = repository
+                .findByPrefix(prefixOf(rawToken))
                 .filter(record -> constantTimeEquals(record.tokenHash(), candidateHash));
         found.ifPresent(record -> revokeAllForUser(record.userId()));
         return found.isPresent();
@@ -116,18 +116,13 @@ public class RefreshTokenService {
         return MessageDigest.isEqual(a.getBytes(StandardCharsets.UTF_8), b.getBytes(StandardCharsets.UTF_8));
     }
 
-    public record IssuedRefreshToken(String rawToken, Instant expiresAt) {
-    }
+    public record IssuedRefreshToken(String rawToken, Instant expiresAt) {}
 
-    public sealed interface RotateResult permits Rotated, Invalid, ReuseDetected {
-    }
+    public sealed interface RotateResult permits Rotated, Invalid, ReuseDetected {}
 
-    public record Rotated(String userId, String rawToken, Instant expiresAt) implements RotateResult {
-    }
+    public record Rotated(String userId, String rawToken, Instant expiresAt) implements RotateResult {}
 
-    public record Invalid() implements RotateResult {
-    }
+    public record Invalid() implements RotateResult {}
 
-    public record ReuseDetected(String userId) implements RotateResult {
-    }
+    public record ReuseDetected(String userId) implements RotateResult {}
 }

@@ -8,6 +8,4 @@ import org.springframework.security.web.webauthn.api.PublicKeyCredential;
  * for why this carries just the challenge rather than the full original request options.
  */
 public record PasskeyLoginFinishRequest(
-        String challenge,
-        PublicKeyCredential<AuthenticatorAssertionResponse> credential) {
-}
+        String challenge, PublicKeyCredential<AuthenticatorAssertionResponse> credential) {}

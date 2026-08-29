@@ -1,5 +1,8 @@
 package org.reciplease.service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.reciplease.model.Recipe;
@@ -7,10 +10,6 @@ import org.reciplease.model.RecipeIngredient;
 import org.reciplease.repository.RecipeRepository;
 import org.reciplease.service.request.AddIngredient;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -45,8 +44,8 @@ public class RecipeService {
     }
 
     public Recipe update(final String id, final Recipe updates) {
-        final var existing = recipeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Recipe does not exist"));
+        final var existing =
+                recipeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Recipe does not exist"));
 
         final var merged = existing.toBuilder()
                 .name(updates.name())
@@ -64,7 +63,8 @@ public class RecipeService {
     }
 
     public Set<RecipeIngredient> addIngredient(final String recipeId, final AddIngredient addIngredient) {
-        final var recipe = recipeRepository.findById(recipeId)
+        final var recipe = recipeRepository
+                .findById(recipeId)
                 .orElseThrow(() -> new IllegalArgumentException("Recipe does not exist"));
 
         recipe.addIngredient(addIngredient.getName(), addIngredient.getMeasure(), addIngredient.getAmount());

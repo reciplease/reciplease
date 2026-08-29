@@ -1,5 +1,9 @@
 package org.reciplease.configuration;
 
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+
+import java.nio.charset.StandardCharsets;
+import javax.crypto.spec.SecretKeySpec;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.service.ApiKeyService;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,11 +19,6 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
-
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-
-import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 /**
  * Production security: validates Reciplease's own HS256-signed JWT bearer tokens (see
@@ -72,10 +71,12 @@ public class CloudWebSecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain anonymousFilterChain(final HttpSecurity http) throws Exception {
-        return http
-                .securityMatcher(
-                        "/api/auth/exchange", "/api/auth/refresh", "/api/auth/logout",
-                        "/api/passkey/signup/**", "/api/passkey/login/**")
+        return http.securityMatcher(
+                        "/api/auth/exchange",
+                        "/api/auth/refresh",
+                        "/api/auth/logout",
+                        "/api/passkey/signup/**",
+                        "/api/passkey/login/**")
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .csrf(csrf -> csrf.disable())
@@ -87,13 +88,10 @@ public class CloudWebSecurityConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
-        return http
-                .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
+        return http.sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .bearerTokenResolver(new CookieBearerTokenResolver())
-                        .jwt(jwt -> jwt
-                                .decoder(jwtDecoder())
+                .oauth2ResourceServer(oauth2 -> oauth2.bearerTokenResolver(new CookieBearerTokenResolver())
+                        .jwt(jwt -> jwt.decoder(jwtDecoder())
                                 .jwtAuthenticationConverter(membershipJwtAuthenticationConverter)))
                 .addFilterBefore(new ApiKeyAuthenticationFilter(apiKeyService), BearerTokenAuthenticationFilter.class)
                 .csrf(csrf -> csrf.disable())

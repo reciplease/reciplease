@@ -1,5 +1,11 @@
 package org.reciplease.controller;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
+
+import java.time.Instant;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -15,13 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.time.Instant;
-import java.util.Optional;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
-
 /**
  * Exercises {@link ApiKeyController#self()} directly rather than through {@code @WebMvcTest} +
  * {@code MockMvc}: the class's {@code @WithHouseOwner} default authentication (needed for the
@@ -36,8 +35,10 @@ class ApiKeyControllerSelfTest {
 
     @Mock
     private ApiKeyService apiKeyService;
+
     @Mock
     private HouseAccess houseAccess;
+
     @Mock
     private HouseRepository houseRepository;
 
@@ -48,9 +49,11 @@ class ApiKeyControllerSelfTest {
 
     @Test
     void resolvesTheHouseAndRoleAnApiKeyAuthenticatesAs() {
-        when(houseRepository.findById("house-1")).thenReturn(Optional.of(new House("house-1", "Test House", Instant.now())));
-        SecurityContextHolder.getContext().setAuthentication(
-                new ApiKeyAuthenticationToken(new ApiKeyPrincipal("key-1", "house-1", HouseRole.READ_ONLY)));
+        when(houseRepository.findById("house-1"))
+                .thenReturn(Optional.of(new House("house-1", "Test House", Instant.now())));
+        SecurityContextHolder.getContext()
+                .setAuthentication(
+                        new ApiKeyAuthenticationToken(new ApiKeyPrincipal("key-1", "house-1", HouseRole.READ_ONLY)));
 
         var response = new ApiKeyController(apiKeyService, houseAccess, houseRepository).self();
 

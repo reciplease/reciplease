@@ -1,13 +1,12 @@
 package org.reciplease.model;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Builder
 @Getter
@@ -16,6 +15,7 @@ import java.util.stream.Collectors;
 public class PlannedIngredientDocument {
 
     private RecipeIngredientDocument ingredient;
+
     @Builder.Default
     private List<PantryAllocationDocument> allocations = new ArrayList<>();
 
@@ -29,9 +29,9 @@ public class PlannedIngredientDocument {
     }
 
     public PlannedIngredient toModel() {
-        var resolvedAllocations = allocations == null ? List.<PantryAllocation>of() : allocations.stream()
-                .map(PantryAllocationDocument::toModel)
-                .collect(Collectors.toList());
+        var resolvedAllocations = allocations == null
+                ? List.<PantryAllocation>of()
+                : allocations.stream().map(PantryAllocationDocument::toModel).collect(Collectors.toList());
         return new PlannedIngredient(ingredient.toModel(), resolvedAllocations);
     }
 }

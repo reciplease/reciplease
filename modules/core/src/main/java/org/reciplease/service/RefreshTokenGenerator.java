@@ -1,9 +1,8 @@
 package org.reciplease.service;
 
-import org.springframework.stereotype.Component;
-
 import java.security.SecureRandom;
 import java.util.Base64;
+import org.springframework.stereotype.Component;
 
 /**
  * Generates raw refresh token secrets. Unlike {@link ApiKeyGenerator}, no {@code rcpl_}-style

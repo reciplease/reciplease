@@ -1,5 +1,7 @@
 package org.reciplease.model;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,9 +12,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.Instant;
-import java.time.LocalDate;
-
 @Document("pantry")
 @Builder
 @Getter
@@ -22,6 +21,7 @@ public class PantryItemDocument {
 
     @Id
     private String id;
+
     private String houseId;
     private String name;
     private String brand;
@@ -31,10 +31,13 @@ public class PantryItemDocument {
     private LocalDate expiration;
     private String barcode;
     private byte[] image;
+
     @CreatedBy
     private String createdBy;
+
     @CreatedDate
     private Instant createdAt;
+
     @LastModifiedDate
     private Instant updatedAt;
 
@@ -60,6 +63,19 @@ public class PantryItemDocument {
     // constructor defaults a null `remaining` to `amount` (fully stocked), so nothing extra
     // is needed here. Same for `brand` — simply null on documents saved before it existed.
     public PantryItem toModel() {
-        return new PantryItem(id, createdBy, houseId, name, brand, measure, amount, remaining, expiration, barcode, image, createdAt, updatedAt);
+        return new PantryItem(
+                id,
+                createdBy,
+                houseId,
+                name,
+                brand,
+                measure,
+                amount,
+                remaining,
+                expiration,
+                barcode,
+                image,
+                createdAt,
+                updatedAt);
     }
 }

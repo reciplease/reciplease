@@ -1,5 +1,8 @@
 package org.reciplease.configuration;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,9 +15,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 
 @MockitoSettings
 class HouseAccessTest {
@@ -38,8 +38,9 @@ class HouseAccessTest {
     @Test
     void isMemberIsTrueForAnApiKeyWhoseHouseMatchesTheRequestHeader() {
         withHouseHeader("house-1");
-        SecurityContextHolder.getContext().setAuthentication(
-                new ApiKeyAuthenticationToken(new ApiKeyPrincipal("key-1", "house-1", HouseRole.READ_ONLY)));
+        SecurityContextHolder.getContext()
+                .setAuthentication(
+                        new ApiKeyAuthenticationToken(new ApiKeyPrincipal("key-1", "house-1", HouseRole.READ_ONLY)));
 
         assertThat(houseAccess.isMember(), is(true));
         assertThat(houseAccess.isOwner(), is(false));
@@ -48,8 +49,9 @@ class HouseAccessTest {
     @Test
     void isOwnerIsTrueForAnOwnerScopedApiKey() {
         withHouseHeader("house-1");
-        SecurityContextHolder.getContext().setAuthentication(
-                new ApiKeyAuthenticationToken(new ApiKeyPrincipal("key-1", "house-1", HouseRole.OWNER)));
+        SecurityContextHolder.getContext()
+                .setAuthentication(
+                        new ApiKeyAuthenticationToken(new ApiKeyPrincipal("key-1", "house-1", HouseRole.OWNER)));
 
         assertThat(houseAccess.isOwner(), is(true));
     }
@@ -57,8 +59,9 @@ class HouseAccessTest {
     @Test
     void isMemberIsFalseWhenTheApiKeysHouseDoesNotMatchTheRequestHeader() {
         withHouseHeader("house-2");
-        SecurityContextHolder.getContext().setAuthentication(
-                new ApiKeyAuthenticationToken(new ApiKeyPrincipal("key-1", "house-1", HouseRole.OWNER)));
+        SecurityContextHolder.getContext()
+                .setAuthentication(
+                        new ApiKeyAuthenticationToken(new ApiKeyPrincipal("key-1", "house-1", HouseRole.OWNER)));
 
         assertThat(houseAccess.isMember(), is(false));
     }
@@ -66,8 +69,9 @@ class HouseAccessTest {
     @Test
     void isMemberIsFalseForAnApiKeyWhenTheRequestHasNoHouseHeaderAtAll() {
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(new MockHttpServletRequest()));
-        SecurityContextHolder.getContext().setAuthentication(
-                new ApiKeyAuthenticationToken(new ApiKeyPrincipal("key-1", "house-1", HouseRole.OWNER)));
+        SecurityContextHolder.getContext()
+                .setAuthentication(
+                        new ApiKeyAuthenticationToken(new ApiKeyPrincipal("key-1", "house-1", HouseRole.OWNER)));
 
         assertThat(houseAccess.isMember(), is(false));
     }

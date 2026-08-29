@@ -1,5 +1,10 @@
 package org.reciplease;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.MethodSecurityTestSupport;
@@ -14,8 +19,8 @@ import org.reciplease.repository.WebAuthnChallengeLedger;
 import org.reciplease.service.ApiKeyService;
 import org.reciplease.service.FoodSearchService;
 import org.reciplease.service.GoogleHealthAdapter;
-import org.reciplease.service.PantryService;
 import org.reciplease.service.InviteService;
+import org.reciplease.service.PantryService;
 import org.reciplease.service.PendingPantryService;
 import org.reciplease.service.PlannedMealService;
 import org.reciplease.service.RecipeService;
@@ -32,12 +37,6 @@ import org.springframework.security.web.webauthn.management.WebAuthnRelyingParty
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * Generates a static OpenAPI spec without booting the full app (no database): loads every
  * {@code @RestController} in a single Spring MVC slice with every port/adapter mocked, then
@@ -47,15 +46,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest
 @WithMockRecipleaseUser
 @Import({
-        MethodSecurityTestSupport.class,
-        PasskeyConfig.class,
-        ReciplaseJwtService.class,
-        // springdoc's auto-configuration isn't part of @WebMvcTest's curated slice
-        // auto-config allow-list, so it has to be imported explicitly here.
-        SpringDocConfiguration.class,
-        SpringDocConfigProperties.class,
-        MultipleOpenApiSupportConfiguration.class,
-        SpringDocWebMvcConfiguration.class,
+    MethodSecurityTestSupport.class,
+    PasskeyConfig.class,
+    ReciplaseJwtService.class,
+    // springdoc's auto-configuration isn't part of @WebMvcTest's curated slice
+    // auto-config allow-list, so it has to be imported explicitly here.
+    SpringDocConfiguration.class,
+    SpringDocConfigProperties.class,
+    MultipleOpenApiSupportConfiguration.class,
+    SpringDocWebMvcConfiguration.class,
 })
 class OpenApiSpecExportTest {
 
@@ -64,28 +63,40 @@ class OpenApiSpecExportTest {
 
     @MockitoBean
     private RecipeService recipeService;
+
     @MockitoBean(name = "houseAccess")
     private HouseAccess houseAccess;
+
     @MockitoBean
     private PantryService pantryService;
+
     @MockitoBean
     private PendingPantryService pendingPantryService;
+
     @MockitoBean
     private HouseRepository houseRepository;
+
     @MockitoBean
     private InviteService inviteService;
+
     @MockitoBean
     private InviteRepository inviteRepository;
+
     @MockitoBean
     private UserRepository userRepository;
+
     @MockitoBean
     private UserIdentityRepository userIdentityRepository;
+
     @MockitoBean
     private PlannedMealService plannedMealService;
+
     @MockitoBean
     private ShoppingListService shoppingListService;
+
     @MockitoBean
     private WebAuthnRelyingPartyOperations relyingPartyOperations;
+
     @MockitoBean
     private WebAuthnChallengeLedger challengeLedger;
     // GoogleHealthAdapter itself implements FoodConsumptionLoggerPort, so this single mock
@@ -94,10 +105,13 @@ class OpenApiSpecExportTest {
     // FoodConsumptionLoggerPort mock would create a second, ambiguous candidate bean.
     @MockitoBean
     private GoogleHealthAdapter googleHealthAdapter;
+
     @MockitoBean
     private FoodSearchService foodSearchService;
+
     @MockitoBean
     private ApiKeyService apiKeyService;
+
     @MockitoBean
     private RefreshTokenService refreshTokenService;
 

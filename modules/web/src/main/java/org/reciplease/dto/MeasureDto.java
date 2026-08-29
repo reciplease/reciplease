@@ -1,5 +1,7 @@
 package org.reciplease.dto;
 
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.reciplease.model.Measure;
 
@@ -10,8 +12,13 @@ import org.reciplease.model.Measure;
 @Schema(name = "Measure")
 public class MeasureDto {
 
+    @Schema(requiredMode = REQUIRED)
     private final String shortName;
+
+    @Schema(requiredMode = REQUIRED)
     private final String singular;
+
+    @Schema(requiredMode = REQUIRED)
     private final String plural;
 
     public MeasureDto(final Measure measure) {

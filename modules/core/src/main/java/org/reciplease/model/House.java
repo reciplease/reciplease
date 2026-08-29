@@ -8,5 +8,4 @@ import java.time.Instant;
  * queried and mutated through {@link org.reciplease.repository.HouseRepository},
  * not an attribute of the house itself.
  */
-public record House(String id, String name, Instant createdAt) implements Identifiable {
-}
+public record House(String id, String name, Instant createdAt) implements Identifiable {}

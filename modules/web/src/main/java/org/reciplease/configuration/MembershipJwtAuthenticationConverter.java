@@ -1,17 +1,16 @@
 package org.reciplease.configuration;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.repository.HouseRepository;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * Turns a validated Reciplease JWT into a Spring Security principal.
@@ -39,11 +38,11 @@ public class MembershipJwtAuthenticationConverter implements Converter<Jwt, Abst
     @Override
     public AbstractAuthenticationToken convert(final Jwt jwt) {
         final String userId = jwt.getSubject();
-        final boolean member = userId != null && !houseRepository.findAllForUser(userId).isEmpty();
+        final boolean member =
+                userId != null && !houseRepository.findAllForUser(userId).isEmpty();
 
-        final List<GrantedAuthority> authorities = member
-                ? List.of(new SimpleGrantedAuthority(ROLE_RECIPLEASE))
-                : List.of();
+        final List<GrantedAuthority> authorities =
+                member ? List.of(new SimpleGrantedAuthority(ROLE_RECIPLEASE)) : List.of();
 
         return new JwtAuthenticationToken(jwt, authorities, userId);
     }

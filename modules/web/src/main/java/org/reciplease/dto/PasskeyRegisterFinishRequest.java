@@ -12,7 +12,4 @@ import org.springframework.security.web.webauthn.api.PublicKeyCredential;
  * else the caller might echo back.
  */
 public record PasskeyRegisterFinishRequest(
-        String challenge,
-        PublicKeyCredential<AuthenticatorAttestationResponse> credential,
-        String label) {
-}
+        String challenge, PublicKeyCredential<AuthenticatorAttestationResponse> credential, String label) {}

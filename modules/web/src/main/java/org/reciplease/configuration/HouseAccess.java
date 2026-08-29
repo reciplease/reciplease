@@ -1,5 +1,6 @@
 package org.reciplease.configuration;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.model.HouseRole;
 import org.reciplease.model.HouseScoped;
@@ -8,8 +9,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
-import java.util.Optional;
 
 /**
  * Backs the {@code @houseAccess.isMember()} / {@code @houseAccess.isOwner()}

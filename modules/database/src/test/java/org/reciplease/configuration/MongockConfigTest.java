@@ -1,5 +1,10 @@
 package org.reciplease.configuration;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
+
 import io.mongock.runner.springboot.base.MongockApplicationRunner;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.InviteDocument;
@@ -13,11 +18,6 @@ import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
-
 /**
  * Verifies the Mongock changesets under {@code org.reciplease.migration} actually run and
  * create their indexes — {@code @DataMongoTest}'s context doesn't invoke {@code ApplicationRunner}
@@ -29,6 +29,7 @@ class MongockConfigTest {
 
     @Autowired
     private MongoTemplate mongoTemplate;
+
     @Autowired
     private MongockApplicationRunner mongockApplicationRunner;
 
@@ -56,7 +57,8 @@ class MongockConfigTest {
     void createsTheWebAuthnChallengeTtlIndex() throws Exception {
         mongockApplicationRunner.run(new DefaultApplicationArguments());
 
-        final var indexes = mongoTemplate.indexOps(WebAuthnChallengeDocument.class).getIndexInfo();
+        final var indexes =
+                mongoTemplate.indexOps(WebAuthnChallengeDocument.class).getIndexInfo();
         assertThat(indexes.stream().anyMatch(info -> info.getExpireAfter().isPresent()), is(true));
     }
 

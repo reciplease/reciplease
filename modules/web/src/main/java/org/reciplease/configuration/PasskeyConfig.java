@@ -1,5 +1,7 @@
 package org.reciplease.configuration;
 
+import java.util.Arrays;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,9 +11,6 @@ import org.springframework.security.web.webauthn.management.PublicKeyCredentialU
 import org.springframework.security.web.webauthn.management.UserCredentialRepository;
 import org.springframework.security.web.webauthn.management.WebAuthnRelyingPartyOperations;
 import org.springframework.security.web.webauthn.management.Webauthn4JRelyingPartyOperations;
-
-import java.util.Arrays;
-import java.util.Set;
 
 /**
  * Wires up Spring Security's WebAuthn building blocks directly, rather than its {@code .webAuthn()}

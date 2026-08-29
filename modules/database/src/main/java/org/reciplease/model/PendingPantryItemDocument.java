@@ -1,5 +1,6 @@
 package org.reciplease.model;
 
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,8 +12,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.time.Instant;
-
 @Document("pendingPantry")
 @Builder
 @Getter
@@ -22,6 +21,7 @@ public class PendingPantryItemDocument {
 
     @Id
     private String id;
+
     private String houseId;
     private byte[] barcodeImage;
     // Predates barcodeImage — a decoded barcode string from when capture scanned live instead of
@@ -29,12 +29,16 @@ public class PendingPantryItemDocument {
     // clearer name; never written by new saves. See PendingPantryItem.legacyBarcode.
     @Field("barcode")
     private String legacyBarcode;
+
     private byte[] expirationImage;
     private byte[] measureImage;
+
     @CreatedBy
     private String createdBy;
+
     @CreatedDate
     private Instant createdAt;
+
     @LastModifiedDate
     private Instant updatedAt;
 
@@ -53,6 +57,15 @@ public class PendingPantryItemDocument {
     }
 
     public PendingPantryItem toModel() {
-        return new PendingPantryItem(id, createdBy, houseId, barcodeImage, legacyBarcode, expirationImage, measureImage, createdAt, updatedAt);
+        return new PendingPantryItem(
+                id,
+                createdBy,
+                houseId,
+                barcodeImage,
+                legacyBarcode,
+                expirationImage,
+                measureImage,
+                createdAt,
+                updatedAt);
     }
 }

@@ -1,5 +1,14 @@
 package org.reciplease.controller;
 
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.Instant;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.reciplease.configuration.MethodSecurityTestSupport;
 import org.reciplease.model.House;
@@ -15,16 +24,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.Instant;
-import java.util.Optional;
-
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(InviteController.class)
 @Import(MethodSecurityTestSupport.class)
 class InviteControllerTest {
@@ -36,8 +35,10 @@ class InviteControllerTest {
 
     @MockitoBean
     private InviteRepository inviteRepository;
+
     @MockitoBean
     private HouseRepository houseRepository;
+
     @MockitoBean
     private InviteService inviteService;
 
@@ -55,19 +56,18 @@ class InviteControllerTest {
 
     @Test
     void previewReturnsNotFoundForAnAlreadyUsedInvite() throws Exception {
-        var invite = new Invite("invite-1", "code1", HOUSE_ID, HouseRole.READ_ONLY, Instant.now(), Instant.now(), "user-1");
+        var invite =
+                new Invite("invite-1", "code1", HOUSE_ID, HouseRole.READ_ONLY, Instant.now(), Instant.now(), "user-1");
         when(inviteRepository.findByCode("code1")).thenReturn(Optional.of(invite));
 
-        mockMvc.perform(get("/api/invites/code1"))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/invites/code1")).andExpect(status().isNotFound());
     }
 
     @Test
     void previewReturnsNotFoundForAnUnknownCode() throws Exception {
         when(inviteRepository.findByCode("missing")).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/invites/missing"))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/invites/missing")).andExpect(status().isNotFound());
     }
 
     @Test
@@ -86,14 +86,12 @@ class InviteControllerTest {
     void acceptReturnsNotFoundWhenTheCodeIsInvalidOrAlreadyUsed() throws Exception {
         when(inviteService.accept("bad-code", "user-1")).thenReturn(Optional.empty());
 
-        mockMvc.perform(post("/api/invites/bad-code/accept").with(csrf()))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(post("/api/invites/bad-code/accept").with(csrf())).andExpect(status().isNotFound());
     }
 
     @Test
     @org.springframework.security.test.context.support.WithAnonymousUser
     void acceptIsRejectedForAnUnauthenticatedRequest() throws Exception {
-        mockMvc.perform(post("/api/invites/code1/accept").with(csrf()))
-                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/invites/code1/accept").with(csrf())).andExpect(status().isForbidden());
     }
 }

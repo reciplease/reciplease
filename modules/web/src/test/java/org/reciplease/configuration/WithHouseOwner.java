@@ -15,5 +15,4 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @WithMockRecipleaseUser
-public @interface WithHouseOwner {
-}
+public @interface WithHouseOwner {}

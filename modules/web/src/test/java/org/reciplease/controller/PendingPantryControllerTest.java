@@ -1,5 +1,22 @@
 package org.reciplease.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.Base64;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,24 +34,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 // PantryController is loaded alongside so the tests prove the literal `pending` segment
 // wins over its `api/pantry/{uuid}` mapping rather than being captured as a uuid.
@@ -58,9 +57,9 @@ class PendingPantryControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private final byte[] barcodeImageBytes = new byte[]{7, 8, 9};
-    private final byte[] expirationImageBytes = new byte[]{1, 2, 3};
-    private final byte[] measureImageBytes = new byte[]{4, 5, 6};
+    private final byte[] barcodeImageBytes = new byte[] {7, 8, 9};
+    private final byte[] expirationImageBytes = new byte[] {1, 2, 3};
+    private final byte[] measureImageBytes = new byte[] {4, 5, 6};
     private final String barcodeImageBase64 = Base64.getEncoder().encodeToString(barcodeImageBytes);
     private final String expirationImageBase64 = Base64.getEncoder().encodeToString(expirationImageBytes);
     private final String measureImageBase64 = Base64.getEncoder().encodeToString(measureImageBytes);
@@ -76,7 +75,8 @@ class PendingPantryControllerTest {
     @Test
     @DisplayName("should create a pending item with a barcode photo and both other images")
     void shouldCreatePendingItem() throws Exception {
-        var requestItem = new PendingPantryItem(null, null, HOUSE_ID, barcodeImageBytes, expirationImageBytes, measureImageBytes);
+        var requestItem =
+                new PendingPantryItem(null, null, HOUSE_ID, barcodeImageBytes, expirationImageBytes, measureImageBytes);
         var savedItem = requestItem.withId(PENDING_ID);
 
         when(pendingPantryService.save(requestItem)).thenReturn(savedItem);
@@ -91,14 +91,22 @@ class PendingPantryControllerTest {
                                   "measureImage": "%s"
                                 }""".formatted(barcodeImageBase64, expirationImageBase64, measureImageBase64)))
                 .andExpect(status().isCreated())
-                .andExpect(content().json("""
+                .andExpect(content()
+                        .json(
+                                """
                         {
                           "uuid": "%s",
                           "houseId": "%s",
                           "barcodeImage": "%s",
                           "expirationImage": "%s",
                           "measureImage": "%s"
-                        }""".formatted(PENDING_ID, HOUSE_ID, barcodeImageBase64, expirationImageBase64, measureImageBase64), true));
+                        }""".formatted(
+                                                PENDING_ID,
+                                                HOUSE_ID,
+                                                barcodeImageBase64,
+                                                expirationImageBase64,
+                                                measureImageBase64),
+                                true));
     }
 
     @Test
@@ -166,7 +174,8 @@ class PendingPantryControllerTest {
 
         mockMvc.perform(get("/api/pantry/pending"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("""
+                .andExpect(content()
+                        .json("""
                         [{
                           "uuid": "%s",
                           "houseId": "%s",
@@ -184,7 +193,8 @@ class PendingPantryControllerTest {
 
         mockMvc.perform(get("/api/pantry/pending/{uuid}", PENDING_ID))
                 .andExpect(status().isOk())
-                .andExpect(content().json("""
+                .andExpect(content()
+                        .json("""
                         {
                           "uuid": "%s",
                           "houseId": "%s",
@@ -200,8 +210,7 @@ class PendingPantryControllerTest {
         when(houseAccess.belongsToHeaderHouse(any(PendingPantryItem.class))).thenReturn(false);
         when(pendingPantryService.findById(PENDING_ID)).thenReturn(Optional.of(pending));
 
-        mockMvc.perform(get("/api/pantry/pending/{uuid}", PENDING_ID))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/pantry/pending/{uuid}", PENDING_ID)).andExpect(status().isNotFound());
     }
 
     @Test
@@ -244,11 +253,21 @@ class PendingPantryControllerTest {
     @DisplayName("complete creates the pantry item and returns it")
     void shouldCompletePendingItem() throws Exception {
         var pending = new PendingPantryItem(PENDING_ID, null, HOUSE_ID, barcodeImageBytes, null, null);
-        var item = new PantryItem(null, null, HOUSE_ID, "bread", null, "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
+        var item = new PantryItem(
+                null,
+                null,
+                HOUSE_ID,
+                "bread",
+                null,
+                "item",
+                20d,
+                LocalDate.of(2020, Month.JANUARY, 1),
+                "0123456789012");
         var savedItem = item.withId(PENDING_ID);
 
         when(pendingPantryService.findById(PENDING_ID)).thenReturn(Optional.of(pending));
-        when(pendingPantryService.complete(eq(PENDING_ID), any(PantryItem.class))).thenReturn(savedItem);
+        when(pendingPantryService.complete(eq(PENDING_ID), any(PantryItem.class)))
+                .thenReturn(savedItem);
 
         mockMvc.perform(post("/api/pantry/pending/{uuid}/complete", PENDING_ID)
                         .with(csrf())

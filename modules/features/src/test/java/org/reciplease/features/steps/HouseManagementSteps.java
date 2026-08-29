@@ -1,5 +1,15 @@
 package org.reciplease.features.steps;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
@@ -13,16 +23,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import static org.hamcrest.Matchers.not;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.hamcrest.Matchers.containsString;
-
 /**
  * Drives the house-settings flows (member role changes, invite generation/listing/deletion)
  * end to end through MockMvc, against the real {@code HouseRepository}/{@code InviteRepository}
@@ -32,16 +32,19 @@ public class HouseManagementSteps {
 
     @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private ScenarioState state;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @When("{string} sets the role of {string} to {string} in the house")
-    public void setsTheRoleOfInTheHouse(final String actorId, final String targetUserId, final String role) throws Exception {
-        state.setLastResult(mockMvc.perform(houseScopedRequest(patch("/api/houses/members/{userId}", targetUserId), actorId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
+    public void setsTheRoleOfInTheHouse(final String actorId, final String targetUserId, final String role)
+            throws Exception {
+        state.setLastResult(
+                mockMvc.perform(houseScopedRequest(patch("/api/houses/members/{userId}", targetUserId), actorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                         {"role": "%s"}""".formatted(role))));
     }
 
@@ -79,14 +82,16 @@ public class HouseManagementSteps {
 
     @Then("the pending invites list does not contain code {string}")
     public void thePendingInvitesListDoesNotContainCode(final String code) throws Exception {
-        state.lastResult().andExpect(
-                org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(not(containsString(code))));
+        state.lastResult()
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+                        .string(not(containsString(code))));
     }
 
-    private MockHttpServletRequestBuilder houseScopedRequest(final MockHttpServletRequestBuilder builder, final String userId) {
-        return builder
-                .with(csrf())
-                .with(authentication(new TestingAuthenticationToken(userId, "n/a", new SimpleGrantedAuthority("ROLE_RECIPLEASE"))))
+    private MockHttpServletRequestBuilder houseScopedRequest(
+            final MockHttpServletRequestBuilder builder, final String userId) {
+        return builder.with(csrf())
+                .with(authentication(
+                        new TestingAuthenticationToken(userId, "n/a", new SimpleGrantedAuthority("ROLE_RECIPLEASE"))))
                 .header(HouseAccess.HOUSE_HEADER, state.houseId("Test House"));
     }
 }

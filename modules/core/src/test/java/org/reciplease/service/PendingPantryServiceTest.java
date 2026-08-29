@@ -1,5 +1,19 @@
 package org.reciplease.service;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,27 +26,13 @@ import org.reciplease.model.PendingPantryItem;
 import org.reciplease.repository.PantryRepository;
 import org.reciplease.repository.PendingPantryRepository;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @MockitoSettings
 class PendingPantryServiceTest {
     private static final String HOUSE_ID = "house-1";
 
     @Mock
     private PendingPantryRepository pendingPantryRepository;
+
     @Mock
     private PantryRepository pantryRepository;
 
@@ -46,7 +46,8 @@ class PendingPantryServiceTest {
     @Test
     @DisplayName("should save pending item")
     void save() {
-        var pending = new PendingPantryItem(null, null, HOUSE_ID, "0123456789012".getBytes(), new byte[]{1}, new byte[]{2});
+        var pending =
+                new PendingPantryItem(null, null, HOUSE_ID, "0123456789012".getBytes(), new byte[] {1}, new byte[] {2});
         var saved = pending.withId(UUID.randomUUID().toString());
 
         when(pendingPantryRepository.save(pending)).thenReturn(saved);
@@ -70,7 +71,8 @@ class PendingPantryServiceTest {
     @Test
     @DisplayName("should list all pending items for a house")
     void findAll() {
-        var pending = new PendingPantryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "0123456789012".getBytes(), null, null);
+        var pending = new PendingPantryItem(
+                UUID.randomUUID().toString(), null, HOUSE_ID, "0123456789012".getBytes(), null, null);
         when(pendingPantryRepository.findAllByHouseId(HOUSE_ID)).thenReturn(List.of(pending));
         when(pantryRepository.findById(pending.id())).thenReturn(Optional.empty());
 
@@ -82,9 +84,12 @@ class PendingPantryServiceTest {
     @Test
     @DisplayName("findAll silently deletes and excludes pending items already completed into pantry")
     void findAllSweepsCompletedPendingItems() {
-        var pending = new PendingPantryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "0123456789012".getBytes(), null, null);
-        var alreadyCompleted = new PendingPantryItem(UUID.randomUUID().toString(), null, HOUSE_ID, "9999999999999".getBytes(), null, null);
-        var completedItem = new PantryItem(alreadyCompleted.id(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, LocalDate.now(), "9999999999999");
+        var pending = new PendingPantryItem(
+                UUID.randomUUID().toString(), null, HOUSE_ID, "0123456789012".getBytes(), null, null);
+        var alreadyCompleted = new PendingPantryItem(
+                UUID.randomUUID().toString(), null, HOUSE_ID, "9999999999999".getBytes(), null, null);
+        var completedItem = new PantryItem(
+                alreadyCompleted.id(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, LocalDate.now(), "9999999999999");
 
         when(pendingPantryRepository.findAllByHouseId(HOUSE_ID)).thenReturn(List.of(pending, alreadyCompleted));
         when(pantryRepository.findById(pending.id())).thenReturn(Optional.empty());
@@ -131,10 +136,23 @@ class PendingPantryServiceTest {
     void completeCarriesAuditFields() {
         var pendingId = UUID.randomUUID().toString();
         var capturedAt = Instant.parse("2026-07-01T10:15:30Z");
-        var pending = new PendingPantryItem(pendingId, "user-1", HOUSE_ID, "0123456789012".getBytes(), null, null, null, capturedAt, capturedAt);
+        var pending = new PendingPantryItem(
+                pendingId, "user-1", HOUSE_ID, "0123456789012".getBytes(), null, null, null, capturedAt, capturedAt);
         var item = new PantryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 10d, LocalDate.now(), "0123456789012");
-        var expectedSave = new PantryItem(pendingId, "user-1", HOUSE_ID, item.name(), null, item.measure(),
-                item.amount(), item.remaining(), item.expiration(), item.barcode(), item.image(), capturedAt, null);
+        var expectedSave = new PantryItem(
+                pendingId,
+                "user-1",
+                HOUSE_ID,
+                item.name(),
+                null,
+                item.measure(),
+                item.amount(),
+                item.remaining(),
+                item.expiration(),
+                item.barcode(),
+                item.image(),
+                capturedAt,
+                null);
 
         when(pendingPantryRepository.findById(pendingId)).thenReturn(Optional.of(pending));
         when(pantryRepository.save(expectedSave)).thenReturn(expectedSave);
@@ -151,7 +169,8 @@ class PendingPantryServiceTest {
         var pendingId = UUID.randomUUID().toString();
         var pending = new PendingPantryItem(pendingId, null, HOUSE_ID, "0123456789012".getBytes(), null, null);
         var item = new PantryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 10d, LocalDate.now(), "0123456789012");
-        var otherHouseItem = new PantryItem(pendingId, null, "house-2", "milk", null, "LITRES", 1d, LocalDate.now(), null);
+        var otherHouseItem =
+                new PantryItem(pendingId, null, "house-2", "milk", null, "LITRES", 1d, LocalDate.now(), null);
 
         when(pendingPantryRepository.findById(pendingId)).thenReturn(Optional.of(pending));
         when(pantryRepository.findById(pendingId)).thenReturn(Optional.of(otherHouseItem));

@@ -1,9 +1,8 @@
 package org.reciplease.repository;
 
-import org.reciplease.model.Invite;
-
 import java.util.List;
 import java.util.Optional;
+import org.reciplease.model.Invite;
 
 public interface InviteRepository {
     Optional<Invite> findByCode(String code);

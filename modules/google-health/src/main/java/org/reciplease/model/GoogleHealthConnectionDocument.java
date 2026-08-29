@@ -1,13 +1,12 @@
 package org.reciplease.model;
 
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.time.Instant;
 
 /**
  * A user's linked Google Health account. {@code userId} is the {@code @Id} — one connection
@@ -27,6 +26,7 @@ public class GoogleHealthConnectionDocument {
 
     @Id
     private String userId;
+
     private String accessToken;
     private String refreshToken;
     private Instant expiresAt;

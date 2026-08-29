@@ -1,8 +1,7 @@
 package org.reciplease.repository;
 
-import org.reciplease.model.LinkedIdentity;
-
 import java.util.List;
+import org.reciplease.model.LinkedIdentity;
 
 /** The provider identities linked to a user (provider ids are never exposed). */
 public interface UserIdentityRepository {

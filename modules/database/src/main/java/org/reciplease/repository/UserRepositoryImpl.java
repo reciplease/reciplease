@@ -1,6 +1,8 @@
 package org.reciplease.repository;
 
 import com.mongodb.DuplicateKeyException;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.model.User;
 import org.reciplease.model.UserDocument;
@@ -8,9 +10,6 @@ import org.reciplease.model.UserIdentityDocument;
 import org.reciplease.repository.mongo.UserIdentityMongoRepository;
 import org.reciplease.repository.mongo.UserMongoRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
-import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -30,7 +29,8 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findByIdentity(final String provider, final String providerId) {
-        return userIdentityMongoRepository.findById(UserIdentityDocument.idFor(provider, providerId))
+        return userIdentityMongoRepository
+                .findById(UserIdentityDocument.idFor(provider, providerId))
                 .flatMap(identity -> userMongoRepository.findById(identity.getUserId()))
                 .map(UserDocument::toModel);
     }
@@ -38,7 +38,9 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User createWithIdentity(final String provider, final String providerId, final String email) {
         final var userId = UUID.randomUUID().toString();
-        final var user = userMongoRepository.save(UserDocument.builder().id(userId).handle(null).build()).toModel();
+        final var user = userMongoRepository
+                .save(UserDocument.builder().id(userId).handle(null).build())
+                .toModel();
         try {
             userIdentityMongoRepository.save(UserIdentityDocument.builder()
                     .id(UserIdentityDocument.idFor(provider, providerId))
@@ -75,8 +77,9 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public void updateIdentityEmail(final String provider, final String providerId, final String email) {
         final var identityId = UserIdentityDocument.idFor(provider, providerId);
-        userIdentityMongoRepository.findById(identityId).ifPresent(identity ->
-                userIdentityMongoRepository.save(UserIdentityDocument.builder()
+        userIdentityMongoRepository
+                .findById(identityId)
+                .ifPresent(identity -> userIdentityMongoRepository.save(UserIdentityDocument.builder()
                         .id(identity.getId())
                         .userId(identity.getUserId())
                         .email(email)
@@ -89,6 +92,7 @@ public class UserRepositoryImpl implements UserRepository {
         if (holder.isPresent() && !holder.get().getId().equals(userId)) {
             throw new HandleTakenException(handle);
         }
-        userMongoRepository.save(UserDocument.builder().id(userId).handle(handle).build());
+        userMongoRepository.save(
+                UserDocument.builder().id(userId).handle(handle).build());
     }
 }

@@ -1,5 +1,8 @@
 package org.reciplease.model;
 
+import java.time.Instant;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,10 +17,6 @@ import org.springframework.security.web.webauthn.api.ImmutableCredentialRecord;
 import org.springframework.security.web.webauthn.api.ImmutablePublicKeyCose;
 import org.springframework.security.web.webauthn.api.PublicKeyCredentialType;
 
-import java.time.Instant;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 /**
  * A registered passkey credential. {@code id} is the credential id (base64url), which both
  * uniquely identifies the credential and lets Mongo enforce it's never stored twice.
@@ -31,6 +30,7 @@ public class PasskeyCredentialDocument {
 
     @Id
     private String id;
+
     private String userId;
     private String publicKeyCose;
     // Raw CBOR attestation object — Webauthn4JRelyingPartyOperations.authenticate() reads the
@@ -42,10 +42,12 @@ public class PasskeyCredentialDocument {
     private boolean backupEligible;
     private boolean backupState;
     private String label;
+
     @CreatedDate
     private Instant createdAt;
 
-    public static PasskeyCredentialDocument from(final CredentialRecord credential, final String userId, final String label) {
+    public static PasskeyCredentialDocument from(
+            final CredentialRecord credential, final String userId, final String label) {
         return PasskeyCredentialDocument.builder()
                 .id(credential.getCredentialId().toBase64UrlString())
                 .userId(userId)
@@ -53,7 +55,9 @@ public class PasskeyCredentialDocument {
                 .attestationObject(credential.getAttestationObject().toBase64UrlString())
                 .signatureCount(credential.getSignatureCount())
                 .uvInitialized(credential.isUvInitialized())
-                .transports(credential.getTransports().stream().map(AuthenticatorTransport::getValue).collect(Collectors.toSet()))
+                .transports(credential.getTransports().stream()
+                        .map(AuthenticatorTransport::getValue)
+                        .collect(Collectors.toSet()))
                 .backupEligible(credential.isBackupEligible())
                 .backupState(credential.isBackupState())
                 .label(label)
@@ -69,7 +73,8 @@ public class PasskeyCredentialDocument {
                 .attestationObject(Bytes.fromBase64(attestationObject))
                 .signatureCount(signatureCount)
                 .uvInitialized(uvInitialized)
-                .transports(transports.stream().map(AuthenticatorTransport::valueOf).collect(Collectors.toSet()))
+                .transports(
+                        transports.stream().map(AuthenticatorTransport::valueOf).collect(Collectors.toSet()))
                 .backupEligible(backupEligible)
                 .backupState(backupState)
                 .label(label)

@@ -1,5 +1,6 @@
 package org.reciplease.controller;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.dto.IdentitiesDto;
 import org.reciplease.dto.LinkedIdentityDto;
@@ -20,8 +21,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 /**
  * The current authenticated user's own profile: their id/handle ({@code /api/me}), their
  * linked identities (provider + email, never the provider id, {@code /api/me/identities}),
@@ -38,7 +37,8 @@ public class MeController {
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MeDto> me() {
-        return userRepository.findById(currentUserId())
+        return userRepository
+                .findById(currentUserId())
                 .map(user -> ResponseEntity.ok(new MeDto(user.id(), user.handle())))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

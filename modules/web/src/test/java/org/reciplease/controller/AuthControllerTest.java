@@ -1,5 +1,16 @@
 package org.reciplease.controller;
 
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.Instant;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reciplease.configuration.MethodSecurityTestSupport;
@@ -14,19 +25,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.Instant;
-import java.util.Optional;
-
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthController.class)
 @Import({ReciplaseJwtService.class, MethodSecurityTestSupport.class})
@@ -48,8 +46,9 @@ class AuthControllerTest {
 
     @BeforeEach
     void stubRefreshTokenIssuance() {
-        when(refreshTokenService.issue(any())).thenReturn(
-                new RefreshTokenService.IssuedRefreshToken("issued-raw-refresh-token", Instant.parse("2026-02-01T00:00:00Z")));
+        when(refreshTokenService.issue(any()))
+                .thenReturn(new RefreshTokenService.IssuedRefreshToken(
+                        "issued-raw-refresh-token", Instant.parse("2026-02-01T00:00:00Z")));
     }
 
     @Test
@@ -74,7 +73,8 @@ class AuthControllerTest {
     @Test
     void createsANewUserOnFirstLogin() throws Exception {
         when(userRepository.findByIdentity("google", "google-sub-1")).thenReturn(Optional.empty());
-        when(userRepository.createWithIdentity("google", "google-sub-1", "me@gmail.com")).thenReturn(new User("user-1", null));
+        when(userRepository.createWithIdentity("google", "google-sub-1", "me@gmail.com"))
+                .thenReturn(new User("user-1", null));
 
         mockMvc.perform(post("/api/auth/exchange")
                         .header("X-Internal-Secret", SECRET)
@@ -94,7 +94,8 @@ class AuthControllerTest {
 
     @Test
     void logsInAnExistingUserWithoutCreatingANewOne() throws Exception {
-        when(userRepository.findByIdentity("google", "google-sub-1")).thenReturn(Optional.of(new User("user-1", "my-handle")));
+        when(userRepository.findByIdentity("google", "google-sub-1"))
+                .thenReturn(Optional.of(new User("user-1", "my-handle")));
 
         mockMvc.perform(post("/api/auth/exchange")
                         .header("X-Internal-Secret", SECRET)
@@ -112,7 +113,8 @@ class AuthControllerTest {
 
     @Test
     void loggingInAnExistingUserBackfillsTheStoredEmail() throws Exception {
-        when(userRepository.findByIdentity("google", "google-sub-1")).thenReturn(Optional.of(new User("user-1", "my-handle")));
+        when(userRepository.findByIdentity("google", "google-sub-1"))
+                .thenReturn(Optional.of(new User("user-1", "my-handle")));
 
         mockMvc.perform(post("/api/auth/exchange")
                         .header("X-Internal-Secret", SECRET)
@@ -126,7 +128,8 @@ class AuthControllerTest {
 
     @Test
     void loggingInAnExistingUserWithoutAnEmailDoesNotClobberTheStoredEmail() throws Exception {
-        when(userRepository.findByIdentity("google", "google-sub-1")).thenReturn(Optional.of(new User("user-1", "my-handle")));
+        when(userRepository.findByIdentity("google", "google-sub-1"))
+                .thenReturn(Optional.of(new User("user-1", "my-handle")));
 
         mockMvc.perform(post("/api/auth/exchange")
                         .header("X-Internal-Secret", SECRET)
@@ -161,7 +164,8 @@ class AuthControllerTest {
     void returnsConflictWhenLinkingAnIdentityAlreadyLinkedToADifferentUser() throws Exception {
         final var linkToken = jwtService.mint("user-1");
         org.mockito.Mockito.doThrow(new IdentityConflictException("github", "github-sub-1"))
-                .when(userRepository).linkIdentity("user-1", "github", "github-sub-1", "me@github.com");
+                .when(userRepository)
+                .linkIdentity("user-1", "github", "github-sub-1", "me@github.com");
 
         mockMvc.perform(post("/api/auth/exchange")
                         .header("X-Internal-Secret", SECRET)
@@ -173,19 +177,20 @@ class AuthControllerTest {
 
     @Test
     void refreshWithNoCookieIsUnauthorized() throws Exception {
-        mockMvc.perform(post("/api/auth/refresh"))
-                .andExpect(status().isUnauthorized());
+        mockMvc.perform(post("/api/auth/refresh")).andExpect(status().isUnauthorized());
 
         verify(refreshTokenService, never()).rotate(any());
     }
 
     @Test
     void refreshWithAValidCookieRotatesAndReturnsAFreshExchangeResponse() throws Exception {
-        when(refreshTokenService.rotate("valid-refresh-cookie")).thenReturn(
-                new RefreshTokenService.Rotated("user-1", "rotated-raw-refresh-token", Instant.parse("2026-03-01T00:00:00Z")));
+        when(refreshTokenService.rotate("valid-refresh-cookie"))
+                .thenReturn(new RefreshTokenService.Rotated(
+                        "user-1", "rotated-raw-refresh-token", Instant.parse("2026-03-01T00:00:00Z")));
         when(userRepository.findById("user-1")).thenReturn(Optional.of(new User("user-1", "my-handle")));
 
-        mockMvc.perform(post("/api/auth/refresh").cookie(new jakarta.servlet.http.Cookie("reciplease-refresh", "valid-refresh-cookie")))
+        mockMvc.perform(post("/api/auth/refresh")
+                        .cookie(new jakarta.servlet.http.Cookie("reciplease-refresh", "valid-refresh-cookie")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId", is("user-1")))
                 .andExpect(jsonPath("$.handle", is("my-handle")))
@@ -198,9 +203,11 @@ class AuthControllerTest {
 
     @Test
     void refreshWithReuseDetectedIsUnauthorized() throws Exception {
-        when(refreshTokenService.rotate("reused-refresh-cookie")).thenReturn(new RefreshTokenService.ReuseDetected("user-1"));
+        when(refreshTokenService.rotate("reused-refresh-cookie"))
+                .thenReturn(new RefreshTokenService.ReuseDetected("user-1"));
 
-        mockMvc.perform(post("/api/auth/refresh").cookie(new jakarta.servlet.http.Cookie("reciplease-refresh", "reused-refresh-cookie")))
+        mockMvc.perform(post("/api/auth/refresh")
+                        .cookie(new jakarta.servlet.http.Cookie("reciplease-refresh", "reused-refresh-cookie")))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -208,13 +215,15 @@ class AuthControllerTest {
     void refreshWithAnInvalidCookieIsUnauthorized() throws Exception {
         when(refreshTokenService.rotate("bad-refresh-cookie")).thenReturn(new RefreshTokenService.Invalid());
 
-        mockMvc.perform(post("/api/auth/refresh").cookie(new jakarta.servlet.http.Cookie("reciplease-refresh", "bad-refresh-cookie")))
+        mockMvc.perform(post("/api/auth/refresh")
+                        .cookie(new jakarta.servlet.http.Cookie("reciplease-refresh", "bad-refresh-cookie")))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void logoutWithCookiePresentRevokesTheRefreshToken() throws Exception {
-        mockMvc.perform(post("/api/auth/logout").cookie(new jakarta.servlet.http.Cookie("reciplease-refresh", "some-refresh-cookie")))
+        mockMvc.perform(post("/api/auth/logout")
+                        .cookie(new jakarta.servlet.http.Cookie("reciplease-refresh", "some-refresh-cookie")))
                 .andExpect(status().isOk());
 
         verify(refreshTokenService).revokeByRawToken("some-refresh-cookie");
@@ -222,8 +231,7 @@ class AuthControllerTest {
 
     @Test
     void logoutWithoutCookieDoesNotAttemptToRevokeAnything() throws Exception {
-        mockMvc.perform(post("/api/auth/logout"))
-                .andExpect(status().isOk());
+        mockMvc.perform(post("/api/auth/logout")).andExpect(status().isOk());
 
         verify(refreshTokenService, never()).revokeByRawToken(any());
     }

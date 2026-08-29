@@ -1,5 +1,6 @@
 package org.reciplease.model;
 
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,8 +9,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.time.Instant;
 
 @Document("invites")
 @Builder
@@ -20,12 +19,16 @@ public class InviteDocument {
 
     @Id
     private String id;
+
     @Indexed(unique = true)
     private String code;
+
     private String houseId;
     private String role;
+
     @CreatedDate
     private Instant createdAt;
+
     private Instant usedAt;
     private String usedByUserId;
 
@@ -42,6 +45,7 @@ public class InviteDocument {
     }
 
     public Invite toModel() {
-        return new Invite(id, code, houseId, role != null ? HouseRole.valueOf(role) : null, createdAt, usedAt, usedByUserId);
+        return new Invite(
+                id, code, houseId, role != null ? HouseRole.valueOf(role) : null, createdAt, usedAt, usedByUserId);
     }
 }

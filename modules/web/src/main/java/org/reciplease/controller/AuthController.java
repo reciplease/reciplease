@@ -1,5 +1,7 @@
 package org.reciplease.controller;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.ReciplaseJwtService;
 import org.reciplease.dto.ExchangeRequest;
@@ -18,9 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 
 /**
  * Exchanges a provider sign-in (already verified by the frontend) for a Reciplease JWT, and
@@ -86,11 +85,14 @@ public class AuthController {
     }
 
     private User link(final String linkToken, final String provider, final String providerId, final String email) {
-        final var userId = jwtService.parse(linkToken)
+        final var userId = jwtService
+                .parse(linkToken)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid or expired linkToken"));
         userRepository.linkIdentity(userId, provider, providerId, email);
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalStateException("Missing user referenced by a valid linkToken: " + userId));
+        return userRepository
+                .findById(userId)
+                .orElseThrow(
+                        () -> new IllegalStateException("Missing user referenced by a valid linkToken: " + userId));
     }
 
     private User loginOrSignup(final String provider, final String providerId, final String email) {
@@ -125,7 +127,8 @@ public class AuthController {
         if (!(result instanceof RefreshTokenService.Rotated rotated)) {
             return ResponseEntity.status(401).build();
         }
-        final var handle = userRepository.findById(rotated.userId()).map(User::handle).orElse(null);
+        final var handle =
+                userRepository.findById(rotated.userId()).map(User::handle).orElse(null);
         return ResponseEntity.ok(new ExchangeResponse(
                 jwtService.mint(rotated.userId()), rotated.rawToken(), rotated.expiresAt(), rotated.userId(), handle));
     }
@@ -142,6 +145,8 @@ public class AuthController {
 
     private boolean isValidSecret(final String providedSecret) {
         return providedSecret != null
-                && MessageDigest.isEqual(providedSecret.getBytes(StandardCharsets.UTF_8), internalSecret.getBytes(StandardCharsets.UTF_8));
+                && MessageDigest.isEqual(
+                        providedSecret.getBytes(StandardCharsets.UTF_8),
+                        internalSecret.getBytes(StandardCharsets.UTF_8));
     }
 }

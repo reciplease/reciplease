@@ -1,8 +1,23 @@
 package org.reciplease.controller;
 
-import tools.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
+import static java.util.stream.Collectors.toList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.MethodSecurityTestSupport;
 import org.reciplease.configuration.WithHouseMember;
@@ -20,26 +35,10 @@ import org.reciplease.service.request.AddIngredient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
-import static java.util.stream.Collectors.toList;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Imports {@link org.reciplease.configuration.MethodSecurityTestSupport} to exercise the same
@@ -73,8 +72,7 @@ class RecipeControllerTest {
         final var id = UUID.randomUUID().toString();
         when(recipeService.findVisibleById(id, null)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/recipes/{uuid}", id))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/recipes/{uuid}", id)).andExpect(status().isNotFound());
     }
 
     @Test
@@ -94,9 +92,7 @@ class RecipeControllerTest {
     @DisplayName("get all recipes")
     void allRecipes() throws Exception {
         final var recipes = List.of(getToast(), getSoup());
-        final var recipeDtoList = recipes.stream()
-                .map(RecipeDto::from)
-                .collect(toList());
+        final var recipeDtoList = recipes.stream().map(RecipeDto::from).collect(toList());
 
         when(recipeService.findVisibleTo(null)).thenReturn(recipes);
 
@@ -182,7 +178,10 @@ class RecipeControllerTest {
                 .houseId(HOUSE_ID)
                 .build();
         final var updated = recipe.toBuilder().name("tomato soup").build();
-        final var updateDto = PublicRecipeDto.builder().recipeId(recipe.id()).name("tomato soup").build();
+        final var updateDto = PublicRecipeDto.builder()
+                .recipeId(recipe.id())
+                .name("tomato soup")
+                .build();
 
         when(houseAccess.isOwner()).thenReturn(true);
         when(houseAccess.isMember()).thenReturn(true);
@@ -207,7 +206,10 @@ class RecipeControllerTest {
                 .name("soup")
                 .houseId(HOUSE_ID)
                 .build();
-        final var updateDto = PublicRecipeDto.builder().recipeId(recipe.id()).name("tomato soup").build();
+        final var updateDto = PublicRecipeDto.builder()
+                .recipeId(recipe.id())
+                .name("tomato soup")
+                .build();
 
         when(houseAccess.isOwner()).thenReturn(false);
 
@@ -228,7 +230,10 @@ class RecipeControllerTest {
                 .name("soup")
                 .houseId("some-other-house")
                 .build();
-        final var updateDto = PublicRecipeDto.builder().recipeId(recipe.id()).name("tomato soup").build();
+        final var updateDto = PublicRecipeDto.builder()
+                .recipeId(recipe.id())
+                .name("tomato soup")
+                .build();
 
         when(houseAccess.isOwner()).thenReturn(true);
         when(houseAccess.belongsToHeaderHouse(recipe)).thenReturn(false);
@@ -246,10 +251,15 @@ class RecipeControllerTest {
     @DisplayName("get recipe by ID includes houseId and resolved owner handles for a house member")
     @WithHouseMember
     void recipeIncludesOwnerInfoForHouseMember() throws Exception {
-        final var soup = getSoup().toBuilder().houseId(HOUSE_ID).createdBy("user-1").updatedBy("user-2").build();
+        final var soup = getSoup().toBuilder()
+                .houseId(HOUSE_ID)
+                .createdBy("user-1")
+                .updatedBy("user-2")
+                .build();
         final var createdBy = new User("user-1", "alice");
         final var updatedBy = new User("user-2", "bob");
-        final var expectedDto = RecipeDto.from(soup,
+        final var expectedDto = RecipeDto.from(
+                soup,
                 UserSummaryDto.builder().userId("user-1").handle("alice").build(),
                 UserSummaryDto.builder().userId("user-2").handle("bob").build());
 
@@ -268,7 +278,11 @@ class RecipeControllerTest {
     @Test
     @DisplayName("get recipe by ID omits houseId and owner info for a caller outside the recipe's house")
     void recipeOmitsOwnerInfoForNonMember() throws Exception {
-        final var soup = getSoup().toBuilder().houseId(HOUSE_ID).createdBy("user-1").updatedBy("user-2").build();
+        final var soup = getSoup().toBuilder()
+                .houseId(HOUSE_ID)
+                .createdBy("user-1")
+                .updatedBy("user-2")
+                .build();
         final var expectedDto = RecipeDto.from(soup);
 
         when(recipeService.findVisibleById(soup.id(), null)).thenReturn(Optional.of(soup));
@@ -294,8 +308,7 @@ class RecipeControllerTest {
         when(houseAccess.belongsToHeaderHouse(recipe)).thenReturn(true);
         when(recipeService.findById(recipe.id())).thenReturn(Optional.of(recipe));
 
-        mockMvc.perform(delete("/api/recipes/{uuid}", recipe.id()))
-                .andExpect(status().isNoContent());
+        mockMvc.perform(delete("/api/recipes/{uuid}", recipe.id())).andExpect(status().isNoContent());
 
         verify(recipeService).deleteById(recipe.id());
     }
@@ -305,7 +318,8 @@ class RecipeControllerTest {
     @WithHouseOwner
     void updateRecipeNotFound() throws Exception {
         final var id = UUID.randomUUID().toString();
-        final var updateDto = PublicRecipeDto.builder().recipeId(id).name("tomato soup").build();
+        final var updateDto =
+                PublicRecipeDto.builder().recipeId(id).name("tomato soup").build();
 
         when(houseAccess.isOwner()).thenReturn(true);
         when(recipeService.findById(id)).thenReturn(Optional.empty());
@@ -317,9 +331,7 @@ class RecipeControllerTest {
     }
 
     private PublicRecipeDto getNewSoupDto() {
-        return PublicRecipeDto.builder()
-                .name("soup")
-                .build();
+        return PublicRecipeDto.builder().name("soup").build();
     }
 
     private Recipe getSavedSoup() {
@@ -345,5 +357,4 @@ class RecipeControllerTest {
                 .build()
                 .addIngredient("bread", "ITEMS", 1d);
     }
-
 }

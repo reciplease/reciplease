@@ -1,5 +1,18 @@
 package org.reciplease.service;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,20 +25,6 @@ import org.reciplease.model.PlannedMeal;
 import org.reciplease.model.RecipeIngredient;
 import org.reciplease.repository.PantryRepository;
 import org.reciplease.repository.PlannedMealRepository;
-
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
 
 @MockitoSettings
 public class ShoppingListServiceTest {
@@ -56,7 +55,8 @@ public class ShoppingListServiceTest {
                 return List.of();
             }
             return ids.stream()
-                    .map(id -> new PantryItem(id, null, HOUSE_ID, "item", null, "item", 999999d, LocalDate.of(2099, 1, 1), null))
+                    .map(id -> new PantryItem(
+                            id, null, HOUSE_ID, "item", null, "item", 999999d, LocalDate.of(2099, 1, 1), null))
                     .collect(Collectors.toList());
         });
     }
@@ -72,7 +72,8 @@ public class ShoppingListServiceTest {
     public void shouldReturnFullAmountWhenNothingAllocated() {
         var plannedIngredient = new PlannedIngredient(new RecipeIngredient("bread", "item", 10d), List.of());
         var meal = new PlannedMeal(HOUSE_ID, null, "Dinner", date, List.of(plannedIngredient));
-        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate)).thenReturn(List.of(meal));
+        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate))
+                .thenReturn(List.of(meal));
 
         var shoppingList = shoppingListService.generateShoppingList(HOUSE_ID, startDate, endDate);
 
@@ -81,10 +82,11 @@ public class ShoppingListServiceTest {
 
     @Test
     public void shouldSubtractPartialAllocation() {
-        var plannedIngredient = new PlannedIngredient(new RecipeIngredient("bread", "item", 10d),
-                List.of(new PantryAllocation("item-1", "111", 4d)));
+        var plannedIngredient = new PlannedIngredient(
+                new RecipeIngredient("bread", "item", 10d), List.of(new PantryAllocation("item-1", "111", 4d)));
         var meal = new PlannedMeal(HOUSE_ID, null, "Dinner", date, List.of(plannedIngredient));
-        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate)).thenReturn(List.of(meal));
+        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate))
+                .thenReturn(List.of(meal));
 
         var shoppingList = shoppingListService.generateShoppingList(HOUSE_ID, startDate, endDate);
 
@@ -93,10 +95,11 @@ public class ShoppingListServiceTest {
 
     @Test
     public void shouldOmitFullyAllocatedIngredients() {
-        var plannedIngredient = new PlannedIngredient(new RecipeIngredient("bread", "item", 10d),
-                List.of(new PantryAllocation("item-1", "111", 10d)));
+        var plannedIngredient = new PlannedIngredient(
+                new RecipeIngredient("bread", "item", 10d), List.of(new PantryAllocation("item-1", "111", 10d)));
         var meal = new PlannedMeal(HOUSE_ID, null, "Dinner", date, List.of(plannedIngredient));
-        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate)).thenReturn(List.of(meal));
+        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate))
+                .thenReturn(List.of(meal));
 
         var shoppingList = shoppingListService.generateShoppingList(HOUSE_ID, startDate, endDate);
 
@@ -105,10 +108,11 @@ public class ShoppingListServiceTest {
 
     @Test
     public void shouldNotReturnNegativeGapWhenOverAllocated() {
-        var plannedIngredient = new PlannedIngredient(new RecipeIngredient("bread", "item", 10d),
-                List.of(new PantryAllocation("item-1", "111", 15d)));
+        var plannedIngredient = new PlannedIngredient(
+                new RecipeIngredient("bread", "item", 10d), List.of(new PantryAllocation("item-1", "111", 15d)));
         var meal = new PlannedMeal(HOUSE_ID, null, "Dinner", date, List.of(plannedIngredient));
-        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate)).thenReturn(List.of(meal));
+        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate))
+                .thenReturn(List.of(meal));
 
         var shoppingList = shoppingListService.generateShoppingList(HOUSE_ID, startDate, endDate);
 
@@ -118,12 +122,13 @@ public class ShoppingListServiceTest {
     @Test
     public void shouldSumSameIngredientAcrossMultipleMeals() {
         var breakfast = new PlannedIngredient(new RecipeIngredient("bread", "item", 4d), List.of());
-        var dinner = new PlannedIngredient(new RecipeIngredient("bread", "item", 6d),
-                List.of(new PantryAllocation("item-1", "111", 2d)));
+        var dinner = new PlannedIngredient(
+                new RecipeIngredient("bread", "item", 6d), List.of(new PantryAllocation("item-1", "111", 2d)));
         var meals = List.of(
                 new PlannedMeal(HOUSE_ID, null, "Breakfast", date, List.of(breakfast)),
                 new PlannedMeal(HOUSE_ID, null, "Dinner", date, List.of(dinner)));
-        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate)).thenReturn(meals);
+        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate))
+                .thenReturn(meals);
 
         var shoppingList = shoppingListService.generateShoppingList(HOUSE_ID, startDate, endDate);
 
@@ -135,10 +140,11 @@ public class ShoppingListServiceTest {
     @DisplayName("combines convertible measures (kg and g) of the same ingredient")
     public void shouldConvertBetweenCompatibleMeasures() {
         var kilogram = new PlannedIngredient(new RecipeIngredient("flour", "kg", 1d), List.of());
-        var grams = new PlannedIngredient(new RecipeIngredient("flour", "g", 200d),
-                List.of(new PantryAllocation("item-1", "111", 100d)));
+        var grams = new PlannedIngredient(
+                new RecipeIngredient("flour", "g", 200d), List.of(new PantryAllocation("item-1", "111", 100d)));
         var meal = new PlannedMeal(HOUSE_ID, null, "Dinner", date, List.of(kilogram, grams));
-        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate)).thenReturn(List.of(meal));
+        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate))
+                .thenReturn(List.of(meal));
 
         var shoppingList = shoppingListService.generateShoppingList(HOUSE_ID, startDate, endDate);
 
@@ -152,13 +158,14 @@ public class ShoppingListServiceTest {
         var grams = new PlannedIngredient(new RecipeIngredient("milk", "g", 200d), List.of());
         var millilitres = new PlannedIngredient(new RecipeIngredient("milk", "ml", 300d), List.of());
         var meal = new PlannedMeal(HOUSE_ID, null, "Dinner", date, List.of(grams, millilitres));
-        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate)).thenReturn(List.of(meal));
+        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate))
+                .thenReturn(List.of(meal));
 
         var shoppingList = shoppingListService.generateShoppingList(HOUSE_ID, startDate, endDate);
 
-        assertThat(shoppingList.getItems(), containsInAnyOrder(
-                new RecipeIngredient("milk", "g", 200d),
-                new RecipeIngredient("milk", "ml", 300d)));
+        assertThat(
+                shoppingList.getItems(),
+                containsInAnyOrder(new RecipeIngredient("milk", "g", 200d), new RecipeIngredient("milk", "ml", 300d)));
     }
 
     @Test
@@ -167,22 +174,25 @@ public class ShoppingListServiceTest {
         var grams = new PlannedIngredient(new RecipeIngredient("flour", "g", 200d), List.of());
         var handfuls = new PlannedIngredient(new RecipeIngredient("flour", "handfuls", 2d), List.of());
         var meal = new PlannedMeal(HOUSE_ID, null, "Dinner", date, List.of(grams, handfuls));
-        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate)).thenReturn(List.of(meal));
+        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate))
+                .thenReturn(List.of(meal));
 
         var shoppingList = shoppingListService.generateShoppingList(HOUSE_ID, startDate, endDate);
 
-        assertThat(shoppingList.getItems(), containsInAnyOrder(
-                new RecipeIngredient("flour", "g", 200d),
-                new RecipeIngredient("flour", "handfuls", 2d)));
+        assertThat(
+                shoppingList.getItems(),
+                containsInAnyOrder(
+                        new RecipeIngredient("flour", "g", 200d), new RecipeIngredient("flour", "handfuls", 2d)));
     }
 
     @Test
     @DisplayName("reinstates the full gap when the allocated pantry item was since deleted (binned/eaten to nothing)")
     public void shouldIgnoreAllocationsToDeletedPantryItems() {
-        var plannedIngredient = new PlannedIngredient(new RecipeIngredient("bread", "item", 10d),
-                List.of(new PantryAllocation("item-1", "111", 10d)));
+        var plannedIngredient = new PlannedIngredient(
+                new RecipeIngredient("bread", "item", 10d), List.of(new PantryAllocation("item-1", "111", 10d)));
         var meal = new PlannedMeal(HOUSE_ID, null, "Dinner", date, List.of(plannedIngredient));
-        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate)).thenReturn(List.of(meal));
+        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate))
+                .thenReturn(List.of(meal));
         // item-1 no longer exists (deleted when it was binned/consumed) — findAllById returns nothing for it
         when(pantryRepository.findAllById(any())).thenReturn(List.of());
 
@@ -194,13 +204,15 @@ public class ShoppingListServiceTest {
     @Test
     @DisplayName("caps a stale allocation by the source item's current remaining, not its snapshot amount")
     public void shouldCapAllocationByCurrentRemaining() {
-        var plannedIngredient = new PlannedIngredient(new RecipeIngredient("bread", "item", 10d),
-                List.of(new PantryAllocation("item-1", "111", 10d)));
+        var plannedIngredient = new PlannedIngredient(
+                new RecipeIngredient("bread", "item", 10d), List.of(new PantryAllocation("item-1", "111", 10d)));
         var meal = new PlannedMeal(HOUSE_ID, null, "Dinner", date, List.of(plannedIngredient));
-        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate)).thenReturn(List.of(meal));
+        when(plannedMealRepository.findByDateIsBetween(HOUSE_ID, startDate, endDate))
+                .thenReturn(List.of(meal));
         // item-1 still exists but has since been partially consumed elsewhere — only 3 remain
         when(pantryRepository.findAllById(any()))
-                .thenReturn(List.of(new PantryItem("item-1", null, HOUSE_ID, "bread", null, "item", 10d, 3d, LocalDate.of(2099, 1, 1), null)));
+                .thenReturn(List.of(new PantryItem(
+                        "item-1", null, HOUSE_ID, "bread", null, "item", 10d, 3d, LocalDate.of(2099, 1, 1), null)));
 
         var shoppingList = shoppingListService.generateShoppingList(HOUSE_ID, startDate, endDate);
 

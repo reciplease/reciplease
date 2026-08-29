@@ -1,9 +1,8 @@
 package org.reciplease.service;
 
-import org.reciplease.model.FoodCatalogEntry;
-
 import java.util.List;
 import java.util.Optional;
+import org.reciplease.model.FoodCatalogEntry;
 
 /**
  * Looks up foods (and their macros) from an external catalog, by name or barcode. Best-effort:

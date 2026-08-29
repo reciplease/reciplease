@@ -1,6 +1,10 @@
 package org.reciplease.controller;
 
+import static java.util.stream.Collectors.toList;
+
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseMember;
@@ -17,11 +21,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * The shopping-trip capture backlog: barcode + photos captured in the fast "add a whole shop"
@@ -57,7 +56,8 @@ public class PendingPantryController {
     @GetMapping("{uuid}")
     @HouseMember
     public ResponseEntity<PendingPantryItemDto> findById(@PathVariable final String uuid) {
-        final Optional<PendingPantryItemDto> foundItem = pendingPantryService.findById(uuid)
+        final Optional<PendingPantryItemDto> foundItem = pendingPantryService
+                .findById(uuid)
                 .filter(houseAccess::belongsToHeaderHouse)
                 .map(PendingPantryItemDto::from);
 
@@ -78,7 +78,8 @@ public class PendingPantryController {
 
     @PostMapping("{uuid}/complete")
     @HouseOwner
-    public ResponseEntity<PantryItemDto> complete(@PathVariable final String uuid, @Valid @RequestBody final PantryItemDto itemDto) {
+    public ResponseEntity<PantryItemDto> complete(
+            @PathVariable final String uuid, @Valid @RequestBody final PantryItemDto itemDto) {
         final var existing = pendingPantryService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
             return ResponseEntity.notFound().build();

@@ -1,16 +1,15 @@
 package org.reciplease.model;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-import lombok.experimental.Accessors;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
 @Getter
 @Accessors(fluent = true)
@@ -24,13 +23,17 @@ public final class Recipe implements Audited, HouseScoped {
     private final String updatedBy;
     private final Instant updatedAt;
     private final String houseId;
+
     @Builder.Default
     private final boolean isPublic = false;
+
     private final String name;
     private final String description;
     private final String sourceUrl;
+
     @Builder.Default
     private final List<String> steps = new ArrayList<>();
+
     @Builder.Default
     private final Set<RecipeIngredient> recipeIngredients = new HashSet<>();
 

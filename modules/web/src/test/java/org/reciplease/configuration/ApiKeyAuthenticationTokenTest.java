@@ -1,13 +1,13 @@
 package org.reciplease.configuration;
 
-import org.junit.jupiter.api.Test;
-import org.reciplease.model.ApiKeyPrincipal;
-import org.reciplease.model.HouseRole;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+
+import org.junit.jupiter.api.Test;
+import org.reciplease.model.ApiKeyPrincipal;
+import org.reciplease.model.HouseRole;
 
 class ApiKeyAuthenticationTokenTest {
 

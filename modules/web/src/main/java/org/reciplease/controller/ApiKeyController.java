@@ -1,6 +1,9 @@
 package org.reciplease.controller;
 
+import static java.util.stream.Collectors.toList;
+
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.ApiKeyAuthenticationToken;
 import org.reciplease.configuration.HouseAccess;
@@ -22,10 +25,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * Manages house service-account API keys — long-lived credentials a house owner mints for a
@@ -63,7 +62,9 @@ public class ApiKeyController {
     @HouseOwner
     public ResponseEntity<Void> revoke(@PathVariable final String id) {
         final var revoked = apiKeyService.revoke(houseAccess.requireHouseId(), id);
-        return revoked ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        return revoked
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.notFound().build();
     }
 
     /**
@@ -81,7 +82,8 @@ public class ApiKeyController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         final var principal = apiKeyAuthentication.getPrincipal();
-        final var houseName = houseRepository.findById(principal.houseId())
+        final var houseName = houseRepository
+                .findById(principal.houseId())
                 .map(house -> house.name())
                 .orElse(null);
         return ResponseEntity.ok(ApiKeySelfDto.builder()

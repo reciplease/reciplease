@@ -19,5 +19,4 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 @EnableMethodSecurity
 @ComponentScan(basePackages = "org.reciplease")
 @EnableMongoRepositories(basePackages = "org.reciplease")
-public class FeaturesTestApplication {
-}
+public class FeaturesTestApplication {}

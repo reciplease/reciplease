@@ -1,9 +1,17 @@
 package org.reciplease.features.steps;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import java.time.Instant;
+import java.util.HashMap;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.features.support.ScenarioState;
 import org.reciplease.model.HouseDocument;
@@ -17,15 +25,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import java.time.Instant;
-import java.util.HashMap;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-
 /**
  * Drives the invite-acceptance and house-scoped-data flows end to end through MockMvc, against
  * the real (non-mocked) {@code HouseRepository}/{@code InviteRepository}
@@ -36,10 +35,13 @@ public class HouseInviteSteps {
 
     @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private MongoTemplate mongoTemplate;
+
     @Autowired
     private HouseRepository houseRepository;
+
     @Autowired
     private ScenarioState state;
 
@@ -74,8 +76,8 @@ public class HouseInviteSteps {
 
     @When("{string} accepts invite {string}")
     public void acceptsInvite(final String userId, final String code) throws Exception {
-        state.setLastResult(mockMvc.perform(post("/api/invites/{code}/accept", code)
-                .with(jwt().jwt(builder -> builder.subject(userId)))));
+        state.setLastResult(mockMvc.perform(
+                post("/api/invites/{code}/accept", code).with(jwt().jwt(builder -> builder.subject(userId)))));
     }
 
     @When("{string} creates a pantry item named {string} in the house")
@@ -84,7 +86,8 @@ public class HouseInviteSteps {
     }
 
     @And("{string} creates a pantry item named {string} in house {string}")
-    public void createsPantryItemInHouse(final String userId, final String itemName, final String houseName) throws Exception {
+    public void createsPantryItemInHouse(final String userId, final String itemName, final String houseName)
+            throws Exception {
         final var body = """
                 {"name": "%s", "measure": "ITEMS", "amount": 1, "expiration": "2030-01-01"}
                 """.formatted(itemName);
@@ -101,7 +104,9 @@ public class HouseInviteSteps {
 
     @Then("the response status is {int}")
     public void theResponseStatusIs(final int status) throws Exception {
-        state.lastResult().andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().is(status));
+        state.lastResult()
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status()
+                        .is(status));
     }
 
     @Then("{string} has role {string} in the house")
@@ -114,21 +119,22 @@ public class HouseInviteSteps {
 
     @Then("the pantry list contains {string}")
     public void thePantryListContains(final String itemName) throws Exception {
-        state.lastResult().andExpect(
-                org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(
-                        org.hamcrest.Matchers.containsString(itemName)));
+        state.lastResult()
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+                        .string(org.hamcrest.Matchers.containsString(itemName)));
     }
 
     @Then("the pantry list does not contain {string}")
     public void thePantryListDoesNotContain(final String itemName) throws Exception {
-        state.lastResult().andExpect(
-                org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(
-                        org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString(itemName))));
+        state.lastResult()
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+                        .string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString(itemName))));
     }
 
-    private MockHttpServletRequestBuilder houseScopedRequest(final MockHttpServletRequestBuilder builder, final String userId, final String houseName) {
-        return builder
-                .with(authentication(new TestingAuthenticationToken(userId, "n/a", new SimpleGrantedAuthority("ROLE_RECIPLEASE"))))
+    private MockHttpServletRequestBuilder houseScopedRequest(
+            final MockHttpServletRequestBuilder builder, final String userId, final String houseName) {
+        return builder.with(authentication(
+                        new TestingAuthenticationToken(userId, "n/a", new SimpleGrantedAuthority("ROLE_RECIPLEASE"))))
                 .header(HouseAccess.HOUSE_HEADER, state.houseId(houseName));
     }
 }

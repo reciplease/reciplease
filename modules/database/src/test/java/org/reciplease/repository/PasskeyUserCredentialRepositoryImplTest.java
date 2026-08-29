@@ -1,5 +1,14 @@
 package org.reciplease.repository;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+
+import java.time.Instant;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.PasskeyUserHandles;
@@ -14,22 +23,13 @@ import org.springframework.security.web.webauthn.api.ImmutablePublicKeyCose;
 import org.springframework.security.web.webauthn.api.PublicKeyCredentialType;
 import org.springframework.security.web.webauthn.management.UserCredentialRepository;
 
-import java.time.Instant;
-import java.util.Set;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-
 @DataMongoTest
 @Import(PasskeyUserCredentialRepositoryImpl.class)
 class PasskeyUserCredentialRepositoryImplTest {
 
     @Autowired
     private UserCredentialRepository repository;
+
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -40,14 +40,14 @@ class PasskeyUserCredentialRepositoryImplTest {
 
     // Minimal valid-looking attestation object bytes (enough for round-trip; Webauthn4J parses
     // them during authenticate(), which is exercised via integration test against the real library).
-    private static final Bytes FAKE_ATTESTATION_OBJECT = new Bytes(new byte[]{1, 2, 3, 4, 5});
+    private static final Bytes FAKE_ATTESTATION_OBJECT = new Bytes(new byte[] {1, 2, 3, 4, 5});
 
     private static ImmutableCredentialRecord credentialFor(final String credentialId, final String userId) {
         return ImmutableCredentialRecord.builder()
                 .credentialType(PublicKeyCredentialType.PUBLIC_KEY)
                 .credentialId(Bytes.fromBase64(credentialId))
                 .userEntityUserId(PasskeyUserHandles.toHandle(userId))
-                .publicKey(new ImmutablePublicKeyCose(new byte[]{1, 2, 3}))
+                .publicKey(new ImmutablePublicKeyCose(new byte[] {1, 2, 3}))
                 .attestationObject(FAKE_ATTESTATION_OBJECT)
                 .signatureCount(0)
                 .uvInitialized(true)

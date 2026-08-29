@@ -1,14 +1,13 @@
 package org.reciplease.model;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+
+import java.util.List;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 class RecipeDocumentTest {
 
@@ -39,11 +38,7 @@ class RecipeDocumentTest {
     @Test
     @DisplayName("creates document with empty steps when entity steps is null")
     void fromModelWithNullSteps() {
-        var recipe = Recipe.builder()
-                .id("recipe-1")
-                .name("toast")
-                .steps(null)
-                .build();
+        var recipe = Recipe.builder().id("recipe-1").name("toast").steps(null).build();
 
         var document = RecipeDocument.from(recipe);
 

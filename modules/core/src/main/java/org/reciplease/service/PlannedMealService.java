@@ -1,15 +1,5 @@
 package org.reciplease.service;
 
-import lombok.RequiredArgsConstructor;
-import org.reciplease.model.PantryAllocation;
-import org.reciplease.model.PantryItem;
-import org.reciplease.model.PlannedIngredient;
-import org.reciplease.model.PlannedMeal;
-import org.reciplease.repository.PantryRepository;
-import org.reciplease.repository.PlannedMealRepository;
-import org.reciplease.repository.RecipeRepository;
-import org.springframework.stereotype.Service;
-
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -19,6 +9,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.reciplease.model.PantryAllocation;
+import org.reciplease.model.PantryItem;
+import org.reciplease.model.PlannedIngredient;
+import org.reciplease.model.PlannedMeal;
+import org.reciplease.repository.PantryRepository;
+import org.reciplease.repository.PlannedMealRepository;
+import org.reciplease.repository.RecipeRepository;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -34,10 +33,15 @@ public class PlannedMealService {
      * pantry items. Each referenced pantry item is validated and its barcode snapshotted so
      * future plans can suggest matching items. The meal's name must be unique for that date.
      */
-    public PlannedMeal plan(final String houseId, final String recipeId, final String name,
-                             final LocalDate date, final List<PlannedIngredient> items) {
+    public PlannedMeal plan(
+            final String houseId,
+            final String recipeId,
+            final String name,
+            final LocalDate date,
+            final List<PlannedIngredient> items) {
         if (recipeId != null) {
-            recipeRepository.findById(recipeId)
+            recipeRepository
+                    .findById(recipeId)
                     .orElseThrow(() -> new IllegalArgumentException("Recipe does not exist"));
         }
 
@@ -45,9 +49,7 @@ public class PlannedMealService {
             throw new IllegalArgumentException("A meal named '" + name + "' is already planned for this date");
         }
 
-        var resolvedItems = items.stream()
-                .map(this::resolveItem)
-                .collect(Collectors.toList());
+        var resolvedItems = items.stream().map(this::resolveItem).collect(Collectors.toList());
 
         return plannedMealRepository.save(new PlannedMeal(houseId, recipeId, name, date, resolvedItems));
     }
@@ -67,7 +69,8 @@ public class PlannedMealService {
      * its allocations).
      */
     public PlannedMeal markEaten(final String id) {
-        final var meal = plannedMealRepository.findById(id)
+        final var meal = plannedMealRepository
+                .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Planned meal does not exist"));
 
         if (meal.eatenAt() != null) {
@@ -86,13 +89,19 @@ public class PlannedMealService {
      * item allocations the same way {@link #plan} does. The name-uniqueness check excludes
      * the meal being updated, so keeping the same name/date doesn't clash with itself.
      */
-    public PlannedMeal update(final String id, final String recipeId, final String name,
-                               final LocalDate date, final List<PlannedIngredient> items) {
-        final var existing = plannedMealRepository.findById(id)
+    public PlannedMeal update(
+            final String id,
+            final String recipeId,
+            final String name,
+            final LocalDate date,
+            final List<PlannedIngredient> items) {
+        final var existing = plannedMealRepository
+                .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Planned meal does not exist"));
 
         if (recipeId != null) {
-            recipeRepository.findById(recipeId)
+            recipeRepository
+                    .findById(recipeId)
                     .orElseThrow(() -> new IllegalArgumentException("Recipe does not exist"));
         }
 
@@ -100,12 +109,19 @@ public class PlannedMealService {
             throw new IllegalArgumentException("A meal named '" + name + "' is already planned for this date");
         }
 
-        var resolvedItems = items.stream()
-                .map(this::resolveItem)
-                .collect(Collectors.toList());
+        var resolvedItems = items.stream().map(this::resolveItem).collect(Collectors.toList());
 
-        var updated = new PlannedMeal(id, existing.createdBy(), existing.houseId(), recipeId, name, date,
-                resolvedItems, existing.createdAt(), existing.updatedAt(), existing.eatenAt());
+        var updated = new PlannedMeal(
+                id,
+                existing.createdBy(),
+                existing.houseId(),
+                recipeId,
+                name,
+                date,
+                resolvedItems,
+                existing.createdAt(),
+                existing.updatedAt(),
+                existing.eatenAt());
 
         return plannedMealRepository.save(updated);
     }
@@ -113,7 +129,8 @@ public class PlannedMealService {
     private PlannedIngredient resolveItem(final PlannedIngredient item) {
         var allocations = item.allocations().stream()
                 .map(allocation -> {
-                    var pantryItem = pantryRepository.findById(allocation.pantryItemId())
+                    var pantryItem = pantryRepository
+                            .findById(allocation.pantryItemId())
                             .orElseThrow(() -> new IllegalArgumentException("Pantry item does not exist"));
                     return new PantryAllocation(pantryItem.id(), pantryItem.barcode(), allocation.amount());
                 })
@@ -133,7 +150,8 @@ public class PlannedMealService {
      * across all planned meals for the house. Falls back to matching the ingredient name when no
      * barcode history is available.
      */
-    public List<PantryItem> suggestPantryItems(final String houseId, final String recipeId, final String ingredientName) {
+    public List<PantryItem> suggestPantryItems(
+            final String houseId, final String recipeId, final String ingredientName) {
         var historicMeals = recipeId != null
                 ? plannedMealRepository.findByRecipeId(houseId, recipeId)
                 : plannedMealRepository.findByIngredientName(houseId, ingredientName);

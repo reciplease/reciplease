@@ -1,10 +1,10 @@
 package org.reciplease.repository;
 
-import org.junit.jupiter.api.Test;
-import org.reciplease.model.PasskeyUserHandles;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+
+import org.junit.jupiter.api.Test;
+import org.reciplease.model.PasskeyUserHandles;
 
 class PasskeyUserEntityRepositoryImplTest {
 

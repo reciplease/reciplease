@@ -1,11 +1,10 @@
 package org.reciplease.repository;
 
-import org.reciplease.model.PantryItem;
-
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import org.reciplease.model.PantryItem;
 
 public interface PantryRepository {
     Optional<PantryItem> findById(String id);

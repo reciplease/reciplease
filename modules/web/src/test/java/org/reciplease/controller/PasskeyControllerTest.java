@@ -1,12 +1,24 @@
 package org.reciplease.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.reciplease.configuration.MethodSecurityTestSupport;
 import org.reciplease.configuration.PasskeyConfig;
 import org.reciplease.configuration.ReciplaseJwtService;
-import org.reciplease.dto.PasskeyLoginFinishRequest;
-import org.reciplease.dto.PasskeyRegisterFinishRequest;
 import org.reciplease.model.User;
 import org.reciplease.repository.IdentityConflictException;
 import org.reciplease.repository.UserRepository;
@@ -16,43 +28,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.web.webauthn.api.AuthenticatorAssertionResponse;
-import org.springframework.security.web.webauthn.api.AuthenticatorAttestationResponse;
 import org.springframework.security.web.webauthn.api.AuthenticatorTransport;
 import org.springframework.security.web.webauthn.api.Bytes;
-import org.springframework.security.web.webauthn.api.ImmutableAuthenticationExtensionsClientOutputs;
 import org.springframework.security.web.webauthn.api.ImmutableCredentialRecord;
 import org.springframework.security.web.webauthn.api.ImmutablePublicKeyCose;
 import org.springframework.security.web.webauthn.api.ImmutablePublicKeyCredentialUserEntity;
-import org.springframework.security.web.webauthn.api.PublicKeyCredential;
 import org.springframework.security.web.webauthn.api.PublicKeyCredentialCreationOptions;
 import org.springframework.security.web.webauthn.api.PublicKeyCredentialParameters;
 import org.springframework.security.web.webauthn.api.PublicKeyCredentialRpEntity;
 import org.springframework.security.web.webauthn.api.PublicKeyCredentialType;
 import org.springframework.security.web.webauthn.api.PublicKeyCredentialUserEntity;
+import org.springframework.security.web.webauthn.api.ResidentKeyRequirement;
+import org.springframework.security.web.webauthn.api.UserVerificationRequirement;
+import org.springframework.security.web.webauthn.management.RelyingPartyRegistrationRequest;
 import org.springframework.security.web.webauthn.management.WebAuthnRelyingPartyOperations;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import org.mockito.ArgumentCaptor;
-import org.springframework.security.web.webauthn.api.ResidentKeyRequirement;
-import org.springframework.security.web.webauthn.api.UserVerificationRequirement;
-import org.springframework.security.web.webauthn.management.ImmutableRelyingPartyRegistrationRequest;
-import org.springframework.security.web.webauthn.management.RelyingPartyRegistrationRequest;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PasskeyController.class)
 @Import({PasskeyConfig.class, ReciplaseJwtService.class, MethodSecurityTestSupport.class})
@@ -63,24 +54,34 @@ class PasskeyControllerTest {
 
     @MockitoBean
     private WebAuthnRelyingPartyOperations relyingPartyOperations;
+
     @MockitoBean
     private WebAuthnChallengeLedger challengeLedger;
+
     @MockitoBean
     private UserRepository userRepository;
+
     @MockitoBean
     private RefreshTokenService refreshTokenService;
 
     @BeforeEach
     void stubRefreshTokenIssuance() {
-        when(refreshTokenService.issue(any())).thenReturn(
-                new RefreshTokenService.IssuedRefreshToken("issued-raw-refresh-token", Instant.now().plusSeconds(3600)));
+        when(refreshTokenService.issue(any()))
+                .thenReturn(new RefreshTokenService.IssuedRefreshToken(
+                        "issued-raw-refresh-token", Instant.now().plusSeconds(3600)));
     }
 
     private static PublicKeyCredentialCreationOptions creationOptions(final String challenge) {
         return PublicKeyCredentialCreationOptions.builder()
-                .rp(PublicKeyCredentialRpEntity.builder().id("localhost").name("Reciplease").build())
+                .rp(PublicKeyCredentialRpEntity.builder()
+                        .id("localhost")
+                        .name("Reciplease")
+                        .build())
                 .user(ImmutablePublicKeyCredentialUserEntity.builder()
-                        .id(new Bytes("user-1".getBytes())).name("user-1").displayName("user-1").build())
+                        .id(new Bytes("user-1".getBytes()))
+                        .name("user-1")
+                        .displayName("user-1")
+                        .build())
                 .challenge(Bytes.fromBase64(challenge))
                 .pubKeyCredParams(List.of(PublicKeyCredentialParameters.ES256))
                 .build();
@@ -119,8 +120,8 @@ class PasskeyControllerTest {
                 .credentialType(PublicKeyCredentialType.PUBLIC_KEY)
                 .credentialId(Bytes.fromBase64("Y3JlZGVudGlhbC0x"))
                 .userEntityUserId(new Bytes(userId.getBytes()))
-                .publicKey(new ImmutablePublicKeyCose(new byte[]{1, 2, 3}))
-                .attestationObject(new Bytes(new byte[]{1, 2, 3}))
+                .publicKey(new ImmutablePublicKeyCose(new byte[] {1, 2, 3}))
+                .attestationObject(new Bytes(new byte[] {1, 2, 3}))
                 .signatureCount(0)
                 .transports(Set.of(AuthenticatorTransport.INTERNAL))
                 .created(Instant.now())
@@ -130,7 +131,8 @@ class PasskeyControllerTest {
 
     @Test
     void signupOptionsIssuesAFreshChallengeForAFreshlyMintedUserId() throws Exception {
-        when(relyingPartyOperations.createPublicKeyCredentialCreationOptions(any())).thenReturn(creationOptions("Y2hhbGxlbmdlLTE"));
+        when(relyingPartyOperations.createPublicKeyCredentialCreationOptions(any()))
+                .thenReturn(creationOptions("Y2hhbGxlbmdlLTE"));
 
         mockMvc.perform(post("/api/passkey/signup/options"))
                 .andExpect(status().isOk())
@@ -169,7 +171,8 @@ class PasskeyControllerTest {
 
         final var captor = ArgumentCaptor.forClass(RelyingPartyRegistrationRequest.class);
         verify(relyingPartyOperations).registerCredential(captor.capture());
-        assertThat(captor.getValue().getCreationOptions().getAuthenticatorSelection()).isNotNull();
+        assertThat(captor.getValue().getCreationOptions().getAuthenticatorSelection())
+                .isNotNull();
     }
 
     @Test
@@ -186,8 +189,7 @@ class PasskeyControllerTest {
 
     @Test
     void registerOptionsRequiresAuthentication() throws Exception {
-        mockMvc.perform(post("/api/passkey/register/options"))
-                .andExpect(status().isUnauthorized());
+        mockMvc.perform(post("/api/passkey/register/options")).andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -246,7 +248,8 @@ class PasskeyControllerTest {
         when(challengeLedger.consumeForRegistration("Y2hhbGxlbmdlLTE")).thenReturn(Optional.of("user-1"));
         when(relyingPartyOperations.registerCredential(any())).thenReturn(credentialRecord("user-1"));
         org.mockito.Mockito.doThrow(new IdentityConflictException("passkey", "Y3JlZGVudGlhbC0x"))
-                .when(userRepository).linkIdentity("user-1", "passkey", "Y3JlZGVudGlhbC0x", null);
+                .when(userRepository)
+                .linkIdentity("user-1", "passkey", "Y3JlZGVudGlhbC0x", null);
 
         mockMvc.perform(post("/api/passkey/register/finish")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -256,9 +259,11 @@ class PasskeyControllerTest {
 
     @Test
     void loginOptionsIssuesADiscoverableChallenge() throws Exception {
-        when(relyingPartyOperations.createCredentialRequestOptions(any())).thenReturn(
-                org.springframework.security.web.webauthn.api.PublicKeyCredentialRequestOptions.builder()
-                        .challenge(Bytes.fromBase64("Y2hhbGxlbmdlLTI")).rpId("localhost").build());
+        when(relyingPartyOperations.createCredentialRequestOptions(any()))
+                .thenReturn(org.springframework.security.web.webauthn.api.PublicKeyCredentialRequestOptions.builder()
+                        .challenge(Bytes.fromBase64("Y2hhbGxlbmdlLTI"))
+                        .rpId("localhost")
+                        .build());
 
         mockMvc.perform(post("/api/passkey/login/options"))
                 .andExpect(status().isOk())
@@ -271,7 +276,10 @@ class PasskeyControllerTest {
     void loginFinishAuthenticatesAndMintsAToken() throws Exception {
         when(challengeLedger.consumeForLogin("Y2hhbGxlbmdlLTI")).thenReturn(true);
         final PublicKeyCredentialUserEntity userEntity = ImmutablePublicKeyCredentialUserEntity.builder()
-                .id(new Bytes("user-1".getBytes())).name("user-1").displayName("user-1").build();
+                .id(new Bytes("user-1".getBytes()))
+                .name("user-1")
+                .displayName("user-1")
+                .build();
         when(relyingPartyOperations.authenticate(any())).thenReturn(userEntity);
         when(userRepository.findById("user-1")).thenReturn(Optional.of(new User("user-1", "my-handle")));
 

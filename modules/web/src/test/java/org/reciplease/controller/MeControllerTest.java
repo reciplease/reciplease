@@ -1,5 +1,19 @@
 package org.reciplease.controller;
 
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.reciplease.configuration.MethodSecurityTestSupport;
 import org.reciplease.model.LinkedIdentity;
@@ -15,22 +29,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(MeController.class)
 @WithMockUser(username = "user-1", authorities = "ROLE_RECIPLEASE")
 @Import(MethodSecurityTestSupport.class)
@@ -41,6 +39,7 @@ class MeControllerTest {
 
     @MockitoBean
     private UserRepository userRepository;
+
     @MockitoBean
     private UserIdentityRepository userIdentityRepository;
 
@@ -65,9 +64,10 @@ class MeControllerTest {
 
     @Test
     void identitiesReturnsProviderAndEmailForEachLinkedIdentity() throws Exception {
-        when(userIdentityRepository.findIdentitiesForUser("user-1")).thenReturn(List.of(
-                new LinkedIdentity("google", "me@gmail.com"),
-                new LinkedIdentity("github", "me@users.noreply.github.com")));
+        when(userIdentityRepository.findIdentitiesForUser("user-1"))
+                .thenReturn(List.of(
+                        new LinkedIdentity("google", "me@gmail.com"),
+                        new LinkedIdentity("github", "me@users.noreply.github.com")));
 
         mockMvc.perform(get("/api/me/identities"))
                 .andExpect(status().isOk())
@@ -90,7 +90,8 @@ class MeControllerTest {
     @Test
     void unlinkRemovesTheProviderAndReturnsTheRemaining() throws Exception {
         when(userIdentityRepository.findIdentitiesForUser("user-1"))
-                .thenReturn(List.of(new LinkedIdentity("google", "me@gmail.com"), new LinkedIdentity("github", "me@github.com")))
+                .thenReturn(List.of(
+                        new LinkedIdentity("google", "me@gmail.com"), new LinkedIdentity("github", "me@github.com")))
                 .thenReturn(List.of(new LinkedIdentity("google", "me@gmail.com")));
 
         mockMvc.perform(delete("/api/me/identities/{provider}", "github").with(csrf()))
@@ -108,18 +109,21 @@ class MeControllerTest {
         mockMvc.perform(delete("/api/me/identities/{provider}", "google").with(csrf()))
                 .andExpect(status().isConflict());
 
-        verify(userIdentityRepository, never()).removeForUser(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+        verify(userIdentityRepository, never())
+                .removeForUser(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
     }
 
     @Test
     void unlinkReturnsNotFoundForAProviderTheUserHasNotLinked() throws Exception {
         when(userIdentityRepository.findIdentitiesForUser("user-1"))
-                .thenReturn(List.of(new LinkedIdentity("google", "me@gmail.com"), new LinkedIdentity("github", "me@github.com")));
+                .thenReturn(List.of(
+                        new LinkedIdentity("google", "me@gmail.com"), new LinkedIdentity("github", "me@github.com")));
 
         mockMvc.perform(delete("/api/me/identities/{provider}", "facebook").with(csrf()))
                 .andExpect(status().isNotFound());
 
-        verify(userIdentityRepository, never()).removeForUser(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+        verify(userIdentityRepository, never())
+                .removeForUser(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
     }
 
     @Test
@@ -145,7 +149,8 @@ class MeControllerTest {
                                 {"handle": "   "}"""))
                 .andExpect(status().isBadRequest());
 
-        verify(userRepository, never()).setHandle(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+        verify(userRepository, never())
+                .setHandle(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
     }
 
     @Test

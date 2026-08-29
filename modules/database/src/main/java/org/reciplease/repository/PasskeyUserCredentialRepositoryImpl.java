@@ -1,5 +1,6 @@
 package org.reciplease.repository;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.model.PasskeyCredentialDocument;
 import org.reciplease.model.PasskeyUserHandles;
@@ -8,8 +9,6 @@ import org.springframework.security.web.webauthn.api.Bytes;
 import org.springframework.security.web.webauthn.api.CredentialRecord;
 import org.springframework.security.web.webauthn.management.UserCredentialRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
@@ -20,12 +19,14 @@ public class PasskeyUserCredentialRepositoryImpl implements UserCredentialReposi
     @Override
     public void save(final CredentialRecord credentialRecord) {
         final var userId = PasskeyUserHandles.toUserId(credentialRecord.getUserEntityUserId());
-        passkeyCredentialMongoRepository.save(PasskeyCredentialDocument.from(credentialRecord, userId, credentialRecord.getLabel()));
+        passkeyCredentialMongoRepository.save(
+                PasskeyCredentialDocument.from(credentialRecord, userId, credentialRecord.getLabel()));
     }
 
     @Override
     public CredentialRecord findByCredentialId(final Bytes credentialId) {
-        return passkeyCredentialMongoRepository.findById(credentialId.toBase64UrlString())
+        return passkeyCredentialMongoRepository
+                .findById(credentialId.toBase64UrlString())
                 .map(PasskeyCredentialDocument::toCredentialRecord)
                 .orElse(null);
     }

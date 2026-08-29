@@ -1,5 +1,11 @@
 package org.reciplease.repository;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+
+import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.RefreshTokenRecord;
@@ -7,13 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
-
-import java.time.Instant;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 
 @DataMongoTest
 @Import(RefreshTokenRepositoryImpl.class)
@@ -24,6 +23,7 @@ class RefreshTokenRepositoryImplTest {
 
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
+
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -59,7 +59,12 @@ class RefreshTokenRepositoryImplTest {
 
         refreshTokenRepository.markUsed(saved.id(), usedAt);
 
-        assertThat(refreshTokenRepository.findByPrefix("prefix000002").orElseThrow().usedAt(), is(usedAt));
+        assertThat(
+                refreshTokenRepository
+                        .findByPrefix("prefix000002")
+                        .orElseThrow()
+                        .usedAt(),
+                is(usedAt));
     }
 
     @Test
@@ -70,8 +75,18 @@ class RefreshTokenRepositoryImplTest {
 
         refreshTokenRepository.revokeFamily("family-1", revokedAt);
 
-        assertThat(refreshTokenRepository.findByPrefix("prefix000003").orElseThrow().revokedAt(), is(revokedAt));
-        assertThat(refreshTokenRepository.findByPrefix("prefix000004").orElseThrow().revokedAt(), is(nullValue()));
+        assertThat(
+                refreshTokenRepository
+                        .findByPrefix("prefix000003")
+                        .orElseThrow()
+                        .revokedAt(),
+                is(revokedAt));
+        assertThat(
+                refreshTokenRepository
+                        .findByPrefix("prefix000004")
+                        .orElseThrow()
+                        .revokedAt(),
+                is(nullValue()));
     }
 
     @Test
@@ -83,9 +98,24 @@ class RefreshTokenRepositoryImplTest {
 
         refreshTokenRepository.revokeAllForUser("user-1", revokedAt);
 
-        assertThat(refreshTokenRepository.findByPrefix("prefix000005").orElseThrow().revokedAt(), is(revokedAt));
-        assertThat(refreshTokenRepository.findByPrefix("prefix000006").orElseThrow().revokedAt(), is(revokedAt));
-        assertThat(refreshTokenRepository.findByPrefix("prefix000007").orElseThrow().revokedAt(), is(nullValue()));
+        assertThat(
+                refreshTokenRepository
+                        .findByPrefix("prefix000005")
+                        .orElseThrow()
+                        .revokedAt(),
+                is(revokedAt));
+        assertThat(
+                refreshTokenRepository
+                        .findByPrefix("prefix000006")
+                        .orElseThrow()
+                        .revokedAt(),
+                is(revokedAt));
+        assertThat(
+                refreshTokenRepository
+                        .findByPrefix("prefix000007")
+                        .orElseThrow()
+                        .revokedAt(),
+                is(nullValue()));
     }
 
     private static RefreshTokenRecord newRecord(final String userId, final String familyId, final String prefix) {

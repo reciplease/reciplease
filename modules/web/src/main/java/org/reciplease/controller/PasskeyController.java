@@ -1,5 +1,8 @@
 package org.reciplease.controller;
 
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.ReciplaseJwtService;
 import org.reciplease.dto.ExchangeResponse;
@@ -10,13 +13,15 @@ import org.reciplease.repository.IdentityConflictException;
 import org.reciplease.repository.UserRepository;
 import org.reciplease.repository.WebAuthnChallengeLedger;
 import org.reciplease.service.RefreshTokenService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.webauthn.api.AuthenticatorSelectionCriteria;
 import org.springframework.security.web.webauthn.api.Bytes;
 import org.springframework.security.web.webauthn.api.ImmutablePublicKeyCredentialUserEntity;
@@ -37,13 +42,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * Passkeys as a third sign-in provider, alongside Google/GitHub — but unlike those, there's no
@@ -83,8 +81,10 @@ public class PasskeyController {
     // EdDSA, ES256, RS256 — the same algorithm set Webauthn4JRelyingPartyOperations itself
     // generates by default, since these reconstructed options must match what the browser
     // was actually shown when the credential was created.
-    private static final List<PublicKeyCredentialParameters> PUB_KEY_CRED_PARAMS =
-            List.of(PublicKeyCredentialParameters.EdDSA, PublicKeyCredentialParameters.ES256, PublicKeyCredentialParameters.RS256);
+    private static final List<PublicKeyCredentialParameters> PUB_KEY_CRED_PARAMS = List.of(
+            PublicKeyCredentialParameters.EdDSA,
+            PublicKeyCredentialParameters.ES256,
+            PublicKeyCredentialParameters.RS256);
 
     private final WebAuthnRelyingPartyOperations relyingPartyOperations;
     private final WebAuthnChallengeLedger challengeLedger;
@@ -103,7 +103,8 @@ public class PasskeyController {
 
     @PostMapping("signup/finish")
     public ResponseEntity<ExchangeResponse> signupFinish(@RequestBody final PasskeyRegisterFinishRequest request) {
-        final var userId = challengeLedger.consumeForRegistration(request.challenge()).orElse(null);
+        final var userId =
+                challengeLedger.consumeForRegistration(request.challenge()).orElse(null);
         if (userId == null) {
             return ResponseEntity.status(401).build();
         }
@@ -117,8 +118,8 @@ public class PasskeyController {
         }
 
         final var issued = refreshTokenService.issue(userId);
-        return ResponseEntity.ok(new ExchangeResponse(
-                jwtService.mint(userId), issued.rawToken(), issued.expiresAt(), userId, null));
+        return ResponseEntity.ok(
+                new ExchangeResponse(jwtService.mint(userId), issued.rawToken(), issued.expiresAt(), userId, null));
     }
 
     @PostMapping("register/options")
@@ -131,8 +132,12 @@ public class PasskeyController {
     @PostMapping("register/finish")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> registerFinish(@RequestBody final PasskeyRegisterFinishRequest request) {
-        final var userId = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (challengeLedger.consumeForRegistration(request.challenge()).filter(userId::equals).isEmpty()) {
+        final var userId =
+                SecurityContextHolder.getContext().getAuthentication().getName();
+        if (challengeLedger
+                .consumeForRegistration(request.challenge())
+                .filter(userId::equals)
+                .isEmpty()) {
             return ResponseEntity.status(401).build();
         }
 
@@ -171,7 +176,8 @@ public class PasskeyController {
 
         final PublicKeyCredentialUserEntity userEntity;
         try {
-            userEntity = relyingPartyOperations.authenticate(new RelyingPartyAuthenticationRequest(requestOptions, request.credential()));
+            userEntity = relyingPartyOperations.authenticate(
+                    new RelyingPartyAuthenticationRequest(requestOptions, request.credential()));
         } catch (final RuntimeException e) {
             log.warn("Passkey login/finish authentication failed", e);
             return ResponseEntity.status(401).build();
@@ -180,8 +186,8 @@ public class PasskeyController {
         final var userId = toUserId(userEntity.getId());
         final var handle = userRepository.findById(userId).map(User::handle).orElse(null);
         final var issued = refreshTokenService.issue(userId);
-        return ResponseEntity.ok(new ExchangeResponse(
-                jwtService.mint(userId), issued.rawToken(), issued.expiresAt(), userId, handle));
+        return ResponseEntity.ok(
+                new ExchangeResponse(jwtService.mint(userId), issued.rawToken(), issued.expiresAt(), userId, handle));
     }
 
     // These values match what Webauthn4JRelyingPartyOperations.createPublicKeyCredentialCreationOptions
@@ -208,7 +214,8 @@ public class PasskeyController {
         return credential.getCredentialId().toBase64UrlString();
     }
 
-    private PublicKeyCredentialCreationOptions creationOptions(final Authentication authentication, final String userId) {
+    private PublicKeyCredentialCreationOptions creationOptions(
+            final Authentication authentication, final String userId) {
         // Built via the library (not the manual builder registerCredential uses) so the response
         // includes everything the browser needs to pick an authenticator — excludeCredentials,
         // authenticatorSelection, attestation, extensions — none of which matter for verification

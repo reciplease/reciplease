@@ -1,5 +1,19 @@
 package org.reciplease.repository;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -11,21 +25,6 @@ import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-
 @DataMongoTest
 @Import({PantryRepositoryImpl.class, MongoAuditingConfig.class})
 class PantryRepositoryTest {
@@ -33,8 +32,10 @@ class PantryRepositoryTest {
 
     @Autowired
     private PantryRepository pantryRepository;
+
     @Autowired
     private MongoTemplate mongoTemplate;
+
     @Autowired
     private org.reciplease.repository.mongo.PantryArchiveMongoRepository pantryArchiveMongoRepository;
 
@@ -55,9 +56,12 @@ class PantryRepositoryTest {
         void setUp() {
             today = LocalDate.of(2020, Month.JANUARY, 2);
 
-            slice_Jan1 = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2020, Month.JANUARY, 1), null));
-            slice_Jan2 = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2020, Month.JANUARY, 2), null));
-            slice_Jan3 = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2020, Month.JANUARY, 3), null));
+            slice_Jan1 = pantryRepository.save(new PantryItem(
+                    null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2020, Month.JANUARY, 1), null));
+            slice_Jan2 = pantryRepository.save(new PantryItem(
+                    null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2020, Month.JANUARY, 2), null));
+            slice_Jan3 = pantryRepository.save(new PantryItem(
+                    null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2020, Month.JANUARY, 3), null));
         }
 
         @Test
@@ -79,9 +83,12 @@ class PantryRepositoryTest {
     @DisplayName("expiresAfter orders results alphabetically by name")
     void shouldOrderUnexpiredAlphabeticallyByName() {
         var today = LocalDate.of(2026, Month.JUNE, 1);
-        var milk = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "milk", null, "MILLILITRES", 500d, LocalDate.of(2026, Month.JUNE, 10), null));
-        var eggs = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 10), null));
-        var bread = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 10), null));
+        var milk = pantryRepository.save(new PantryItem(
+                null, null, HOUSE_ID, "milk", null, "MILLILITRES", 500d, LocalDate.of(2026, Month.JUNE, 10), null));
+        var eggs = pantryRepository.save(new PantryItem(
+                null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 10), null));
+        var bread = pantryRepository.save(new PantryItem(
+                null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 10), null));
 
         var unexpired = pantryRepository.expiresAfter(HOUSE_ID, today);
 
@@ -92,9 +99,12 @@ class PantryRepositoryTest {
     @DisplayName("betweenDates orders results alphabetically by name")
     void shouldOrderExpiredAlphabeticallyByName() {
         var today = LocalDate.of(2026, Month.JUNE, 10);
-        var milk = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "milk", null, "MILLILITRES", 500d, LocalDate.of(2026, Month.JUNE, 1), null));
-        var eggs = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 1), null));
-        var bread = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 1), null));
+        var milk = pantryRepository.save(new PantryItem(
+                null, null, HOUSE_ID, "milk", null, "MILLILITRES", 500d, LocalDate.of(2026, Month.JUNE, 1), null));
+        var eggs = pantryRepository.save(new PantryItem(
+                null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 1), null));
+        var bread = pantryRepository.save(new PantryItem(
+                null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 1), null));
 
         var expired = pantryRepository.betweenDates(HOUSE_ID, today);
 
@@ -103,7 +113,16 @@ class PantryRepositoryTest {
 
     @Test
     void shouldFindByBarcodeAndPreserveIt() {
-        var saved = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "milk", null, "MILLILITRES", 1000d, LocalDate.of(2026, Month.JUNE, 6), "5012345678900"));
+        var saved = pantryRepository.save(new PantryItem(
+                null,
+                null,
+                HOUSE_ID,
+                "milk",
+                null,
+                "MILLILITRES",
+                1000d,
+                LocalDate.of(2026, Month.JUNE, 6),
+                "5012345678900"));
 
         var found = pantryRepository.findByBarcode(HOUSE_ID, "5012345678900");
 
@@ -113,9 +132,20 @@ class PantryRepositoryTest {
 
     @Test
     void shouldFindByBarcodeIn() {
-        var milk = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "milk", null, "MILLILITRES", 1000d, LocalDate.of(2026, Month.JUNE, 6), "5012345678900"));
-        var eggs = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 6), "5012345678901"));
-        pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 6), "5012345678902"));
+        var milk = pantryRepository.save(new PantryItem(
+                null,
+                null,
+                HOUSE_ID,
+                "milk",
+                null,
+                "MILLILITRES",
+                1000d,
+                LocalDate.of(2026, Month.JUNE, 6),
+                "5012345678900"));
+        var eggs = pantryRepository.save(new PantryItem(
+                null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 6), "5012345678901"));
+        pantryRepository.save(new PantryItem(
+                null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 6), "5012345678902"));
 
         var found = pantryRepository.findByBarcodeIn(HOUSE_ID, Set.of("5012345678900", "5012345678901"));
 
@@ -124,7 +154,16 @@ class PantryRepositoryTest {
 
     @Test
     void shouldPersistAndRetrieveBrand() {
-        var saved = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "tomato ketchup", "Heinz", "MILLILITRES", 500d, LocalDate.of(2026, Month.JUNE, 6), null));
+        var saved = pantryRepository.save(new PantryItem(
+                null,
+                null,
+                HOUSE_ID,
+                "tomato ketchup",
+                "Heinz",
+                "MILLILITRES",
+                500d,
+                LocalDate.of(2026, Month.JUNE, 6),
+                null));
 
         var found = pantryRepository.findById(saved.id());
 
@@ -134,8 +173,18 @@ class PantryRepositoryTest {
 
     @Test
     void shouldPersistAndRetrieveImageBytes() {
-        var imageBytes = new byte[]{1, 2, 3, 4};
-        var saved = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "milk", null, "MILLILITRES", 1000d, LocalDate.of(2026, Month.JUNE, 6), null, imageBytes));
+        var imageBytes = new byte[] {1, 2, 3, 4};
+        var saved = pantryRepository.save(new PantryItem(
+                null,
+                null,
+                HOUSE_ID,
+                "milk",
+                null,
+                "MILLILITRES",
+                1000d,
+                LocalDate.of(2026, Month.JUNE, 6),
+                null,
+                imageBytes));
 
         var found = pantryRepository.findById(saved.id());
 
@@ -145,7 +194,8 @@ class PantryRepositoryTest {
 
     @Test
     void shouldFindByNameIgnoringCase() {
-        var saved = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "Bread", null, "ITEMS", 2d, LocalDate.of(2026, Month.JUNE, 6), null));
+        var saved = pantryRepository.save(new PantryItem(
+                null, null, HOUSE_ID, "Bread", null, "ITEMS", 2d, LocalDate.of(2026, Month.JUNE, 6), null));
 
         assertThat(pantryRepository.findByName(HOUSE_ID, "bread"), contains(saved));
     }
@@ -157,7 +207,8 @@ class PantryRepositoryTest {
 
     @Test
     void shouldFindById() {
-        var saved = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
+        var saved = pantryRepository.save(new PantryItem(
+                null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
 
         assertThat(pantryRepository.findById(saved.id()), is(Optional.of(saved)));
     }
@@ -169,7 +220,8 @@ class PantryRepositoryTest {
 
     @Test
     void shouldSetCreatedAtAndUpdatedAtOnCreate() {
-        var saved = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
+        var saved = pantryRepository.save(new PantryItem(
+                null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
 
         assertThat(saved.createdAt(), is(notNullValue()));
         assertThat(saved.updatedAt(), is(notNullValue()));
@@ -177,7 +229,8 @@ class PantryRepositoryTest {
 
     @Test
     void shouldDeleteById() {
-        var saved = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
+        var saved = pantryRepository.save(new PantryItem(
+                null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
 
         pantryRepository.deleteById(saved.id());
 
@@ -187,7 +240,17 @@ class PantryRepositoryTest {
     @Test
     @DisplayName("deleteById archives a snapshot of the item before removing it")
     void shouldArchiveOnDelete() {
-        var saved = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, 2d, LocalDate.of(2026, Month.JUNE, 20), "5012345678900"));
+        var saved = pantryRepository.save(new PantryItem(
+                null,
+                null,
+                HOUSE_ID,
+                "eggs",
+                null,
+                "ITEMS",
+                6d,
+                2d,
+                LocalDate.of(2026, Month.JUNE, 20),
+                "5012345678900"));
 
         pantryRepository.deleteById(saved.id());
 
@@ -211,17 +274,31 @@ class PantryRepositoryTest {
 
     @Test
     void shouldFindAllZeroRemaining() {
-        var zero = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, 0d, LocalDate.of(2026, Month.JUNE, 20), null));
-        pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "milk", null, "MILLILITRES", 500d, 100d, LocalDate.of(2026, Month.JUNE, 20), null));
+        var zero = pantryRepository.save(new PantryItem(
+                null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, 0d, LocalDate.of(2026, Month.JUNE, 20), null));
+        pantryRepository.save(new PantryItem(
+                null,
+                null,
+                HOUSE_ID,
+                "milk",
+                null,
+                "MILLILITRES",
+                500d,
+                100d,
+                LocalDate.of(2026, Month.JUNE, 20),
+                null));
 
         assertThat(pantryRepository.findAllZeroRemaining(), contains(zero));
     }
 
     @Test
     void shouldFindAllById() {
-        var eggs = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
-        var milk = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "milk", null, "MILLILITRES", 500d, LocalDate.of(2026, Month.JUNE, 20), null));
-        pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 20), null));
+        var eggs = pantryRepository.save(new PantryItem(
+                null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
+        var milk = pantryRepository.save(new PantryItem(
+                null, null, HOUSE_ID, "milk", null, "MILLILITRES", 500d, LocalDate.of(2026, Month.JUNE, 20), null));
+        pantryRepository.save(new PantryItem(
+                null, null, HOUSE_ID, "bread", null, "ITEMS", 1d, LocalDate.of(2026, Month.JUNE, 20), null));
 
         var found = pantryRepository.findAllById(List.of(eggs.id(), milk.id()));
 
@@ -230,10 +307,23 @@ class PantryRepositoryTest {
 
     @Test
     void shouldPreserveCreatedAtAndAdvanceUpdatedAtOnUpdate() {
-        var saved = pantryRepository.save(new PantryItem(null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
+        var saved = pantryRepository.save(new PantryItem(
+                null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));
 
-        var updated = pantryRepository.save(new PantryItem(saved.id(), saved.createdBy(), saved.houseId(), saved.name(), null, saved.measure(), 12d,
-                saved.remaining(), saved.expiration(), saved.barcode(), saved.image(), saved.createdAt(), saved.updatedAt()));
+        var updated = pantryRepository.save(new PantryItem(
+                saved.id(),
+                saved.createdBy(),
+                saved.houseId(),
+                saved.name(),
+                null,
+                saved.measure(),
+                12d,
+                saved.remaining(),
+                saved.expiration(),
+                saved.barcode(),
+                saved.image(),
+                saved.createdAt(),
+                saved.updatedAt()));
 
         assertThat(updated.createdAt(), is(saved.createdAt()));
         assertThat(updated.updatedAt(), is(greaterThanOrEqualTo(saved.updatedAt())));

@@ -1,5 +1,8 @@
 package org.reciplease.dto;
 
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 
 /**
@@ -10,4 +13,9 @@ import java.time.Instant;
  * {@code refreshTokenExpiresAt} as the source of truth for the refresh token's actual lifetime
  * (see {@code reciplease.jwt.refresh-token-ttl}) rather than hardcoding a duplicate of it.
  */
-public record ExchangeResponse(String token, String refreshToken, Instant refreshTokenExpiresAt, String userId, String handle) {}
+public record ExchangeResponse(
+        @Schema(requiredMode = REQUIRED) String token,
+        String refreshToken,
+        Instant refreshTokenExpiresAt,
+        @Schema(requiredMode = REQUIRED) String userId,
+        @Schema(requiredMode = REQUIRED) String handle) {}

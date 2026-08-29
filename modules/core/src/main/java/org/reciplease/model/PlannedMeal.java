@@ -15,7 +15,8 @@ public record PlannedMeal(
         List<PlannedIngredient> items,
         Instant createdAt,
         Instant updatedAt,
-        Instant eatenAt) implements Audited, HouseScoped {
+        Instant eatenAt)
+        implements Audited, HouseScoped {
 
     public PlannedMeal {
         if (name == null || name.isBlank()) {
@@ -25,8 +26,12 @@ public record PlannedMeal(
         items = items == null ? List.of() : List.copyOf(items);
     }
 
-    public PlannedMeal(final String houseId, final String recipeId, final String name,
-                        final LocalDate date, final List<PlannedIngredient> items) {
+    public PlannedMeal(
+            final String houseId,
+            final String recipeId,
+            final String name,
+            final LocalDate date,
+            final List<PlannedIngredient> items) {
         this(null, null, houseId, recipeId, name, date, items, null, null, null);
     }
 

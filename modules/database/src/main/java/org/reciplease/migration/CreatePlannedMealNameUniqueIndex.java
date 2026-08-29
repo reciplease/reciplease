@@ -14,7 +14,8 @@ public class CreatePlannedMealNameUniqueIndex {
 
     @Execution
     public void execution(final MongoTemplate mongoTemplate) {
-        mongoTemplate.indexOps(PlannedMealDocument.class)
+        mongoTemplate
+                .indexOps(PlannedMealDocument.class)
                 .createIndex(new Index()
                         .on("houseId", Sort.Direction.ASC)
                         .on("date", Sort.Direction.ASC)

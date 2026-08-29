@@ -1,17 +1,5 @@
 package org.reciplease.service;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.reciplease.model.ApiKey;
-import org.reciplease.model.HouseRole;
-import org.reciplease.repository.ApiKeyRepository;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
@@ -22,6 +10,17 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.reciplease.model.ApiKey;
+import org.reciplease.model.HouseRole;
+import org.reciplease.repository.ApiKeyRepository;
+
 @MockitoSettings
 class ApiKeyServiceTest {
 
@@ -29,6 +28,7 @@ class ApiKeyServiceTest {
 
     @Mock
     private ApiKeyRepository apiKeyRepository;
+
     @Mock
     private ApiKeyGenerator apiKeyGenerator;
 
@@ -76,7 +76,8 @@ class ApiKeyServiceTest {
 
     @Test
     void revokeRefusesToDeleteAnotherHousesKey() {
-        var key = new ApiKey("key-1", "other-house", "name", HouseRole.READ_ONLY, "owner-1", "prefix", "hash", Instant.now(), null);
+        var key = new ApiKey(
+                "key-1", "other-house", "name", HouseRole.READ_ONLY, "owner-1", "prefix", "hash", Instant.now(), null);
         when(apiKeyRepository.findById("key-1")).thenReturn(Optional.of(key));
 
         var revoked = apiKeyService.revoke(HOUSE_ID, "key-1");
@@ -99,7 +100,8 @@ class ApiKeyServiceTest {
     void authenticateReturnsThePrincipalForAMatchingKeyAndRecordsLastUsedAt() {
         var rawKey = "rcpl_abcdefghij1234567890";
         var hash = ApiKeyHasher.hash(rawKey);
-        var key = new ApiKey("key-1", HOUSE_ID, "name", HouseRole.OWNER, "owner-1", "rcpl_abcdefghij", hash, Instant.now(), null);
+        var key = new ApiKey(
+                "key-1", HOUSE_ID, "name", HouseRole.OWNER, "owner-1", "rcpl_abcdefghij", hash, Instant.now(), null);
         when(apiKeyRepository.findByPrefix("rcpl_abcdefghij")).thenReturn(Optional.of(key));
 
         var authenticated = apiKeyService.authenticate(rawKey);
@@ -113,8 +115,16 @@ class ApiKeyServiceTest {
 
     @Test
     void authenticateReturnsEmptyWhenTheHashDoesNotMatch() {
-        var key = new ApiKey("key-1", HOUSE_ID, "name", HouseRole.OWNER, "owner-1", "rcpl_abcdefghij",
-                ApiKeyHasher.hash("rcpl_someotherkey1234567"), Instant.now(), null);
+        var key = new ApiKey(
+                "key-1",
+                HOUSE_ID,
+                "name",
+                HouseRole.OWNER,
+                "owner-1",
+                "rcpl_abcdefghij",
+                ApiKeyHasher.hash("rcpl_someotherkey1234567"),
+                Instant.now(),
+                null);
         when(apiKeyRepository.findByPrefix("rcpl_abcdefghij")).thenReturn(Optional.of(key));
 
         var authenticated = apiKeyService.authenticate("rcpl_abcdefghij1234567890");

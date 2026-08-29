@@ -1,5 +1,7 @@
 package org.reciplease.dto;
 
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,8 +15,13 @@ import org.reciplease.model.RecipeIngredient;
 @Schema(name = "RecipeIngredient")
 public class RecipeIngredientDto {
 
+    @Schema(requiredMode = REQUIRED)
     String name;
+
+    @Schema(requiredMode = REQUIRED)
     String measure;
+
+    @Schema(requiredMode = REQUIRED)
     Double amount;
 
     public static RecipeIngredientDto from(final RecipeIngredient recipeIngredient) {

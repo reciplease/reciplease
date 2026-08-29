@@ -1,12 +1,11 @@
 package org.reciplease.configuration;
 
-import org.springframework.data.auditing.DateTimeProvider;
-
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAccessor;
 import java.util.Optional;
+import org.springframework.data.auditing.DateTimeProvider;
 
 /**
  * MongoDB stores {@link Instant}s with millisecond precision, so auditing timestamps are

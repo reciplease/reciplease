@@ -1,5 +1,7 @@
 package org.reciplease.migration;
 
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+
 import io.mongock.api.annotations.ChangeUnit;
 import io.mongock.api.annotations.Execution;
 import io.mongock.api.annotations.RollbackExecution;
@@ -7,8 +9,6 @@ import org.reciplease.model.RecipeDocument;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-
-import static org.springframework.data.mongodb.core.query.Criteria.where;
 
 /**
  * Recipes saved before {@link RecipeDocument#getUpdatedBy()} existed have no
@@ -20,8 +20,8 @@ public class BackfillRecipeUpdatedBy {
 
     @Execution
     public void execution(final MongoTemplate mongoTemplate) {
-        final var recipesMissingUpdatedBy = mongoTemplate.find(
-                Query.query(where("updatedBy").is(null)), RecipeDocument.class);
+        final var recipesMissingUpdatedBy =
+                mongoTemplate.find(Query.query(where("updatedBy").is(null)), RecipeDocument.class);
 
         recipesMissingUpdatedBy.forEach(recipe -> mongoTemplate.updateFirst(
                 Query.query(where("_id").is(recipe.getId())),

@@ -1,5 +1,7 @@
 package org.reciplease.dto;
 
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,9 +19,12 @@ import org.reciplease.model.HouseRole;
 @Builder
 @Schema(name = "ApiKeySelf")
 public class ApiKeySelfDto {
+    @Schema(requiredMode = REQUIRED)
     String houseId;
     // Null if the key's house has since been deleted but the key itself wasn't cleaned up.
     @Schema(nullable = true)
     String houseName;
+
+    @Schema(requiredMode = REQUIRED)
     HouseRole role;
 }

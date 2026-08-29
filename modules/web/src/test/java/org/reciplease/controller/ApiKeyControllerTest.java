@@ -1,5 +1,18 @@
 package org.reciplease.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.Instant;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,20 +33,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.Instant;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(ApiKeyController.class)
 @WithHouseOwner
 @Import(MethodSecurityTestSupport.class)
@@ -43,8 +42,10 @@ class ApiKeyControllerTest {
 
     @MockitoBean
     private ApiKeyService apiKeyService;
+
     @MockitoBean(name = "houseAccess")
     private HouseAccess houseAccess;
+
     @MockitoBean
     private HouseRepository houseRepository;
 
@@ -62,8 +63,17 @@ class ApiKeyControllerTest {
     @DisplayName("should list keys for the house without exposing the raw secret")
     void findAll() throws Exception {
         var createdAt = Instant.parse("2026-01-01T00:00:00Z");
-        when(apiKeyService.list(HOUSE_ID)).thenReturn(List.of(
-                new ApiKey("key-1", HOUSE_ID, "Home Assistant", HouseRole.READ_ONLY, "owner-1", "rcpl_abc", "hash", createdAt, null)));
+        when(apiKeyService.list(HOUSE_ID))
+                .thenReturn(List.of(new ApiKey(
+                        "key-1",
+                        HOUSE_ID,
+                        "Home Assistant",
+                        HouseRole.READ_ONLY,
+                        "owner-1",
+                        "rcpl_abc",
+                        "hash",
+                        createdAt,
+                        null)));
 
         mockMvc.perform(get("/api/houses/api-keys"))
                 .andExpect(status().isOk())
@@ -79,8 +89,7 @@ class ApiKeyControllerTest {
     void findAllForbiddenForReadOnly() throws Exception {
         when(houseAccess.isOwner()).thenReturn(false);
 
-        mockMvc.perform(get("/api/houses/api-keys"))
-                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/houses/api-keys")).andExpect(status().isForbidden());
     }
 
     @Test
@@ -88,7 +97,16 @@ class ApiKeyControllerTest {
     @WithMockUser(username = "owner-1", authorities = "ROLE_RECIPLEASE")
     void create() throws Exception {
         var createdAt = Instant.parse("2026-01-01T00:00:00Z");
-        var apiKey = new ApiKey("key-1", HOUSE_ID, "Home Assistant", HouseRole.READ_ONLY, "owner-1", "rcpl_abc", "hash", createdAt, null);
+        var apiKey = new ApiKey(
+                "key-1",
+                HOUSE_ID,
+                "Home Assistant",
+                HouseRole.READ_ONLY,
+                "owner-1",
+                "rcpl_abc",
+                "hash",
+                createdAt,
+                null);
         when(apiKeyService.create(HOUSE_ID, "Home Assistant", HouseRole.READ_ONLY, "owner-1"))
                 .thenReturn(new CreatedApiKey(apiKey, "rcpl_abcdefghij1234567890"));
 

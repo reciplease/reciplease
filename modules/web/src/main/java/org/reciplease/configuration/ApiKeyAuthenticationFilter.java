@@ -4,13 +4,12 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.service.ApiKeyGenerator;
 import org.reciplease.service.ApiKeyService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import java.io.IOException;
 
 /**
  * Authenticates requests bearing a house service-account API key (see {@link ApiKeyService}),
@@ -33,7 +32,8 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         final var token = resolveToken(request);
         if (token != null) {
-            apiKeyService.authenticate(token)
+            apiKeyService
+                    .authenticate(token)
                     .ifPresent(principal -> SecurityContextHolder.getContext()
                             .setAuthentication(new ApiKeyAuthenticationToken(principal)));
         }

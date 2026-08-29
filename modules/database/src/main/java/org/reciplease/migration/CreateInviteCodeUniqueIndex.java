@@ -14,7 +14,8 @@ public class CreateInviteCodeUniqueIndex {
 
     @Execution
     public void execution(final MongoTemplate mongoTemplate) {
-        mongoTemplate.indexOps(InviteDocument.class)
+        mongoTemplate
+                .indexOps(InviteDocument.class)
                 .createIndex(new Index().on("code", Sort.Direction.ASC).unique());
     }
 

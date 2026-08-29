@@ -1,8 +1,7 @@
 package org.reciplease.service;
 
-import org.springframework.stereotype.Component;
-
 import java.security.SecureRandom;
+import org.springframework.stereotype.Component;
 
 /**
  * Generates one-time invite codes. Alphanumeric only (no {@code -}/{@code _}/other

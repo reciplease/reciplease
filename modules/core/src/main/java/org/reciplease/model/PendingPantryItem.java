@@ -26,15 +26,30 @@ public record PendingPantryItem(
         byte[] expirationImage,
         byte[] measureImage,
         Instant createdAt,
-        Instant updatedAt) implements Audited, HouseScoped {
+        Instant updatedAt)
+        implements Audited, HouseScoped {
 
-    public PendingPantryItem(final String id, final String createdBy, final String houseId, final byte[] barcodeImage,
-                                 final byte[] expirationImage, final byte[] measureImage) {
+    public PendingPantryItem(
+            final String id,
+            final String createdBy,
+            final String houseId,
+            final byte[] barcodeImage,
+            final byte[] expirationImage,
+            final byte[] measureImage) {
         this(id, createdBy, houseId, barcodeImage, null, expirationImage, measureImage, null, null);
     }
 
     public PendingPantryItem withId(final String id) {
-        return new PendingPantryItem(id, createdBy, houseId, barcodeImage, legacyBarcode, expirationImage, measureImage, createdAt, updatedAt);
+        return new PendingPantryItem(
+                id,
+                createdBy,
+                houseId,
+                barcodeImage,
+                legacyBarcode,
+                expirationImage,
+                measureImage,
+                createdAt,
+                updatedAt);
     }
 
     // The generated record equals()/hashCode() would compare the image fields by array identity
@@ -60,6 +75,15 @@ public record PendingPantryItem(
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, createdBy, houseId, Arrays.hashCode(barcodeImage), legacyBarcode, Arrays.hashCode(expirationImage), Arrays.hashCode(measureImage), createdAt, updatedAt);
+        return Objects.hash(
+                id,
+                createdBy,
+                houseId,
+                Arrays.hashCode(barcodeImage),
+                legacyBarcode,
+                Arrays.hashCode(expirationImage),
+                Arrays.hashCode(measureImage),
+                createdAt,
+                updatedAt);
     }
 }

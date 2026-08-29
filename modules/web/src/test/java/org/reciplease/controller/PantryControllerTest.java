@@ -1,5 +1,22 @@
 package org.reciplease.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.reciplease.utils.ResourceUtils.readTestResource;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -13,27 +30,9 @@ import org.reciplease.service.PantryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.List;
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.reciplease.utils.ResourceUtils.readTestResource;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PantryController.class)
 @WithHouseOwner
@@ -62,7 +61,16 @@ class PantryControllerTest {
     @Test
     @DisplayName("should create pantry item")
     void shouldCreatePantryItem() throws Exception {
-        var mockRequestItem = new PantryItem(null, null, HOUSE_ID, "bread", null, "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
+        var mockRequestItem = new PantryItem(
+                null,
+                null,
+                HOUSE_ID,
+                "bread",
+                null,
+                "item",
+                20d,
+                LocalDate.of(2020, Month.JANUARY, 1),
+                "0123456789012");
         var mockResponseItem = mockRequestItem.withId("b465af6e-2465-4436-84c1-14f35db68dbf");
 
         when(pantryService.save(mockRequestItem)).thenReturn(mockResponseItem);
@@ -82,9 +90,19 @@ class PantryControllerTest {
     @Test
     @DisplayName("should create pantry item with an image")
     void shouldCreatePantryItemWithImage() throws Exception {
-        var imageBytes = new byte[]{1, 2, 3};
+        var imageBytes = new byte[] {1, 2, 3};
         var imageBase64 = java.util.Base64.getEncoder().encodeToString(imageBytes);
-        var mockRequestItem = new PantryItem(null, null, HOUSE_ID, "bread", null, "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012", imageBytes);
+        var mockRequestItem = new PantryItem(
+                null,
+                null,
+                HOUSE_ID,
+                "bread",
+                null,
+                "item",
+                20d,
+                LocalDate.of(2020, Month.JANUARY, 1),
+                "0123456789012",
+                imageBytes);
         var mockResponseItem = mockRequestItem.withId("b465af6e-2465-4436-84c1-14f35db68dbf");
 
         when(pantryService.save(mockRequestItem)).thenReturn(mockResponseItem);
@@ -119,7 +137,16 @@ class PantryControllerTest {
     @Test
     @DisplayName("should create pantry item with a brand")
     void shouldCreatePantryItemWithBrand() throws Exception {
-        var mockRequestItem = new PantryItem(null, null, HOUSE_ID, "tomato ketchup", "Heinz", "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
+        var mockRequestItem = new PantryItem(
+                null,
+                null,
+                HOUSE_ID,
+                "tomato ketchup",
+                "Heinz",
+                "item",
+                20d,
+                LocalDate.of(2020, Month.JANUARY, 1),
+                "0123456789012");
         var mockResponseItem = mockRequestItem.withId("b465af6e-2465-4436-84c1-14f35db68dbf");
 
         when(pantryService.save(mockRequestItem)).thenReturn(mockResponseItem);
@@ -171,13 +198,31 @@ class PantryControllerTest {
 
         @BeforeEach
         void setUp() {
-            item = new PantryItem("b465af6e-2465-4436-84c1-14f35db68dbf", null, HOUSE_ID, "bread", null, "item", 20d, LocalDate.of(2020, Month.JANUARY, 1), "0123456789012");
+            item = new PantryItem(
+                    "b465af6e-2465-4436-84c1-14f35db68dbf",
+                    null,
+                    HOUSE_ID,
+                    "bread",
+                    null,
+                    "item",
+                    20d,
+                    LocalDate.of(2020, Month.JANUARY, 1),
+                    "0123456789012");
         }
 
         @Test
         @DisplayName("should update item")
         void update() throws Exception {
-            var updates = new PantryItem(null, null, HOUSE_ID, "sourdough", null, "item", 12d, LocalDate.of(2020, Month.JANUARY, 5), "0123456789012");
+            var updates = new PantryItem(
+                    null,
+                    null,
+                    HOUSE_ID,
+                    "sourdough",
+                    null,
+                    "item",
+                    12d,
+                    LocalDate.of(2020, Month.JANUARY, 5),
+                    "0123456789012");
             var updated = item.withId(item.id());
 
             when(pantryService.findById(item.id())).thenReturn(Optional.of(item));
@@ -202,7 +247,17 @@ class PantryControllerTest {
         @Test
         @DisplayName("should 204 when the update drives remaining to zero (item archived and removed)")
         void updateToZeroRemaining() throws Exception {
-            var updates = new PantryItem(null, null, HOUSE_ID, "bread", null, "item", 12d, 0d, LocalDate.of(2020, Month.JANUARY, 5), "0123456789012");
+            var updates = new PantryItem(
+                    null,
+                    null,
+                    HOUSE_ID,
+                    "bread",
+                    null,
+                    "item",
+                    12d,
+                    0d,
+                    LocalDate.of(2020, Month.JANUARY, 5),
+                    "0123456789012");
 
             when(pantryService.findById(item.id())).thenReturn(Optional.of(item));
             when(pantryService.update(item.id(), updates)).thenReturn(Optional.empty());
@@ -345,5 +400,4 @@ class PantryControllerTest {
                     .andExpect(content().json(itemsJson, true));
         }
     }
-
 }

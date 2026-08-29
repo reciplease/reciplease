@@ -1,5 +1,7 @@
 package org.reciplease.dto;
 
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +14,7 @@ import org.reciplease.model.User;
 @Builder
 @Schema(name = "UserSummary")
 public class UserSummaryDto {
+    @Schema(requiredMode = REQUIRED)
     String userId;
     // Users who haven't set a display handle yet are represented with a null handle on
     // the wire, not an empty string.
@@ -19,9 +22,6 @@ public class UserSummaryDto {
     String handle;
 
     public static UserSummaryDto from(final User user) {
-        return UserSummaryDto.builder()
-                .userId(user.id())
-                .handle(user.handle())
-                .build();
+        return UserSummaryDto.builder().userId(user.id()).handle(user.handle()).build();
     }
 }

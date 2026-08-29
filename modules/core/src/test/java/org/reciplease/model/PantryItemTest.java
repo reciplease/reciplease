@@ -1,12 +1,11 @@
 package org.reciplease.model;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import java.time.LocalDate;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+
+import java.time.LocalDate;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 class PantryItemTest {
     @Test
@@ -39,7 +38,8 @@ class PantryItemTest {
     @Test
     @DisplayName("withId preserves brand")
     void withIdPreservesBrand() {
-        var item = new PantryItem(null, null, "house-1", "tomato ketchup", "Heinz", "ITEMS", 10d, LocalDate.now(), null);
+        var item =
+                new PantryItem(null, null, "house-1", "tomato ketchup", "Heinz", "ITEMS", 10d, LocalDate.now(), null);
 
         var updated = item.withId("new-id");
 

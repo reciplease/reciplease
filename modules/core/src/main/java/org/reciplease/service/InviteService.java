@@ -1,5 +1,10 @@
 package org.reciplease.service;
 
+import static java.util.stream.Collectors.toList;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.model.House;
 import org.reciplease.model.HouseRole;
@@ -7,12 +12,6 @@ import org.reciplease.model.Invite;
 import org.reciplease.repository.HouseRepository;
 import org.reciplease.repository.InviteRepository;
 import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
@@ -30,8 +29,10 @@ public class InviteService {
     public Optional<House> accept(final String code, final String userId) {
         return inviteRepository.claim(code, userId).map(invite -> {
             houseRepository.addMember(invite.houseId(), userId, invite.role());
-            return houseRepository.findById(invite.houseId())
-                    .orElseThrow(() -> new IllegalStateException("Invite references a missing house: " + invite.houseId()));
+            return houseRepository
+                    .findById(invite.houseId())
+                    .orElseThrow(
+                            () -> new IllegalStateException("Invite references a missing house: " + invite.houseId()));
         });
     }
 
@@ -55,7 +56,8 @@ public class InviteService {
      * Returns false if the invite doesn't exist or belongs to a different house.
      */
     public boolean deleteInvite(final String houseId, final String inviteId) {
-        final var belongsToHouse = inviteRepository.findById(inviteId)
+        final var belongsToHouse = inviteRepository
+                .findById(inviteId)
                 .filter(invite -> invite.houseId().equals(houseId))
                 .isPresent();
         if (belongsToHouse) {

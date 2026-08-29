@@ -1,5 +1,14 @@
 package org.reciplease.repository;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+
+import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reciplease.configuration.MongoAuditingConfig;
@@ -13,16 +22,6 @@ import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-
 @DataMongoTest
 @Import({PlannedMealRepositoryImpl.class, RecipeRepositoryImpl.class, MongoAuditingConfig.class})
 public class PlannedMealRepositoryTest {
@@ -30,8 +29,10 @@ public class PlannedMealRepositoryTest {
 
     @Autowired
     private PlannedMealRepository plannedMealRepository;
+
     @Autowired
     private RecipeRepository recipeRepository;
+
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -43,9 +44,11 @@ public class PlannedMealRepositoryTest {
     @Test
     public void shouldReturnPlannedMealsByDate() {
         var recipe = recipeRepository.save(Recipe.builder().build());
-        var plannedMeal = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2019, 2, 2), List.of()));
+        var plannedMeal = plannedMealRepository.save(
+                new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2019, 2, 2), List.of()));
 
-        var plannedMeals = plannedMealRepository.findByDateIsBetween(HOUSE_ID, LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
+        var plannedMeals =
+                plannedMealRepository.findByDateIsBetween(HOUSE_ID, LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
 
         assertThat(plannedMeals, contains(plannedMeal));
     }
@@ -53,9 +56,11 @@ public class PlannedMealRepositoryTest {
     @Test
     public void shouldIncludeAMealDatedExactlyOnTheRangeEnd() {
         var recipe = recipeRepository.save(Recipe.builder().build());
-        var plannedMeal = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2026, 7, 5), List.of()));
+        var plannedMeal = plannedMealRepository.save(
+                new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2026, 7, 5), List.of()));
 
-        var plannedMeals = plannedMealRepository.findByDateIsBetween(HOUSE_ID, LocalDate.of(2026, 6, 29), LocalDate.of(2026, 7, 5));
+        var plannedMeals = plannedMealRepository.findByDateIsBetween(
+                HOUSE_ID, LocalDate.of(2026, 6, 29), LocalDate.of(2026, 7, 5));
 
         assertThat(plannedMeals, contains(plannedMeal));
     }
@@ -63,9 +68,11 @@ public class PlannedMealRepositoryTest {
     @Test
     public void shouldIncludeAMealDatedExactlyOnTheRangeStart() {
         var recipe = recipeRepository.save(Recipe.builder().build());
-        var plannedMeal = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2026, 6, 29), List.of()));
+        var plannedMeal = plannedMealRepository.save(
+                new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2026, 6, 29), List.of()));
 
-        var plannedMeals = plannedMealRepository.findByDateIsBetween(HOUSE_ID, LocalDate.of(2026, 6, 29), LocalDate.of(2026, 7, 5));
+        var plannedMeals = plannedMealRepository.findByDateIsBetween(
+                HOUSE_ID, LocalDate.of(2026, 6, 29), LocalDate.of(2026, 7, 5));
 
         assertThat(plannedMeals, contains(plannedMeal));
     }
@@ -73,9 +80,11 @@ public class PlannedMealRepositoryTest {
     @Test
     public void shouldReturnEmptyList() {
         var recipe = recipeRepository.save(Recipe.builder().build());
-        plannedMealRepository.save(new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2019, 2, 5), List.of()));
+        plannedMealRepository.save(
+                new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2019, 2, 5), List.of()));
 
-        var plannedMeals = plannedMealRepository.findByDateIsBetween(HOUSE_ID, LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
+        var plannedMeals =
+                plannedMealRepository.findByDateIsBetween(HOUSE_ID, LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 3));
 
         assertThat(plannedMeals, is(empty()));
     }
@@ -84,7 +93,8 @@ public class PlannedMealRepositoryTest {
     public void shouldSetIdAndCreatedAtAndUpdatedAtOnSave() {
         var recipe = recipeRepository.save(Recipe.builder().build());
 
-        var saved = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2026, 6, 10), List.of()));
+        var saved = plannedMealRepository.save(
+                new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2026, 6, 10), List.of()));
 
         assertThat(saved.id(), is(notNullValue()));
         assertThat(saved.createdAt(), is(notNullValue()));
@@ -95,7 +105,8 @@ public class PlannedMealRepositoryTest {
     @Test
     public void shouldRoundTripEatenAt() {
         var recipe = recipeRepository.save(Recipe.builder().build());
-        var saved = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2026, 6, 10), List.of()));
+        var saved = plannedMealRepository.save(
+                new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2026, 6, 10), List.of()));
         var eatenAt = java.time.Instant.parse("2026-06-10T18:30:00Z");
 
         var marked = plannedMealRepository.save(saved.withEatenAt(eatenAt));
@@ -108,9 +119,9 @@ public class PlannedMealRepositoryTest {
     public void shouldRoundTripItemsAndFindByRecipeId() {
         var recipe = recipeRepository.save(Recipe.builder().name("toast").build());
         var item = new PlannedIngredient(
-                new RecipeIngredient("bread", "ITEMS", 2d),
-                List.of(new PantryAllocation("item-1", "111", 2d)));
-        plannedMealRepository.save(new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2026, 6, 6), List.of(item)));
+                new RecipeIngredient("bread", "ITEMS", 2d), List.of(new PantryAllocation("item-1", "111", 2d)));
+        plannedMealRepository.save(
+                new PlannedMeal(HOUSE_ID, recipe.id(), "Dinner", LocalDate.of(2026, 6, 6), List.of(item)));
 
         var found = plannedMealRepository.findByRecipeId(HOUSE_ID, recipe.id());
 
@@ -121,9 +132,11 @@ public class PlannedMealRepositoryTest {
     @Test
     public void shouldRoundTripMealsWithoutARecipe() {
         var item = new PlannedIngredient(new RecipeIngredient("rice", "GRAMS", 200d), List.of());
-        var saved = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, null, "Leftover rice night", LocalDate.of(2026, 6, 6), List.of(item)));
+        var saved = plannedMealRepository.save(
+                new PlannedMeal(HOUSE_ID, null, "Leftover rice night", LocalDate.of(2026, 6, 6), List.of(item)));
 
-        var found = plannedMealRepository.findByDateIsBetween(HOUSE_ID, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30));
+        var found = plannedMealRepository.findByDateIsBetween(
+                HOUSE_ID, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30));
 
         assertThat(found, contains(saved));
         assertThat(found.getFirst().recipeId(), is(nullValue()));
@@ -131,9 +144,10 @@ public class PlannedMealRepositoryTest {
 
     @Test
     public void shouldFindByIngredientName() {
-        var item = new PlannedIngredient(new RecipeIngredient("bread", "ITEMS", 2d),
-                List.of(new PantryAllocation("item-1", "111", 2d)));
-        var saved = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of(item)));
+        var item = new PlannedIngredient(
+                new RecipeIngredient("bread", "ITEMS", 2d), List.of(new PantryAllocation("item-1", "111", 2d)));
+        var saved = plannedMealRepository.save(
+                new PlannedMeal(HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of(item)));
 
         var found = plannedMealRepository.findByIngredientName(HOUSE_ID, "bread");
 
@@ -144,14 +158,21 @@ public class PlannedMealRepositoryTest {
     public void shouldReportExistingNameOnThatDate() {
         plannedMealRepository.save(new PlannedMeal(HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of()));
 
-        assertThat(plannedMealRepository.existsByHouseIdAndDateAndName(HOUSE_ID, LocalDate.of(2026, 6, 6), "Dinner"), is(true));
-        assertThat(plannedMealRepository.existsByHouseIdAndDateAndName(HOUSE_ID, LocalDate.of(2026, 6, 7), "Dinner"), is(false));
-        assertThat(plannedMealRepository.existsByHouseIdAndDateAndName(HOUSE_ID, LocalDate.of(2026, 6, 6), "Lunch"), is(false));
+        assertThat(
+                plannedMealRepository.existsByHouseIdAndDateAndName(HOUSE_ID, LocalDate.of(2026, 6, 6), "Dinner"),
+                is(true));
+        assertThat(
+                plannedMealRepository.existsByHouseIdAndDateAndName(HOUSE_ID, LocalDate.of(2026, 6, 7), "Dinner"),
+                is(false));
+        assertThat(
+                plannedMealRepository.existsByHouseIdAndDateAndName(HOUSE_ID, LocalDate.of(2026, 6, 6), "Lunch"),
+                is(false));
     }
 
     @Test
     public void shouldFindById() {
-        var saved = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of()));
+        var saved = plannedMealRepository.save(
+                new PlannedMeal(HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of()));
 
         assertThat(plannedMealRepository.findById(saved.id()), is(java.util.Optional.of(saved)));
         assertThat(plannedMealRepository.findById("does-not-exist"), is(java.util.Optional.empty()));
@@ -159,7 +180,8 @@ public class PlannedMealRepositoryTest {
 
     @Test
     public void shouldDeleteById() {
-        var saved = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of()));
+        var saved = plannedMealRepository.save(
+                new PlannedMeal(HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of()));
 
         plannedMealRepository.deleteById(saved.id());
 
@@ -168,11 +190,19 @@ public class PlannedMealRepositoryTest {
 
     @Test
     public void shouldReportExistingNameOnThatDateExcludingGivenId() {
-        var saved = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of()));
+        var saved = plannedMealRepository.save(
+                new PlannedMeal(HOUSE_ID, null, "Dinner", LocalDate.of(2026, 6, 6), List.of()));
 
-        assertThat(plannedMealRepository.existsByHouseIdAndDateAndNameAndIdNot(HOUSE_ID, LocalDate.of(2026, 6, 6), "Dinner", saved.id()), is(false));
+        assertThat(
+                plannedMealRepository.existsByHouseIdAndDateAndNameAndIdNot(
+                        HOUSE_ID, LocalDate.of(2026, 6, 6), "Dinner", saved.id()),
+                is(false));
 
-        var other = plannedMealRepository.save(new PlannedMeal(HOUSE_ID, null, "Lunch", LocalDate.of(2026, 6, 6), List.of()));
-        assertThat(plannedMealRepository.existsByHouseIdAndDateAndNameAndIdNot(HOUSE_ID, LocalDate.of(2026, 6, 6), "Dinner", other.id()), is(true));
+        var other = plannedMealRepository.save(
+                new PlannedMeal(HOUSE_ID, null, "Lunch", LocalDate.of(2026, 6, 6), List.of()));
+        assertThat(
+                plannedMealRepository.existsByHouseIdAndDateAndNameAndIdNot(
+                        HOUSE_ID, LocalDate.of(2026, 6, 6), "Dinner", other.id()),
+                is(true));
     }
 }

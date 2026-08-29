@@ -1,5 +1,9 @@
 package org.reciplease.model;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,11 +16,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Document("recipes")
 @Builder
 @Getter
@@ -26,23 +25,32 @@ public class RecipeDocument {
 
     @Id
     private String id;
+
     private String houseId;
+
     @Field("public")
     @Builder.Default
     private boolean isPublic = false;
+
     private String name;
     private String description;
     private String sourceUrl;
+
     @Builder.Default
     private List<String> steps = new ArrayList<>();
+
     @Builder.Default
     private List<RecipeIngredientDocument> ingredients = new ArrayList<>();
+
     @CreatedBy
     private String createdBy;
+
     @CreatedDate
     private Instant createdAt;
+
     @LastModifiedBy
     private String updatedBy;
+
     @LastModifiedDate
     private Instant updatedAt;
 
@@ -80,9 +88,7 @@ public class RecipeDocument {
                 .updatedAt(updatedAt)
                 .build();
         if (ingredients != null) {
-            ingredients.stream()
-                    .map(RecipeIngredientDocument::toModel)
-                    .forEach(recipe::addIngredient);
+            ingredients.stream().map(RecipeIngredientDocument::toModel).forEach(recipe::addIngredient);
         }
         return recipe;
     }

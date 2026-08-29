@@ -3,6 +3,11 @@ package org.reciplease.service;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Clock;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.reciplease.model.FoodConsumption;
 import org.reciplease.model.GoogleHealthConnection;
 import org.reciplease.model.LoggedFoodHistoryEntry;
@@ -12,12 +17,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-
-import java.time.Clock;
-import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Talks to the Google Health API (nutrition logging, nutrition-log history) on behalf of a
@@ -42,16 +41,18 @@ import java.util.UUID;
 @Service
 public class GoogleHealthAdapter implements FoodConsumptionLoggerPort {
 
-    private static final String NUTRITION_LOG_LIST_URL = "https://health.googleapis.com/v4/users/me/dataTypes/nutrition-log/dataPoints";
-    private static final String NUTRITION_LOG_URL = "https://health.googleapis.com/v4/users/me/dataTypes/nutrition-log/dataPoints/{dataPointId}";
+    private static final String NUTRITION_LOG_LIST_URL =
+            "https://health.googleapis.com/v4/users/me/dataTypes/nutrition-log/dataPoints";
+    private static final String NUTRITION_LOG_URL =
+            "https://health.googleapis.com/v4/users/me/dataTypes/nutrition-log/dataPoints/{dataPointId}";
 
     private final GoogleHealthConnectionRepository googleHealthConnectionRepository;
     private final Clock clock;
     private final RestClient restClient;
 
     @Autowired
-    public GoogleHealthAdapter(final GoogleHealthConnectionRepository googleHealthConnectionRepository,
-                                final Clock clock) {
+    public GoogleHealthAdapter(
+            final GoogleHealthConnectionRepository googleHealthConnectionRepository, final Clock clock) {
         // Built directly rather than injecting a Spring-provided RestClient.Builder bean,
         // since that bean is only auto-configured in a full web application context — the
         // Cucumber features module boots this service in a plain context without it.
@@ -62,9 +63,10 @@ public class GoogleHealthAdapter implements FoodConsumptionLoggerPort {
      * Test-only entry point letting {@link org.springframework.test.web.client.MockRestServiceServer}
      * bind to a pre-built {@link RestClient} instead of the one the public constructor builds.
      */
-    GoogleHealthAdapter(final GoogleHealthConnectionRepository googleHealthConnectionRepository,
-                         final Clock clock,
-                         final RestClient restClient) {
+    GoogleHealthAdapter(
+            final GoogleHealthConnectionRepository googleHealthConnectionRepository,
+            final Clock clock,
+            final RestClient restClient) {
         this.googleHealthConnectionRepository = googleHealthConnectionRepository;
         this.clock = clock;
         this.restClient = restClient;
@@ -77,14 +79,19 @@ public class GoogleHealthAdapter implements FoodConsumptionLoggerPort {
      * for the first time and, every time the frontend proactively refreshes an expiring
      * access token, to push the refreshed tokens back for storage.
      */
-    public GoogleHealthConnection storeConnection(final String userId, final String accessToken, final String refreshToken,
-                                                    final long expiresIn, final String scope) {
+    public GoogleHealthConnection storeConnection(
+            final String userId,
+            final String accessToken,
+            final String refreshToken,
+            final long expiresIn,
+            final String scope) {
         final var now = clock.instant();
-        final var createdAt = googleHealthConnectionRepository.findByUserId(userId)
+        final var createdAt = googleHealthConnectionRepository
+                .findByUserId(userId)
                 .map(GoogleHealthConnection::createdAt)
                 .orElse(now);
-        final var connection = new GoogleHealthConnection(userId, accessToken, refreshToken,
-                now.plusSeconds(expiresIn), scope, createdAt, now);
+        final var connection = new GoogleHealthConnection(
+                userId, accessToken, refreshToken, now.plusSeconds(expiresIn), scope, createdAt, now);
         return googleHealthConnectionRepository.save(connection);
     }
 
@@ -117,7 +124,8 @@ public class GoogleHealthAdapter implements FoodConsumptionLoggerPort {
     @Override
     public List<LoggedFoodHistoryEntry> history(final String userId) {
         final var connection = requireConnection(userId);
-        final var response = restClient.get()
+        final var response = restClient
+                .get()
                 .uri(NUTRITION_LOG_LIST_URL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + connection.accessToken())
                 .retrieve()
@@ -132,7 +140,9 @@ public class GoogleHealthAdapter implements FoodConsumptionLoggerPort {
     }
 
     private static String foodIdFrom(final String foodReference) {
-        return foodReference != null && foodReference.startsWith("food/") ? foodReference.substring("food/".length()) : null;
+        return foodReference != null && foodReference.startsWith("food/")
+                ? foodReference.substring("food/".length())
+                : null;
     }
 
     /**
@@ -156,18 +166,29 @@ public class GoogleHealthAdapter implements FoodConsumptionLoggerPort {
                 date.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toString());
 
         final var mealType = consumption.mealType().name();
-        final var nutrients = consumption.nutrients().map(GoogleHealthAdapter::toNutrientsPayload).orElse(null);
+        final var nutrients = consumption
+                .nutrients()
+                .map(GoogleHealthAdapter::toNutrientsPayload)
+                .orElse(null);
 
         final NutritionLogRequest body;
         if (consumption.identifiedFoodId().isPresent()) {
             // Best-effort: Google Health's documented Food resource name shape is
             // "food/{foodId}" — reused as the NutritionLog's food reference.
-            body = new NutritionLogRequest(interval, mealType, "food/" + consumption.identifiedFoodId().get(), null, consumption.amount(), null);
+            body = new NutritionLogRequest(
+                    interval,
+                    mealType,
+                    "food/" + consumption.identifiedFoodId().get(),
+                    null,
+                    consumption.amount(),
+                    null);
         } else {
-            body = new NutritionLogRequest(interval, mealType, null, consumption.displayName(), consumption.amount(), nutrients);
+            body = new NutritionLogRequest(
+                    interval, mealType, null, consumption.displayName(), consumption.amount(), nutrients);
         }
 
-        restClient.patch()
+        restClient
+                .patch()
                 .uri(NUTRITION_LOG_URL, dataPointId)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + connection.accessToken())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -177,7 +198,8 @@ public class GoogleHealthAdapter implements FoodConsumptionLoggerPort {
     }
 
     private static NutrientsPayload toNutrientsPayload(final org.reciplease.model.Nutrients nutrients) {
-        return new NutrientsPayload(nutrients.energyKcal(), nutrients.proteinG(), nutrients.fatG(), nutrients.carbohydrateG());
+        return new NutrientsPayload(
+                nutrients.energyKcal(), nutrients.proteinG(), nutrients.fatG(), nutrients.carbohydrateG());
     }
 
     /**
@@ -187,7 +209,8 @@ public class GoogleHealthAdapter implements FoodConsumptionLoggerPort {
      * expiry check or refresh call here.
      */
     private GoogleHealthConnection requireConnection(final String userId) {
-        return googleHealthConnectionRepository.findByUserId(userId)
+        return googleHealthConnectionRepository
+                .findByUserId(userId)
                 .orElseThrow(() -> new FoodConsumptionLoggerNotConnectedException(userId));
     }
 
@@ -217,7 +240,8 @@ public class GoogleHealthAdapter implements FoodConsumptionLoggerPort {
             @JsonProperty("totalCarbohydrate") Double carbohydrateG) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private record NutritionLogListResponse(@JsonProperty("dataPoint") List<NutritionLogDataPoint> dataPoint) {}
+    private record NutritionLogListResponse(
+            @JsonProperty("dataPoint") List<NutritionLogDataPoint> dataPoint) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private record NutritionLogDataPoint(

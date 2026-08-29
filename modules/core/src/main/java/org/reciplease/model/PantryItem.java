@@ -26,7 +26,8 @@ public record PantryItem(
         String barcode,
         byte[] image,
         Instant createdAt,
-        Instant updatedAt) implements Audited, HouseScoped {
+        Instant updatedAt)
+        implements Audited, HouseScoped {
 
     public PantryItem {
         Objects.requireNonNull(name, "name");
@@ -41,33 +42,95 @@ public record PantryItem(
     // Convenience overloads that don't mention `remaining` at all (e.g. for freshly created
     // items, or callers that don't care about the amount/remaining split) — it defaults to
     // `amount` via the compact constructor above.
-    public PantryItem(final String id, final String createdBy, final String houseId, final String name, final String brand, final String measure,
-                          final Double amount, final LocalDate expiration, final String barcode) {
+    public PantryItem(
+            final String id,
+            final String createdBy,
+            final String houseId,
+            final String name,
+            final String brand,
+            final String measure,
+            final Double amount,
+            final LocalDate expiration,
+            final String barcode) {
         this(id, createdBy, houseId, name, brand, measure, amount, null, expiration, barcode, null, null, null);
     }
 
-    public PantryItem(final String id, final String createdBy, final String houseId, final String name, final String brand, final String measure,
-                          final Double amount, final LocalDate expiration, final String barcode, final byte[] image) {
+    public PantryItem(
+            final String id,
+            final String createdBy,
+            final String houseId,
+            final String name,
+            final String brand,
+            final String measure,
+            final Double amount,
+            final LocalDate expiration,
+            final String barcode,
+            final byte[] image) {
         this(id, createdBy, houseId, name, brand, measure, amount, null, expiration, barcode, image, null, null);
     }
 
     // Overloads for callers that do care about the amount/remaining split but not audit fields.
-    public PantryItem(final String id, final String createdBy, final String houseId, final String name, final String brand, final String measure,
-                          final Double amount, final Double remaining, final LocalDate expiration, final String barcode) {
+    public PantryItem(
+            final String id,
+            final String createdBy,
+            final String houseId,
+            final String name,
+            final String brand,
+            final String measure,
+            final Double amount,
+            final Double remaining,
+            final LocalDate expiration,
+            final String barcode) {
         this(id, createdBy, houseId, name, brand, measure, amount, remaining, expiration, barcode, null, null, null);
     }
 
-    public PantryItem(final String id, final String createdBy, final String houseId, final String name, final String brand, final String measure,
-                          final Double amount, final Double remaining, final LocalDate expiration, final String barcode, final byte[] image) {
+    public PantryItem(
+            final String id,
+            final String createdBy,
+            final String houseId,
+            final String name,
+            final String brand,
+            final String measure,
+            final Double amount,
+            final Double remaining,
+            final LocalDate expiration,
+            final String barcode,
+            final byte[] image) {
         this(id, createdBy, houseId, name, brand, measure, amount, remaining, expiration, barcode, image, null, null);
     }
 
     public PantryItem withId(final String id) {
-        return new PantryItem(id, createdBy, houseId, name, brand, measure, amount, remaining, expiration, barcode, image, createdAt, updatedAt);
+        return new PantryItem(
+                id,
+                createdBy,
+                houseId,
+                name,
+                brand,
+                measure,
+                amount,
+                remaining,
+                expiration,
+                barcode,
+                image,
+                createdAt,
+                updatedAt);
     }
 
     public PantryItem withRemaining(final Double remaining) {
-        return new PantryItem(id, createdBy, houseId, name, brand, measure, amount, remaining, expiration, barcode, image, createdAt, updatedAt);
+        return new PantryItem(
+                id,
+                createdBy,
+                houseId,
+                name,
+                brand,
+                measure,
+                amount,
+                remaining,
+                expiration,
+                barcode,
+                image,
+                createdAt,
+                updatedAt);
     }
 
     // The generated record equals()/hashCode() would compare `image` by array identity rather
@@ -97,6 +160,19 @@ public record PantryItem(
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, createdBy, houseId, name, brand, measure, amount, remaining, expiration, barcode, Arrays.hashCode(image), createdAt, updatedAt);
+        return Objects.hash(
+                id,
+                createdBy,
+                houseId,
+                name,
+                brand,
+                measure,
+                amount,
+                remaining,
+                expiration,
+                barcode,
+                Arrays.hashCode(image),
+                createdAt,
+                updatedAt);
     }
 }

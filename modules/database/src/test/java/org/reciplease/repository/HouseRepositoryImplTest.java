@@ -1,5 +1,12 @@
 package org.reciplease.repository;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+
+import java.time.Instant;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.HouseDocument;
@@ -11,23 +18,16 @@ import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.empty;
-
 @DataMongoTest
 @Import({HouseRepositoryImpl.class, UserRepositoryImpl.class})
 class HouseRepositoryImplTest {
 
     @Autowired
     private HouseRepository houseRepository;
+
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -38,7 +38,10 @@ class HouseRepositoryImplTest {
 
     @Test
     void membersReturnsAnEmptyListForAHouseWithNoMembers() {
-        var house = mongoTemplate.save(HouseDocument.builder().name("Empty House").createdAt(Instant.now()).build());
+        var house = mongoTemplate.save(HouseDocument.builder()
+                .name("Empty House")
+                .createdAt(Instant.now())
+                .build());
 
         var members = houseRepository.members(house.getId());
 
@@ -62,10 +65,12 @@ class HouseRepositoryImplTest {
 
         var members = houseRepository.members(house.getId());
 
-        assertThat(members, contains(
-                new HouseMembership("owner-id", "owner-handle", HouseRole.OWNER),
-                new HouseMembership("amy-id", "amy-handle", HouseRole.READ_ONLY),
-                new HouseMembership("zed-id", "zed-handle", HouseRole.READ_ONLY)));
+        assertThat(
+                members,
+                contains(
+                        new HouseMembership("owner-id", "owner-handle", HouseRole.OWNER),
+                        new HouseMembership("amy-id", "amy-handle", HouseRole.READ_ONLY),
+                        new HouseMembership("zed-id", "zed-handle", HouseRole.READ_ONLY)));
     }
 
     @Test
@@ -84,7 +89,8 @@ class HouseRepositoryImplTest {
     @Test
     void addMemberThenMembersReflectsTheUpdatedRole() {
         userRepository.save(new User("user-1", "user1-handle"));
-        var house = mongoTemplate.save(HouseDocument.builder().name("House").createdAt(Instant.now()).build());
+        var house = mongoTemplate.save(
+                HouseDocument.builder().name("House").createdAt(Instant.now()).build());
 
         houseRepository.addMember(house.getId(), "user-1", HouseRole.READ_ONLY);
         houseRepository.addMember(house.getId(), "user-1", HouseRole.OWNER);
@@ -98,7 +104,8 @@ class HouseRepositoryImplTest {
     void removeMemberDropsThatMemberButLeavesOthers() {
         userRepository.save(new User("user-1", "user1-handle"));
         userRepository.save(new User("user-2", "user2-handle"));
-        var house = mongoTemplate.save(HouseDocument.builder().name("House").createdAt(Instant.now()).build());
+        var house = mongoTemplate.save(
+                HouseDocument.builder().name("House").createdAt(Instant.now()).build());
         houseRepository.addMember(house.getId(), "user-1", HouseRole.OWNER);
         houseRepository.addMember(house.getId(), "user-2", HouseRole.READ_ONLY);
 

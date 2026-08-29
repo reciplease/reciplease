@@ -9,6 +9,7 @@ import org.reciplease.model.HouseRole;
 public class CreateApiKeyRequest {
     @NotBlank
     String name;
+
     @NotNull
     HouseRole role;
 }

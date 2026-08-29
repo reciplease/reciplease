@@ -1,8 +1,7 @@
 package org.reciplease.model;
 
-import lombok.Value;
-
 import java.util.List;
+import lombok.Value;
 
 @Value
 public class ShoppingList {

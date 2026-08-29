@@ -1,8 +1,7 @@
 package org.reciplease.repository;
 
-import org.reciplease.model.User;
-
 import java.util.Optional;
+import org.reciplease.model.User;
 
 /**
  * Stores authenticated, allowlisted users and the provider identities linked to them.

@@ -1,5 +1,17 @@
 package org.reciplease.service;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -10,19 +22,6 @@ import org.reciplease.model.Invite;
 import org.reciplease.repository.HouseRepository;
 import org.reciplease.repository.InviteRepository;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @MockitoSettings
 class InviteServiceTest {
 
@@ -30,8 +29,10 @@ class InviteServiceTest {
 
     @Mock
     private InviteRepository inviteRepository;
+
     @Mock
     private HouseRepository houseRepository;
+
     @Mock
     private InviteCodeGenerator inviteCodeGenerator;
 
@@ -82,7 +83,8 @@ class InviteServiceTest {
     @Test
     void pendingInvitesExcludesAlreadyUsedInvites() {
         var pending = new Invite("invite-1", "code1", HOUSE_ID, HouseRole.OWNER, Instant.now(), null, null);
-        var used = new Invite("invite-2", "code2", HOUSE_ID, HouseRole.READ_ONLY, Instant.now(), Instant.now(), "user-1");
+        var used =
+                new Invite("invite-2", "code2", HOUSE_ID, HouseRole.READ_ONLY, Instant.now(), Instant.now(), "user-1");
         when(inviteRepository.findAllForHouse(HOUSE_ID)).thenReturn(List.of(pending, used));
 
         var actual = inviteService.pendingInvites(HOUSE_ID);

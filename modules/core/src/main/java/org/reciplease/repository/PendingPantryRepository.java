@@ -1,9 +1,8 @@
 package org.reciplease.repository;
 
-import org.reciplease.model.PendingPantryItem;
-
 import java.util.List;
 import java.util.Optional;
+import org.reciplease.model.PendingPantryItem;
 
 public interface PendingPantryRepository {
     Optional<PendingPantryItem> findById(String id);

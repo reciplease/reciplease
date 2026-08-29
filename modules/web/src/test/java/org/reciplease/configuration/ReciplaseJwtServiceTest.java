@@ -1,16 +1,15 @@
 package org.reciplease.configuration;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.junit.jupiter.api.Test;
-
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import org.junit.jupiter.api.Test;
 
 class ReciplaseJwtServiceTest {
 
@@ -62,13 +61,15 @@ class ReciplaseJwtServiceTest {
 
     @Test
     void mintRespectsTheConfiguredAccessTokenTtl() {
-        var shortLivedService = new ReciplaseJwtService("a-sufficiently-long-test-signing-secret", Duration.ofMinutes(20));
+        var shortLivedService =
+                new ReciplaseJwtService("a-sufficiently-long-test-signing-secret", Duration.ofMinutes(20));
         var before = Instant.now();
 
         var token = shortLivedService.mint("user-1");
 
         var claims = Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor("a-sufficiently-long-test-signing-secret".getBytes(StandardCharsets.UTF_8)))
+                .verifyWith(
+                        Keys.hmacShaKeyFor("a-sufficiently-long-test-signing-secret".getBytes(StandardCharsets.UTF_8)))
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();

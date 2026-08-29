@@ -21,6 +21,7 @@ public class UserIdentityDocument {
 
     @Id
     private String id;
+
     private String userId;
     /** The provider account's email at link time, so the user can tell identities apart. May be null. */
     private String email;

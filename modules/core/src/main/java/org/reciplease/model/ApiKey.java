@@ -20,5 +20,5 @@ public record ApiKey(
         String keyPrefix,
         String keyHash,
         Instant createdAt,
-        Instant lastUsedAt) implements Identifiable, HouseScoped {
-}
+        Instant lastUsedAt)
+        implements Identifiable, HouseScoped {}

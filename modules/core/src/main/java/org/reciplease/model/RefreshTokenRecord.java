@@ -23,5 +23,5 @@ public record RefreshTokenRecord(
         Instant issuedAt,
         Instant expiresAt,
         Instant usedAt,
-        Instant revokedAt) implements Identifiable {
-}
+        Instant revokedAt)
+        implements Identifiable {}

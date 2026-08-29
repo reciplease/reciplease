@@ -1,5 +1,6 @@
 package org.reciplease.model;
 
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,8 +9,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.time.Instant;
 
 /**
  * Tracks a WebAuthn challenge between being issued (a creation/request-options call) and
@@ -30,6 +29,7 @@ public class WebAuthnChallengeDocument {
     private String id;
     /** The user id the challenge was issued for; null for the usernameless login flow. */
     private String userId;
+
     @Indexed(expireAfter = "5m")
     @CreatedDate
     private Instant createdAt;

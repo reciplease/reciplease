@@ -5,5 +5,4 @@ package org.reciplease.model;
  * acts with. Unlike a user JWT, there is no separate membership lookup — the key itself carries
  * its authorization.
  */
-public record ApiKeyPrincipal(String apiKeyId, String houseId, HouseRole role) {
-}
+public record ApiKeyPrincipal(String apiKeyId, String houseId, HouseRole role) {}

@@ -1,11 +1,11 @@
 package org.reciplease.model;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 class PlannedIngredientDocumentTest {
 
@@ -26,7 +26,8 @@ class PlannedIngredientDocumentTest {
     void toModel() {
         var document = PlannedIngredientDocument.builder()
                 .ingredient(RecipeIngredientDocument.from(new RecipeIngredient("bread", "ITEMS", 2d)))
-                .allocations(java.util.List.of(PantryAllocationDocument.from(new PantryAllocation("item-1", "111", 2d))))
+                .allocations(
+                        java.util.List.of(PantryAllocationDocument.from(new PantryAllocation("item-1", "111", 2d))))
                 .build();
 
         var item = document.toModel();

@@ -1,5 +1,12 @@
 package org.reciplease.repository;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+
+import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.HouseRole;
@@ -9,20 +16,13 @@ import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import java.time.Instant;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-
 @DataMongoTest
 @Import(InviteRepositoryImpl.class)
 class InviteRepositoryImplTest {
 
     @Autowired
     private InviteRepository inviteRepository;
+
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -54,7 +54,8 @@ class InviteRepositoryImplTest {
 
     @Test
     void deleteRemovesTheInvite() {
-        var created = inviteRepository.create(new Invite(null, "code1", "house-1", HouseRole.OWNER, Instant.now(), null, null));
+        var created = inviteRepository.create(
+                new Invite(null, "code1", "house-1", HouseRole.OWNER, Instant.now(), null, null));
 
         inviteRepository.delete(created.id());
 

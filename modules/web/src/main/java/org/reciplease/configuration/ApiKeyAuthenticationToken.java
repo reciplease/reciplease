@@ -1,10 +1,9 @@
 package org.reciplease.configuration;
 
+import java.util.List;
 import org.reciplease.model.ApiKeyPrincipal;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
-import java.util.List;
 
 /**
  * The authenticated identity for a request bearing a valid house service-account API key (see

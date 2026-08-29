@@ -1,24 +1,35 @@
 package org.reciplease.dto;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.reciplease.model.PantryItem;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.UUID;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.reciplease.model.PantryItem;
+
 class PantryItemDtoTest {
     @Test
     @DisplayName("create DTO from entity")
     void from() {
-        var item = new PantryItem(UUID.randomUUID().toString(), null, "house-1", "bread", "Warburtons", "ITEMS", 10d, 12d, LocalDate.now(), "0123456789012",
-                new byte[]{1, 2, 3}, Instant.now(), Instant.now());
+        var item = new PantryItem(
+                UUID.randomUUID().toString(),
+                null,
+                "house-1",
+                "bread",
+                "Warburtons",
+                "ITEMS",
+                10d,
+                12d,
+                LocalDate.now(),
+                "0123456789012",
+                new byte[] {1, 2, 3},
+                Instant.now(),
+                Instant.now());
 
         var itemDto = PantryItemDto.from(item);
 
@@ -40,7 +51,16 @@ class PantryItemDtoTest {
     @Test
     @DisplayName("create DTO from entity with no image")
     void fromWithNoImage() {
-        var item = new PantryItem(UUID.randomUUID().toString(), null, "house-1", "bread", null, "ITEMS", 10d, LocalDate.now(), "0123456789012");
+        var item = new PantryItem(
+                UUID.randomUUID().toString(),
+                null,
+                "house-1",
+                "bread",
+                null,
+                "ITEMS",
+                10d,
+                LocalDate.now(),
+                "0123456789012");
 
         var itemDto = PantryItemDto.from(item);
 
@@ -59,7 +79,7 @@ class PantryItemDtoTest {
                 .remaining(6d)
                 .expiration(LocalDate.now())
                 .barcode("0123456789012")
-                .image(new byte[]{1, 2, 3})
+                .image(new byte[] {1, 2, 3})
                 .build();
 
         var item = itemDto.toEntity("house-1");

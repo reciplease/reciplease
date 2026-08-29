@@ -1,23 +1,22 @@
 package org.reciplease.repository;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.reciplease.configuration.MongoAuditingConfig;
-import org.bson.Document;
-import org.reciplease.model.PendingPantryItem;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.data.mongodb.core.MongoTemplate;
-
-import java.util.Optional;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+
+import java.util.Optional;
+import org.bson.Document;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.reciplease.configuration.MongoAuditingConfig;
+import org.reciplease.model.PendingPantryItem;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 @DataMongoTest
 @Import({PendingPantryRepositoryImpl.class, MongoAuditingConfig.class})
@@ -26,6 +25,7 @@ class PendingPantryRepositoryTest {
 
     @Autowired
     private PendingPantryRepository pendingPantryRepository;
+
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -36,10 +36,11 @@ class PendingPantryRepositoryTest {
 
     @Test
     void shouldSaveAndFindByIdIncludingImages() {
-        var barcodeImage = new byte[]{7, 8, 9};
-        var expirationImage = new byte[]{1, 2, 3};
-        var measureImage = new byte[]{4, 5, 6};
-        var saved = pendingPantryRepository.save(new PendingPantryItem(null, null, HOUSE_ID, barcodeImage, expirationImage, measureImage));
+        var barcodeImage = new byte[] {7, 8, 9};
+        var expirationImage = new byte[] {1, 2, 3};
+        var measureImage = new byte[] {4, 5, 6};
+        var saved = pendingPantryRepository.save(
+                new PendingPantryItem(null, null, HOUSE_ID, barcodeImage, expirationImage, measureImage));
 
         var found = pendingPantryRepository.findById(saved.id());
 
@@ -52,9 +53,9 @@ class PendingPantryRepositoryTest {
     @Test
     @DisplayName("reads a pre-migration document's \"barcode\" string field as legacyBarcode, not barcodeImage")
     void shouldReadLegacyBarcodeFromPreMigrationDocument() {
-        mongoTemplate.getCollection("pendingPantry").insertOne(new Document()
-                .append("houseId", HOUSE_ID)
-                .append("barcode", "5012345678900"));
+        mongoTemplate
+                .getCollection("pendingPantry")
+                .insertOne(new Document().append("houseId", HOUSE_ID).append("barcode", "5012345678900"));
 
         var found = pendingPantryRepository.findAllByHouseId(HOUSE_ID);
 
@@ -80,9 +81,11 @@ class PendingPantryRepositoryTest {
     @Test
     @DisplayName("findAllByHouseId returns only that house's items, oldest first")
     void shouldFindAllByHouseIdOldestFirst() {
-        var first = pendingPantryRepository.save(new PendingPantryItem(null, null, HOUSE_ID, new byte[]{1}, null, null));
-        var second = pendingPantryRepository.save(new PendingPantryItem(null, null, HOUSE_ID, new byte[]{2}, null, null));
-        pendingPantryRepository.save(new PendingPantryItem(null, null, "other-house", new byte[]{3}, null, null));
+        var first =
+                pendingPantryRepository.save(new PendingPantryItem(null, null, HOUSE_ID, new byte[] {1}, null, null));
+        var second =
+                pendingPantryRepository.save(new PendingPantryItem(null, null, HOUSE_ID, new byte[] {2}, null, null));
+        pendingPantryRepository.save(new PendingPantryItem(null, null, "other-house", new byte[] {3}, null, null));
 
         var found = pendingPantryRepository.findAllByHouseId(HOUSE_ID);
 

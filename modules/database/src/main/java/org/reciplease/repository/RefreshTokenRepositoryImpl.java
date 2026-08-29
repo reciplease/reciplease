@@ -1,5 +1,10 @@
 package org.reciplease.repository;
 
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.core.query.Query.query;
+
+import java.time.Instant;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.model.RefreshTokenDocument;
 import org.reciplease.model.RefreshTokenRecord;
@@ -7,12 +12,6 @@ import org.reciplease.repository.mongo.RefreshTokenMongoRepository;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
-
-import java.time.Instant;
-import java.util.Optional;
-
-import static org.springframework.data.mongodb.core.query.Criteria.where;
-import static org.springframework.data.mongodb.core.query.Query.query;
 
 @Repository
 @RequiredArgsConstructor
@@ -23,7 +22,9 @@ public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
 
     @Override
     public RefreshTokenRecord save(final RefreshTokenRecord record) {
-        return refreshTokenMongoRepository.save(RefreshTokenDocument.from(record)).toModel();
+        return refreshTokenMongoRepository
+                .save(RefreshTokenDocument.from(record))
+                .toModel();
     }
 
     @Override
@@ -40,12 +41,16 @@ public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
     @Override
     public void revokeFamily(final String familyId, final Instant revokedAt) {
         mongoTemplate.updateMulti(
-                query(where("familyId").is(familyId)), new Update().set("revokedAt", revokedAt), RefreshTokenDocument.class);
+                query(where("familyId").is(familyId)),
+                new Update().set("revokedAt", revokedAt),
+                RefreshTokenDocument.class);
     }
 
     @Override
     public void revokeAllForUser(final String userId, final Instant revokedAt) {
         mongoTemplate.updateMulti(
-                query(where("userId").is(userId)), new Update().set("revokedAt", revokedAt), RefreshTokenDocument.class);
+                query(where("userId").is(userId)),
+                new Update().set("revokedAt", revokedAt),
+                RefreshTokenDocument.class);
     }
 }

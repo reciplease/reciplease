@@ -1,14 +1,13 @@
 package org.reciplease.model;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.time.Instant;
-import java.time.LocalDate;
 
 /**
  * A snapshot of an {@link PantryItemDocument} taken right before it's deleted (binned, eaten
@@ -23,6 +22,7 @@ public class ArchivedPantryItemDocument {
 
     @Id
     private String id;
+
     private String originalId;
     private String houseId;
     private String name;

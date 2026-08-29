@@ -1,9 +1,8 @@
 package org.reciplease.repository;
 
-import org.reciplease.model.RefreshTokenRecord;
-
 import java.time.Instant;
 import java.util.Optional;
+import org.reciplease.model.RefreshTokenRecord;
 
 public interface RefreshTokenRepository {
 

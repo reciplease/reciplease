@@ -8,8 +8,7 @@ import java.util.HexFormat;
 /** Hashes raw API key secrets for storage; SHA-256 is enough here since keys are high-entropy random values, not passwords. */
 final class ApiKeyHasher {
 
-    private ApiKeyHasher() {
-    }
+    private ApiKeyHasher() {}
 
     static String hash(final String rawKey) {
         try {

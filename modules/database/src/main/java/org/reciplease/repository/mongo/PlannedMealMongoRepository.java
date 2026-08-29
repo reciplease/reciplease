@@ -1,11 +1,10 @@
 package org.reciplease.repository.mongo;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.reciplease.model.PlannedMealDocument;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
-
-import java.time.LocalDate;
-import java.util.List;
 
 public interface PlannedMealMongoRepository extends MongoRepository<PlannedMealDocument, String> {
     // Spring Data Mongo's derived "Between" excludes the upper bound (unlike JPA's

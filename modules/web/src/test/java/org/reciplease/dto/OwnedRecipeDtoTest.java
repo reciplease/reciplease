@@ -1,13 +1,12 @@
 package org.reciplease.dto;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.Recipe;
-
-import java.util.UUID;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 
 class OwnedRecipeDtoTest {
 
@@ -19,7 +18,8 @@ class OwnedRecipeDtoTest {
                 .name("Toast")
                 .houseId("house-1")
                 .build();
-        var createdBy = UserSummaryDto.builder().userId("user-1").handle("alice").build();
+        var createdBy =
+                UserSummaryDto.builder().userId("user-1").handle("alice").build();
         var updatedBy = UserSummaryDto.builder().userId("user-2").handle("bob").build();
 
         var recipeDto = OwnedRecipeDto.from(recipe, createdBy, updatedBy);

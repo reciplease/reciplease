@@ -1,5 +1,10 @@
 package org.reciplease.service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.model.ApiKey;
 import org.reciplease.model.ApiKeyPrincipal;
@@ -7,12 +12,6 @@ import org.reciplease.model.CreatedApiKey;
 import org.reciplease.model.HouseRole;
 import org.reciplease.repository.ApiKeyRepository;
 import org.springframework.stereotype.Service;
-
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,10 +26,19 @@ public class ApiKeyService {
      * Mints and persists a new house-scoped service-account key. The raw secret is only ever
      * available on the returned {@link CreatedApiKey} — only its hash is stored.
      */
-    public CreatedApiKey create(final String houseId, final String name, final HouseRole role, final String createdByUserId) {
+    public CreatedApiKey create(
+            final String houseId, final String name, final HouseRole role, final String createdByUserId) {
         final var rawKey = apiKeyGenerator.generate();
         final var apiKey = new ApiKey(
-                null, houseId, name, role, createdByUserId, prefixOf(rawKey), ApiKeyHasher.hash(rawKey), Instant.now(), null);
+                null,
+                houseId,
+                name,
+                role,
+                createdByUserId,
+                prefixOf(rawKey),
+                ApiKeyHasher.hash(rawKey),
+                Instant.now(),
+                null);
         return new CreatedApiKey(apiKeyRepository.create(apiKey), rawKey);
     }
 
@@ -45,7 +53,8 @@ public class ApiKeyService {
      * different house.
      */
     public boolean revoke(final String houseId, final String id) {
-        final var belongsToHouse = apiKeyRepository.findById(id)
+        final var belongsToHouse = apiKeyRepository
+                .findById(id)
                 .filter(key -> key.houseId().equals(houseId))
                 .isPresent();
         if (belongsToHouse) {
@@ -63,7 +72,8 @@ public class ApiKeyService {
             return Optional.empty();
         }
         final var candidateHash = ApiKeyHasher.hash(rawKey);
-        return apiKeyRepository.findByPrefix(prefixOf(rawKey))
+        return apiKeyRepository
+                .findByPrefix(prefixOf(rawKey))
                 .filter(key -> constantTimeEquals(key.keyHash(), candidateHash))
                 .map(key -> {
                     apiKeyRepository.updateLastUsedAt(key.id(), Instant.now());

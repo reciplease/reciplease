@@ -1,14 +1,5 @@
 package org.reciplease.configuration;
 
-import org.junit.jupiter.api.Test;
-import org.reciplease.model.House;
-import org.reciplease.repository.HouseRepository;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.oauth2.jwt.Jwt;
-
-import java.time.Instant;
-import java.util.List;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.emptyIterable;
@@ -16,6 +7,14 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+
+import java.time.Instant;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.reciplease.model.House;
+import org.reciplease.repository.HouseRepository;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 class MembershipJwtAuthenticationConverterTest {
 
@@ -37,13 +36,11 @@ class MembershipJwtAuthenticationConverterTest {
 
     @Test
     void grantsRoleWhenTheUserBelongsToAtLeastOneHouse() {
-        when(houseRepository.findAllForUser(SUBJECT))
-                .thenReturn(List.of(new House("house-1", "Home", Instant.now())));
+        when(houseRepository.findAllForUser(SUBJECT)).thenReturn(List.of(new House("house-1", "Home", Instant.now())));
 
         final AbstractAuthenticationToken auth = converter.convert(jwt());
 
-        assertThat(auth.getAuthorities().stream().map(Object::toString).toList(),
-                contains("ROLE_RECIPLEASE"));
+        assertThat(auth.getAuthorities().stream().map(Object::toString).toList(), contains("ROLE_RECIPLEASE"));
         assertThat(auth.getName(), is(SUBJECT));
     }
 

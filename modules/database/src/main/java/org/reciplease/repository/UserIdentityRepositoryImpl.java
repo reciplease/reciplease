@@ -1,13 +1,12 @@
 package org.reciplease.repository;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.model.LinkedIdentity;
 import org.reciplease.model.UserIdentityDocument;
 import org.reciplease.repository.mongo.PasskeyCredentialMongoRepository;
 import org.reciplease.repository.mongo.UserIdentityMongoRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 @RequiredArgsConstructor

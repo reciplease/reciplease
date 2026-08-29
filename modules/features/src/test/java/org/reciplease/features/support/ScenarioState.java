@@ -1,11 +1,10 @@
 package org.reciplease.features.support;
 
 import io.cucumber.spring.ScenarioScope;
-import org.springframework.stereotype.Component;
-import org.springframework.test.web.servlet.ResultActions;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.stereotype.Component;
+import org.springframework.test.web.servlet.ResultActions;
 
 /** Shared, per-scenario state for step definitions (cucumber-spring resets this every scenario). */
 @Component

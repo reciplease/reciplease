@@ -1,9 +1,8 @@
 package org.reciplease.repository;
 
-import org.reciplease.model.Recipe;
-
 import java.util.List;
 import java.util.Optional;
+import org.reciplease.model.Recipe;
 
 public interface RecipeRepository {
     List<Recipe> findAll();

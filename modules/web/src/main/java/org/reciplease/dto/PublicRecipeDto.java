@@ -1,17 +1,18 @@
 package org.reciplease.dto;
 
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.Instant;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Value;
 import org.reciplease.model.Recipe;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * The public view of a recipe: safe for anonymous/public browsing and for authenticated
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 @Schema(name = "PublicRecipe")
 public class PublicRecipeDto implements RecipeDto {
 
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
     String recipeId;
     // Without an explicit name, Jackson's getter-based property naming maps the
     // isPublic() accessor to JSON key "public" on serialization, while the
@@ -35,15 +36,36 @@ public class PublicRecipeDto implements RecipeDto {
     // swagger-core's schema scan picks up both names and emits the property twice.
     @Getter(onMethod_ = @JsonProperty("isPublic"))
     @Builder.Default
+    @Schema(requiredMode = REQUIRED)
     boolean isPublic = false;
+
+    @Schema(requiredMode = REQUIRED)
     String name;
+
+    @Schema(requiredMode = REQUIRED)
     String description;
+
+    @Schema(requiredMode = REQUIRED)
     String sourceUrl;
+
+    @Schema(requiredMode = REQUIRED)
     List<String> steps;
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
     Set<RecipeIngredientDto> ingredients;
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
     Instant updatedAt;
+
+    // Jackson doesn't reliably pick up @JsonProperty from a default interface method, so
+    // this override — and the matching one on OwnedRecipeDto — restates it explicitly. It's
+    // also the EXISTING_PROPERTY discriminant for the RecipeDto polymorphic union (see
+    // RecipeDto's @JsonTypeInfo).
+    @Override
+    @JsonProperty("owned")
+    public boolean isOwned() {
+        return false;
+    }
 
     public static PublicRecipeDto from(final Recipe recipe) {
         return PublicRecipeDto.builder()

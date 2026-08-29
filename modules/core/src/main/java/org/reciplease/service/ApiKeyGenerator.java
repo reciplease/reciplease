@@ -1,9 +1,8 @@
 package org.reciplease.service;
 
-import org.springframework.stereotype.Component;
-
 import java.security.SecureRandom;
 import java.util.Base64;
+import org.springframework.stereotype.Component;
 
 /**
  * Generates raw API key secrets. The {@code rcpl_} prefix distinguishes them from Reciplease's

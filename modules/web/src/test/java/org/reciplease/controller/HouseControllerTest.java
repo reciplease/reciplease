@@ -1,5 +1,19 @@
 package org.reciplease.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.Instant;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,21 +34,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.Instant;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(HouseController.class)
 @WithHouseOwner
 @Import(MethodSecurityTestSupport.class)
@@ -44,8 +43,10 @@ class HouseControllerTest {
 
     @MockitoBean
     private HouseRepository houseRepository;
+
     @MockitoBean
     private InviteService inviteService;
+
     @MockitoBean(name = "houseAccess")
     private HouseAccess houseAccess;
 
@@ -62,9 +63,10 @@ class HouseControllerTest {
     @Test
     @DisplayName("should return members with their handles")
     void findMembers() throws Exception {
-        when(houseRepository.members(HOUSE_ID)).thenReturn(List.of(
-                new HouseMembership("owner-id", "owner-handle", HouseRole.OWNER),
-                new HouseMembership("member-id", "member-handle", HouseRole.READ_ONLY)));
+        when(houseRepository.members(HOUSE_ID))
+                .thenReturn(List.of(
+                        new HouseMembership("owner-id", "owner-handle", HouseRole.OWNER),
+                        new HouseMembership("member-id", "member-handle", HouseRole.READ_ONLY)));
 
         mockMvc.perform(get("/api/houses/members"))
                 .andExpect(status().isOk())
@@ -79,9 +81,10 @@ class HouseControllerTest {
     @DisplayName("returns a null handle for members who haven't set one")
     @WithMockUser(username = "owner-id", authorities = "ROLE_RECIPLEASE")
     void findMembersWithNullHandle() throws Exception {
-        when(houseRepository.members(HOUSE_ID)).thenReturn(List.of(
-                new HouseMembership("owner-id", null, HouseRole.OWNER),
-                new HouseMembership("member-id", "member-handle", HouseRole.READ_ONLY)));
+        when(houseRepository.members(HOUSE_ID))
+                .thenReturn(List.of(
+                        new HouseMembership("owner-id", null, HouseRole.OWNER),
+                        new HouseMembership("member-id", "member-handle", HouseRole.READ_ONLY)));
 
         mockMvc.perform(get("/api/houses/members"))
                 .andExpect(status().isOk())
@@ -99,15 +102,14 @@ class HouseControllerTest {
         when(houseAccess.isOwner()).thenReturn(false);
         when(houseRepository.members(HOUSE_ID)).thenReturn(List.of());
 
-        mockMvc.perform(get("/api/houses/members"))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/houses/members")).andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("should update a member's role")
     void updateMemberRole() throws Exception {
-        when(houseRepository.members(HOUSE_ID)).thenReturn(List.of(
-                new HouseMembership("member-id", "member-handle", HouseRole.OWNER)));
+        when(houseRepository.members(HOUSE_ID))
+                .thenReturn(List.of(new HouseMembership("member-id", "member-handle", HouseRole.OWNER)));
 
         mockMvc.perform(patch("/api/houses/members/{userId}", "member-id")
                         .with(csrf())
@@ -140,8 +142,8 @@ class HouseControllerTest {
     @Test
     @DisplayName("should remove a member and return the updated list")
     void removeMember() throws Exception {
-        when(houseRepository.members(HOUSE_ID)).thenReturn(List.of(
-                new HouseMembership("user", "owner-handle", HouseRole.OWNER)));
+        when(houseRepository.members(HOUSE_ID))
+                .thenReturn(List.of(new HouseMembership("user", "owner-handle", HouseRole.OWNER)));
 
         mockMvc.perform(delete("/api/houses/members/{userId}", "member-id").with(csrf()))
                 .andExpect(status().isOk())
@@ -176,8 +178,9 @@ class HouseControllerTest {
     @DisplayName("should return pending invites")
     void findPendingInvites() throws Exception {
         var createdAt = Instant.parse("2026-01-01T00:00:00Z");
-        when(inviteService.pendingInvites(HOUSE_ID)).thenReturn(List.of(
-                new Invite("invite-1", "abc123", HOUSE_ID, HouseRole.READ_ONLY, createdAt, null, null)));
+        when(inviteService.pendingInvites(HOUSE_ID))
+                .thenReturn(List.of(
+                        new Invite("invite-1", "abc123", HOUSE_ID, HouseRole.READ_ONLY, createdAt, null, null)));
 
         mockMvc.perform(get("/api/houses/invites"))
                 .andExpect(status().isOk())
@@ -193,8 +196,7 @@ class HouseControllerTest {
     void findPendingInvitesForbiddenForReadOnly() throws Exception {
         when(houseAccess.isOwner()).thenReturn(false);
 
-        mockMvc.perform(get("/api/houses/invites"))
-                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/houses/invites")).andExpect(status().isForbidden());
     }
 
     @Test

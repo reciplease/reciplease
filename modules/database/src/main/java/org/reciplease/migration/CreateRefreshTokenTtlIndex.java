@@ -3,12 +3,11 @@ package org.reciplease.migration;
 import io.mongock.api.annotations.ChangeUnit;
 import io.mongock.api.annotations.Execution;
 import io.mongock.api.annotations.RollbackExecution;
+import java.time.Duration;
 import org.reciplease.model.RefreshTokenDocument;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.Index;
-
-import java.time.Duration;
 
 /**
  * Refresh tokens expire at a variable time per-record (30 days from issuance), unlike
@@ -21,7 +20,8 @@ public class CreateRefreshTokenTtlIndex {
 
     @Execution
     public void execution(final MongoTemplate mongoTemplate) {
-        mongoTemplate.indexOps(RefreshTokenDocument.class)
+        mongoTemplate
+                .indexOps(RefreshTokenDocument.class)
                 .createIndex(new Index().on("expiresAt", Sort.Direction.ASC).expire(Duration.ZERO));
     }
 

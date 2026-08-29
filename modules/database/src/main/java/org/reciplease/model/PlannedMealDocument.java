@@ -1,5 +1,10 @@
 package org.reciplease.model;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,12 +15,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Document("planned_meals")
 @Builder
 @Getter
@@ -25,18 +24,24 @@ public class PlannedMealDocument {
 
     @Id
     private String id;
+
     private String houseId;
     private String recipeId;
     private String name;
     private LocalDate date;
+
     @Builder.Default
     private List<PlannedIngredientDocument> items = new ArrayList<>();
+
     @CreatedBy
     private String createdBy;
+
     @CreatedDate
     private Instant createdAt;
+
     @LastModifiedDate
     private Instant updatedAt;
+
     private Instant eatenAt;
 
     public static PlannedMealDocument from(final PlannedMeal plannedMeal) {
@@ -57,9 +62,10 @@ public class PlannedMealDocument {
     }
 
     public PlannedMeal toModel() {
-        var resolvedItems = items == null ? List.<PlannedIngredient>of() : items.stream()
-                .map(PlannedIngredientDocument::toModel)
-                .collect(Collectors.toList());
-        return new PlannedMeal(id, createdBy, houseId, recipeId, name, date, resolvedItems, createdAt, updatedAt, eatenAt);
+        var resolvedItems = items == null
+                ? List.<PlannedIngredient>of()
+                : items.stream().map(PlannedIngredientDocument::toModel).collect(Collectors.toList());
+        return new PlannedMeal(
+                id, createdBy, houseId, recipeId, name, date, resolvedItems, createdAt, updatedAt, eatenAt);
     }
 }

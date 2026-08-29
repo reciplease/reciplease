@@ -1,5 +1,10 @@
 package org.reciplease.controller;
 
+import static java.util.stream.Collectors.toList;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseOwner;
@@ -22,12 +27,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
-
 @RestController
 @RequestMapping("api/recipes")
 @RequiredArgsConstructor
@@ -39,8 +38,8 @@ public class RecipeController {
 
     @GetMapping("{uuid}")
     public ResponseEntity<RecipeDto> findById(@PathVariable final String uuid) {
-        final var optionalRecipe = recipeService.findVisibleById(uuid, activeHouseId())
-                .map(this::toDto);
+        final var optionalRecipe =
+                recipeService.findVisibleById(uuid, activeHouseId()).map(this::toDto);
         return ResponseEntity.of(optionalRecipe);
     }
 
@@ -61,7 +60,8 @@ public class RecipeController {
 
     @PutMapping("{uuid}")
     @HouseOwner
-    public ResponseEntity<RecipeDto> update(@PathVariable final String uuid, @RequestBody final PublicRecipeDto recipeDto) {
+    public ResponseEntity<RecipeDto> update(
+            @PathVariable final String uuid, @RequestBody final PublicRecipeDto recipeDto) {
         final var existing = recipeService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
             return ResponseEntity.notFound().build();
@@ -85,7 +85,8 @@ public class RecipeController {
 
     @PutMapping("{uuid}/ingredients")
     @HouseOwner
-    public ResponseEntity<Set<RecipeIngredientDto>> addIngredient(@PathVariable final String uuid, @RequestBody final AddIngredient addIngredient) {
+    public ResponseEntity<Set<RecipeIngredientDto>> addIngredient(
+            @PathVariable final String uuid, @RequestBody final AddIngredient addIngredient) {
         final var existing = recipeService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
             return ResponseEntity.notFound().build();

@@ -1,5 +1,13 @@
 package org.reciplease.controller;
 
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.reciplease.configuration.MethodSecurityTestSupport;
 import org.reciplease.model.Nutrients;
@@ -12,15 +20,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(FoodSearchController.class)
 @WithMockUser(username = "user-1", authorities = "ROLE_RECIPLEASE")
@@ -35,10 +34,14 @@ class FoodSearchControllerTest {
 
     @Test
     void searchReturnsMergedResults() throws Exception {
-        when(foodSearchService.search("user-1", "chick")).thenReturn(List.of(
-                new FoodSearchResult(FoodSearchResultSource.HISTORY, "Chicken Breast, grilled", "food-1", null),
-                new FoodSearchResult(FoodSearchResultSource.CATALOG, "Chicken Tikka Masala", null,
-                        new Nutrients(200.0, 15.0, 8.0, 10.0))));
+        when(foodSearchService.search("user-1", "chick"))
+                .thenReturn(List.of(
+                        new FoodSearchResult(FoodSearchResultSource.HISTORY, "Chicken Breast, grilled", "food-1", null),
+                        new FoodSearchResult(
+                                FoodSearchResultSource.CATALOG,
+                                "Chicken Tikka Masala",
+                                null,
+                                new Nutrients(200.0, 15.0, 8.0, 10.0))));
 
         mockMvc.perform(get("/api/food/search").param("query", "chick"))
                 .andExpect(status().isOk())
@@ -51,8 +54,9 @@ class FoodSearchControllerTest {
 
     @Test
     void barcodeReturnsTheMatchWhenFound() throws Exception {
-        when(foodSearchService.searchByBarcode("012345")).thenReturn(Optional.of(
-                new FoodSearchResult(FoodSearchResultSource.CATALOG, "Oat Milk", null, new Nutrients(45.0, 1.0, 1.5, 6.0))));
+        when(foodSearchService.searchByBarcode("012345"))
+                .thenReturn(Optional.of(new FoodSearchResult(
+                        FoodSearchResultSource.CATALOG, "Oat Milk", null, new Nutrients(45.0, 1.0, 1.5, 6.0))));
 
         mockMvc.perform(get("/api/food/barcode/012345"))
                 .andExpect(status().isOk())
@@ -64,7 +68,6 @@ class FoodSearchControllerTest {
     void barcodeReturnsNotFoundWhenNoMatch() throws Exception {
         when(foodSearchService.searchByBarcode("000000")).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/food/barcode/000000"))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/food/barcode/000000")).andExpect(status().isNotFound());
     }
 }

@@ -1,18 +1,17 @@
 package org.reciplease.dto;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.reciplease.model.Recipe;
-import org.reciplease.model.RecipeIngredient;
-
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.reciplease.model.Recipe;
+import org.reciplease.model.RecipeIngredient;
 
 class PublicRecipeDtoTest {
 
@@ -38,10 +37,8 @@ class PublicRecipeDtoTest {
     @Test
     @DisplayName("description and steps default to null when not set")
     void fromEntityDefaults() {
-        var recipe = Recipe.builder()
-                .id(UUID.randomUUID().toString())
-                .name("Toast")
-                .build();
+        var recipe =
+                Recipe.builder().id(UUID.randomUUID().toString()).name("Toast").build();
 
         var recipeDto = PublicRecipeDto.from(recipe);
 
@@ -85,7 +82,8 @@ class PublicRecipeDtoTest {
     @Test
     @DisplayName("sourceUrl is null when not set")
     void sourceUrlNullByDefault() {
-        var recipe = Recipe.builder().id(UUID.randomUUID().toString()).name("Toast").build();
+        var recipe =
+                Recipe.builder().id(UUID.randomUUID().toString()).name("Toast").build();
         assertThat(PublicRecipeDto.from(recipe).getSourceUrl(), is((String) null));
     }
 

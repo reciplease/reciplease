@@ -1,5 +1,11 @@
 package org.reciplease.repository;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.model.ArchivedPantryItemDocument;
 import org.reciplease.model.PantryItem;
@@ -8,13 +14,6 @@ import org.reciplease.repository.mongo.PantryArchiveMongoRepository;
 import org.reciplease.repository.mongo.PantryMongoRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -34,14 +33,18 @@ public class PantryRepositoryImpl implements PantryRepository {
 
     @Override
     public List<PantryItem> expiresAfter(final String houseId, final LocalDate date) {
-        return pantryMongoRepository.findByHouseIdAndExpirationGreaterThanEqual(houseId, date, Sort.by(Sort.Direction.ASC, "name")).stream()
+        return pantryMongoRepository
+                .findByHouseIdAndExpirationGreaterThanEqual(houseId, date, Sort.by(Sort.Direction.ASC, "name"))
+                .stream()
                 .map(PantryItemDocument::toModel)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<PantryItem> betweenDates(final String houseId, final LocalDate date) {
-        return pantryMongoRepository.findByHouseIdAndExpirationBefore(houseId, date, Sort.by(Sort.Direction.ASC, "name")).stream()
+        return pantryMongoRepository
+                .findByHouseIdAndExpirationBefore(houseId, date, Sort.by(Sort.Direction.ASC, "name"))
+                .stream()
                 .map(PantryItemDocument::toModel)
                 .collect(Collectors.toList());
     }
@@ -85,8 +88,10 @@ public class PantryRepositoryImpl implements PantryRepository {
     // a database-only concern, nothing above this layer needs to know it happens.
     @Override
     public void deleteById(final String id) {
-        pantryMongoRepository.findById(id)
-                .ifPresent(doc -> pantryArchiveMongoRepository.save(ArchivedPantryItemDocument.from(doc, Instant.now())));
+        pantryMongoRepository
+                .findById(id)
+                .ifPresent(
+                        doc -> pantryArchiveMongoRepository.save(ArchivedPantryItemDocument.from(doc, Instant.now())));
         pantryMongoRepository.deleteById(id);
     }
 }

@@ -1,5 +1,6 @@
 package org.reciplease.controller;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.dto.FoodSearchResultDto;
 import org.reciplease.service.FoodSearchService;
@@ -11,8 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 /**
  * "What food did I mean" search for the Eat flow: merges the current user's own logged-food
@@ -38,7 +37,8 @@ public class FoodSearchController {
     @GetMapping("barcode/{barcode}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<FoodSearchResultDto> barcode(@PathVariable final String barcode) {
-        return foodSearchService.searchByBarcode(barcode)
+        return foodSearchService
+                .searchByBarcode(barcode)
                 .map(FoodSearchResultDto::from)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());

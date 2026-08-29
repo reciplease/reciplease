@@ -1,6 +1,9 @@
 package org.reciplease.controller;
 
+import static java.util.stream.Collectors.toList;
+
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseMember;
@@ -18,16 +21,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 @RestController
 @RequestMapping("api/houses")
@@ -43,7 +42,8 @@ public class HouseController {
     public ResponseEntity<List<HouseDto>> findAll() {
         final var userId = currentUserId();
         final var houses = houseRepository.findAllForUser(userId).stream()
-                .map(house -> HouseDto.from(house, houseRepository.roleOf(house.id(), userId).orElse(null)))
+                .map(house -> HouseDto.from(
+                        house, houseRepository.roleOf(house.id(), userId).orElse(null)))
                 .collect(toList());
         return ResponseEntity.ok(houses);
     }
@@ -97,7 +97,9 @@ public class HouseController {
     @HouseOwner
     public ResponseEntity<Void> deleteInvite(@PathVariable final String inviteId) {
         final var deleted = inviteService.deleteInvite(houseAccess.requireHouseId(), inviteId);
-        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        return deleted
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.notFound().build();
     }
 
     private String currentUserId() {

@@ -1,11 +1,11 @@
 package org.reciplease.dto;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.RecipeIngredient;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 
 class RecipeIngredientDtoTest {
 
@@ -26,7 +26,10 @@ class RecipeIngredientDtoTest {
     @DisplayName("round-trips to model")
     void toModel() {
         var dto = RecipeIngredientDto.builder()
-                .name("Bread").measure("item").amount(2d).build();
+                .name("Bread")
+                .measure("item")
+                .amount(2d)
+                .build();
 
         var model = dto.toModel();
 

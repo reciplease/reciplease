@@ -1,5 +1,10 @@
 package org.reciplease.repository;
 
+import static org.springframework.data.mongodb.core.query.Query.query;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeDocument;
@@ -7,12 +12,6 @@ import org.reciplease.repository.mongo.RecipeMongoRepository;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static org.springframework.data.mongodb.core.query.Query.query;
 
 @Repository
 @RequiredArgsConstructor
@@ -59,6 +58,9 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     private Criteria visibilityCriteria(final String houseId) {
         return houseId == null
                 ? Criteria.where("public").is(true)
-                : new Criteria().orOperator(Criteria.where("public").is(true), Criteria.where("houseId").is(houseId));
+                : new Criteria()
+                        .orOperator(
+                                Criteria.where("public").is(true),
+                                Criteria.where("houseId").is(houseId));
     }
 }

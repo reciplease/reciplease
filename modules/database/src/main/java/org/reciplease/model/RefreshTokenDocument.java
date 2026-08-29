@@ -1,5 +1,6 @@
 package org.reciplease.model;
 
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,8 +9,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.time.Instant;
 
 @Document("refresh_tokens")
 @Builder
@@ -20,13 +19,18 @@ public class RefreshTokenDocument {
 
     @Id
     private String id;
+
     private String userId;
     private String familyId;
+
     @Indexed
     private String tokenPrefix;
+
     private String tokenHash;
+
     @CreatedDate
     private Instant issuedAt;
+
     private Instant expiresAt;
     private Instant usedAt;
     private Instant revokedAt;
@@ -46,6 +50,7 @@ public class RefreshTokenDocument {
     }
 
     public RefreshTokenRecord toModel() {
-        return new RefreshTokenRecord(id, userId, familyId, tokenPrefix, tokenHash, issuedAt, expiresAt, usedAt, revokedAt);
+        return new RefreshTokenRecord(
+                id, userId, familyId, tokenPrefix, tokenHash, issuedAt, expiresAt, usedAt, revokedAt);
     }
 }

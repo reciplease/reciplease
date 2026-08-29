@@ -1,15 +1,14 @@
 package org.reciplease.repository;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.model.PendingPantryItem;
 import org.reciplease.model.PendingPantryItemDocument;
 import org.reciplease.repository.mongo.PendingPantryMongoRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -23,7 +22,9 @@ public class PendingPantryRepositoryImpl implements PendingPantryRepository {
 
     @Override
     public PendingPantryItem save(final PendingPantryItem item) {
-        return pendingPantryMongoRepository.save(PendingPantryItemDocument.from(item)).toModel();
+        return pendingPantryMongoRepository
+                .save(PendingPantryItemDocument.from(item))
+                .toModel();
     }
 
     @Override

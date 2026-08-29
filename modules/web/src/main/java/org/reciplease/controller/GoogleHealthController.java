@@ -1,5 +1,6 @@
 package org.reciplease.controller;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.dto.GoogleHealthConnectionStatusDto;
 import org.reciplease.dto.GoogleHealthTokensRequest;
@@ -21,8 +22,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Optional;
 
 /**
  * Links/unlinks the current user's Google Health account, and logs food consumption to it. The
@@ -53,9 +52,10 @@ public class GoogleHealthController {
 
     @PutMapping("connection")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<GoogleHealthConnectionStatusDto> putConnection(@RequestBody final GoogleHealthTokensRequest request) {
-        final var connection = googleHealthAdapter.storeConnection(currentUserId(), request.accessToken(), request.refreshToken(),
-                request.expiresIn(), request.scope());
+    public ResponseEntity<GoogleHealthConnectionStatusDto> putConnection(
+            @RequestBody final GoogleHealthTokensRequest request) {
+        final var connection = googleHealthAdapter.storeConnection(
+                currentUserId(), request.accessToken(), request.refreshToken(), request.expiresIn(), request.scope());
         return ResponseEntity.ok(toDto(Optional.of(connection)));
     }
 

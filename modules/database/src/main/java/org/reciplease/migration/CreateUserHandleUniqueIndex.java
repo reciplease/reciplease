@@ -14,8 +14,10 @@ public class CreateUserHandleUniqueIndex {
 
     @Execution
     public void execution(final MongoTemplate mongoTemplate) {
-        mongoTemplate.indexOps(UserDocument.class)
-                .createIndex(new Index().on("handle", Sort.Direction.ASC).unique().sparse());
+        mongoTemplate
+                .indexOps(UserDocument.class)
+                .createIndex(
+                        new Index().on("handle", Sort.Direction.ASC).unique().sparse());
     }
 
     @RollbackExecution

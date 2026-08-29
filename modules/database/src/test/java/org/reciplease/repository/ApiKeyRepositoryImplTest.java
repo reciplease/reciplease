@@ -1,5 +1,12 @@
 package org.reciplease.repository;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+
+import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.ApiKey;
@@ -9,14 +16,6 @@ import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import java.time.Instant;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-
 @DataMongoTest
 @Import(ApiKeyRepositoryImpl.class)
 class ApiKeyRepositoryImplTest {
@@ -25,6 +24,7 @@ class ApiKeyRepositoryImplTest {
 
     @Autowired
     private ApiKeyRepository apiKeyRepository;
+
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -35,7 +35,16 @@ class ApiKeyRepositoryImplTest {
 
     @Test
     void createPersistsANewApiKey() {
-        var apiKey = new ApiKey(null, HOUSE_ID, "Home Assistant", HouseRole.READ_ONLY, "owner-1", "rcpl_abc", "hash1", Instant.now(), null);
+        var apiKey = new ApiKey(
+                null,
+                HOUSE_ID,
+                "Home Assistant",
+                HouseRole.READ_ONLY,
+                "owner-1",
+                "rcpl_abc",
+                "hash1",
+                Instant.now(),
+                null);
 
         var created = apiKeyRepository.create(apiKey);
 
