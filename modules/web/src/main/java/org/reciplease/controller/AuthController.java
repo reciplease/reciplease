@@ -1,5 +1,7 @@
 package org.reciplease.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -42,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("api/auth")
+@Tag(name = "Auth")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -55,6 +58,7 @@ public class AuthController {
     private String internalSecret;
 
     @PostMapping("exchange")
+    @Operation(operationId = "exchangeAuth")
     public ResponseEntity<ExchangeResponse> exchange(
             @RequestHeader(value = "X-Internal-Secret", required = false) final String providedSecret,
             @Valid @RequestBody final ExchangeRequest request) {
@@ -115,6 +119,7 @@ public class AuthController {
      * the whole token family is revoked and the caller must sign in again.
      */
     @PostMapping("refresh")
+    @Operation(operationId = "refreshAuth")
     public ResponseEntity<ExchangeResponse> refresh(
             @CookieValue(value = "reciplease-refresh", required = false) final String refreshCookie) {
         if (refreshCookie == null) {
@@ -136,6 +141,7 @@ public class AuthController {
 
     /** Revokes the refresh token carried by the {@code reciplease-refresh} cookie, if any. */
     @PostMapping("logout")
+    @Operation(operationId = "logoutAuth")
     public ResponseEntity<Void> logout(
             @CookieValue(value = "reciplease-refresh", required = false) final String refreshCookie) {
         if (refreshCookie != null) {

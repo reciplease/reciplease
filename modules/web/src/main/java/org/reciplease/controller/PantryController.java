@@ -3,6 +3,7 @@ package org.reciplease.controller;
 import static java.util.stream.Collectors.toList;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("api/pantry")
+@Tag(name = "Pantry")
 @RequiredArgsConstructor
 public class PantryController {
 
@@ -60,6 +62,7 @@ public class PantryController {
 
     @DeleteMapping("{uuid}")
     @HouseOwner
+    @Operation(operationId = "deletePantryItemById")
     public ResponseEntity<Void> deleteById(@PathVariable final String uuid) {
         final var existing = pantryService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
@@ -72,6 +75,7 @@ public class PantryController {
 
     @GetMapping("{uuid}")
     @HouseMember
+    @Operation(operationId = "findPantryItemById")
     public ResponseEntity<PantryItemDto> findById(@PathVariable final String uuid) {
         final Optional<PantryItemDto> foundItem = pantryService
                 .findById(uuid)
@@ -83,6 +87,7 @@ public class PantryController {
 
     @GetMapping
     @HouseMember
+    @Operation(operationId = "findAllPantryItems")
     public ResponseEntity<List<PantryItemDto>> findAll(
             @RequestParam(defaultValue = "false") final boolean excludeFullyConsumed) {
         final List<PantryItemDto> items =
@@ -95,6 +100,7 @@ public class PantryController {
 
     @GetMapping("/unexpired")
     @HouseMember
+    @Operation(operationId = "findAllUnexpiredPantryItems")
     public ResponseEntity<List<PantryItemDto>> findAllUnexpired() {
         final List<PantryItemDto> items = pantryService.findAllUnexpired(houseAccess.requireHouseId()).stream()
                 .map(PantryItemDto::from)
@@ -105,6 +111,7 @@ public class PantryController {
 
     @GetMapping("/expired")
     @HouseMember
+    @Operation(operationId = "findAllExpiredPantryItems")
     public ResponseEntity<List<PantryItemDto>> findAllExpired() {
         final List<PantryItemDto> items = pantryService.findAllExpired(houseAccess.requireHouseId()).stream()
                 .map(PantryItemDto::from)

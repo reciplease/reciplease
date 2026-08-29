@@ -1,5 +1,7 @@
 package org.reciplease.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.dto.FoodSearchResultDto;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("api/food")
+@Tag(name = "Food Search")
 @RequiredArgsConstructor
 public class FoodSearchController {
 
@@ -28,6 +31,7 @@ public class FoodSearchController {
 
     @GetMapping("search")
     @PreAuthorize("isAuthenticated()")
+    @Operation(operationId = "searchFoods")
     public List<FoodSearchResultDto> search(@RequestParam final String query) {
         return foodSearchService.search(currentUserId(), query).stream()
                 .map(FoodSearchResultDto::from)
@@ -36,6 +40,7 @@ public class FoodSearchController {
 
     @GetMapping("barcode/{barcode}")
     @PreAuthorize("isAuthenticated()")
+    @Operation(operationId = "findFoodByBarcode")
     public ResponseEntity<FoodSearchResultDto> barcode(@PathVariable final String barcode) {
         return foodSearchService
                 .searchByBarcode(barcode)

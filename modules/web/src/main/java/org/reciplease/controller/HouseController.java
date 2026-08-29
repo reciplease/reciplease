@@ -3,6 +3,7 @@ package org.reciplease.controller;
 import static java.util.stream.Collectors.toList;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("api/houses")
+@Tag(name = "Houses")
 @RequiredArgsConstructor
 public class HouseController {
 
@@ -40,6 +42,7 @@ public class HouseController {
 
     @GetMapping
     @PreAuthorize("hasRole('RECIPLEASE')")
+    @Operation(operationId = "findAllHouses")
     public ResponseEntity<List<HouseDto>> findAll() {
         final var userId = currentUserId();
         final var houses = houseRepository.findAllForUser(userId).stream()
@@ -51,6 +54,7 @@ public class HouseController {
 
     @GetMapping("members")
     @HouseMember
+    @Operation(operationId = "findHouseMembers")
     public ResponseEntity<List<HouseMemberDto>> findMembers() {
         final var members = houseRepository.members(houseAccess.requireHouseId()).stream()
                 .map(HouseMemberDto::from)
@@ -60,6 +64,7 @@ public class HouseController {
 
     @PatchMapping("members/{userId}")
     @HouseOwner
+    @Operation(operationId = "updateHouseMemberRole")
     public ResponseEntity<List<HouseMemberDto>> updateMemberRole(
             @PathVariable final String userId, @Valid @RequestBody final UpdateMemberRoleRequest request) {
         houseRepository.addMember(houseAccess.requireHouseId(), userId, request.getRole());
@@ -68,6 +73,7 @@ public class HouseController {
 
     @DeleteMapping("members/{userId}")
     @HouseOwner
+    @Operation(operationId = "removeHouseMember")
     public ResponseEntity<List<HouseMemberDto>> removeMember(@PathVariable final String userId) {
         // An owner can remove anyone but themselves — self-removal could orphan the
         // house (and is better expressed as a future "leave house" action).
@@ -80,6 +86,7 @@ public class HouseController {
 
     @GetMapping("invites")
     @HouseOwner
+    @Operation(operationId = "findPendingHouseInvites")
     public ResponseEntity<List<HouseInviteDto>> findPendingInvites() {
         final var invites = inviteService.pendingInvites(houseAccess.requireHouseId()).stream()
                 .map(HouseInviteDto::from)
@@ -97,6 +104,7 @@ public class HouseController {
 
     @DeleteMapping("invites/{inviteId}")
     @HouseOwner
+    @Operation(operationId = "deleteHouseInvite")
     public ResponseEntity<Void> deleteInvite(@PathVariable final String inviteId) {
         final var deleted = inviteService.deleteInvite(houseAccess.requireHouseId(), inviteId);
         return deleted

@@ -3,6 +3,7 @@ package org.reciplease.controller;
 import static java.util.stream.Collectors.toList;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("api/houses/api-keys")
+@Tag(name = "API Keys")
 @RequiredArgsConstructor
 public class ApiKeyController {
 
@@ -44,6 +46,7 @@ public class ApiKeyController {
 
     @GetMapping
     @HouseOwner
+    @Operation(operationId = "findAllApiKeys")
     public ResponseEntity<List<ApiKeyDto>> findAll() {
         final var keys = apiKeyService.list(houseAccess.requireHouseId()).stream()
                 .map(ApiKeyDto::from)
@@ -62,6 +65,7 @@ public class ApiKeyController {
 
     @DeleteMapping("{id}")
     @HouseOwner
+    @Operation(operationId = "revokeApiKey")
     public ResponseEntity<Void> revoke(@PathVariable final String id) {
         final var revoked = apiKeyService.revoke(houseAccess.requireHouseId(), id);
         return revoked
@@ -78,6 +82,7 @@ public class ApiKeyController {
      */
     @GetMapping("self")
     @PreAuthorize("hasRole('RECIPLEASE')")
+    @Operation(operationId = "findApiKeySelf")
     public ResponseEntity<ApiKeySelfDto> self() {
         final var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!(authentication instanceof ApiKeyAuthenticationToken apiKeyAuthentication)) {

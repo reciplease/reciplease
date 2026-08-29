@@ -1,5 +1,7 @@
 package org.reciplease.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.dto.HouseDto;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("api/invites")
+@Tag(name = "Invites")
 @RequiredArgsConstructor
 @Validated
 public class InviteController {
@@ -34,6 +37,7 @@ public class InviteController {
     private final InviteService inviteService;
 
     @GetMapping("{code}")
+    @Operation(operationId = "previewInvite")
     public ResponseEntity<InviteDto> preview(@PathVariable @Pattern(regexp = "^[A-Za-z0-9]{24}$") final String code) {
         final var preview = inviteRepository
                 .findByCode(code)
@@ -45,6 +49,7 @@ public class InviteController {
 
     @PostMapping("{code}/accept")
     @PreAuthorize("isAuthenticated()")
+    @Operation(operationId = "acceptInvite")
     public ResponseEntity<HouseDto> accept(@PathVariable @Pattern(regexp = "^[A-Za-z0-9]{24}$") final String code) {
         final var userId = currentUserId();
         if (userId == null) {

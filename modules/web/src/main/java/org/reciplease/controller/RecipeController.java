@@ -3,6 +3,7 @@ package org.reciplease.controller;
 import static java.util.stream.Collectors.toList;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("api/recipes")
+@Tag(name = "Recipes")
 @RequiredArgsConstructor
 public class RecipeController {
 
@@ -41,6 +43,7 @@ public class RecipeController {
 
     @GetMapping("{uuid}")
     @OptionalHouseHeader
+    @Operation(operationId = "findRecipeById")
     public ResponseEntity<RecipeDto> findById(@PathVariable final String uuid) {
         final var optionalRecipe =
                 recipeService.findVisibleById(uuid, activeHouseId()).map(this::toDto);
@@ -49,6 +52,7 @@ public class RecipeController {
 
     @GetMapping
     @OptionalHouseHeader
+    @Operation(operationId = "findAllRecipes")
     public ResponseEntity<List<RecipeDto>> findAll() {
         final var recipes = recipeService.findVisibleTo(activeHouseId()).stream()
                 .map(this::toDto)
@@ -80,6 +84,7 @@ public class RecipeController {
 
     @DeleteMapping("{uuid}")
     @HouseOwner
+    @Operation(operationId = "deleteRecipeById")
     public ResponseEntity<Void> deleteById(@PathVariable final String uuid) {
         final var existing = recipeService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {

@@ -1,6 +1,7 @@
 package org.reciplease.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("api/me")
+@Tag(name = "Me")
 @RequiredArgsConstructor
 public class MeController {
 
@@ -38,6 +40,7 @@ public class MeController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
+    @Operation(operationId = "findMe")
     public ResponseEntity<MeDto> me() {
         return userRepository
                 .findById(currentUserId())
@@ -47,12 +50,14 @@ public class MeController {
 
     @GetMapping("identities")
     @PreAuthorize("isAuthenticated()")
+    @Operation(operationId = "findMyIdentities")
     public IdentitiesDto identities() {
         return toDto(userIdentityRepository.findIdentitiesForUser(currentUserId()));
     }
 
     @DeleteMapping("identities/{provider}")
     @PreAuthorize("isAuthenticated()")
+    @Operation(operationId = "unlinkMyIdentity")
     public ResponseEntity<IdentitiesDto> unlinkIdentity(@PathVariable final String provider) {
         final var userId = currentUserId();
         final var identities = userIdentityRepository.findIdentitiesForUser(userId);

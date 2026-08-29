@@ -3,6 +3,7 @@ package org.reciplease.controller;
 import static java.util.stream.Collectors.toList;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("api/pantry/pending")
+@Tag(name = "Pantry")
 @RequiredArgsConstructor
 public class PendingPantryController {
 
@@ -83,6 +85,7 @@ public class PendingPantryController {
 
     @PostMapping("{uuid}/complete")
     @HouseOwner
+    @Operation(operationId = "completePendingPantryItem")
     public ResponseEntity<PantryItemDto> complete(
             @PathVariable final String uuid, @Valid @RequestBody final PantryItemDto itemDto) {
         final var existing = pendingPantryService.findById(uuid);

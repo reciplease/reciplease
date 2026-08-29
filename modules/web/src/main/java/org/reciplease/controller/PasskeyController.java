@@ -1,5 +1,7 @@
 package org.reciplease.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
@@ -73,6 +75,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("api/passkey")
+@Tag(name = "Passkeys")
 @RequiredArgsConstructor
 public class PasskeyController {
 
@@ -94,6 +97,7 @@ public class PasskeyController {
     private final RefreshTokenService refreshTokenService;
 
     @PostMapping("signup/options")
+    @Operation(operationId = "passkeySignupOptions")
     public PublicKeyCredentialCreationOptions signupOptions() {
         // The eventual user id is minted now, not at signup/finish — WebAuthn embeds the user
         // handle into the credential at creation time, so it has to be decided up front.
@@ -102,6 +106,7 @@ public class PasskeyController {
     }
 
     @PostMapping("signup/finish")
+    @Operation(operationId = "passkeySignupFinish")
     public ResponseEntity<ExchangeResponse> signupFinish(@RequestBody final PasskeyRegisterFinishRequest request) {
         final var userId =
                 challengeLedger.consumeForRegistration(request.challenge()).orElse(null);
@@ -124,6 +129,7 @@ public class PasskeyController {
 
     @PostMapping("register/options")
     @PreAuthorize("isAuthenticated()")
+    @Operation(operationId = "passkeyRegisterOptions")
     public PublicKeyCredentialCreationOptions registerOptions() {
         final var authentication = SecurityContextHolder.getContext().getAuthentication();
         return creationOptions(authentication, authentication.getName());
@@ -131,6 +137,7 @@ public class PasskeyController {
 
     @PostMapping("register/finish")
     @PreAuthorize("isAuthenticated()")
+    @Operation(operationId = "passkeyRegisterFinish")
     public ResponseEntity<Void> registerFinish(@RequestBody final PasskeyRegisterFinishRequest request) {
         final var userId =
                 SecurityContextHolder.getContext().getAuthentication().getName();
@@ -152,6 +159,7 @@ public class PasskeyController {
     }
 
     @PostMapping("login/options")
+    @Operation(operationId = "passkeyLoginOptions")
     public PublicKeyCredentialRequestOptions loginOptions() {
         // An anonymous token resolves to an empty allow-list (see Webauthn4JRelyingPartyOperations),
         // which is exactly the discoverable/usernameless login this app wants.
@@ -164,6 +172,7 @@ public class PasskeyController {
     }
 
     @PostMapping("login/finish")
+    @Operation(operationId = "passkeyLoginFinish")
     public ResponseEntity<ExchangeResponse> loginFinish(@RequestBody final PasskeyLoginFinishRequest request) {
         if (!challengeLedger.consumeForLogin(request.challenge())) {
             return ResponseEntity.status(401).build();

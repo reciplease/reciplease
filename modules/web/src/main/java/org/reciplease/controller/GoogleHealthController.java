@@ -1,5 +1,7 @@
 package org.reciplease.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.dto.GoogleHealthConnectionStatusDto;
@@ -38,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("api/google-health")
+@Tag(name = "Google Health")
 @RequiredArgsConstructor
 public class GoogleHealthController {
 
@@ -46,12 +49,14 @@ public class GoogleHealthController {
 
     @GetMapping("connection")
     @PreAuthorize("isAuthenticated()")
+    @Operation(operationId = "findGoogleHealthConnection")
     public GoogleHealthConnectionStatusDto connection() {
         return toDto(googleHealthAdapter.connectionStatus(currentUserId()));
     }
 
     @PutMapping("connection")
     @PreAuthorize("isAuthenticated()")
+    @Operation(operationId = "updateGoogleHealthConnection")
     public ResponseEntity<GoogleHealthConnectionStatusDto> putConnection(
             @RequestBody final GoogleHealthTokensRequest request) {
         final var connection = googleHealthAdapter.storeConnection(
@@ -61,6 +66,7 @@ public class GoogleHealthController {
 
     @DeleteMapping("connection")
     @PreAuthorize("isAuthenticated()")
+    @Operation(operationId = "disconnectGoogleHealth")
     public ResponseEntity<Void> disconnect() {
         googleHealthAdapter.disconnect(currentUserId());
         return ResponseEntity.noContent().build();
@@ -68,6 +74,7 @@ public class GoogleHealthController {
 
     @PostMapping("foods/log")
     @PreAuthorize("isAuthenticated()")
+    @Operation(operationId = "logGoogleHealthFood")
     public ResponseEntity<Void> logFood(@RequestBody final LogGoogleHealthFoodRequest request) {
         try {
             foodConsumptionLoggerPort.log(toFoodConsumption(currentUserId(), request));

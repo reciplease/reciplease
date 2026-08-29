@@ -3,6 +3,7 @@ package org.reciplease.controller;
 import static java.util.stream.Collectors.toList;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("api/planned-meals")
+@Tag(name = "Planned Meals")
 @RequiredArgsConstructor
 public class PlannedMealController {
 
@@ -59,6 +61,7 @@ public class PlannedMealController {
 
     @GetMapping("{uuid}")
     @HouseMember
+    @Operation(operationId = "findPlannedMealById")
     public ResponseEntity<PlannedMealDto> findById(@PathVariable final String uuid) {
         final var meal = plannedMealService.findById(uuid).filter(houseAccess::belongsToHeaderHouse);
 
@@ -89,6 +92,7 @@ public class PlannedMealController {
 
     @DeleteMapping("{uuid}")
     @HouseOwner
+    @Operation(operationId = "deletePlannedMealById")
     public ResponseEntity<Void> deleteById(@PathVariable final String uuid) {
         final var existing = plannedMealService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
@@ -101,6 +105,7 @@ public class PlannedMealController {
 
     @PostMapping("{uuid}/eaten")
     @HouseOwner
+    @Operation(operationId = "markPlannedMealEaten")
     public ResponseEntity<PlannedMealDto> markEaten(@PathVariable final String uuid) {
         final var existing = plannedMealService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
@@ -113,6 +118,7 @@ public class PlannedMealController {
 
     @GetMapping("suggestions")
     @HouseMember
+    @Operation(operationId = "suggestPantryItemsForPlannedMeal")
     public ResponseEntity<List<PantryItemDto>> suggestPantryItems(
             @RequestParam(required = false) final String recipeId, @RequestParam final String ingredient) {
         final List<PantryItemDto> suggestions =
@@ -125,6 +131,7 @@ public class PlannedMealController {
 
     @GetMapping
     @HouseMember
+    @Operation(operationId = "findPlannedMealsByDateRange")
     public ResponseEntity<List<PlannedMealDto>> findByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate end) {
@@ -138,6 +145,7 @@ public class PlannedMealController {
 
     @GetMapping("shopping-list")
     @HouseMember
+    @Operation(operationId = "findShoppingList")
     public ResponseEntity<ShoppingListDto> shoppingList(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate end) {
