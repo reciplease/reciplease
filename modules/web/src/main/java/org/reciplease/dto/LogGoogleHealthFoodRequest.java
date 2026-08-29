@@ -1,5 +1,6 @@
 package org.reciplease.dto;
 
+import jakarta.validation.constraints.DecimalMin;
 import java.time.LocalDate;
 
 /**
@@ -9,7 +10,12 @@ import java.time.LocalDate;
  * is expected to be set; both may be absent for a bare-name log with no known macros.
  */
 public record LogGoogleHealthFoodRequest(
-        String foodId, String foodDisplayName, String mealType, double amount, LocalDate date, NutrientsDto nutrients) {
+        String foodId,
+        String foodDisplayName,
+        String mealType,
+        @DecimalMin(value = "0", inclusive = false) double amount,
+        LocalDate date,
+        NutrientsDto nutrients) {
 
     public record NutrientsDto(Double energyKcal, Double proteinG, Double fatG, Double carbohydrateG) {}
 }

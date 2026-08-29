@@ -122,6 +122,22 @@ class ApiKeyControllerTest {
     }
 
     @Test
+    @DisplayName("should reject a name longer than 200 characters")
+    @WithMockUser(username = "owner-1", authorities = "ROLE_RECIPLEASE")
+    void createRejectsOverlongName() throws Exception {
+        final var tooLong = "a".repeat(201);
+
+        mockMvc.perform(post("/api/houses/api-keys")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name": "%s", "role": "READ_ONLY"}""".formatted(tooLong)))
+                .andExpect(status().isBadRequest());
+
+        verify(apiKeyService, never()).create(any(), any(), any(), any());
+    }
+
+    @Test
     @DisplayName("create is forbidden for read-only members")
     @WithHouseMember
     void createForbiddenForReadOnly() throws Exception {

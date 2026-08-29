@@ -3,6 +3,7 @@ package org.reciplease.dto;
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,13 +20,14 @@ public class ApiKeyDto {
     @Schema(requiredMode = REQUIRED)
     String id;
 
-    @Schema(requiredMode = REQUIRED)
+    @Size(max = 200)
+    @Schema(requiredMode = REQUIRED, maxLength = 200)
     String name;
 
     @Schema(requiredMode = REQUIRED)
     HouseRole role;
 
-    @Schema(requiredMode = REQUIRED)
+    @Schema(requiredMode = REQUIRED, pattern = "^rcpl_[A-Za-z0-9_-]{10}$", minLength = 15, maxLength = 15)
     String keyPrefix;
 
     @Schema(requiredMode = REQUIRED)

@@ -3,6 +3,7 @@ package org.reciplease.dto;
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.DecimalMin;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
@@ -21,7 +22,8 @@ public class RecipeIngredientDto {
     @Schema(requiredMode = REQUIRED)
     String measure;
 
-    @Schema(requiredMode = REQUIRED)
+    @DecimalMin(value = "0", inclusive = false)
+    @Schema(requiredMode = REQUIRED, minimum = "0", exclusiveMinimum = true)
     Double amount;
 
     public static RecipeIngredientDto from(final RecipeIngredient recipeIngredient) {

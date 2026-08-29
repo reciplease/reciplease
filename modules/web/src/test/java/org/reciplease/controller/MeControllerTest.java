@@ -179,9 +179,29 @@ class MeControllerTest {
 
     @Test
     void setHandleCountsByCodePointNotUtf16CharsForSurrogatePairEmoji() throws Exception {
-        // U+1F600 (the "grinning face" emoji) is one code point but two UTF-16 chars,
-        // repeated 30 times: 30 code points (valid), 60 chars (would be rejected if length()
-        // were used instead of codePointCount()).
+        // U+1F600 (the "grinning face" emoji) is one code point but two UTF-16 chars.
+        // The controller's own manual check uses codePointCount(), so 15 code points
+        // (30 UTF-16 chars) is accepted by both that check and the defense-in-depth
+        // @Size(max = 30) on SetHandleRequest.handle, which — unlike the manual check —
+        // counts UTF-16 chars, not code points. (A 30-code-point/60-char handle is
+        // accepted by the manual check but rejected by @Size; see
+        // setHandleRejectsSurrogatePairEmojiOverUtf16CharLimitEvenWithinCodePointLimit
+        // below for that boundary.)
+        final var fifteenEmoji = "😀".repeat(15);
+
+        mockMvc.perform(post("/api/me/handle")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"handle": "%s"}""".formatted(fifteenEmoji)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void setHandleRejectsSurrogatePairEmojiOverUtf16CharLimitEvenWithinCodePointLimit() throws Exception {
+        // 30 code points, but 60 UTF-16 chars: within the controller's own manual
+        // codePointCount() <= 30 check, but rejected by the defense-in-depth
+        // @Size(max = 30) on SetHandleRequest.handle, which counts UTF-16 chars.
         final var thirtyEmoji = "😀".repeat(30);
 
         mockMvc.perform(post("/api/me/handle")
@@ -189,7 +209,7 @@ class MeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"handle": "%s"}""".formatted(thirtyEmoji)))
-                .andExpect(status().isOk());
+                .andExpect(status().isBadRequest());
     }
 
     @Test

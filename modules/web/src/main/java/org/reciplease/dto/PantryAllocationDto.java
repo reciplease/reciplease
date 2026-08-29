@@ -3,6 +3,7 @@ package org.reciplease.dto;
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.DecimalMin;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
@@ -20,7 +21,8 @@ public class PantryAllocationDto {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     String barcode;
 
-    @Schema(requiredMode = REQUIRED)
+    @DecimalMin(value = "0", inclusive = true)
+    @Schema(requiredMode = REQUIRED, minimum = "0")
     Double amount;
 
     public static PantryAllocationDto from(final PantryAllocation allocation) {

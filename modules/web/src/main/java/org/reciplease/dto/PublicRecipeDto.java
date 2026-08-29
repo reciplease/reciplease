@@ -4,6 +4,8 @@ import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
@@ -39,13 +41,15 @@ public class PublicRecipeDto implements RecipeDto {
     @Schema(requiredMode = REQUIRED)
     boolean isPublic = false;
 
-    @Schema(requiredMode = REQUIRED)
+    @Size(max = 200)
+    @Schema(requiredMode = REQUIRED, maxLength = 200)
     String name;
 
     @Schema(requiredMode = REQUIRED)
     String description;
 
-    @Schema(requiredMode = REQUIRED)
+    @Pattern(regexp = "^$|^https?://.+")
+    @Schema(requiredMode = REQUIRED, pattern = "^$|^https?://.+")
     String sourceUrl;
 
     @Schema(requiredMode = REQUIRED)

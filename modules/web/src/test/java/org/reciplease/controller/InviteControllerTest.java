@@ -44,39 +44,46 @@ class InviteControllerTest {
 
     @Test
     void previewReturnsTheHouseForAnUnusedInvite() throws Exception {
-        var invite = new Invite("invite-1", "code1", HOUSE_ID, HouseRole.READ_ONLY, Instant.now(), null, null);
+        var invite = new Invite(
+                "invite-1", "code10000000000000000000", HOUSE_ID, HouseRole.READ_ONLY, Instant.now(), null, null);
         var house = new House(HOUSE_ID, "My House", Instant.now());
-        when(inviteRepository.findByCode("code1")).thenReturn(Optional.of(invite));
+        when(inviteRepository.findByCode("code10000000000000000000")).thenReturn(Optional.of(invite));
         when(houseRepository.findById(HOUSE_ID)).thenReturn(Optional.of(house));
 
-        mockMvc.perform(get("/api/invites/code1"))
+        mockMvc.perform(get("/api/invites/code10000000000000000000"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.houseName", org.hamcrest.Matchers.is("My House")));
     }
 
     @Test
     void previewReturnsNotFoundForAnAlreadyUsedInvite() throws Exception {
-        var invite =
-                new Invite("invite-1", "code1", HOUSE_ID, HouseRole.READ_ONLY, Instant.now(), Instant.now(), "user-1");
-        when(inviteRepository.findByCode("code1")).thenReturn(Optional.of(invite));
+        var invite = new Invite(
+                "invite-1",
+                "code10000000000000000000",
+                HOUSE_ID,
+                HouseRole.READ_ONLY,
+                Instant.now(),
+                Instant.now(),
+                "user-1");
+        when(inviteRepository.findByCode("code10000000000000000000")).thenReturn(Optional.of(invite));
 
-        mockMvc.perform(get("/api/invites/code1")).andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/invites/code10000000000000000000")).andExpect(status().isNotFound());
     }
 
     @Test
     void previewReturnsNotFoundForAnUnknownCode() throws Exception {
-        when(inviteRepository.findByCode("missing")).thenReturn(Optional.empty());
+        when(inviteRepository.findByCode("missing00000000000000000")).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/invites/missing")).andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/invites/missing00000000000000000")).andExpect(status().isNotFound());
     }
 
     @Test
     @WithMockUser(username = "user-1")
     void acceptReturnsTheHouseWhenTheInviteIsRedeemed() throws Exception {
         var house = new House(HOUSE_ID, "My House", Instant.now());
-        when(inviteService.accept("code1", "user-1")).thenReturn(Optional.of(house));
+        when(inviteService.accept("code10000000000000000000", "user-1")).thenReturn(Optional.of(house));
 
-        mockMvc.perform(post("/api/invites/code1/accept").with(csrf()))
+        mockMvc.perform(post("/api/invites/code10000000000000000000/accept").with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", org.hamcrest.Matchers.is("My House")));
     }
@@ -84,14 +91,32 @@ class InviteControllerTest {
     @Test
     @WithMockUser(username = "user-1")
     void acceptReturnsNotFoundWhenTheCodeIsInvalidOrAlreadyUsed() throws Exception {
-        when(inviteService.accept("bad-code", "user-1")).thenReturn(Optional.empty());
+        when(inviteService.accept("badcode00000000000000000", "user-1")).thenReturn(Optional.empty());
 
-        mockMvc.perform(post("/api/invites/bad-code/accept").with(csrf())).andExpect(status().isNotFound());
+        mockMvc.perform(post("/api/invites/badcode00000000000000000/accept").with(csrf()))
+                .andExpect(status().isNotFound());
     }
 
     @Test
     @org.springframework.security.test.context.support.WithAnonymousUser
     void acceptIsRejectedForAnUnauthenticatedRequest() throws Exception {
-        mockMvc.perform(post("/api/invites/code1/accept").with(csrf())).andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/invites/code10000000000000000000/accept").with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void previewRejectsAMalformedCode() throws Exception {
+        mockMvc.perform(get("/api/invites/short")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void previewRejectsACodeContainingNonAlphanumericCharacters() throws Exception {
+        mockMvc.perform(get("/api/invites/has-a-dash-in-it-badcode")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "user-1")
+    void acceptRejectsAMalformedCode() throws Exception {
+        mockMvc.perform(post("/api/invites/short/accept").with(csrf())).andExpect(status().isBadRequest());
     }
 }

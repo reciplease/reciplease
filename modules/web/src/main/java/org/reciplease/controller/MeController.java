@@ -1,5 +1,6 @@
 package org.reciplease.controller;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.dto.IdentitiesDto;
@@ -73,7 +74,7 @@ public class MeController {
 
     @PostMapping("handle")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<MeDto> setHandle(@RequestBody final SetHandleRequest request) {
+    public ResponseEntity<MeDto> setHandle(@Valid @RequestBody final SetHandleRequest request) {
         final var userId = currentUserId();
         final var handle = request.handle() == null ? "" : request.handle().trim();
         final var codePoints = handle.codePointCount(0, handle.length());

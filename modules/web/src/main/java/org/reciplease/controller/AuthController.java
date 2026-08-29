@@ -1,5 +1,6 @@
 package org.reciplease.controller;
 
+import jakarta.validation.Valid;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +57,7 @@ public class AuthController {
     @PostMapping("exchange")
     public ResponseEntity<ExchangeResponse> exchange(
             @RequestHeader(value = "X-Internal-Secret", required = false) final String providedSecret,
-            @RequestBody final ExchangeRequest request) {
+            @Valid @RequestBody final ExchangeRequest request) {
         if (!isValidSecret(providedSecret)) {
             return ResponseEntity.status(401).build();
         }

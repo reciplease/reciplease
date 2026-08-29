@@ -4,7 +4,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 
+import jakarta.validation.Validator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -12,7 +14,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
+import org.reciplease.validation.ValidationTest;
 
+@ValidationTest
 class PublicRecipeDtoTest {
 
     @Test
@@ -119,5 +123,32 @@ class PublicRecipeDtoTest {
 
         // Round-tripping through RecipeIngredientDto normalizes the legacy measure id to its short form.
         assertThat(recipe.recipeIngredients(), contains(new RecipeIngredient("bread", "item", 2d)));
+    }
+
+    @Test
+    @DisplayName("an invalid sourceUrl is rejected")
+    void invalidSourceUrlIsRejected(final Validator validator) {
+        var recipeDto = PublicRecipeDto.builder()
+                .name("Toast")
+                .sourceUrl("not-a-valid-url")
+                .build();
+
+        assertThat(validator.validate(recipeDto), not(empty()));
+    }
+
+    @Test
+    @DisplayName("an empty sourceUrl is accepted")
+    void emptySourceUrlIsAccepted(final Validator validator) {
+        var recipeDto = PublicRecipeDto.builder().name("Toast").sourceUrl("").build();
+
+        assertThat(validator.validate(recipeDto), empty());
+    }
+
+    @Test
+    @DisplayName("a name longer than 200 characters is rejected")
+    void overlongNameIsRejected(final Validator validator) {
+        var recipeDto = PublicRecipeDto.builder().name("a".repeat(201)).build();
+
+        assertThat(validator.validate(recipeDto), not(empty()));
     }
 }

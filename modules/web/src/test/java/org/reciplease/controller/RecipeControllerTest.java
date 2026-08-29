@@ -125,6 +125,43 @@ class RecipeControllerTest {
     }
 
     @Test
+    @DisplayName("create new recipe rejects an invalid sourceUrl")
+    @WithHouseOwner
+    void createRecipeRejectsInvalidSourceUrl() throws Exception {
+        when(houseAccess.isOwner()).thenReturn(true);
+        when(houseAccess.requireHouseId()).thenReturn(HOUSE_ID);
+
+        final var invalidDto = PublicRecipeDto.builder()
+                .name("soup")
+                .sourceUrl("not-a-valid-url")
+                .build();
+
+        mockMvc.perform(post("/api/recipes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(invalidDto)))
+                .andExpect(status().isBadRequest());
+
+        verify(recipeService, never()).create(any(), any());
+    }
+
+    @Test
+    @DisplayName("create new recipe rejects a name longer than 200 characters")
+    @WithHouseOwner
+    void createRecipeRejectsOverlongName() throws Exception {
+        when(houseAccess.isOwner()).thenReturn(true);
+        when(houseAccess.requireHouseId()).thenReturn(HOUSE_ID);
+
+        final var invalidDto = PublicRecipeDto.builder().name("a".repeat(201)).build();
+
+        mockMvc.perform(post("/api/recipes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(invalidDto)))
+                .andExpect(status().isBadRequest());
+
+        verify(recipeService, never()).create(any(), any());
+    }
+
+    @Test
     @DisplayName("create new recipe is forbidden for non-owners")
     @WithHouseMember
     void createRecipeForbiddenForNonOwner() throws Exception {
@@ -166,6 +203,54 @@ class RecipeControllerTest {
                         .content(data))
                 .andExpect(status().isCreated())
                 .andExpect(content().json(expectedJson, true));
+    }
+
+    @Test
+    @DisplayName("addIngredient rejects a non-positive amount")
+    @WithHouseOwner
+    void addRecipeIngredientRejectsNonPositiveAmount() throws Exception {
+        final var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("soup")
+                .houseId(HOUSE_ID)
+                .build();
+
+        when(houseAccess.isOwner()).thenReturn(true);
+        when(houseAccess.belongsToHeaderHouse(recipe)).thenReturn(true);
+        when(recipeService.findById(recipe.id())).thenReturn(Optional.of(recipe));
+
+        final var data = "{\"name\": \"tomato\", \"measure\": \"ITEMS\", \"amount\": 0}";
+
+        mockMvc.perform(put("/api/recipes/{uuid}/ingredients", recipe.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(data))
+                .andExpect(status().isBadRequest());
+
+        verify(recipeService, never()).addIngredient(any(), any());
+    }
+
+    @Test
+    @DisplayName("addIngredient rejects a blank name and measure")
+    @WithHouseOwner
+    void addRecipeIngredientRejectsBlankNameAndMeasure() throws Exception {
+        final var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("soup")
+                .houseId(HOUSE_ID)
+                .build();
+
+        when(houseAccess.isOwner()).thenReturn(true);
+        when(houseAccess.belongsToHeaderHouse(recipe)).thenReturn(true);
+        when(recipeService.findById(recipe.id())).thenReturn(Optional.of(recipe));
+
+        final var data = "{\"name\": \"\", \"measure\": \"\", \"amount\": 10.0}";
+
+        mockMvc.perform(put("/api/recipes/{uuid}/ingredients", recipe.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(data))
+                .andExpect(status().isBadRequest());
+
+        verify(recipeService, never()).addIngredient(any(), any());
     }
 
     @Test

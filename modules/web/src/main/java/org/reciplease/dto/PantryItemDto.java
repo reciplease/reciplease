@@ -3,6 +3,9 @@ package org.reciplease.dto;
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
@@ -24,24 +27,32 @@ public class PantryItemDto {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
     String houseId;
 
-    @Schema(requiredMode = REQUIRED)
+    @Size(max = 200)
+    @Schema(requiredMode = REQUIRED, maxLength = 200)
     String name;
 
+    @Size(max = 200)
+    @Schema(maxLength = 200)
     String brand;
 
     @Schema(requiredMode = REQUIRED)
     String measure;
 
-    @Schema(requiredMode = REQUIRED)
+    @DecimalMin(value = "0", inclusive = false)
+    @Schema(requiredMode = REQUIRED, minimum = "0", exclusiveMinimum = true)
     Double amount;
 
-    @Schema(requiredMode = REQUIRED)
+    @DecimalMin(value = "0", inclusive = true)
+    @Schema(requiredMode = REQUIRED, minimum = "0")
     Double remaining;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate expiration;
 
+    @Pattern(regexp = "^$|^\\d{8}$|^\\d{12,14}$")
+    @Schema(pattern = "^$|^\\d{8}$|^\\d{12,14}$")
     String barcode;
+
     byte[] image;
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)

@@ -2,6 +2,7 @@ package org.reciplease.controller;
 
 import static java.util.stream.Collectors.toList;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -53,7 +54,7 @@ public class RecipeController {
 
     @PostMapping
     @HouseOwner
-    public ResponseEntity<RecipeDto> create(@RequestBody final PublicRecipeDto recipeDto) {
+    public ResponseEntity<RecipeDto> create(@Valid @RequestBody final PublicRecipeDto recipeDto) {
         final Recipe recipe = recipeService.create(houseAccess.requireHouseId(), recipeDto.toEntity());
         return ResponseEntity.status(HttpStatus.CREATED).body(toDto(recipe));
     }
@@ -61,7 +62,7 @@ public class RecipeController {
     @PutMapping("{uuid}")
     @HouseOwner
     public ResponseEntity<RecipeDto> update(
-            @PathVariable final String uuid, @RequestBody final PublicRecipeDto recipeDto) {
+            @PathVariable final String uuid, @Valid @RequestBody final PublicRecipeDto recipeDto) {
         final var existing = recipeService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
             return ResponseEntity.notFound().build();
@@ -86,7 +87,7 @@ public class RecipeController {
     @PutMapping("{uuid}/ingredients")
     @HouseOwner
     public ResponseEntity<Set<RecipeIngredientDto>> addIngredient(
-            @PathVariable final String uuid, @RequestBody final AddIngredient addIngredient) {
+            @PathVariable final String uuid, @Valid @RequestBody final AddIngredient addIngredient) {
         final var existing = recipeService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
             return ResponseEntity.notFound().build();

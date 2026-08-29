@@ -191,6 +191,63 @@ class PantryControllerTest {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    @DisplayName("should reject a non-positive amount")
+    void createRejectsNonPositiveAmount() throws Exception {
+        mockMvc.perform(post("/api/pantry")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "bread",
+                                  "measure": "item",
+                                  "amount": 0,
+                                  "remaining": 0
+                                }"""))
+                .andExpect(status().isBadRequest());
+
+        verify(pantryService, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("should reject a name longer than 200 characters")
+    void createRejectsOverlongName() throws Exception {
+        final var tooLong = "a".repeat(201);
+
+        mockMvc.perform(post("/api/pantry")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "%s",
+                                  "measure": "item",
+                                  "amount": 20.0,
+                                  "remaining": 20.0
+                                }""".formatted(tooLong)))
+                .andExpect(status().isBadRequest());
+
+        verify(pantryService, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("should reject an invalid barcode")
+    void createRejectsInvalidBarcode() throws Exception {
+        mockMvc.perform(post("/api/pantry")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "bread",
+                                  "measure": "item",
+                                  "amount": 20.0,
+                                  "remaining": 20.0,
+                                  "barcode": "abc123"
+                                }"""))
+                .andExpect(status().isBadRequest());
+
+        verify(pantryService, never()).save(any());
+    }
+
     @Nested
     @DisplayName("With item")
     class WithItem {
@@ -275,6 +332,23 @@ class PantryControllerTest {
                                       "barcode": "0123456789012"
                                     }"""))
                     .andExpect(status().isNoContent());
+        }
+
+        @Test
+        @DisplayName("should reject an update with a non-positive amount")
+        void updateRejectsNonPositiveAmount() throws Exception {
+            mockMvc.perform(put("/api/pantry/{uuid}", item.id())
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {
+                                      "name": "sourdough",
+                                      "measure": "item",
+                                      "amount": -1.0
+                                    }"""))
+                    .andExpect(status().isBadRequest());
+
+            verify(pantryService, never()).update(any(), any());
         }
 
         @Test

@@ -3,6 +3,7 @@ package org.reciplease.dto;
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
@@ -17,7 +18,8 @@ public class HouseDto {
     @Schema(requiredMode = REQUIRED)
     String id;
 
-    @Schema(requiredMode = REQUIRED)
+    @Size(max = 200)
+    @Schema(requiredMode = REQUIRED, maxLength = 200)
     String name;
 
     @Schema(requiredMode = REQUIRED)
