@@ -1,5 +1,6 @@
 package org.reciplease.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -74,6 +75,7 @@ public class MeController {
 
     @PostMapping("handle")
     @PreAuthorize("isAuthenticated()")
+    @Operation(operationId = "setHandle")
     public ResponseEntity<MeDto> setHandle(@Valid @RequestBody final SetHandleRequest request) {
         final var userId = currentUserId();
         final var handle = request.handle() == null ? "" : request.handle().trim();

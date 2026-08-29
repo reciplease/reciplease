@@ -2,6 +2,7 @@ package org.reciplease.controller;
 
 import static java.util.stream.Collectors.toList;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,7 @@ public class ApiKeyController {
 
     @PostMapping
     @HouseOwner
+    @Operation(operationId = "createApiKey")
     public ResponseEntity<CreatedApiKeyDto> create(@Valid @RequestBody final CreateApiKeyRequest request) {
         final var created = apiKeyService.create(
                 houseAccess.requireHouseId(), request.getName(), request.getRole(), currentUserId());

@@ -2,6 +2,7 @@ package org.reciplease.controller;
 
 import static java.util.stream.Collectors.toList;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,7 @@ public class PantryController {
 
     @PostMapping
     @HouseOwner
+    @Operation(operationId = "createPantryItem")
     public ResponseEntity<PantryItemDto> create(@Valid @RequestBody final PantryItemDto itemDto) {
         final var savedItem = pantryService.save(itemDto.toEntity(houseAccess.requireHouseId()));
         final var savedItemDto = PantryItemDto.from(savedItem);
@@ -41,6 +43,7 @@ public class PantryController {
 
     @PutMapping("{uuid}")
     @HouseOwner
+    @Operation(operationId = "updatePantryItem")
     public ResponseEntity<PantryItemDto> update(
             @PathVariable final String uuid, @Valid @RequestBody final PantryItemDto itemDto) {
         final var existing = pantryService.findById(uuid);

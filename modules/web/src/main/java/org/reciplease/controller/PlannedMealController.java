@@ -2,6 +2,7 @@ package org.reciplease.controller;
 
 import static java.util.stream.Collectors.toList;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
@@ -44,6 +45,7 @@ public class PlannedMealController {
 
     @PostMapping
     @HouseOwner
+    @Operation(operationId = "planMeal")
     public ResponseEntity<PlannedMealDto> plan(@Valid @RequestBody final PlanMealRequest request) {
         final List<PlannedIngredient> items = request.getItems() == null
                 ? List.of()
@@ -67,6 +69,7 @@ public class PlannedMealController {
 
     @PutMapping("{uuid}")
     @HouseOwner
+    @Operation(operationId = "updatePlannedMeal")
     public ResponseEntity<PlannedMealDto> update(
             @PathVariable final String uuid, @Valid @RequestBody final PlanMealRequest request) {
         final var existing = plannedMealService.findById(uuid);

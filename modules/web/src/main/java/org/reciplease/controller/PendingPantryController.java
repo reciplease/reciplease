@@ -2,6 +2,7 @@ package org.reciplease.controller;
 
 import static java.util.stream.Collectors.toList;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,7 @@ public class PendingPantryController {
 
     @PostMapping
     @HouseOwner
+    @Operation(operationId = "createPendingPantryItem")
     public ResponseEntity<PendingPantryItemDto> create(@Valid @RequestBody final PendingPantryItemDto itemDto) {
         final var savedItem = pendingPantryService.save(itemDto.toEntity(houseAccess.requireHouseId()));
         return ResponseEntity.status(HttpStatus.CREATED).body(PendingPantryItemDto.from(savedItem));

@@ -2,6 +2,7 @@ package org.reciplease.controller;
 
 import static java.util.stream.Collectors.toList;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -88,6 +89,7 @@ public class HouseController {
 
     @PostMapping("invites")
     @HouseOwner
+    @Operation(operationId = "createInvite")
     public ResponseEntity<HouseInviteDto> createInvite(@Valid @RequestBody final CreateInviteRequest request) {
         final var invite = inviteService.createInvite(houseAccess.requireHouseId(), request.getRole());
         return ResponseEntity.status(HttpStatus.CREATED).body(HouseInviteDto.from(invite));

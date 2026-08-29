@@ -2,6 +2,7 @@ package org.reciplease.controller;
 
 import static java.util.stream.Collectors.toList;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
@@ -54,6 +55,7 @@ public class RecipeController {
 
     @PostMapping
     @HouseOwner
+    @Operation(operationId = "createRecipe")
     public ResponseEntity<RecipeDto> create(@Valid @RequestBody final PublicRecipeDto recipeDto) {
         final Recipe recipe = recipeService.create(houseAccess.requireHouseId(), recipeDto.toEntity());
         return ResponseEntity.status(HttpStatus.CREATED).body(toDto(recipe));
@@ -61,6 +63,7 @@ public class RecipeController {
 
     @PutMapping("{uuid}")
     @HouseOwner
+    @Operation(operationId = "updateRecipe")
     public ResponseEntity<RecipeDto> update(
             @PathVariable final String uuid, @Valid @RequestBody final PublicRecipeDto recipeDto) {
         final var existing = recipeService.findById(uuid);
@@ -86,6 +89,7 @@ public class RecipeController {
 
     @PutMapping("{uuid}/ingredients")
     @HouseOwner
+    @Operation(operationId = "addRecipeIngredient")
     public ResponseEntity<Set<RecipeIngredientDto>> addIngredient(
             @PathVariable final String uuid, @Valid @RequestBody final AddIngredient addIngredient) {
         final var existing = recipeService.findById(uuid);
