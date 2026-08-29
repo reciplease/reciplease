@@ -1,5 +1,7 @@
 package org.reciplease.configuration;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -14,4 +16,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @PreAuthorize("hasRole('RECIPLEASE') and @houseAccess.isOwner()")
+@Parameter(
+        name = HouseAccess.HOUSE_HEADER,
+        in = ParameterIn.HEADER,
+        required = true,
+        description = "The house this request is scoped to.")
 public @interface HouseOwner {}

@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseOwner;
 import org.reciplease.configuration.OptionalHouseHeader;
-import org.reciplease.configuration.RequiresHouseHeader;
 import org.reciplease.dto.PublicRecipeDto;
 import org.reciplease.dto.RecipeDto;
 import org.reciplease.dto.RecipeIngredientDto;
@@ -59,7 +58,6 @@ public class RecipeController {
 
     @PostMapping
     @HouseOwner
-    @RequiresHouseHeader
     @Operation(operationId = "createRecipe")
     public ResponseEntity<RecipeDto> create(@Valid @RequestBody final PublicRecipeDto recipeDto) {
         final Recipe recipe = recipeService.create(houseAccess.requireHouseId(), recipeDto.toEntity());
@@ -68,7 +66,6 @@ public class RecipeController {
 
     @PutMapping("{uuid}")
     @HouseOwner
-    @RequiresHouseHeader
     @Operation(operationId = "updateRecipe")
     public ResponseEntity<RecipeDto> update(
             @PathVariable final String uuid, @Valid @RequestBody final PublicRecipeDto recipeDto) {
@@ -83,7 +80,6 @@ public class RecipeController {
 
     @DeleteMapping("{uuid}")
     @HouseOwner
-    @RequiresHouseHeader
     public ResponseEntity<Void> deleteById(@PathVariable final String uuid) {
         final var existing = recipeService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
@@ -96,7 +92,6 @@ public class RecipeController {
 
     @PutMapping("{uuid}/ingredients")
     @HouseOwner
-    @RequiresHouseHeader
     @Operation(operationId = "addRecipeIngredient")
     public ResponseEntity<Set<RecipeIngredientDto>> addIngredient(
             @PathVariable final String uuid, @Valid @RequestBody final AddIngredient addIngredient) {
