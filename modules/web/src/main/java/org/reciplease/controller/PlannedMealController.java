@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseMember;
 import org.reciplease.configuration.HouseOwner;
+import org.reciplease.configuration.RequiresHouseHeader;
 import org.reciplease.dto.PantryItemDto;
 import org.reciplease.dto.PlanMealRequest;
 import org.reciplease.dto.PlannedIngredientDto;
@@ -45,6 +46,7 @@ public class PlannedMealController {
 
     @PostMapping
     @HouseOwner
+    @RequiresHouseHeader
     @Operation(operationId = "planMeal")
     public ResponseEntity<PlannedMealDto> plan(@Valid @RequestBody final PlanMealRequest request) {
         final List<PlannedIngredient> items = request.getItems() == null
@@ -59,6 +61,7 @@ public class PlannedMealController {
 
     @GetMapping("{uuid}")
     @HouseMember
+    @RequiresHouseHeader
     public ResponseEntity<PlannedMealDto> findById(@PathVariable final String uuid) {
         final var meal = plannedMealService.findById(uuid).filter(houseAccess::belongsToHeaderHouse);
 
@@ -69,6 +72,7 @@ public class PlannedMealController {
 
     @PutMapping("{uuid}")
     @HouseOwner
+    @RequiresHouseHeader
     @Operation(operationId = "updatePlannedMeal")
     public ResponseEntity<PlannedMealDto> update(
             @PathVariable final String uuid, @Valid @RequestBody final PlanMealRequest request) {
@@ -89,6 +93,7 @@ public class PlannedMealController {
 
     @DeleteMapping("{uuid}")
     @HouseOwner
+    @RequiresHouseHeader
     public ResponseEntity<Void> deleteById(@PathVariable final String uuid) {
         final var existing = plannedMealService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
@@ -101,6 +106,7 @@ public class PlannedMealController {
 
     @PostMapping("{uuid}/eaten")
     @HouseOwner
+    @RequiresHouseHeader
     public ResponseEntity<PlannedMealDto> markEaten(@PathVariable final String uuid) {
         final var existing = plannedMealService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
@@ -113,6 +119,7 @@ public class PlannedMealController {
 
     @GetMapping("suggestions")
     @HouseMember
+    @RequiresHouseHeader
     public ResponseEntity<List<PantryItemDto>> suggestPantryItems(
             @RequestParam(required = false) final String recipeId, @RequestParam final String ingredient) {
         final List<PantryItemDto> suggestions =
@@ -125,6 +132,7 @@ public class PlannedMealController {
 
     @GetMapping
     @HouseMember
+    @RequiresHouseHeader
     public ResponseEntity<List<PlannedMealDto>> findByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate end) {
@@ -138,6 +146,7 @@ public class PlannedMealController {
 
     @GetMapping("shopping-list")
     @HouseMember
+    @RequiresHouseHeader
     public ResponseEntity<ShoppingListDto> shoppingList(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate end) {

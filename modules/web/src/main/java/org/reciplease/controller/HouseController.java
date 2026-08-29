@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseMember;
 import org.reciplease.configuration.HouseOwner;
+import org.reciplease.configuration.RequiresHouseHeader;
 import org.reciplease.dto.CreateInviteRequest;
 import org.reciplease.dto.HouseDto;
 import org.reciplease.dto.HouseInviteDto;
@@ -51,6 +52,7 @@ public class HouseController {
 
     @GetMapping("members")
     @HouseMember
+    @RequiresHouseHeader
     public ResponseEntity<List<HouseMemberDto>> findMembers() {
         final var members = houseRepository.members(houseAccess.requireHouseId()).stream()
                 .map(HouseMemberDto::from)
@@ -60,6 +62,7 @@ public class HouseController {
 
     @PatchMapping("members/{userId}")
     @HouseOwner
+    @RequiresHouseHeader
     public ResponseEntity<List<HouseMemberDto>> updateMemberRole(
             @PathVariable final String userId, @Valid @RequestBody final UpdateMemberRoleRequest request) {
         houseRepository.addMember(houseAccess.requireHouseId(), userId, request.getRole());
@@ -68,6 +71,7 @@ public class HouseController {
 
     @DeleteMapping("members/{userId}")
     @HouseOwner
+    @RequiresHouseHeader
     public ResponseEntity<List<HouseMemberDto>> removeMember(@PathVariable final String userId) {
         // An owner can remove anyone but themselves — self-removal could orphan the
         // house (and is better expressed as a future "leave house" action).
@@ -80,6 +84,7 @@ public class HouseController {
 
     @GetMapping("invites")
     @HouseOwner
+    @RequiresHouseHeader
     public ResponseEntity<List<HouseInviteDto>> findPendingInvites() {
         final var invites = inviteService.pendingInvites(houseAccess.requireHouseId()).stream()
                 .map(HouseInviteDto::from)
@@ -89,6 +94,7 @@ public class HouseController {
 
     @PostMapping("invites")
     @HouseOwner
+    @RequiresHouseHeader
     @Operation(operationId = "createInvite")
     public ResponseEntity<HouseInviteDto> createInvite(@Valid @RequestBody final CreateInviteRequest request) {
         final var invite = inviteService.createInvite(houseAccess.requireHouseId(), request.getRole());
@@ -97,6 +103,7 @@ public class HouseController {
 
     @DeleteMapping("invites/{inviteId}")
     @HouseOwner
+    @RequiresHouseHeader
     public ResponseEntity<Void> deleteInvite(@PathVariable final String inviteId) {
         final var deleted = inviteService.deleteInvite(houseAccess.requireHouseId(), inviteId);
         return deleted

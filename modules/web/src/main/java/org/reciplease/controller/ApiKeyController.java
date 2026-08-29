@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.ApiKeyAuthenticationToken;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseOwner;
+import org.reciplease.configuration.RequiresHouseHeader;
 import org.reciplease.dto.ApiKeyDto;
 import org.reciplease.dto.ApiKeySelfDto;
 import org.reciplease.dto.CreateApiKeyRequest;
@@ -44,6 +45,7 @@ public class ApiKeyController {
 
     @GetMapping
     @HouseOwner
+    @RequiresHouseHeader
     public ResponseEntity<List<ApiKeyDto>> findAll() {
         final var keys = apiKeyService.list(houseAccess.requireHouseId()).stream()
                 .map(ApiKeyDto::from)
@@ -53,6 +55,7 @@ public class ApiKeyController {
 
     @PostMapping
     @HouseOwner
+    @RequiresHouseHeader
     @Operation(operationId = "createApiKey")
     public ResponseEntity<CreatedApiKeyDto> create(@Valid @RequestBody final CreateApiKeyRequest request) {
         final var created = apiKeyService.create(
@@ -62,6 +65,7 @@ public class ApiKeyController {
 
     @DeleteMapping("{id}")
     @HouseOwner
+    @RequiresHouseHeader
     public ResponseEntity<Void> revoke(@PathVariable final String id) {
         final var revoked = apiKeyService.revoke(houseAccess.requireHouseId(), id);
         return revoked

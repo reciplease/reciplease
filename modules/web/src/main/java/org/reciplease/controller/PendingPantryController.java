@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseMember;
 import org.reciplease.configuration.HouseOwner;
+import org.reciplease.configuration.RequiresHouseHeader;
 import org.reciplease.dto.PantryItemDto;
 import org.reciplease.dto.PendingPantryItemDto;
 import org.reciplease.service.PendingPantryService;
@@ -39,6 +40,7 @@ public class PendingPantryController {
 
     @PostMapping
     @HouseOwner
+    @RequiresHouseHeader
     @Operation(operationId = "createPendingPantryItem")
     public ResponseEntity<PendingPantryItemDto> create(@Valid @RequestBody final PendingPantryItemDto itemDto) {
         final var savedItem = pendingPantryService.save(itemDto.toEntity(houseAccess.requireHouseId()));
@@ -47,6 +49,7 @@ public class PendingPantryController {
 
     @GetMapping
     @HouseMember
+    @RequiresHouseHeader
     public ResponseEntity<List<PendingPantryItemDto>> findAll() {
         final List<PendingPantryItemDto> items = pendingPantryService.findAll(houseAccess.requireHouseId()).stream()
                 .map(PendingPantryItemDto::from)
@@ -57,6 +60,7 @@ public class PendingPantryController {
 
     @GetMapping("{uuid}")
     @HouseMember
+    @RequiresHouseHeader
     public ResponseEntity<PendingPantryItemDto> findById(@PathVariable final String uuid) {
         final Optional<PendingPantryItemDto> foundItem = pendingPantryService
                 .findById(uuid)
@@ -68,6 +72,7 @@ public class PendingPantryController {
 
     @DeleteMapping("{uuid}")
     @HouseOwner
+    @RequiresHouseHeader
     public ResponseEntity<Void> deleteById(@PathVariable final String uuid) {
         final var existing = pendingPantryService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
@@ -80,6 +85,7 @@ public class PendingPantryController {
 
     @PostMapping("{uuid}/complete")
     @HouseOwner
+    @RequiresHouseHeader
     public ResponseEntity<PantryItemDto> complete(
             @PathVariable final String uuid, @Valid @RequestBody final PantryItemDto itemDto) {
         final var existing = pendingPantryService.findById(uuid);
