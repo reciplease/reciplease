@@ -3,6 +3,9 @@ package org.reciplease.controller;
 import static java.util.stream.Collectors.toList;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
@@ -10,7 +13,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseOwner;
-import org.reciplease.configuration.OptionalHouseHeader;
 import org.reciplease.dto.PublicRecipeDto;
 import org.reciplease.dto.RecipeDto;
 import org.reciplease.dto.RecipeIngredientDto;
@@ -30,6 +32,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * {@code GET /api/recipes} and {@code GET /api/recipes/{uuid}} here only handle requests that
+ * <em>do</em> carry the {@code X-RCPLS-House-Id} header (see the {@code headers} mapping
+ * condition below) — the no-header case is
+ * {@link org.reciplease.controller.publicapi.PublicRecipeController}. A present header still
+ * isn't proof of membership (it could name a house the caller doesn't belong to, or be stale),
+ * so {@link #toDto} still checks {@link HouseAccess#isMember()} before enriching the response;
+ * it just never needs to handle a missing header.
+ */
 @RestController
 @RequestMapping("api/recipes")
 @RequiredArgsConstructor
@@ -39,18 +50,29 @@ public class RecipeController {
     private final HouseAccess houseAccess;
     private final UserRepository userRepository;
 
-    @GetMapping("{uuid}")
-    @OptionalHouseHeader
+    @GetMapping(value = "{uuid}", headers = HouseAccess.HOUSE_HEADER)
+    @Parameter(
+            name = HouseAccess.HOUSE_HEADER,
+            in = ParameterIn.HEADER,
+            required = true,
+            description = "The house this request is scoped to.",
+            schema = @Schema(type = "string"))
     public ResponseEntity<RecipeDto> findById(@PathVariable final String uuid) {
-        final var optionalRecipe =
-                recipeService.findVisibleById(uuid, activeHouseId()).map(this::toDto);
+        final var optionalRecipe = recipeService
+                .findVisibleById(uuid, houseAccess.requireHouseId())
+                .map(this::toDto);
         return ResponseEntity.of(optionalRecipe);
     }
 
-    @GetMapping
-    @OptionalHouseHeader
+    @GetMapping(headers = HouseAccess.HOUSE_HEADER)
+    @Parameter(
+            name = HouseAccess.HOUSE_HEADER,
+            in = ParameterIn.HEADER,
+            required = true,
+            description = "The house this request is scoped to.",
+            schema = @Schema(type = "string"))
     public ResponseEntity<List<RecipeDto>> findAll() {
-        final var recipes = recipeService.findVisibleTo(activeHouseId()).stream()
+        final var recipes = recipeService.findVisibleTo(houseAccess.requireHouseId()).stream()
                 .map(this::toDto)
                 .collect(toList());
         return ResponseEntity.status(HttpStatus.OK).body(recipes);
@@ -105,11 +127,6 @@ public class RecipeController {
                 .collect(Collectors.toSet());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(recipeIngredients);
-    }
-
-    /** Null for unauthenticated callers or callers with no active house — they only see public recipes. */
-    private String activeHouseId() {
-        return houseAccess.currentHouseIdOrNull();
     }
 
     /**
