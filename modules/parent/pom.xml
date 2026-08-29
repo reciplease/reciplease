@@ -20,7 +20,7 @@
   <url>https://app.reciplease.org</url>
 
   <properties>
-    <revision>2026.08.29-aca8dd6</revision>
+    <revision>2026.08.29-c94b30b</revision>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>25</java.version>
