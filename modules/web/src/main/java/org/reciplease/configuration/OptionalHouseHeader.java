@@ -2,6 +2,7 @@ package org.reciplease.configuration;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -20,5 +21,6 @@ import java.lang.annotation.Target;
         name = HouseAccess.HOUSE_HEADER,
         in = ParameterIn.HEADER,
         required = false,
-        description = "The house this request is scoped to, if any.")
+        description = "The house this request is scoped to, if any.",
+        schema = @Schema(type = "string"))
 public @interface OptionalHouseHeader {}
