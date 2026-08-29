@@ -2,7 +2,6 @@ package org.reciplease.configuration;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -21,6 +20,5 @@ import org.springframework.security.access.prepost.PreAuthorize;
         name = HouseAccess.HOUSE_HEADER,
         in = ParameterIn.HEADER,
         required = true,
-        description = "The house this request is scoped to.",
-        schema = @Schema(type = "string"))
+        description = "The house this request is scoped to.")
 public @interface HouseMember {}

@@ -64,6 +64,15 @@ public class HouseAccess {
     }
 
     /**
+     * Returns the {@code X-RCPLS-House-Id} header value, or null if absent — for
+     * endpoints (like public recipe browsing) that work fine with no active house and
+     * don't gate access on one via {@code @PreAuthorize}.
+     */
+    public String currentHouseIdOrNull() {
+        return houseIdHeader();
+    }
+
+    /**
      * An {@link ApiKeyAuthenticationToken} carries its own house/role assignment — that
      * assignment <em>is</em> the authorization, not a lookup key into {@link HouseRepository} —
      * so it's resolved directly rather than via {@link #currentUserId()}/{@code roleOf}. Still

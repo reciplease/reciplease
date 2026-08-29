@@ -1,5 +1,6 @@
 package org.reciplease.controller;
 
+import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -11,6 +12,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -63,6 +65,41 @@ class RecipeControllerTest {
 
     @MockitoBean
     private UserRepository userRepository;
+
+    @Test
+    @DisplayName("ID does not exist")
+    void noRecipe() throws Exception {
+        final var id = UUID.randomUUID().toString();
+        when(recipeService.findVisibleById(id, null)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/recipes/{uuid}", id)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("get recipe by ID")
+    void recipe() throws Exception {
+        final var soup = getSoup();
+        final var soupDto = RecipeDto.from(soup);
+
+        when(recipeService.findVisibleById(soup.id(), null)).thenReturn(Optional.of(soup));
+
+        mockMvc.perform(get("/api/recipes/{uuid}", soup.id()))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(soupDto), true));
+    }
+
+    @Test
+    @DisplayName("get all recipes")
+    void allRecipes() throws Exception {
+        final var recipes = List.of(getToast(), getSoup());
+        final var recipeDtoList = recipes.stream().map(RecipeDto::from).collect(toList());
+
+        when(recipeService.findVisibleTo(null)).thenReturn(recipes);
+
+        mockMvc.perform(get("/api/recipes"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(recipeDtoList), true));
+    }
 
     @Test
     @DisplayName("create new recipe")
@@ -312,21 +349,20 @@ class RecipeControllerTest {
                 UserSummaryDto.builder().userId("user-2").handle("bob").build());
 
         when(recipeService.findVisibleById(soup.id(), HOUSE_ID)).thenReturn(Optional.of(soup));
-        when(houseAccess.requireHouseId()).thenReturn(HOUSE_ID);
         when(houseAccess.isMember()).thenReturn(true);
         when(houseAccess.belongsToHeaderHouse(soup)).thenReturn(true);
+        when(houseAccess.currentHouseIdOrNull()).thenReturn(HOUSE_ID);
         when(userRepository.findById("user-1")).thenReturn(Optional.of(createdBy));
         when(userRepository.findById("user-2")).thenReturn(Optional.of(updatedBy));
 
-        mockMvc.perform(get("/api/recipes/{uuid}", soup.id()).header(HouseAccess.HOUSE_HEADER, HOUSE_ID))
+        mockMvc.perform(get("/api/recipes/{uuid}", soup.id()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(expectedDto), true));
     }
 
     @Test
-    @DisplayName(
-            "get recipe by ID omits houseId and owner info for a caller whose header house they are not a member of")
-    void recipeOmitsOwnerInfoWhenNotAMember() throws Exception {
+    @DisplayName("get recipe by ID omits houseId and owner info for a caller outside the recipe's house")
+    void recipeOmitsOwnerInfoForNonMember() throws Exception {
         final var soup = getSoup().toBuilder()
                 .houseId(HOUSE_ID)
                 .createdBy("user-1")
@@ -334,11 +370,9 @@ class RecipeControllerTest {
                 .build();
         final var expectedDto = RecipeDto.from(soup);
 
-        when(recipeService.findVisibleById(soup.id(), HOUSE_ID)).thenReturn(Optional.of(soup));
-        when(houseAccess.requireHouseId()).thenReturn(HOUSE_ID);
-        when(houseAccess.isMember()).thenReturn(false);
+        when(recipeService.findVisibleById(soup.id(), null)).thenReturn(Optional.of(soup));
 
-        mockMvc.perform(get("/api/recipes/{uuid}", soup.id()).header(HouseAccess.HOUSE_HEADER, HOUSE_ID))
+        mockMvc.perform(get("/api/recipes/{uuid}", soup.id()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(expectedDto), true));
 
