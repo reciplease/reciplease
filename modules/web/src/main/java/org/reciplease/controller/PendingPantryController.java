@@ -47,6 +47,7 @@ public class PendingPantryController {
 
     @GetMapping
     @HouseMember
+    @Operation(operationId = "findAllPendingPantryItems")
     public ResponseEntity<List<PendingPantryItemDto>> findAll() {
         final List<PendingPantryItemDto> items = pendingPantryService.findAll(houseAccess.requireHouseId()).stream()
                 .map(PendingPantryItemDto::from)
@@ -57,6 +58,7 @@ public class PendingPantryController {
 
     @GetMapping("{uuid}")
     @HouseMember
+    @Operation(operationId = "findPendingPantryItem")
     public ResponseEntity<PendingPantryItemDto> findById(@PathVariable final String uuid) {
         final Optional<PendingPantryItemDto> foundItem = pendingPantryService
                 .findById(uuid)
@@ -68,6 +70,7 @@ public class PendingPantryController {
 
     @DeleteMapping("{uuid}")
     @HouseOwner
+    @Operation(operationId = "discardPendingPantryItem")
     public ResponseEntity<Void> deleteById(@PathVariable final String uuid) {
         final var existing = pendingPantryService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
