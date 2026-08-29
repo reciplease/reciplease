@@ -33,8 +33,6 @@
     <spring-cloud-gcp-dependencies.version>8.0.4</spring-cloud-gcp-dependencies.version>
     <springdoc.version>3.0.3</springdoc.version>
     <jjwt.version>0.12.6</jjwt.version>
-    <aspectj.version>1.9.25.1</aspectj.version>
-    <aspectj-maven-plugin.version>1.16.0</aspectj-maven-plugin.version>
     <mongock.version>5.5.1</mongock.version>
   </properties>
 

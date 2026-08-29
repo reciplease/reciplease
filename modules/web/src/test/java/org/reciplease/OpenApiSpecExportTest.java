@@ -6,10 +6,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
+import org.reciplease.configuration.ErrorResponseOperationCustomizer;
+import org.reciplease.configuration.ErrorResponseSchemaRegistrar;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.MethodSecurityTestSupport;
 import org.reciplease.configuration.PasskeyConfig;
 import org.reciplease.configuration.ReciplaseJwtService;
+import org.reciplease.configuration.SwaggerConfig;
 import org.reciplease.configuration.WithMockRecipleaseUser;
 import org.reciplease.repository.HouseRepository;
 import org.reciplease.repository.InviteRepository;
@@ -49,6 +52,9 @@ import org.springframework.test.web.servlet.MockMvc;
     MethodSecurityTestSupport.class,
     PasskeyConfig.class,
     ReciplaseJwtService.class,
+    SwaggerConfig.class,
+    ErrorResponseOperationCustomizer.class,
+    ErrorResponseSchemaRegistrar.class,
     // springdoc's auto-configuration isn't part of @WebMvcTest's curated slice
     // auto-config allow-list, so it has to be imported explicitly here.
     SpringDocConfiguration.class,

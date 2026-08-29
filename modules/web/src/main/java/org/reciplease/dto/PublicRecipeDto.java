@@ -55,7 +55,11 @@ public class PublicRecipeDto implements RecipeDto {
     @Schema(requiredMode = REQUIRED)
     List<String> steps;
 
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
+    // Not read-only: RecipeController.update/RecipeService#update genuinely reads this from
+    // the request body and overwrites the recipe's ingredients with it — omitting it on an
+    // update would silently wipe them (Recipe#recipeIngredients defaults to an empty set), so
+    // it stays required on both directions rather than being marked server-generated-only.
+    @Schema(requiredMode = REQUIRED)
     Set<RecipeIngredientDto> ingredients;
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)

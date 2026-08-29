@@ -84,15 +84,6 @@
       <artifactId>utils</artifactId>
       <scope>test</scope>
     </dependency>
-
-    <!-- AspectJ: compile-time weaving used to introduce @ApiResponse annotations onto
-         controller methods (e.g. every @Valid parameter gets a documented 400) so springdoc's
-         reflection-based scanning sees them at startup without hand-annotating every endpoint. -->
-    <dependency>
-      <groupId>org.aspectj</groupId>
-      <artifactId>aspectjrt</artifactId>
-      <version>${aspectj.version}</version>
-    </dependency>
   </dependencies>
 
   <build>
@@ -119,53 +110,6 @@
           <!--suppress MavenModelInspection -->
           <argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar}</argLine>
         </configuration>
-      </plugin>
-      <plugin>
-        <!-- ajc (AspectJ's compiler) is built on the Eclipse JDT compiler, which Lombok's
-             annotation processor cannot hook into via a normal -processorpath the way it does
-             javac's internals — Lombok support for ECJ instead needs a `-javaagent:lombok.jar=ECJ`
-             on the *compiling* JVM itself, which aspectj-maven-plugin (it runs ajc in-process, no
-             fork option) can't be given per-execution. Rather than pull in delombok or a
-             build-wide java agent just for this, source-level compilation of controllers/DTOs is
-             left entirely to maven-compiler-plugin (Lombok works there, unmodified) and this
-             plugin instead does binary weaving: it compiles only the aspect itself, then weaves
-             the declare-annotations onto the *already-compiled* .class files in target/classes
-             (-inpath, via weaveDirectories) — no Lombok-annotated source ever passes through ajc. -->
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>aspectj-maven-plugin</artifactId>
-        <version>${aspectj-maven-plugin.version}</version>
-        <configuration>
-          <complianceLevel>${java.version}</complianceLevel>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-          <showWeaveInfo>true</showWeaveInfo>
-          <verbose>false</verbose>
-          <Xlint>ignore</Xlint>
-          <aspectDirectory>src/main/aspect</aspectDirectory>
-          <includes>
-            <include>org/reciplease/aspect/**/*.aj</include>
-          </includes>
-          <weaveDirectories>
-            <weaveDirectory>${project.build.outputDirectory}</weaveDirectory>
-          </weaveDirectories>
-        </configuration>
-        <executions>
-          <execution>
-            <!-- after maven-compiler-plugin's own "compile" execution has produced
-                 target/classes, so there's something to weave. -->
-            <phase>process-classes</phase>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjtools</artifactId>
-            <version>${aspectj.version}</version>
-          </dependency>
-        </dependencies>
       </plugin>
     </plugins>
   </build>
