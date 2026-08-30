@@ -30,6 +30,15 @@ mvn -pl modules/web -am test        # just the web module
 module's tests, since `modules/features` is registered in the root `pom.xml`'s
 `<modules>` list — there's no separate "e2e" CI step or Maven profile to remember.
 
+## Code style
+
+No comments. None — not "what" comments, not "why" comments, not javadocs.
+Code must be self-documenting: if a comment feels necessary, that's a signal
+to rename something, extract a well-named method/variable, or restructure the
+logic instead of explaining it. Clean Code rules here. This applies to new
+code and to code you touch; don't go out of your way to strip comments from
+files you aren't otherwise editing.
+
 ## Writing new tests
 
 - Domain/service logic → `modules/core/src/test/java`, mock the repository
