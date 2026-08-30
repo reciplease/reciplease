@@ -8,14 +8,15 @@ import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.reciplease.configuration.CurrentHouse;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseMember;
 import org.reciplease.configuration.HouseOwner;
-import org.reciplease.dto.PantryItemDto;
 import org.reciplease.dto.PlanMealRequest;
 import org.reciplease.dto.PlannedIngredientDto;
 import org.reciplease.dto.PlannedMealDto;
 import org.reciplease.dto.ShoppingListDto;
+import org.reciplease.dto.SuggestedPantryItemDto;
 import org.reciplease.model.PlannedIngredient;
 import org.reciplease.model.PlannedMeal;
 import org.reciplease.service.PlannedMealService;
@@ -48,13 +49,14 @@ public class PlannedMealController {
     @PostMapping
     @HouseOwner
     @Operation(operationId = "planMeal")
-    public ResponseEntity<PlannedMealDto> plan(@Valid @RequestBody final PlanMealRequest request) {
+    public ResponseEntity<PlannedMealDto> plan(
+            @CurrentHouse final String houseId, @Valid @RequestBody final PlanMealRequest request) {
         final List<PlannedIngredient> items = request.getItems() == null
                 ? List.of()
                 : request.getItems().stream().map(PlannedIngredientDto::toModel).collect(toList());
 
         final var plannedMeal = plannedMealService.plan(
-                houseAccess.requireHouseId(), request.getRecipeId(), request.getName(), request.getDate(), items);
+                houseId, request.getRecipeId(), request.getName(), request.getDate(), items);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(toDto(plannedMeal));
     }
@@ -119,11 +121,17 @@ public class PlannedMealController {
     @GetMapping("suggestions")
     @HouseMember
     @Operation(operationId = "suggestPantryItemsForPlannedMeal")
-    public ResponseEntity<List<PantryItemDto>> suggestPantryItems(
-            @RequestParam(required = false) final String recipeId, @RequestParam final String ingredient) {
-        final List<PantryItemDto> suggestions =
-                plannedMealService.suggestPantryItems(houseAccess.requireHouseId(), recipeId, ingredient).stream()
-                        .map(PantryItemDto::from)
+    public ResponseEntity<List<SuggestedPantryItemDto>> suggestPantryItems(
+            @CurrentHouse final String houseId,
+            @RequestParam(required = false) final String recipeId,
+            @RequestParam final String ingredient,
+            @RequestParam(required = false) final String excludeMealId) {
+        final var suggestionsWithAvailable =
+                plannedMealService.suggestPantryItemsWithAvailable(houseId, recipeId, ingredient, excludeMealId);
+
+        final List<SuggestedPantryItemDto> suggestions =
+                suggestionsWithAvailable.entrySet().stream()
+                        .map(entry -> SuggestedPantryItemDto.from(entry.getKey(), entry.getValue()))
                         .collect(toList());
 
         return ResponseEntity.ok(suggestions);
@@ -133,12 +141,12 @@ public class PlannedMealController {
     @HouseMember
     @Operation(operationId = "findPlannedMealsByDateRange")
     public ResponseEntity<List<PlannedMealDto>> findByDateRange(
+            @CurrentHouse final String houseId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate end) {
-        final List<PlannedMealDto> meals =
-                plannedMealService.findByDateIsBetween(houseAccess.requireHouseId(), start, end).stream()
-                        .map(this::toDto)
-                        .collect(toList());
+        final List<PlannedMealDto> meals = plannedMealService.findByDateIsBetween(houseId, start, end).stream()
+                .map(this::toDto)
+                .collect(toList());
 
         return ResponseEntity.ok(meals);
     }
@@ -147,9 +155,10 @@ public class PlannedMealController {
     @HouseMember
     @Operation(operationId = "findShoppingList")
     public ResponseEntity<ShoppingListDto> shoppingList(
+            @CurrentHouse final String houseId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate end) {
-        final var shoppingList = shoppingListService.generateShoppingList(houseAccess.requireHouseId(), start, end);
+        final var shoppingList = shoppingListService.generateShoppingList(houseId, start, end);
 
         return ResponseEntity.ok(ShoppingListDto.from(shoppingList));
     }

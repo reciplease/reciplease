@@ -388,6 +388,71 @@ class PlannedMealServiceTest {
 
             assertThat(plannedMealService.suggestPantryItems(HOUSE_ID, recipe.id(), "bread"), is(empty()));
         }
+
+        @Test
+        @DisplayName("available equals remaining when nothing else has claimed the item")
+        void availableEqualsRemainingWithNoOtherAllocations() {
+            var meal = new PlannedMeal(
+                    HOUSE_ID,
+                    recipe.id(),
+                    "Dinner",
+                    date,
+                    List.of(new PlannedIngredient(bread, List.of(new PantryAllocation("old", "111", 2d)))));
+            var current = new PantryItem("new", null, HOUSE_ID, "bread", null, "ITEMS", 5d, date, "111");
+
+            when(plannedMealRepository.findByRecipeId(HOUSE_ID, recipe.id())).thenReturn(List.of(meal));
+            when(pantryRepository.findByBarcodeIn(HOUSE_ID, Set.of("111"))).thenReturn(List.of(current));
+            when(plannedMealRepository.findByHouseId(HOUSE_ID)).thenReturn(List.of(meal));
+
+            var suggestions = plannedMealService.suggestPantryItemsWithAvailable(HOUSE_ID, recipe.id(), "bread", null);
+
+            assertThat(suggestions.get(current), is(5.0));
+        }
+
+        @Test
+        @DisplayName("available is reduced by allocations from other planned meals")
+        void availableReducedByOtherMealAllocations() {
+            var meal1 = new PlannedMeal(
+                    "meal-1", null, HOUSE_ID, recipe.id(), "Dinner", date,
+                    List.of(new PlannedIngredient(bread, List.of(new PantryAllocation("new", "111", 2d)))),
+                    null, null, null);
+            var meal2 = new PlannedMeal(
+                    "meal-2", null, HOUSE_ID, null, "Lunch", date,
+                    List.of(new PlannedIngredient(bread, List.of(new PantryAllocation("new", "111", 3d)))),
+                    null, null, null);
+            var current = new PantryItem("new", null, HOUSE_ID, "bread", null, "ITEMS", 5d, date, "111");
+
+            when(plannedMealRepository.findByRecipeId(HOUSE_ID, recipe.id())).thenReturn(List.of(meal1));
+            when(pantryRepository.findByBarcodeIn(HOUSE_ID, Set.of("111"))).thenReturn(List.of(current));
+            when(plannedMealRepository.findByHouseId(HOUSE_ID)).thenReturn(List.of(meal1, meal2));
+
+            var suggestions = plannedMealService.suggestPantryItemsWithAvailable(HOUSE_ID, recipe.id(), "bread", null);
+
+            assertThat(suggestions.get(current), is(0.0));
+        }
+
+        @Test
+        @DisplayName("excludeMealId keeps that meal's own allocations from counting against it")
+        void excludeMealIdIgnoresItsOwnAllocations() {
+            var meal1 = new PlannedMeal(
+                    "meal-1", null, HOUSE_ID, recipe.id(), "Dinner", date,
+                    List.of(new PlannedIngredient(bread, List.of(new PantryAllocation("new", "111", 2d)))),
+                    null, null, null);
+            var meal2 = new PlannedMeal(
+                    "meal-2", null, HOUSE_ID, null, "Lunch", date,
+                    List.of(new PlannedIngredient(bread, List.of(new PantryAllocation("new", "111", 3d)))),
+                    null, null, null);
+            var current = new PantryItem("new", null, HOUSE_ID, "bread", null, "ITEMS", 5d, date, "111");
+
+            when(plannedMealRepository.findByRecipeId(HOUSE_ID, recipe.id())).thenReturn(List.of(meal1));
+            when(pantryRepository.findByBarcodeIn(HOUSE_ID, Set.of("111"))).thenReturn(List.of(current));
+            when(plannedMealRepository.findByHouseId(HOUSE_ID)).thenReturn(List.of(meal1, meal2));
+
+            var suggestions =
+                    plannedMealService.suggestPantryItemsWithAvailable(HOUSE_ID, recipe.id(), "bread", "meal-1");
+
+            assertThat(suggestions.get(current), is(2.0));
+        }
     }
 
     private static org.hamcrest.Matcher<PantryAllocation> hasAllocation(

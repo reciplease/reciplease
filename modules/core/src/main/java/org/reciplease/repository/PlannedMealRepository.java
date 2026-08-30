@@ -18,6 +18,8 @@ public interface PlannedMealRepository {
 
     List<PlannedMeal> findByIngredientName(String houseId, String ingredientName);
 
+    List<PlannedMeal> findByHouseId(String houseId);
+
     boolean existsByHouseIdAndDateAndName(String houseId, LocalDate date, String name);
 
     boolean existsByHouseIdAndDateAndNameAndIdNot(String houseId, LocalDate date, String name, String id);

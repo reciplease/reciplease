@@ -173,6 +173,33 @@ public class PlannedMealService {
         return distinctById(pantryRepository.findByName(houseId, ingredientName));
     }
 
+    public Map<PantryItem, Double> suggestPantryItemsWithAvailable(
+            final String houseId,
+            final String recipeId,
+            final String ingredientName,
+            final String excludeMealId) {
+        var suggestedItems = suggestPantryItems(houseId, recipeId, ingredientName);
+        var committedElsewhere = committedElsewhere(houseId, ingredientName, excludeMealId);
+
+        return suggestedItems.stream()
+                .collect(Collectors.toMap(
+                        item -> item,
+                        item -> Math.max(0, item.remaining() - committedElsewhere.getOrDefault(item.id(), 0d)),
+                        (a, b) -> a,
+                        LinkedHashMap::new));
+    }
+
+    private Map<String, Double> committedElsewhere(
+            final String houseId, final String ingredientName, final String excludeMealId) {
+        return plannedMealRepository.findByHouseId(houseId).stream()
+                .filter(meal -> !Objects.equals(meal.id(), excludeMealId))
+                .flatMap(meal -> meal.items().stream())
+                .filter(item -> item.ingredient().name().equals(ingredientName))
+                .flatMap(item -> item.allocations().stream())
+                .collect(Collectors.toMap(
+                        PantryAllocation::pantryItemId, PantryAllocation::amount, Double::sum));
+    }
+
     private List<PantryItem> distinctById(final List<PantryItem> items) {
         Map<String, PantryItem> byId = new LinkedHashMap<>();
         items.forEach(item -> byId.putIfAbsent(item.id(), item));

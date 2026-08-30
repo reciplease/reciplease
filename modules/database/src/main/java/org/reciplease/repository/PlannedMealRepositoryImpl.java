@@ -39,6 +39,13 @@ public class PlannedMealRepositoryImpl implements PlannedMealRepository {
     }
 
     @Override
+    public List<PlannedMeal> findByHouseId(final String houseId) {
+        return plannedMealMongoRepository.findByHouseId(houseId).stream()
+                .map(PlannedMealDocument::toModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<PlannedMeal> findByRecipeId(final String houseId, final String recipeId) {
         return plannedMealMongoRepository.findByHouseIdAndRecipeId(houseId, recipeId).stream()
                 .map(PlannedMealDocument::toModel)

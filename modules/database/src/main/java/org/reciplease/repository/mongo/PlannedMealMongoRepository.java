@@ -16,6 +16,8 @@ public interface PlannedMealMongoRepository extends MongoRepository<PlannedMealD
     @Query("{ 'houseId': ?0, 'date': { $gte: ?1, $lte: ?2 } }")
     List<PlannedMealDocument> findByHouseIdAndDateBetweenInclusive(String houseId, LocalDate start, LocalDate end);
 
+    List<PlannedMealDocument> findByHouseId(String houseId);
+
     List<PlannedMealDocument> findByHouseIdAndRecipeId(String houseId, String recipeId);
 
     List<PlannedMealDocument> findByHouseIdAndItemsIngredientName(String houseId, String ingredientName);

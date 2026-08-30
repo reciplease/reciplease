@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -414,8 +415,8 @@ class PlannedMealControllerTest {
         var item =
                 new PantryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 5d, LocalDate.of(2026, 6, 30), "111");
 
-        when(plannedMealService.suggestPantryItems(HOUSE_ID, "recipe-1", "bread"))
-                .thenReturn(List.of(item));
+        when(plannedMealService.suggestPantryItemsWithAvailable(HOUSE_ID, "recipe-1", "bread", null))
+                .thenReturn(Map.of(item, 5.0));
 
         mockMvc.perform(get("/api/planned-meals/suggestions")
                         .param("recipeId", "recipe-1")
@@ -423,7 +424,7 @@ class PlannedMealControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content()
                         .json(
-                                "[{\"uuid\":\"item-1\",\"houseId\":\"house-1\",\"name\":\"bread\",\"measure\":\"item\",\"amount\":5.0,\"remaining\":5.0,\"expiration\":\"2026-06-30\",\"barcode\":\"111\"}]",
+                                "[{\"uuid\":\"item-1\",\"houseId\":\"house-1\",\"name\":\"bread\",\"measure\":\"item\",\"amount\":5.0,\"remaining\":5.0,\"expiration\":\"2026-06-30\",\"barcode\":\"111\",\"available\":5.0}]",
                                 true));
     }
 
@@ -433,11 +434,29 @@ class PlannedMealControllerTest {
         var item =
                 new PantryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 5d, LocalDate.of(2026, 6, 30), "111");
 
-        when(plannedMealService.suggestPantryItems(HOUSE_ID, null, "bread")).thenReturn(List.of(item));
+        when(plannedMealService.suggestPantryItemsWithAvailable(HOUSE_ID, null, "bread", null))
+                .thenReturn(Map.of(item, 5.0));
 
         mockMvc.perform(get("/api/planned-meals/suggestions").param("ingredient", "bread"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].uuid").value("item-1"));
+    }
+
+    @Test
+    @DisplayName("returns pantry suggestions with available amounts, including excludeMealId parameter")
+    void suggestionsWithAvailableAmounts() throws Exception {
+        var item =
+                new PantryItem("item-1", null, HOUSE_ID, "bread", null, "ITEMS", 5d, LocalDate.of(2026, 6, 30), "111");
+
+        when(plannedMealService.suggestPantryItemsWithAvailable(HOUSE_ID, null, "bread", "meal-1"))
+                .thenReturn(Map.of(item, 3.0));
+
+        mockMvc.perform(get("/api/planned-meals/suggestions")
+                        .param("ingredient", "bread")
+                        .param("excludeMealId", "meal-1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].uuid").value("item-1"))
+                .andExpect(jsonPath("$[0].available").value(3.0));
     }
 
     @Test
