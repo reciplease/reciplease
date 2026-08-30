@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.ApiKeyAuthenticationToken;
+import org.reciplease.configuration.CurrentHouse;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseOwner;
 import org.reciplease.dto.ApiKeyDto;
@@ -47,8 +48,8 @@ public class ApiKeyController {
     @GetMapping
     @HouseOwner
     @Operation(operationId = "findAllApiKeys")
-    public ResponseEntity<List<ApiKeyDto>> findAll() {
-        final var keys = apiKeyService.list(houseAccess.requireHouseId()).stream()
+    public ResponseEntity<List<ApiKeyDto>> findAll(@CurrentHouse final String houseId) {
+        final var keys = apiKeyService.list(houseId).stream()
                 .map(ApiKeyDto::from)
                 .collect(toList());
         return ResponseEntity.ok(keys);
@@ -57,17 +58,18 @@ public class ApiKeyController {
     @PostMapping
     @HouseOwner
     @Operation(operationId = "createApiKey")
-    public ResponseEntity<CreatedApiKeyDto> create(@Valid @RequestBody final CreateApiKeyRequest request) {
-        final var created = apiKeyService.create(
-                houseAccess.requireHouseId(), request.getName(), request.getRole(), currentUserId());
+    public ResponseEntity<CreatedApiKeyDto> create(
+            @CurrentHouse final String houseId, @Valid @RequestBody final CreateApiKeyRequest request) {
+        final var created =
+                apiKeyService.create(houseId, request.getName(), request.getRole(), currentUserId());
         return ResponseEntity.status(HttpStatus.CREATED).body(CreatedApiKeyDto.from(created));
     }
 
     @DeleteMapping("{id}")
     @HouseOwner
     @Operation(operationId = "revokeApiKey")
-    public ResponseEntity<Void> revoke(@PathVariable final String id) {
-        final var revoked = apiKeyService.revoke(houseAccess.requireHouseId(), id);
+    public ResponseEntity<Void> revoke(@CurrentHouse final String houseId, @PathVariable final String id) {
+        final var revoked = apiKeyService.revoke(houseId, id);
         return revoked
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();

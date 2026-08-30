@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.reciplease.configuration.CurrentHouse;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseMember;
 import org.reciplease.configuration.HouseOwner;
@@ -37,8 +38,9 @@ public class PantryController {
     @PostMapping
     @HouseOwner
     @Operation(operationId = "createPantryItem")
-    public ResponseEntity<PantryItemDto> create(@Valid @RequestBody final PantryItemDto itemDto) {
-        final var savedItem = pantryService.save(itemDto.toEntity(houseAccess.requireHouseId()));
+    public ResponseEntity<PantryItemDto> create(
+            @CurrentHouse final String houseId, @Valid @RequestBody final PantryItemDto itemDto) {
+        final var savedItem = pantryService.save(itemDto.toEntity(houseId));
         final var savedItemDto = PantryItemDto.from(savedItem);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedItemDto);
     }
@@ -47,14 +49,16 @@ public class PantryController {
     @HouseOwner
     @Operation(operationId = "updatePantryItem")
     public ResponseEntity<PantryItemDto> update(
-            @PathVariable final String uuid, @Valid @RequestBody final PantryItemDto itemDto) {
+            @CurrentHouse final String houseId,
+            @PathVariable final String uuid,
+            @Valid @RequestBody final PantryItemDto itemDto) {
         final var existing = pantryService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
             return ResponseEntity.notFound().build();
         }
 
         return pantryService
-                .update(uuid, itemDto.toEntity(houseAccess.requireHouseId()))
+                .update(uuid, itemDto.toEntity(houseId))
                 .map(PantryItemDto::from)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.noContent().build());
@@ -89,9 +93,10 @@ public class PantryController {
     @HouseMember
     @Operation(operationId = "findAllPantryItems")
     public ResponseEntity<List<PantryItemDto>> findAll(
+            @CurrentHouse final String houseId,
             @RequestParam(defaultValue = "false") final boolean excludeFullyConsumed) {
         final List<PantryItemDto> items =
-                pantryService.findAll(houseAccess.requireHouseId(), excludeFullyConsumed).stream()
+                pantryService.findAll(houseId, excludeFullyConsumed).stream()
                         .map(PantryItemDto::from)
                         .collect(toList());
 
@@ -101,8 +106,8 @@ public class PantryController {
     @GetMapping("/unexpired")
     @HouseMember
     @Operation(operationId = "findAllUnexpiredPantryItems")
-    public ResponseEntity<List<PantryItemDto>> findAllUnexpired() {
-        final List<PantryItemDto> items = pantryService.findAllUnexpired(houseAccess.requireHouseId()).stream()
+    public ResponseEntity<List<PantryItemDto>> findAllUnexpired(@CurrentHouse final String houseId) {
+        final List<PantryItemDto> items = pantryService.findAllUnexpired(houseId).stream()
                 .map(PantryItemDto::from)
                 .collect(toList());
 
@@ -112,8 +117,8 @@ public class PantryController {
     @GetMapping("/expired")
     @HouseMember
     @Operation(operationId = "findAllExpiredPantryItems")
-    public ResponseEntity<List<PantryItemDto>> findAllExpired() {
-        final List<PantryItemDto> items = pantryService.findAllExpired(houseAccess.requireHouseId()).stream()
+    public ResponseEntity<List<PantryItemDto>> findAllExpired(@CurrentHouse final String houseId) {
+        final List<PantryItemDto> items = pantryService.findAllExpired(houseId).stream()
                 .map(PantryItemDto::from)
                 .collect(toList());
 

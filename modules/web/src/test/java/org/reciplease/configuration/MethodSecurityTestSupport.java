@@ -1,11 +1,14 @@
 package org.reciplease.configuration;
 
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.webmvc.test.autoconfigure.MockMvcBuilderCustomizer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -27,6 +30,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @TestConfiguration
 @EnableMethodSecurity
 public class MethodSecurityTestSupport {
+
+    public static final String HOUSE_ID = "house-1";
+
+    @Bean
+    MockMvcBuilderCustomizer currentHouseHeaderCustomizer() {
+        return builder -> builder.defaultRequest(
+                MockMvcRequestBuilders.get("/").header(HouseAccess.HOUSE_HEADER, HOUSE_ID));
+    }
 
     @RestControllerAdvice
     static class AuthorizationDeniedAdvice {

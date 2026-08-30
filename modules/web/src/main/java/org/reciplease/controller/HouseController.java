@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.reciplease.configuration.CurrentHouse;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseMember;
 import org.reciplease.configuration.HouseOwner;
@@ -55,8 +56,8 @@ public class HouseController {
     @GetMapping("members")
     @HouseMember
     @Operation(operationId = "findHouseMembers")
-    public ResponseEntity<List<HouseMemberDto>> findMembers() {
-        final var members = houseRepository.members(houseAccess.requireHouseId()).stream()
+    public ResponseEntity<List<HouseMemberDto>> findMembers(@CurrentHouse final String houseId) {
+        final var members = houseRepository.members(houseId).stream()
                 .map(HouseMemberDto::from)
                 .collect(toList());
         return ResponseEntity.ok(members);
@@ -66,29 +67,30 @@ public class HouseController {
     @HouseOwner
     @Operation(operationId = "updateHouseMemberRole")
     public ResponseEntity<List<HouseMemberDto>> updateMemberRole(
-            @PathVariable final String userId, @Valid @RequestBody final UpdateMemberRoleRequest request) {
-        houseRepository.addMember(houseAccess.requireHouseId(), userId, request.getRole());
-        return findMembers();
+            @CurrentHouse final String houseId,
+            @PathVariable final String userId,
+            @Valid @RequestBody final UpdateMemberRoleRequest request) {
+        houseRepository.addMember(houseId, userId, request.getRole());
+        return findMembers(houseId);
     }
 
     @DeleteMapping("members/{userId}")
     @HouseOwner
     @Operation(operationId = "removeHouseMember")
-    public ResponseEntity<List<HouseMemberDto>> removeMember(@PathVariable final String userId) {
-        // An owner can remove anyone but themselves — self-removal could orphan the
-        // house (and is better expressed as a future "leave house" action).
+    public ResponseEntity<List<HouseMemberDto>> removeMember(
+            @CurrentHouse final String houseId, @PathVariable final String userId) {
         if (userId.equals(currentUserId())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        houseRepository.removeMember(houseAccess.requireHouseId(), userId);
-        return findMembers();
+        houseRepository.removeMember(houseId, userId);
+        return findMembers(houseId);
     }
 
     @GetMapping("invites")
     @HouseOwner
     @Operation(operationId = "findPendingHouseInvites")
-    public ResponseEntity<List<HouseInviteDto>> findPendingInvites() {
-        final var invites = inviteService.pendingInvites(houseAccess.requireHouseId()).stream()
+    public ResponseEntity<List<HouseInviteDto>> findPendingInvites(@CurrentHouse final String houseId) {
+        final var invites = inviteService.pendingInvites(houseId).stream()
                 .map(HouseInviteDto::from)
                 .collect(toList());
         return ResponseEntity.ok(invites);
@@ -97,16 +99,18 @@ public class HouseController {
     @PostMapping("invites")
     @HouseOwner
     @Operation(operationId = "createInvite")
-    public ResponseEntity<HouseInviteDto> createInvite(@Valid @RequestBody final CreateInviteRequest request) {
-        final var invite = inviteService.createInvite(houseAccess.requireHouseId(), request.getRole());
+    public ResponseEntity<HouseInviteDto> createInvite(
+            @CurrentHouse final String houseId, @Valid @RequestBody final CreateInviteRequest request) {
+        final var invite = inviteService.createInvite(houseId, request.getRole());
         return ResponseEntity.status(HttpStatus.CREATED).body(HouseInviteDto.from(invite));
     }
 
     @DeleteMapping("invites/{inviteId}")
     @HouseOwner
     @Operation(operationId = "deleteHouseInvite")
-    public ResponseEntity<Void> deleteInvite(@PathVariable final String inviteId) {
-        final var deleted = inviteService.deleteInvite(houseAccess.requireHouseId(), inviteId);
+    public ResponseEntity<Void> deleteInvite(
+            @CurrentHouse final String houseId, @PathVariable final String inviteId) {
+        final var deleted = inviteService.deleteInvite(houseId, inviteId);
         return deleted
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();

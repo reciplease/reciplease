@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.reciplease.configuration.CurrentHouse;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseOwner;
 import org.reciplease.configuration.OptionalHouseHeader;
@@ -63,8 +64,9 @@ public class RecipeController {
     @PostMapping
     @HouseOwner
     @Operation(operationId = "createRecipe")
-    public ResponseEntity<RecipeDto> create(@Valid @RequestBody final PublicRecipeDto recipeDto) {
-        final Recipe recipe = recipeService.create(houseAccess.requireHouseId(), recipeDto.toEntity());
+    public ResponseEntity<RecipeDto> create(
+            @CurrentHouse final String houseId, @Valid @RequestBody final PublicRecipeDto recipeDto) {
+        final Recipe recipe = recipeService.create(houseId, recipeDto.toEntity());
         return ResponseEntity.status(HttpStatus.CREATED).body(toDto(recipe));
     }
 

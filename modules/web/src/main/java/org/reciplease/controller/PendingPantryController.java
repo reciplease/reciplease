@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.reciplease.configuration.CurrentHouse;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseMember;
 import org.reciplease.configuration.HouseOwner;
@@ -42,16 +43,17 @@ public class PendingPantryController {
     @PostMapping
     @HouseOwner
     @Operation(operationId = "createPendingPantryItem")
-    public ResponseEntity<PendingPantryItemDto> create(@Valid @RequestBody final PendingPantryItemDto itemDto) {
-        final var savedItem = pendingPantryService.save(itemDto.toEntity(houseAccess.requireHouseId()));
+    public ResponseEntity<PendingPantryItemDto> create(
+            @CurrentHouse final String houseId, @Valid @RequestBody final PendingPantryItemDto itemDto) {
+        final var savedItem = pendingPantryService.save(itemDto.toEntity(houseId));
         return ResponseEntity.status(HttpStatus.CREATED).body(PendingPantryItemDto.from(savedItem));
     }
 
     @GetMapping
     @HouseMember
     @Operation(operationId = "findAllPendingPantryItems")
-    public ResponseEntity<List<PendingPantryItemDto>> findAll() {
-        final List<PendingPantryItemDto> items = pendingPantryService.findAll(houseAccess.requireHouseId()).stream()
+    public ResponseEntity<List<PendingPantryItemDto>> findAll(@CurrentHouse final String houseId) {
+        final List<PendingPantryItemDto> items = pendingPantryService.findAll(houseId).stream()
                 .map(PendingPantryItemDto::from)
                 .collect(toList());
 
@@ -87,13 +89,15 @@ public class PendingPantryController {
     @HouseOwner
     @Operation(operationId = "completePendingPantryItem")
     public ResponseEntity<PantryItemDto> complete(
-            @PathVariable final String uuid, @Valid @RequestBody final PantryItemDto itemDto) {
+            @CurrentHouse final String houseId,
+            @PathVariable final String uuid,
+            @Valid @RequestBody final PantryItemDto itemDto) {
         final var existing = pendingPantryService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
             return ResponseEntity.notFound().build();
         }
 
-        final var savedItem = pendingPantryService.complete(uuid, itemDto.toEntity(houseAccess.requireHouseId()));
+        final var savedItem = pendingPantryService.complete(uuid, itemDto.toEntity(houseId));
         return ResponseEntity.status(HttpStatus.CREATED).body(PantryItemDto.from(savedItem));
     }
 }
