@@ -16,12 +16,12 @@ import org.reciplease.validation.ValidationTest;
 class OwnedRecipeDtoTest {
 
     @Test
-    @DisplayName("carries houseId and owner info")
-    void carriesHouseAndOwnerInfo() {
+    @DisplayName("carries ownerId and owner info")
+    void carriesOwnerInfo() {
         var recipe = Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("Toast")
-                .houseId("house-1")
+                .ownerId("user-owner")
                 .build();
         var createdBy =
                 UserSummaryDto.builder().userId("user-1").handle("alice").build();
@@ -29,7 +29,7 @@ class OwnedRecipeDtoTest {
 
         var recipeDto = OwnedRecipeDto.from(recipe, createdBy, updatedBy);
 
-        assertThat(recipeDto.getHouseId(), is("house-1"));
+        assertThat(recipeDto.getOwnerId(), is("user-owner"));
         assertThat(recipeDto.getCreatedBy(), is(createdBy));
         assertThat(recipeDto.getUpdatedBy(), is(updatedBy));
         assertThat(recipeDto.isOwned(), is(true));
@@ -41,7 +41,7 @@ class OwnedRecipeDtoTest {
         var recipe = Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("Toast")
-                .houseId("house-1")
+                .ownerId("user-owner")
                 .build();
 
         var recipeDto = OwnedRecipeDto.from(recipe, null, null);

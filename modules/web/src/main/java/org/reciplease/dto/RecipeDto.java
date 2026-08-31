@@ -11,10 +11,10 @@ import java.util.stream.Collectors;
 import org.reciplease.model.Recipe;
 
 /**
- * A recipe as seen over the API — either the {@link PublicRecipeDto} view (no house or user
- * info; safe for anonymous browsing and for callers outside the recipe's own house) or the
- * {@link OwnedRecipeDto} view (adds houseId/createdBy/updatedBy, only for callers who are an
- * authenticated member of the recipe's own house — see {@code RecipeController#toDto}).
+ * A recipe as seen over the API — either the {@link PublicRecipeDto} view (no owner or user
+ * info; safe for anonymous browsing and for callers who aren't the recipe's owner — including
+ * members of houses it's shared to via membership) or the {@link OwnedRecipeDto} view (adds
+ * ownerId/createdBy/updatedBy, only for the recipe's owner — see {@code RecipeController#toDto}).
  * {@code owned} is the wire-level discriminant a client can switch on to narrow which shape
  * it received.
  */
@@ -60,12 +60,12 @@ public sealed interface RecipeDto permits PublicRecipeDto, OwnedRecipeDto {
         return false;
     }
 
-    /** Public view: no house or user info. */
+    /** Public view: no owner or user info. */
     static RecipeDto from(final Recipe recipe) {
         return PublicRecipeDto.from(recipe);
     }
 
-    /** Owner view, for callers who belong to the recipe's own house. */
+    /** Owner view, for the recipe's owner only. */
     static RecipeDto from(final Recipe recipe, final UserSummaryDto createdBy, final UserSummaryDto updatedBy) {
         return OwnedRecipeDto.from(recipe, createdBy, updatedBy);
     }

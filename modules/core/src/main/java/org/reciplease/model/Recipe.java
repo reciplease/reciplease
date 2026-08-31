@@ -16,13 +16,13 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(exclude = {"createdBy", "createdAt", "updatedBy", "updatedAt"})
 @ToString
 @Builder(toBuilder = true)
-public final class Recipe implements Audited, HouseScoped {
+public final class Recipe implements Audited {
     private final String id;
     private final String createdBy;
     private final Instant createdAt;
     private final String updatedBy;
     private final Instant updatedAt;
-    private final String houseId;
+    private final String ownerId;
 
     @Builder.Default
     private final boolean isPublic = false;

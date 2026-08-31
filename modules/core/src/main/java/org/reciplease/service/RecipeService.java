@@ -1,5 +1,6 @@
 package org.reciplease.service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -7,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
+import org.reciplease.repository.HouseRepository;
 import org.reciplease.repository.RecipeRepository;
 import org.reciplease.service.request.AddIngredient;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class RecipeService {
     private final RecipeRepository recipeRepository;
+    private final HouseRepository houseRepository;
 
     public Optional<Recipe> findById(final String id) {
         return recipeRepository.findById(id);
@@ -28,19 +31,21 @@ public class RecipeService {
     }
 
     /**
-     * Public recipes plus, if {@code houseId} is non-null, private recipes belonging to
-     * that house.
+     * Public recipes plus the private recipes owned by {@code viewerId} and by everyone who
+     * shares a house with the viewer. {@code viewerId} is null for anonymous callers, who only
+     * see public recipes. This is a live membership join (user -> houses -> members), so a
+     * viewer's set of visible owners changes the instant their house membership changes.
      */
-    public List<Recipe> findVisibleTo(final String houseId) {
-        return recipeRepository.findVisibleTo(houseId);
+    public List<Recipe> findVisibleTo(final String viewerId) {
+        return recipeRepository.findVisibleTo(visibleOwnerIds(viewerId));
     }
 
-    public Optional<Recipe> findVisibleById(final String id, final String houseId) {
-        return recipeRepository.findVisibleById(id, houseId);
+    public Optional<Recipe> findVisibleById(final String id, final String viewerId) {
+        return recipeRepository.findVisibleById(id, visibleOwnerIds(viewerId));
     }
 
-    public Recipe create(final String houseId, final Recipe recipe) {
-        return recipeRepository.save(recipe.toBuilder().houseId(houseId).build());
+    public Recipe create(final String ownerId, final Recipe recipe) {
+        return recipeRepository.save(recipe.toBuilder().ownerId(ownerId).build());
     }
 
     public Recipe update(final String id, final Recipe updates) {
@@ -72,5 +77,16 @@ public class RecipeService {
         final var savedRecipe = recipeRepository.save(recipe);
 
         return savedRecipe.recipeIngredients();
+    }
+
+    private Set<String> visibleOwnerIds(final String viewerId) {
+        final var ownerIds = new HashSet<String>();
+        if (viewerId == null) {
+            return ownerIds;
+        }
+        ownerIds.add(viewerId);
+        houseRepository.findAllForUser(viewerId).forEach(house ->
+                houseRepository.members(house.id()).forEach(member -> ownerIds.add(member.userId())));
+        return ownerIds;
     }
 }

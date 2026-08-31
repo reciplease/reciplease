@@ -50,12 +50,12 @@ class PublicRecipeDtoTest {
     }
 
     @Test
-    @DisplayName("carries the public flag but never house or owner info")
+    @DisplayName("carries the public flag but never owner info")
     void carriesPublicFlagOnly() {
         var recipe = Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("Toast")
-                .houseId("house-1")
+                .ownerId("user-owner")
                 .createdBy("user-1")
                 .updatedBy("user-2")
                 .isPublic(true)

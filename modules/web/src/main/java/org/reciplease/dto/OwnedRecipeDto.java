@@ -17,9 +17,9 @@ import lombok.Value;
 import org.reciplease.model.Recipe;
 
 /**
- * The owner view of a recipe: only returned to an authenticated caller who is a member of
- * the recipe's own house (see {@code RecipeController#toDto}). Carries the house and the
- * users who created/last updated it — never sent to anyone else.
+ * The owner view of a recipe: only returned to the recipe's owner (see
+ * {@code RecipeController#toDto}). Carries the owner and the users who created/last updated
+ * it — never sent to anyone else (including members of houses it's shared to via membership).
  */
 @Value
 @AllArgsConstructor
@@ -31,7 +31,7 @@ public class OwnedRecipeDto implements RecipeDto {
     String recipeId;
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
-    String houseId;
+    String ownerId;
 
     @Getter(onMethod_ = @JsonProperty("isPublic"))
     @Builder.Default
@@ -80,7 +80,7 @@ public class OwnedRecipeDto implements RecipeDto {
             final Recipe recipe, final UserSummaryDto createdBy, final UserSummaryDto updatedBy) {
         return OwnedRecipeDto.builder()
                 .recipeId(recipe.id())
-                .houseId(recipe.houseId())
+                .ownerId(recipe.ownerId())
                 .isPublic(recipe.isPublic())
                 .name(recipe.name())
                 .description(recipe.description())

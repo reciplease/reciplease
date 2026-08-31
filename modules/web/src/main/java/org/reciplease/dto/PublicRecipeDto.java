@@ -18,8 +18,8 @@ import org.reciplease.model.Recipe;
 
 /**
  * The public view of a recipe: safe for anonymous/public browsing and for authenticated
- * callers who aren't a member of the recipe's own house. Also the request body shape for
- * create/update — the server derives houseId/createdBy/updatedBy itself, so a client never
+ * callers who aren't the recipe's own owner. Also the request body shape for
+ * create/update — the server derives ownerId/createdBy/updatedBy itself, so a client never
  * submits them.
  */
 @Value

@@ -9,8 +9,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,8 +21,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
+import org.reciplease.model.House;
+import org.reciplease.model.HouseMembership;
+import org.reciplease.model.HouseRole;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
+import org.reciplease.repository.HouseRepository;
 import org.reciplease.repository.RecipeRepository;
 import org.reciplease.service.request.AddIngredient;
 
@@ -28,6 +34,9 @@ import org.reciplease.service.request.AddIngredient;
 class RecipeServiceTest {
     @Mock
     private RecipeRepository recipeRepository;
+
+    @Mock
+    private HouseRepository houseRepository;
 
     @InjectMocks
     private RecipeService recipeService;
@@ -63,14 +72,15 @@ class RecipeServiceTest {
     }
 
     @Test
+    @DisplayName("create stamps the authenticated user as owner")
     void createRecipe() {
         var newRecipe = Recipe.builder().name("toast").build();
         var savedRecipe = newRecipe.toBuilder().id(UUID.randomUUID().toString()).build();
 
-        when(recipeRepository.save(newRecipe.toBuilder().houseId("house-1").build()))
+        when(recipeRepository.save(newRecipe.toBuilder().ownerId("user-1").build()))
                 .thenReturn(savedRecipe);
 
-        var actualRecipe = recipeService.create("house-1", newRecipe);
+        var actualRecipe = recipeService.create("user-1", newRecipe);
 
         assertThat(actualRecipe, is(savedRecipe));
     }
@@ -86,14 +96,72 @@ class RecipeServiceTest {
     }
 
     @Nested
+    class Visibility {
+
+        @Test
+        @DisplayName("anonymous caller sees only public recipes")
+        void anonymousSeesPublicOnly() {
+            recipeService.findVisibleTo(null);
+
+            verify(recipeRepository).findVisibleTo(Set.of());
+        }
+
+        @Test
+        @DisplayName("viewer can see their own plus housemates' recipes")
+        void resolvesHousematesAsVisibleOwners() {
+            var house = new House("house-1", "Home", Instant.now());
+            when(houseRepository.findAllForUser("viewer")).thenReturn(List.of(house));
+            when(houseRepository.members("house-1")).thenReturn(List.of(
+                    new HouseMembership("viewer", null, HouseRole.OWNER),
+                    new HouseMembership("alice", null, HouseRole.OWNER),
+                    new HouseMembership("bob", null, HouseRole.READ_ONLY)));
+
+            recipeService.findVisibleTo("viewer");
+
+            verify(recipeRepository).findVisibleTo(Set.of("viewer", "alice", "bob"));
+        }
+
+        @Test
+        @DisplayName("distinct owners across all of the viewer's houses")
+        void resolvesAcrossMultipleHouses() {
+            when(houseRepository.findAllForUser("viewer")).thenReturn(List.of(
+                    new House("house-1", "Home", Instant.now()),
+                    new House("house-2", "Cottage", Instant.now())));
+            when(houseRepository.members("house-1")).thenReturn(List.of(
+                    new HouseMembership("viewer", null, HouseRole.OWNER),
+                    new HouseMembership("alice", null, HouseRole.READ_ONLY)));
+            when(houseRepository.members("house-2")).thenReturn(List.of(
+                    new HouseMembership("viewer", null, HouseRole.OWNER),
+                    new HouseMembership("carol", null, HouseRole.OWNER)));
+
+            recipeService.findVisibleTo("viewer");
+
+            verify(recipeRepository).findVisibleTo(Set.of("viewer", "alice", "carol"));
+        }
+
+        @Test
+        @DisplayName("findVisibleById resolves visible owners the same way")
+        void findByIdUsesVisibleOwners() {
+            when(houseRepository.findAllForUser("viewer")).thenReturn(List.of());
+            var recipe = Recipe.builder().id("r1").name("toast").ownerId("viewer").build();
+            when(recipeRepository.findVisibleById("r1", Set.of("viewer"))).thenReturn(Optional.of(recipe));
+
+            var found = recipeService.findVisibleById("r1", "viewer");
+
+            assertThat(found, is(Optional.of(recipe)));
+        }
+    }
+
+    @Nested
     class Update {
         @Test
-        @DisplayName("merges name, description, steps and ingredients into the existing recipe")
+        @DisplayName("merges name, description, steps, ingredients and isPublic, preserving owner")
         void mergesUpdatesIntoExisting() {
             var existing = Recipe.builder()
                     .id(UUID.randomUUID().toString())
                     .name("toast")
                     .description("Old description")
+                    .ownerId("owner")
                     .createdBy("owner")
                     .build()
                     .addIngredient("bread", "ITEMS", 1d);
@@ -102,6 +170,7 @@ class RecipeServiceTest {
                     .name("Fancy toast")
                     .description("New description")
                     .steps(List.of("Toast it"))
+                    .isPublic(true)
                     .build()
                     .addIngredient("bread", "ITEMS", 2d);
 
@@ -111,10 +180,12 @@ class RecipeServiceTest {
             var result = recipeService.update(existing.id(), updates);
 
             assertThat(result.id(), is(existing.id()));
+            assertThat(result.ownerId(), is("owner"));
             assertThat(result.createdBy(), is("owner"));
             assertThat(result.name(), is("Fancy toast"));
             assertThat(result.description(), is("New description"));
             assertThat(result.steps(), is(List.of("Toast it")));
+            assertThat(result.isPublic(), is(true));
             assertThat(result.recipeIngredients(), contains(new RecipeIngredient("bread", "ITEMS", 2d)));
         }
 

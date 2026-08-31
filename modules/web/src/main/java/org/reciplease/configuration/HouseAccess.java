@@ -94,7 +94,12 @@ public class HouseAccess {
         return houseRepository.roleOf(houseId, userId);
     }
 
-    private String currentUserId() {
+    /**
+     * The current authenticated user's id, or null for anonymous callers. This is the
+     * security-context principal — not tied to any house, so it works for user-owned
+     * resources (e.g. recipes) that aren't scoped to a single house.
+     */
+    public String currentUserId() {
         final var authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null && authentication.isAuthenticated() ? authentication.getName() : null;
     }

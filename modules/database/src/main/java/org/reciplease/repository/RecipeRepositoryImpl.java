@@ -1,9 +1,11 @@
 package org.reciplease.repository;
 
+import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.model.Recipe;
@@ -42,25 +44,25 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
-    public List<Recipe> findVisibleTo(final String houseId) {
-        return mongoTemplate.find(query(visibilityCriteria(houseId)), RecipeDocument.class).stream()
+    public List<Recipe> findVisibleTo(final Set<String> visibleOwnerIds) {
+        return mongoTemplate.find(query(visibilityCriteria(visibleOwnerIds)), RecipeDocument.class).stream()
                 .map(RecipeDocument::toModel)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<Recipe> findVisibleById(final String id, final String houseId) {
-        final var criteria = visibilityCriteria(houseId).and("_id").is(id);
+    public Optional<Recipe> findVisibleById(final String id, final Set<String> visibleOwnerIds) {
+        final var criteria = visibilityCriteria(visibleOwnerIds).and("_id").is(id);
         return Optional.ofNullable(mongoTemplate.findOne(query(criteria), RecipeDocument.class))
                 .map(RecipeDocument::toModel);
     }
 
-    private Criteria visibilityCriteria(final String houseId) {
-        return houseId == null
-                ? Criteria.where("public").is(true)
-                : new Criteria()
-                        .orOperator(
-                                Criteria.where("public").is(true),
-                                Criteria.where("houseId").is(houseId));
+    private Criteria visibilityCriteria(final Set<String> visibleOwnerIds) {
+        final var orConditions = new java.util.ArrayList<Criteria>();
+        orConditions.add(where("public").is(true));
+        if (visibleOwnerIds != null && !visibleOwnerIds.isEmpty()) {
+            orConditions.add(where("ownerId").in(visibleOwnerIds));
+        }
+        return new Criteria().orOperator(orConditions);
     }
 }

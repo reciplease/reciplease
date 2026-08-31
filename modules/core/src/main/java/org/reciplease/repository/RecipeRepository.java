@@ -2,6 +2,7 @@ package org.reciplease.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.reciplease.model.Recipe;
 
 public interface RecipeRepository {
@@ -14,11 +15,13 @@ public interface RecipeRepository {
     void deleteById(String id);
 
     /**
-     * Public recipes plus, if {@code houseId} is non-null, private recipes belonging to
-     * that house. {@code houseId} is null for unauthenticated callers or callers with no
-     * active house, in which case only public recipes are returned.
+     * Recipes visible to a viewer: every public recipe plus any recipe owned by a user in
+     * {@code visibleOwnerIds}. For anonymous callers {@code visibleOwnerIds} is empty and only
+     * public recipes are returned. The caller resolves {@code visibleOwnerIds} to the viewer
+     * plus everyone who shares a house with the viewer, so a recipe's "members-only" visibility
+     * is evaluated against live house membership.
      */
-    List<Recipe> findVisibleTo(String houseId);
+    List<Recipe> findVisibleTo(Set<String> visibleOwnerIds);
 
-    Optional<Recipe> findVisibleById(String id, String houseId);
+    Optional<Recipe> findVisibleById(String id, Set<String> visibleOwnerIds);
 }
