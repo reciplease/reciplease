@@ -77,7 +77,7 @@ class RecipeServiceTest {
         var newRecipe = Recipe.builder().name("toast").build();
         var savedRecipe = newRecipe.toBuilder().id(UUID.randomUUID().toString()).build();
 
-        when(recipeRepository.save(newRecipe.toBuilder().ownerId("user-1").build()))
+        when(recipeRepository.save(newRecipe.toBuilder().createdBy("user-1").build()))
                 .thenReturn(savedRecipe);
 
         var actualRecipe = recipeService.create("user-1", newRecipe);
@@ -111,10 +111,11 @@ class RecipeServiceTest {
         void resolvesHousematesAsVisibleOwners() {
             var house = new House("house-1", "Home", Instant.now());
             when(houseRepository.findAllForUser("viewer")).thenReturn(List.of(house));
-            when(houseRepository.members("house-1")).thenReturn(List.of(
-                    new HouseMembership("viewer", null, HouseRole.OWNER),
-                    new HouseMembership("alice", null, HouseRole.OWNER),
-                    new HouseMembership("bob", null, HouseRole.READ_ONLY)));
+            when(houseRepository.members("house-1"))
+                    .thenReturn(List.of(
+                            new HouseMembership("viewer", null, HouseRole.OWNER),
+                            new HouseMembership("alice", null, HouseRole.OWNER),
+                            new HouseMembership("bob", null, HouseRole.READ_ONLY)));
 
             recipeService.findVisibleTo("viewer");
 
@@ -124,15 +125,18 @@ class RecipeServiceTest {
         @Test
         @DisplayName("distinct owners across all of the viewer's houses")
         void resolvesAcrossMultipleHouses() {
-            when(houseRepository.findAllForUser("viewer")).thenReturn(List.of(
-                    new House("house-1", "Home", Instant.now()),
-                    new House("house-2", "Cottage", Instant.now())));
-            when(houseRepository.members("house-1")).thenReturn(List.of(
-                    new HouseMembership("viewer", null, HouseRole.OWNER),
-                    new HouseMembership("alice", null, HouseRole.READ_ONLY)));
-            when(houseRepository.members("house-2")).thenReturn(List.of(
-                    new HouseMembership("viewer", null, HouseRole.OWNER),
-                    new HouseMembership("carol", null, HouseRole.OWNER)));
+            when(houseRepository.findAllForUser("viewer"))
+                    .thenReturn(List.of(
+                            new House("house-1", "Home", Instant.now()),
+                            new House("house-2", "Cottage", Instant.now())));
+            when(houseRepository.members("house-1"))
+                    .thenReturn(List.of(
+                            new HouseMembership("viewer", null, HouseRole.OWNER),
+                            new HouseMembership("alice", null, HouseRole.READ_ONLY)));
+            when(houseRepository.members("house-2"))
+                    .thenReturn(List.of(
+                            new HouseMembership("viewer", null, HouseRole.OWNER),
+                            new HouseMembership("carol", null, HouseRole.OWNER)));
 
             recipeService.findVisibleTo("viewer");
 
@@ -143,7 +147,8 @@ class RecipeServiceTest {
         @DisplayName("findVisibleById resolves visible owners the same way")
         void findByIdUsesVisibleOwners() {
             when(houseRepository.findAllForUser("viewer")).thenReturn(List.of());
-            var recipe = Recipe.builder().id("r1").name("toast").ownerId("viewer").build();
+            var recipe =
+                    Recipe.builder().id("r1").name("toast").createdBy("viewer").build();
             when(recipeRepository.findVisibleById("r1", Set.of("viewer"))).thenReturn(Optional.of(recipe));
 
             var found = recipeService.findVisibleById("r1", "viewer");
@@ -161,7 +166,7 @@ class RecipeServiceTest {
                     .id(UUID.randomUUID().toString())
                     .name("toast")
                     .description("Old description")
-                    .ownerId("owner")
+                    .createdBy("owner")
                     .createdBy("owner")
                     .build()
                     .addIngredient("bread", "ITEMS", 1d);
@@ -180,7 +185,7 @@ class RecipeServiceTest {
             var result = recipeService.update(existing.id(), updates);
 
             assertThat(result.id(), is(existing.id()));
-            assertThat(result.ownerId(), is("owner"));
+            assertThat(result.createdBy(), is("owner"));
             assertThat(result.createdBy(), is("owner"));
             assertThat(result.name(), is("Fancy toast"));
             assertThat(result.description(), is("New description"));

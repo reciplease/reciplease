@@ -55,7 +55,7 @@ class PublicRecipeDtoTest {
         var recipe = Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("Toast")
-                .ownerId("user-owner")
+                .createdBy("user-owner")
                 .createdBy("user-1")
                 .updatedBy("user-2")
                 .isPublic(true)

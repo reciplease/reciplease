@@ -22,7 +22,6 @@ public final class Recipe implements Audited {
     private final Instant createdAt;
     private final String updatedBy;
     private final Instant updatedAt;
-    private final String ownerId;
 
     @Builder.Default
     private final boolean isPublic = false;
@@ -49,5 +48,9 @@ public final class Recipe implements Audited {
     public Recipe removeIngredient(final String name) {
         recipeIngredients.removeIf(item -> item.name().equals(name));
         return this;
+    }
+
+    public boolean isOwnedBy(final String userId) {
+        return userId != null && userId.equals(createdBy);
     }
 }

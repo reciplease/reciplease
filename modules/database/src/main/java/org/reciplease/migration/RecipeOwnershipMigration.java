@@ -18,12 +18,7 @@ public class RecipeOwnershipMigration {
         final var recipes = mongoTemplate.find(new Query(), RecipeDocument.class);
 
         recipes.forEach(recipe -> {
-            if (recipe.getCreatedBy() != null) {
-                mongoTemplate.updateFirst(
-                        Query.query(where("_id").is(recipe.getId())),
-                        Update.update("ownerId", recipe.getCreatedBy()),
-                        RecipeDocument.class);
-            } else {
+            if (recipe.getCreatedBy() == null) {
                 mongoTemplate.updateFirst(
                         Query.query(where("_id").is(recipe.getId())),
                         Update.update("public", true),
@@ -35,7 +30,5 @@ public class RecipeOwnershipMigration {
     }
 
     @RollbackExecution
-    public void rollback(final MongoTemplate mongoTemplate) {
-        mongoTemplate.updateMulti(new Query(), new Update().unset("ownerId"), RecipeDocument.class);
-    }
+    public void rollback(final MongoTemplate mongoTemplate) {}
 }

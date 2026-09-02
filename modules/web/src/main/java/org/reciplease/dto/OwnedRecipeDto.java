@@ -30,9 +30,6 @@ public class OwnedRecipeDto implements RecipeDto {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
     String recipeId;
 
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
-    String ownerId;
-
     @Getter(onMethod_ = @JsonProperty("isPublic"))
     @Builder.Default
     @Schema(requiredMode = REQUIRED)
@@ -80,7 +77,6 @@ public class OwnedRecipeDto implements RecipeDto {
             final Recipe recipe, final UserSummaryDto createdBy, final UserSummaryDto updatedBy) {
         return OwnedRecipeDto.builder()
                 .recipeId(recipe.id())
-                .ownerId(recipe.ownerId())
                 .isPublic(recipe.isPublic())
                 .name(recipe.name())
                 .description(recipe.description())

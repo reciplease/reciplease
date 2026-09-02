@@ -61,7 +61,7 @@ public class RecipeRepositoryImpl implements RecipeRepository {
         final var orConditions = new java.util.ArrayList<Criteria>();
         orConditions.add(where("public").is(true));
         if (visibleOwnerIds != null && !visibleOwnerIds.isEmpty()) {
-            orConditions.add(where("ownerId").in(visibleOwnerIds));
+            orConditions.add(where("createdBy").in(visibleOwnerIds));
         }
         return new Criteria().orOperator(orConditions);
     }

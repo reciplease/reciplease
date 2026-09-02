@@ -30,12 +30,6 @@ public class RecipeService {
         return all;
     }
 
-    /**
-     * Public recipes plus the private recipes owned by {@code viewerId} and by everyone who
-     * shares a house with the viewer. {@code viewerId} is null for anonymous callers, who only
-     * see public recipes. This is a live membership join (user -> houses -> members), so a
-     * viewer's set of visible owners changes the instant their house membership changes.
-     */
     public List<Recipe> findVisibleTo(final String viewerId) {
         return recipeRepository.findVisibleTo(visibleOwnerIds(viewerId));
     }
@@ -44,8 +38,8 @@ public class RecipeService {
         return recipeRepository.findVisibleById(id, visibleOwnerIds(viewerId));
     }
 
-    public Recipe create(final String ownerId, final Recipe recipe) {
-        return recipeRepository.save(recipe.toBuilder().ownerId(ownerId).build());
+    public Recipe create(final String userId, final Recipe recipe) {
+        return recipeRepository.save(recipe.toBuilder().build());
     }
 
     public Recipe update(final String id, final Recipe updates) {
@@ -85,8 +79,9 @@ public class RecipeService {
             return ownerIds;
         }
         ownerIds.add(viewerId);
-        houseRepository.findAllForUser(viewerId).forEach(house ->
-                houseRepository.members(house.id()).forEach(member -> ownerIds.add(member.userId())));
+        houseRepository
+                .findAllForUser(viewerId)
+                .forEach(house -> houseRepository.members(house.id()).forEach(member -> ownerIds.add(member.userId())));
         return ownerIds;
     }
 }

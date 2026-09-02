@@ -10,14 +10,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.reciplease.model.Recipe;
 
-/**
- * A recipe as seen over the API — either the {@link PublicRecipeDto} view (no owner or user
- * info; safe for anonymous browsing and for callers who aren't the recipe's owner — including
- * members of houses it's shared to via membership) or the {@link OwnedRecipeDto} view (adds
- * ownerId/createdBy/updatedBy, only for the recipe's owner — see {@code RecipeController#toDto}).
- * {@code owned} is the wire-level discriminant a client can switch on to narrow which shape
- * it received.
- */
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXISTING_PROPERTY,

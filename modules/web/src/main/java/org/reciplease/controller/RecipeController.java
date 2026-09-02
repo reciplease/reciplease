@@ -60,8 +60,7 @@ public class RecipeController {
     @PostMapping
     @PreAuthorize("hasRole('RECIPLEASE')")
     @Operation(operationId = "createRecipe")
-    public ResponseEntity<RecipeDto> create(
-            @Valid @RequestBody final PublicRecipeDto recipeDto) {
+    public ResponseEntity<RecipeDto> create(@Valid @RequestBody final PublicRecipeDto recipeDto) {
         final Recipe recipe = recipeService.create(houseAccess.currentUserId(), recipeDto.toEntity());
         return ResponseEntity.status(HttpStatus.CREATED).body(toDto(recipe));
     }
@@ -110,21 +109,10 @@ public class RecipeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(recipeIngredients);
     }
 
-    /**
-     * True only for the recipe's owner — the sole writer. Everyone else (including members of
-     * houses the recipe is shared to via membership) can view public or shared recipes but never
-     * edit, delete, or mutate them.
-     */
     private boolean isOwner(final Recipe recipe) {
-        final var userId = houseAccess.currentUserId();
-        return userId != null && userId.equals(recipe.ownerId());
+        return recipe.isOwnedBy(houseAccess.currentUserId());
     }
 
-    /**
-     * The owner's view (ownerId/createdBy/updatedBy) goes only to the recipe's owner; every other
-     * caller — anonymous public browsing, other users, and members of houses the recipe is shared
-     * to — gets the read-only public shape with no owner or creator info attached.
-     */
     private RecipeDto toDto(final Recipe recipe) {
         if (isOwner(recipe)) {
             return RecipeDto.from(recipe, userSummary(recipe.createdBy()), userSummary(recipe.updatedBy()));

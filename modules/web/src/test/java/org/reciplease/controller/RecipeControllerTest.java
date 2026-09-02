@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reciplease.configuration.HouseAccess;
@@ -152,7 +151,7 @@ class RecipeControllerTest {
         final var recipe = Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("soup")
-                .ownerId(OWNER_USER_ID)
+                .createdBy(OWNER_USER_ID)
                 .build();
 
         final var addIngredientRequest = new AddIngredient("tomato", "ITEMS", 10d);
@@ -178,7 +177,7 @@ class RecipeControllerTest {
         final var recipe = Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("soup")
-                .ownerId("someone-else")
+                .createdBy("someone-else")
                 .build();
 
         when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
@@ -198,7 +197,7 @@ class RecipeControllerTest {
         final var recipe = Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("soup")
-                .ownerId(OWNER_USER_ID)
+                .createdBy(OWNER_USER_ID)
                 .build();
         final var updated = recipe.toBuilder().name("tomato soup").build();
         final var updateDto = PublicRecipeDto.builder()
@@ -223,7 +222,7 @@ class RecipeControllerTest {
         final var recipe = Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("soup")
-                .ownerId("someone-else")
+                .createdBy("someone-else")
                 .build();
         final var updateDto = PublicRecipeDto.builder()
                 .recipeId(recipe.id())
@@ -258,23 +257,22 @@ class RecipeControllerTest {
     }
 
     @Test
-    @DisplayName("get recipe by ID includes ownerId and resolved handles for the owner")
+    @DisplayName("get recipe by ID includes createdBy and resolved handles for the owner")
     void recipeIncludesOwnerInfoForOwner() throws Exception {
         final var soup = getSoup().toBuilder()
-                .ownerId(OWNER_USER_ID)
-                .createdBy("user-1")
+                .createdBy(OWNER_USER_ID)
                 .updatedBy("user-2")
                 .build();
-        final var createdBy = new User("user-1", "alice");
+        final var ownerUser = new User(OWNER_USER_ID, "alice");
         final var updatedBy = new User("user-2", "bob");
         final var expectedDto = RecipeDto.from(
                 soup,
-                UserSummaryDto.builder().userId("user-1").handle("alice").build(),
+                UserSummaryDto.builder().userId(OWNER_USER_ID).handle("alice").build(),
                 UserSummaryDto.builder().userId("user-2").handle("bob").build());
 
         when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
         when(recipeService.findVisibleById(soup.id(), OWNER_USER_ID)).thenReturn(Optional.of(soup));
-        when(userRepository.findById("user-1")).thenReturn(Optional.of(createdBy));
+        when(userRepository.findById(OWNER_USER_ID)).thenReturn(Optional.of(ownerUser));
         when(userRepository.findById("user-2")).thenReturn(Optional.of(updatedBy));
 
         mockMvc.perform(get("/api/recipes/{uuid}", soup.id()))
@@ -286,8 +284,7 @@ class RecipeControllerTest {
     @DisplayName("get recipe by ID omits owner info for a caller who is not the owner")
     void recipeOmitsOwnerInfoForNonOwner() throws Exception {
         final var soup = getSoup().toBuilder()
-                .ownerId("someone-else")
-                .createdBy("user-1")
+                .createdBy("someone-else")
                 .updatedBy("user-2")
                 .build();
         final var expectedDto = RecipeDto.from(soup);
@@ -308,7 +305,7 @@ class RecipeControllerTest {
         final var recipe = Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("soup")
-                .ownerId(OWNER_USER_ID)
+                .createdBy(OWNER_USER_ID)
                 .build();
 
         when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
@@ -325,7 +322,7 @@ class RecipeControllerTest {
         final var recipe = Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("soup")
-                .ownerId("someone-else")
+                .createdBy("someone-else")
                 .build();
 
         when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
@@ -342,7 +339,7 @@ class RecipeControllerTest {
         return Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("soup")
-                .ownerId(OWNER_USER_ID)
+                .createdBy(OWNER_USER_ID)
                 .build();
     }
 
@@ -350,7 +347,7 @@ class RecipeControllerTest {
         return Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("soup")
-                .ownerId(OWNER_USER_ID)
+                .createdBy(OWNER_USER_ID)
                 .build()
                 .addIngredient("tomato", "ITEMS", 5d);
     }
@@ -359,7 +356,7 @@ class RecipeControllerTest {
         return Recipe.builder()
                 .id(UUID.randomUUID().toString())
                 .name("toast")
-                .ownerId(OWNER_USER_ID)
+                .createdBy(OWNER_USER_ID)
                 .build()
                 .addIngredient("bread", "ITEMS", 1d);
     }

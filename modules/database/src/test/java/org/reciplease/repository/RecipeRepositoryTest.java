@@ -87,52 +87,76 @@ class RecipeRepositoryTest {
 
     @Test
     void shouldSeePublicRecipeWithNoVisibleOwners() {
-        var publicRecipe = recipeRepository.save(Recipe.builder().name("toast").isPublic(true).build());
+        var publicRecipe = recipeRepository.save(
+                Recipe.builder().name("toast").isPublic(true).build());
 
         assertThat(recipeRepository.findVisibleTo(Set.of()), containsInAnyOrder(publicRecipe));
     }
 
     @Test
     void shouldSeeOwnRecipeAsTheOwner() {
-        var own = recipeRepository.save(Recipe.builder().name("toast").ownerId("viewer").isPublic(false).build());
+        var own = recipeRepository.save(Recipe.builder()
+                .name("toast")
+                .createdBy("viewer")
+                .isPublic(false)
+                .build());
 
         assertThat(recipeRepository.findVisibleTo(Set.of("viewer")), containsInAnyOrder(own));
     }
 
     @Test
     void shouldSeeHousemateRecipeAsAMember() {
-        var housemate = recipeRepository.save(
-                Recipe.builder().name("toast").ownerId("alice").isPublic(false).build());
+        var housemate = recipeRepository.save(Recipe.builder()
+                .name("toast")
+                .createdBy("alice")
+                .isPublic(false)
+                .build());
 
         assertThat(recipeRepository.findVisibleTo(Set.of("alice", "viewer")), containsInAnyOrder(housemate));
     }
 
     @Test
     void shouldNotSeeAnotherUsersPrivateRecipe() {
-        recipeRepository.save(Recipe.builder().name("toast").ownerId("stranger").isPublic(false).build());
+        recipeRepository.save(Recipe.builder()
+                .name("toast")
+                .createdBy("stranger")
+                .isPublic(false)
+                .build());
 
         assertThat(recipeRepository.findVisibleTo(Set.of("viewer")), is(empty()));
     }
 
     @Test
     void shouldSeePublicAndOwnInOneQuery() {
-        var own = recipeRepository.save(Recipe.builder().name("toast").ownerId("viewer").isPublic(false).build());
-        var publicRecipe = recipeRepository.save(Recipe.builder().name("soup").isPublic(true).build());
+        var own = recipeRepository.save(Recipe.builder()
+                .name("toast")
+                .createdBy("viewer")
+                .isPublic(false)
+                .build());
+        var publicRecipe = recipeRepository.save(
+                Recipe.builder().name("soup").isPublic(true).build());
 
         assertThat(recipeRepository.findVisibleTo(Set.of("viewer")), containsInAnyOrder(own, publicRecipe));
     }
 
     @Test
     void shouldFindVisibleByIdForAnOwner() {
-        var own = recipeRepository.save(Recipe.builder().name("toast").ownerId("viewer").isPublic(false).build());
+        var own = recipeRepository.save(Recipe.builder()
+                .name("toast")
+                .createdBy("viewer")
+                .isPublic(false)
+                .build());
 
         assertThat(recipeRepository.findVisibleById(own.id(), Set.of("viewer")), is(Optional.of(own)));
     }
 
     @Test
     void shouldNotFindVisibleByIdForAnInvisibleRecipe() {
-        var stranger = recipeRepository.save(
-                Recipe.builder().name("toast").ownerId("stranger").isPublic(false).build());
+        var stranger = recipeRepository.save(Recipe.builder()
+                .name("toast")
+                .createdBy("stranger")
+                .isPublic(false)
+                .build());
 
         assertThat(recipeRepository.findVisibleById(stranger.id(), Set.of("viewer")), is(Optional.empty()));
     }

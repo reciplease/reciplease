@@ -2,9 +2,7 @@ package org.reciplease.model;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,8 +25,6 @@ public class RecipeDocument {
 
     @Id
     private String id;
-
-    private String ownerId;
 
     @Field("public")
     @Builder.Default
@@ -59,7 +55,7 @@ public class RecipeDocument {
     public static RecipeDocument from(final Recipe recipe) {
         return RecipeDocument.builder()
                 .id(recipe.id())
-                .ownerId(recipe.ownerId())
+                .createdBy(recipe.createdBy())
                 .isPublic(recipe.isPublic())
                 .name(recipe.name())
                 .description(recipe.description())
@@ -78,7 +74,6 @@ public class RecipeDocument {
     public Recipe toModel() {
         var recipe = Recipe.builder()
                 .id(id)
-                .ownerId(ownerId)
                 .isPublic(isPublic)
                 .name(name)
                 .description(description)
