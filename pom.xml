@@ -26,7 +26,6 @@
     <module>modules/open-food-facts</module>
     <module>modules/web</module>
     <module>modules/dist</module>
-    <module>modules/webflux</module>
     <module>modules/features</module>
   </modules>
   <properties>

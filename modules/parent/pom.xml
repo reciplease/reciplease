@@ -30,7 +30,6 @@
     <cucumber.version>7.18.1</cucumber.version>
     <jacoco.version>0.8.15</jacoco.version>
     <spring-cloud-dependencies.version>2025.1.0</spring-cloud-dependencies.version>
-    <spring-cloud-gcp-dependencies.version>8.0.4</spring-cloud-gcp-dependencies.version>
     <springdoc.version>3.0.3</springdoc.version>
     <jjwt.version>0.12.6</jjwt.version>
     <mongock.version>5.5.1</mongock.version>
@@ -116,13 +115,7 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <dependency>
-        <groupId>com.google.cloud</groupId>
-        <artifactId>spring-cloud-gcp-dependencies</artifactId>
-        <version>${spring-cloud-gcp-dependencies.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
