@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.ResultActions;
 @ScenarioScope
 public class ScenarioState {
     private final Map<String, String> houseIdsByName = new HashMap<>();
+    private final Map<String, String> recipeIdsByName = new HashMap<>();
     private ResultActions lastResult;
     private String generatedInviteId;
     private String generatedInviteCode;
@@ -25,6 +26,18 @@ public class ScenarioState {
             throw new IllegalStateException("No house registered with name: " + houseName);
         }
         return houseId;
+    }
+
+    public void putRecipeId(final String recipeName, final String recipeId) {
+        recipeIdsByName.put(recipeName, recipeId);
+    }
+
+    public String recipeId(final String recipeName) {
+        final var recipeId = recipeIdsByName.get(recipeName);
+        if (recipeId == null) {
+            throw new IllegalStateException("No recipe registered with name: " + recipeName);
+        }
+        return recipeId;
     }
 
     public void setLastResult(final ResultActions result) {
