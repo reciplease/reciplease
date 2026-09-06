@@ -26,9 +26,3 @@ server:
 spring:
   jackson:
     default-property-inclusion: non_null
-  cloud:
-    gcp:
-      core:
-        enabled: false
-      secretmanager:
-        enabled: false

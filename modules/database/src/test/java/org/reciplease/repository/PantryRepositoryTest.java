@@ -273,25 +273,6 @@ class PantryRepositoryTest {
     }
 
     @Test
-    void shouldFindAllZeroRemaining() {
-        var zero = pantryRepository.save(new PantryItem(
-                null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, 0d, LocalDate.of(2026, Month.JUNE, 20), null));
-        pantryRepository.save(new PantryItem(
-                null,
-                null,
-                HOUSE_ID,
-                "milk",
-                null,
-                "MILLILITRES",
-                500d,
-                100d,
-                LocalDate.of(2026, Month.JUNE, 20),
-                null));
-
-        assertThat(pantryRepository.findAllZeroRemaining(), contains(zero));
-    }
-
-    @Test
     void shouldFindAllById() {
         var eggs = pantryRepository.save(new PantryItem(
                 null, null, HOUSE_ID, "eggs", null, "ITEMS", 6d, LocalDate.of(2026, Month.JUNE, 20), null));

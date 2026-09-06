@@ -71,13 +71,6 @@ public class PantryRepositoryImpl implements PantryRepository {
     }
 
     @Override
-    public List<PantryItem> findAllZeroRemaining() {
-        return pantryMongoRepository.findByRemainingLessThanEqual(0d).stream()
-                .map(PantryItemDocument::toModel)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public List<PantryItem> findAllById(final Collection<String> ids) {
         return pantryMongoRepository.findAllById(ids).stream()
                 .map(PantryItemDocument::toModel)

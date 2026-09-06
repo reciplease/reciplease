@@ -325,28 +325,4 @@ class PantryServiceTest {
             verify(pantryRepository, never()).save(any());
         }
     }
-
-    @Test
-    @DisplayName("archiveAllZeroRemainingItems deletes (and thereby archives) every zero-remaining item found")
-    void shouldArchiveAllZeroRemainingItems() {
-        var first = new PantryItem(
-                UUID.randomUUID().toString(), null, HOUSE_ID, "bread", null, "ITEMS", 10d, 0d, LocalDate.now(), null);
-        var second = new PantryItem(
-                UUID.randomUUID().toString(),
-                null,
-                HOUSE_ID,
-                "milk",
-                null,
-                "MILLILITRES",
-                500d,
-                0d,
-                LocalDate.now(),
-                null);
-        when(pantryRepository.findAllZeroRemaining()).thenReturn(List.of(first, second));
-
-        pantryService.archiveAllZeroRemainingItems();
-
-        verify(pantryRepository).deleteById(first.id());
-        verify(pantryRepository).deleteById(second.id());
-    }
 }

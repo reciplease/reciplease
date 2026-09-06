@@ -21,8 +21,6 @@ public interface PantryRepository {
 
     List<PantryItem> findByName(String houseId, String name);
 
-    List<PantryItem> findAllZeroRemaining();
-
     List<PantryItem> findAllById(Collection<String> ids);
 
     void deleteById(String id);

@@ -101,11 +101,6 @@ public class PantryService {
         return saveOrArchive(existing.withRemaining(Math.max(0, existing.remaining() - amount)));
     }
 
-    /** One-off cleanup for items already sitting at zero remaining from before this behavior existed. */
-    public void archiveAllZeroRemainingItems() {
-        pantryRepository.findAllZeroRemaining().forEach(item -> pantryRepository.deleteById(item.id()));
-    }
-
     /**
      * An item with nothing left has no reason to stay in the live pantry list — deleting it
      * (which archives a snapshot at the repository layer) keeps that list from accumulating
