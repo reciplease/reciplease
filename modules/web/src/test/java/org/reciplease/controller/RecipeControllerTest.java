@@ -388,7 +388,8 @@ class RecipeControllerTest {
 
         mockMvc.perform(delete("/api/recipes/{uuid}/upvote", id)).andExpect(status().isNotFound());
 
-        verify(recipeService, never()).removeUpvote(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+        verify(recipeService, never())
+                .removeUpvote(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
     }
 
     private PublicRecipeDto getNewSoupDto() {

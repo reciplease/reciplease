@@ -55,8 +55,8 @@ public class PlannedMealController {
                 ? List.of()
                 : request.getItems().stream().map(PlannedIngredientDto::toModel).collect(toList());
 
-        final var plannedMeal = plannedMealService.plan(
-                houseId, request.getRecipeId(), request.getName(), request.getDate(), items);
+        final var plannedMeal =
+                plannedMealService.plan(houseId, request.getRecipeId(), request.getName(), request.getDate(), items);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(toDto(plannedMeal));
     }
@@ -129,10 +129,9 @@ public class PlannedMealController {
         final var suggestionsWithAvailable =
                 plannedMealService.suggestPantryItemsWithAvailable(houseId, recipeId, ingredient, excludeMealId);
 
-        final List<SuggestedPantryItemDto> suggestions =
-                suggestionsWithAvailable.entrySet().stream()
-                        .map(entry -> SuggestedPantryItemDto.from(entry.getKey(), entry.getValue()))
-                        .collect(toList());
+        final List<SuggestedPantryItemDto> suggestions = suggestionsWithAvailable.entrySet().stream()
+                .map(entry -> SuggestedPantryItemDto.from(entry.getKey(), entry.getValue()))
+                .collect(toList());
 
         return ResponseEntity.ok(suggestions);
     }

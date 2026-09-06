@@ -413,13 +413,27 @@ class PlannedMealServiceTest {
         @DisplayName("available is reduced by allocations from other planned meals")
         void availableReducedByOtherMealAllocations() {
             var meal1 = new PlannedMeal(
-                    "meal-1", null, HOUSE_ID, recipe.id(), "Dinner", date,
+                    "meal-1",
+                    null,
+                    HOUSE_ID,
+                    recipe.id(),
+                    "Dinner",
+                    date,
                     List.of(new PlannedIngredient(bread, List.of(new PantryAllocation("new", "111", 2d)))),
-                    null, null, null);
+                    null,
+                    null,
+                    null);
             var meal2 = new PlannedMeal(
-                    "meal-2", null, HOUSE_ID, null, "Lunch", date,
+                    "meal-2",
+                    null,
+                    HOUSE_ID,
+                    null,
+                    "Lunch",
+                    date,
                     List.of(new PlannedIngredient(bread, List.of(new PantryAllocation("new", "111", 3d)))),
-                    null, null, null);
+                    null,
+                    null,
+                    null);
             var current = new PantryItem("new", null, HOUSE_ID, "bread", null, "ITEMS", 5d, date, "111");
 
             when(plannedMealRepository.findByRecipeId(HOUSE_ID, recipe.id())).thenReturn(List.of(meal1));
@@ -435,13 +449,27 @@ class PlannedMealServiceTest {
         @DisplayName("excludeMealId keeps that meal's own allocations from counting against it")
         void excludeMealIdIgnoresItsOwnAllocations() {
             var meal1 = new PlannedMeal(
-                    "meal-1", null, HOUSE_ID, recipe.id(), "Dinner", date,
+                    "meal-1",
+                    null,
+                    HOUSE_ID,
+                    recipe.id(),
+                    "Dinner",
+                    date,
                     List.of(new PlannedIngredient(bread, List.of(new PantryAllocation("new", "111", 2d)))),
-                    null, null, null);
+                    null,
+                    null,
+                    null);
             var meal2 = new PlannedMeal(
-                    "meal-2", null, HOUSE_ID, null, "Lunch", date,
+                    "meal-2",
+                    null,
+                    HOUSE_ID,
+                    null,
+                    "Lunch",
+                    date,
                     List.of(new PlannedIngredient(bread, List.of(new PantryAllocation("new", "111", 3d)))),
-                    null, null, null);
+                    null,
+                    null,
+                    null);
             var current = new PantryItem("new", null, HOUSE_ID, "bread", null, "ITEMS", 5d, date, "111");
 
             when(plannedMealRepository.findByRecipeId(HOUSE_ID, recipe.id())).thenReturn(List.of(meal1));

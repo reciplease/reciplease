@@ -95,10 +95,9 @@ public class PantryController {
     public ResponseEntity<List<PantryItemDto>> findAll(
             @CurrentHouse final String houseId,
             @RequestParam(defaultValue = "false") final boolean excludeFullyConsumed) {
-        final List<PantryItemDto> items =
-                pantryService.findAll(houseId, excludeFullyConsumed).stream()
-                        .map(PantryItemDto::from)
-                        .collect(toList());
+        final List<PantryItemDto> items = pantryService.findAll(houseId, excludeFullyConsumed).stream()
+                .map(PantryItemDto::from)
+                .collect(toList());
 
         return ResponseEntity.ok(items);
     }

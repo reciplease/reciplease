@@ -260,7 +260,8 @@ class RecipeServiceTest {
         @Test
         @DisplayName("upvote delegates to the repository for a visible recipe")
         void upvoteDelegates() {
-            when(recipeRepository.findVisibleById(recipe.id(), Set.of("viewer"))).thenReturn(Optional.of(recipe));
+            when(recipeRepository.findVisibleById(recipe.id(), Set.of("viewer")))
+                    .thenReturn(Optional.of(recipe));
 
             recipeService.upvote(recipe.id(), "viewer");
 
@@ -270,9 +271,11 @@ class RecipeServiceTest {
         @Test
         @DisplayName("upvote fails for a recipe the viewer cannot see")
         void upvoteFailsForInvisibleRecipe() {
-            when(recipeRepository.findVisibleById(recipe.id(), Set.of("viewer"))).thenReturn(Optional.empty());
+            when(recipeRepository.findVisibleById(recipe.id(), Set.of("viewer")))
+                    .thenReturn(Optional.empty());
 
-            var exception = assertThrows(IllegalArgumentException.class, () -> recipeService.upvote(recipe.id(), "viewer"));
+            var exception =
+                    assertThrows(IllegalArgumentException.class, () -> recipeService.upvote(recipe.id(), "viewer"));
 
             assertThat(exception.getMessage(), is("Recipe does not exist"));
             verify(recipeRepository, never()).addUpvote(any(), any());
@@ -281,7 +284,8 @@ class RecipeServiceTest {
         @Test
         @DisplayName("removeUpvote delegates to the repository for a visible recipe")
         void removeUpvoteDelegates() {
-            when(recipeRepository.findVisibleById(recipe.id(), Set.of("viewer"))).thenReturn(Optional.of(recipe));
+            when(recipeRepository.findVisibleById(recipe.id(), Set.of("viewer")))
+                    .thenReturn(Optional.of(recipe));
 
             recipeService.removeUpvote(recipe.id(), "viewer");
 
@@ -291,10 +295,11 @@ class RecipeServiceTest {
         @Test
         @DisplayName("removeUpvote fails for a recipe the viewer cannot see")
         void removeUpvoteFailsForInvisibleRecipe() {
-            when(recipeRepository.findVisibleById(recipe.id(), Set.of("viewer"))).thenReturn(Optional.empty());
+            when(recipeRepository.findVisibleById(recipe.id(), Set.of("viewer")))
+                    .thenReturn(Optional.empty());
 
-            var exception =
-                    assertThrows(IllegalArgumentException.class, () -> recipeService.removeUpvote(recipe.id(), "viewer"));
+            var exception = assertThrows(
+                    IllegalArgumentException.class, () -> recipeService.removeUpvote(recipe.id(), "viewer"));
 
             assertThat(exception.getMessage(), is("Recipe does not exist"));
             verify(recipeRepository, never()).removeUpvote(any(), any());

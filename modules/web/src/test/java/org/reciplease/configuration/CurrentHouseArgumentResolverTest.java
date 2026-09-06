@@ -35,8 +35,7 @@ class CurrentHouseArgumentResolverTest {
         when(webRequest.getHeader(HouseAccess.HOUSE_HEADER)).thenReturn(null);
 
         assertThrows(
-                MissingRequestHeaderException.class,
-                () -> resolver.resolveArgument(parameter, null, webRequest, null));
+                MissingRequestHeaderException.class, () -> resolver.resolveArgument(parameter, null, webRequest, null));
     }
 
     @Test

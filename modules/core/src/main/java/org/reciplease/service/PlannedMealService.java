@@ -174,10 +174,7 @@ public class PlannedMealService {
     }
 
     public Map<PantryItem, Double> suggestPantryItemsWithAvailable(
-            final String houseId,
-            final String recipeId,
-            final String ingredientName,
-            final String excludeMealId) {
+            final String houseId, final String recipeId, final String ingredientName, final String excludeMealId) {
         var suggestedItems = suggestPantryItems(houseId, recipeId, ingredientName);
         var committedElsewhere = committedElsewhere(houseId, ingredientName, excludeMealId);
 
@@ -196,8 +193,7 @@ public class PlannedMealService {
                 .flatMap(meal -> meal.items().stream())
                 .filter(item -> item.ingredient().name().equals(ingredientName))
                 .flatMap(item -> item.allocations().stream())
-                .collect(Collectors.toMap(
-                        PantryAllocation::pantryItemId, PantryAllocation::amount, Double::sum));
+                .collect(Collectors.toMap(PantryAllocation::pantryItemId, PantryAllocation::amount, Double::sum));
     }
 
     private List<PantryItem> distinctById(final List<PantryItem> items) {

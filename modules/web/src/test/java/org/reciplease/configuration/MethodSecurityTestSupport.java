@@ -35,8 +35,8 @@ public class MethodSecurityTestSupport {
 
     @Bean
     MockMvcBuilderCustomizer currentHouseHeaderCustomizer() {
-        return builder -> builder.defaultRequest(
-                MockMvcRequestBuilders.get("/").header(HouseAccess.HOUSE_HEADER, HOUSE_ID));
+        return builder ->
+                builder.defaultRequest(MockMvcRequestBuilders.get("/").header(HouseAccess.HOUSE_HEADER, HOUSE_ID));
     }
 
     @RestControllerAdvice

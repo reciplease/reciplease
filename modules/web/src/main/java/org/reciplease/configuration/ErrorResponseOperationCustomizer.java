@@ -99,6 +99,7 @@ public class ErrorResponseOperationCustomizer implements OperationCustomizer {
     private ApiResponse errorApiResponse(final String description) {
         return new ApiResponse()
                 .description(description)
-                .content(new Content().addMediaType("*/*", new MediaType().schema(new Schema<>().$ref(ERROR_RESPONSE_REF))));
+                .content(new Content()
+                        .addMediaType("*/*", new MediaType().schema(new Schema<>().$ref(ERROR_RESPONSE_REF))));
     }
 }

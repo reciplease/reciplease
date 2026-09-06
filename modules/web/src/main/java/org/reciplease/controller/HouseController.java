@@ -108,8 +108,7 @@ public class HouseController {
     @DeleteMapping("invites/{inviteId}")
     @HouseOwner
     @Operation(operationId = "deleteHouseInvite")
-    public ResponseEntity<Void> deleteInvite(
-            @CurrentHouse final String houseId, @PathVariable final String inviteId) {
+    public ResponseEntity<Void> deleteInvite(@CurrentHouse final String houseId, @PathVariable final String inviteId) {
         final var deleted = inviteService.deleteInvite(houseId, inviteId);
         return deleted
                 ? ResponseEntity.noContent().build()

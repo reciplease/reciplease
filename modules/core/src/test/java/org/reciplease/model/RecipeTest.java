@@ -62,9 +62,7 @@ class RecipeTest {
     @Test
     @DisplayName("upvote count and state reflect the upvotedBy set")
     void upvoteCountAndState() {
-        var recipe = Recipe.builder()
-                .upvotedBy(Set.of("user-1", "user-2"))
-                .build();
+        var recipe = Recipe.builder().upvotedBy(Set.of("user-1", "user-2")).build();
 
         assertThat(recipe.upvoteCount(), is(2));
         assertThat(recipe.isUpvotedBy("user-1"), is(true));

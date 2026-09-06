@@ -49,9 +49,8 @@ public class ApiKeyController {
     @HouseOwner
     @Operation(operationId = "findAllApiKeys")
     public ResponseEntity<List<ApiKeyDto>> findAll(@CurrentHouse final String houseId) {
-        final var keys = apiKeyService.list(houseId).stream()
-                .map(ApiKeyDto::from)
-                .collect(toList());
+        final var keys =
+                apiKeyService.list(houseId).stream().map(ApiKeyDto::from).collect(toList());
         return ResponseEntity.ok(keys);
     }
 
@@ -60,8 +59,7 @@ public class ApiKeyController {
     @Operation(operationId = "createApiKey")
     public ResponseEntity<CreatedApiKeyDto> create(
             @CurrentHouse final String houseId, @Valid @RequestBody final CreateApiKeyRequest request) {
-        final var created =
-                apiKeyService.create(houseId, request.getName(), request.getRole(), currentUserId());
+        final var created = apiKeyService.create(houseId, request.getName(), request.getRole(), currentUserId());
         return ResponseEntity.status(HttpStatus.CREATED).body(CreatedApiKeyDto.from(created));
     }
 

@@ -164,10 +164,8 @@ class RecipeRepositoryTest {
 
     @Test
     void shouldAddUpvote() {
-        var recipe = recipeRepository.save(Recipe.builder()
-                .name("toast")
-                .isPublic(true)
-                .build());
+        var recipe = recipeRepository.save(
+                Recipe.builder().name("toast").isPublic(true).build());
 
         var changed = recipeRepository.addUpvote(recipe.id(), "user-1");
 
@@ -211,8 +209,10 @@ class RecipeRepositoryTest {
 
     @Test
     void shouldSortVisibleRecipesByUpvotesDescending() {
-        var low = recipeRepository.save(Recipe.builder().name("toast").isPublic(true).build());
-        var high = recipeRepository.save(Recipe.builder().name("soup").isPublic(true).build());
+        var low = recipeRepository.save(
+                Recipe.builder().name("toast").isPublic(true).build());
+        var high = recipeRepository.save(
+                Recipe.builder().name("soup").isPublic(true).build());
         recipeRepository.addUpvote(high.id(), "user-1");
         recipeRepository.addUpvote(high.id(), "user-2");
         recipeRepository.addUpvote(low.id(), "user-1");
