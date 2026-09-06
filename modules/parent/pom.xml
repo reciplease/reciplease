@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.0.6</version>
+    <version>4.1.1</version>
     <relativePath/>
   </parent>
 
@@ -24,10 +24,9 @@
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>25</java.version>
-    <lombok.version>1.18.46</lombok.version>
+    <lombok.version>1.18.48</lombok.version>
 
-    <commons-io.version>2.20.0</commons-io.version>
-    <cucumber.version>7.18.1</cucumber.version>
+    <cucumber.version>7.34.7</cucumber.version>
     <jacoco.version>0.8.15</jacoco.version>
     <spring-cloud-dependencies.version>2025.1.0</spring-cloud-dependencies.version>
     <springdoc.version>3.0.3</springdoc.version>
@@ -66,12 +65,6 @@
         <groupId>org.reciplease</groupId>
         <artifactId>open-food-facts</artifactId>
         <version>${revision}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>${commons-io.version}</version>
       </dependency>
 
       <dependency>
@@ -125,11 +118,6 @@
       <artifactId>lombok</artifactId>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
