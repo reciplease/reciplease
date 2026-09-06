@@ -24,4 +24,8 @@ public interface RecipeRepository {
     List<Recipe> findVisibleTo(Set<String> visibleOwnerIds);
 
     Optional<Recipe> findVisibleById(String id, Set<String> visibleOwnerIds);
+
+    boolean addUpvote(String recipeId, String userId);
+
+    boolean removeUpvote(String recipeId, String userId);
 }

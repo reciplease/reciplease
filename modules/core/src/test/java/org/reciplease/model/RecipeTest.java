@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -47,5 +48,27 @@ class RecipeTest {
 
         assertThat(recipe.addIngredient("tomato", "ITEMS", 5d), is(recipe));
         assertThat(recipe.removeIngredient("tomato"), is(recipe));
+    }
+
+    @Test
+    @DisplayName("upvotedBy defaults to empty")
+    void upvotedByDefaultsToEmpty() {
+        var recipe = Recipe.builder().build();
+
+        assertThat(recipe.upvoteCount(), is(0));
+        assertThat(recipe.isUpvotedBy("user-1"), is(false));
+    }
+
+    @Test
+    @DisplayName("upvote count and state reflect the upvotedBy set")
+    void upvoteCountAndState() {
+        var recipe = Recipe.builder()
+                .upvotedBy(Set.of("user-1", "user-2"))
+                .build();
+
+        assertThat(recipe.upvoteCount(), is(2));
+        assertThat(recipe.isUpvotedBy("user-1"), is(true));
+        assertThat(recipe.isUpvotedBy("user-3"), is(false));
+        assertThat(recipe.isUpvotedBy(null), is(false));
     }
 }

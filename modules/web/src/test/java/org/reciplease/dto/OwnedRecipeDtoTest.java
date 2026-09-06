@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
 import jakarta.validation.Validator;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,6 +48,21 @@ class OwnedRecipeDtoTest {
 
         assertThat(recipeDto.getCreatedBy(), is((UserSummaryDto) null));
         assertThat(recipeDto.getUpdatedBy(), is((UserSummaryDto) null));
+    }
+
+    @Test
+    @DisplayName("carries the upvote count and viewer state")
+    void carriesUpvoteInfo() {
+        var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("Toast")
+                .upvotedBy(Set.of("user-1"))
+                .build();
+
+        var recipeDto = OwnedRecipeDto.from(recipe, null, null, "user-1");
+
+        assertThat(recipeDto.getUpvoteCount(), is(1));
+        assertThat(recipeDto.isUpvotedByCurrentUser(), is(true));
     }
 
     @Test

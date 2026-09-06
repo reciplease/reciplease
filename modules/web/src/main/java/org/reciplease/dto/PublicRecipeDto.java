@@ -59,6 +59,12 @@ public class PublicRecipeDto implements RecipeDto {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
     Instant updatedAt;
 
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
+    int upvoteCount;
+
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
+    boolean upvotedByCurrentUser;
+
     // Jackson doesn't reliably pick up @JsonProperty from a default interface method, so
     // this override — and the matching one on OwnedRecipeDto — restates it explicitly. It's
     // also the EXISTING_PROPERTY discriminant for the RecipeDto polymorphic union (see
@@ -70,6 +76,10 @@ public class PublicRecipeDto implements RecipeDto {
     }
 
     public static PublicRecipeDto from(final Recipe recipe) {
+        return from(recipe, null);
+    }
+
+    public static PublicRecipeDto from(final Recipe recipe, final String viewerId) {
         return PublicRecipeDto.builder()
                 .recipeId(recipe.id())
                 .isPublic(recipe.isPublic())
@@ -81,6 +91,8 @@ public class PublicRecipeDto implements RecipeDto {
                         .map(RecipeIngredientDto::from)
                         .collect(Collectors.toSet()))
                 .updatedAt(recipe.updatedAt())
+                .upvoteCount(recipe.upvoteCount())
+                .upvotedByCurrentUser(recipe.isUpvotedBy(viewerId))
                 .build();
     }
 }

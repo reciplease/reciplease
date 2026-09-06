@@ -10,8 +10,7 @@ import jakarta.validation.Validator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;import org.junit.jupiter.api.Test;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
 import org.reciplease.validation.ValidationTest;
@@ -81,6 +80,37 @@ class PublicRecipeDtoTest {
 
         var entity = dto.toEntity();
         assertThat(entity.sourceUrl(), is("https://www.bbcgoodfood.com/recipes/pasta"));
+    }
+
+    @Test
+    @DisplayName("carries the upvote count")
+    void carriesUpvoteCount() {
+        var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("Toast")
+                .upvotedBy(Set.of("user-1", "user-2"))
+                .build();
+
+        var recipeDto = PublicRecipeDto.from(recipe);
+
+        assertThat(recipeDto.getUpvoteCount(), is(2));
+        assertThat(recipeDto.isUpvotedByCurrentUser(), is(false));
+    }
+
+    @Test
+    @DisplayName("reflects the viewer's upvote state")
+    void reflectsViewerUpvoteState() {
+        var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("Toast")
+                .upvotedBy(Set.of("user-1"))
+                .build();
+
+        var voted = PublicRecipeDto.from(recipe, "user-1");
+        var notVoted = PublicRecipeDto.from(recipe, "user-2");
+
+        assertThat(voted.isUpvotedByCurrentUser(), is(true));
+        assertThat(notVoted.isUpvotedByCurrentUser(), is(false));
     }
 
     @Test

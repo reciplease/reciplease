@@ -13,6 +13,7 @@ import org.reciplease.model.RecipeDocument;
 import org.reciplease.repository.mongo.RecipeMongoRepository;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -47,6 +48,7 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     public List<Recipe> findVisibleTo(final Set<String> visibleOwnerIds) {
         return mongoTemplate.find(query(visibilityCriteria(visibleOwnerIds)), RecipeDocument.class).stream()
                 .map(RecipeDocument::toModel)
+                .sorted(Recipe.byUpvotes())
                 .collect(Collectors.toList());
     }
 
@@ -55,6 +57,24 @@ public class RecipeRepositoryImpl implements RecipeRepository {
         final var criteria = visibilityCriteria(visibleOwnerIds).and("_id").is(id);
         return Optional.ofNullable(mongoTemplate.findOne(query(criteria), RecipeDocument.class))
                 .map(RecipeDocument::toModel);
+    }
+
+    @Override
+    public boolean addUpvote(final String recipeId, final String userId) {
+        final var update = new Update().addToSet("upvotedBy", userId);
+        return mongoTemplate
+                        .updateFirst(query(where("_id").is(recipeId)), update, RecipeDocument.class)
+                        .getModifiedCount()
+                > 0;
+    }
+
+    @Override
+    public boolean removeUpvote(final String recipeId, final String userId) {
+        final var update = new Update().pull("upvotedBy", userId);
+        return mongoTemplate
+                        .updateFirst(query(where("_id").is(recipeId)), update, RecipeDocument.class)
+                        .getModifiedCount()
+                > 0;
     }
 
     private Criteria visibilityCriteria(final Set<String> visibleOwnerIds) {

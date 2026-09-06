@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -239,6 +240,64 @@ class RecipeServiceTest {
                     () -> recipeService.addIngredient(recipe.id(), new AddIngredient("bread", "ITEMS", 10d)));
 
             assertThat(exception.getMessage(), is("Recipe does not exist"));
+        }
+    }
+
+    @Nested
+    class Upvote {
+        private Recipe recipe;
+
+        @BeforeEach
+        void setUp() {
+            recipe = Recipe.builder()
+                    .id(UUID.randomUUID().toString())
+                    .name("toast")
+                    .createdBy("owner")
+                    .build();
+            when(houseRepository.findAllForUser("viewer")).thenReturn(List.of());
+        }
+
+        @Test
+        @DisplayName("upvote delegates to the repository for a visible recipe")
+        void upvoteDelegates() {
+            when(recipeRepository.findVisibleById(recipe.id(), Set.of("viewer"))).thenReturn(Optional.of(recipe));
+
+            recipeService.upvote(recipe.id(), "viewer");
+
+            verify(recipeRepository).addUpvote(recipe.id(), "viewer");
+        }
+
+        @Test
+        @DisplayName("upvote fails for a recipe the viewer cannot see")
+        void upvoteFailsForInvisibleRecipe() {
+            when(recipeRepository.findVisibleById(recipe.id(), Set.of("viewer"))).thenReturn(Optional.empty());
+
+            var exception = assertThrows(IllegalArgumentException.class, () -> recipeService.upvote(recipe.id(), "viewer"));
+
+            assertThat(exception.getMessage(), is("Recipe does not exist"));
+            verify(recipeRepository, never()).addUpvote(any(), any());
+        }
+
+        @Test
+        @DisplayName("removeUpvote delegates to the repository for a visible recipe")
+        void removeUpvoteDelegates() {
+            when(recipeRepository.findVisibleById(recipe.id(), Set.of("viewer"))).thenReturn(Optional.of(recipe));
+
+            recipeService.removeUpvote(recipe.id(), "viewer");
+
+            verify(recipeRepository).removeUpvote(recipe.id(), "viewer");
+        }
+
+        @Test
+        @DisplayName("removeUpvote fails for a recipe the viewer cannot see")
+        void removeUpvoteFailsForInvisibleRecipe() {
+            when(recipeRepository.findVisibleById(recipe.id(), Set.of("viewer"))).thenReturn(Optional.empty());
+
+            var exception =
+                    assertThrows(IllegalArgumentException.class, () -> recipeService.removeUpvote(recipe.id(), "viewer"));
+
+            assertThat(exception.getMessage(), is("Recipe does not exist"));
+            verify(recipeRepository, never()).removeUpvote(any(), any());
         }
     }
 }

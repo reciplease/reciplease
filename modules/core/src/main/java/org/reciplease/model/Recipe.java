@@ -2,6 +2,7 @@ package org.reciplease.model;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,7 +14,7 @@ import lombok.experimental.Accessors;
 
 @Getter
 @Accessors(fluent = true)
-@EqualsAndHashCode(exclude = {"createdBy", "createdAt", "updatedBy", "updatedAt"})
+@EqualsAndHashCode(exclude = {"createdBy", "createdAt", "updatedBy", "updatedAt", "upvotedBy"})
 @ToString
 @Builder(toBuilder = true)
 public final class Recipe implements Audited {
@@ -36,6 +37,9 @@ public final class Recipe implements Audited {
     @Builder.Default
     private final Set<RecipeIngredient> recipeIngredients = new HashSet<>();
 
+    @Builder.Default
+    private final Set<String> upvotedBy = new HashSet<>();
+
     public Recipe addIngredient(final String name, final String measure, final Double amount) {
         return addIngredient(new RecipeIngredient(name, measure, amount));
     }
@@ -52,5 +56,19 @@ public final class Recipe implements Audited {
 
     public boolean isOwnedBy(final String userId) {
         return userId != null && userId.equals(createdBy);
+    }
+
+    public int upvoteCount() {
+        return upvotedBy.size();
+    }
+
+    public boolean isUpvotedBy(final String userId) {
+        return userId != null && upvotedBy.contains(userId);
+    }
+
+    public static Comparator<Recipe> byUpvotes() {
+        return Comparator.comparingInt(Recipe::upvoteCount)
+                .reversed()
+                .thenComparing(Recipe::createdAt, Comparator.nullsLast(Comparator.reverseOrder()));
     }
 }

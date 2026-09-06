@@ -65,6 +65,12 @@ public class OwnedRecipeDto implements RecipeDto {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
     Instant updatedAt;
 
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
+    int upvoteCount;
+
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
+    boolean upvotedByCurrentUser;
+
     // The EXISTING_PROPERTY discriminant for the RecipeDto polymorphic union — see
     // RecipeDto's @JsonTypeInfo and the matching override on PublicRecipeDto.
     @Override
@@ -75,6 +81,14 @@ public class OwnedRecipeDto implements RecipeDto {
 
     public static OwnedRecipeDto from(
             final Recipe recipe, final UserSummaryDto createdBy, final UserSummaryDto updatedBy) {
+        return from(recipe, createdBy, updatedBy, null);
+    }
+
+    public static OwnedRecipeDto from(
+            final Recipe recipe,
+            final UserSummaryDto createdBy,
+            final UserSummaryDto updatedBy,
+            final String viewerId) {
         return OwnedRecipeDto.builder()
                 .recipeId(recipe.id())
                 .isPublic(recipe.isPublic())
@@ -88,6 +102,8 @@ public class OwnedRecipeDto implements RecipeDto {
                 .createdBy(createdBy)
                 .updatedBy(updatedBy)
                 .updatedAt(recipe.updatedAt())
+                .upvoteCount(recipe.upvoteCount())
+                .upvotedByCurrentUser(recipe.isUpvotedBy(viewerId))
                 .build();
     }
 }

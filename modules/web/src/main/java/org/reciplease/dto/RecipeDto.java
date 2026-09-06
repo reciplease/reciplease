@@ -47,6 +47,10 @@ public sealed interface RecipeDto permits PublicRecipeDto, OwnedRecipeDto {
 
     Instant getUpdatedAt();
 
+    int getUpvoteCount();
+
+    boolean isUpvotedByCurrentUser();
+
     /** True for {@link OwnedRecipeDto} — the discriminant clients narrow the union on. */
     default boolean isOwned() {
         return false;
@@ -57,9 +61,23 @@ public sealed interface RecipeDto permits PublicRecipeDto, OwnedRecipeDto {
         return PublicRecipeDto.from(recipe);
     }
 
+    /** Public view for a specific viewer (upvote state reflected). */
+    static RecipeDto from(final Recipe recipe, final String viewerId) {
+        return PublicRecipeDto.from(recipe, viewerId);
+    }
+
     /** Owner view, for the recipe's owner only. */
     static RecipeDto from(final Recipe recipe, final UserSummaryDto createdBy, final UserSummaryDto updatedBy) {
         return OwnedRecipeDto.from(recipe, createdBy, updatedBy);
+    }
+
+    /** Owner view for a specific viewer (upvote state reflected). */
+    static RecipeDto from(
+            final Recipe recipe,
+            final UserSummaryDto createdBy,
+            final UserSummaryDto updatedBy,
+            final String viewerId) {
+        return OwnedRecipeDto.from(recipe, createdBy, updatedBy, viewerId);
     }
 
     default Recipe toEntity() {

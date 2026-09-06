@@ -331,6 +331,66 @@ class RecipeControllerTest {
         mockMvc.perform(delete("/api/recipes/{uuid}", recipe.id())).andExpect(status().isNotFound());
     }
 
+    @Test
+    @DisplayName("upvote a visible recipe")
+    void upvoteRecipe() throws Exception {
+        final var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("soup")
+                .isPublic(true)
+                .build();
+
+        when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
+        when(recipeService.findVisibleById(recipe.id(), OWNER_USER_ID)).thenReturn(Optional.of(recipe));
+
+        mockMvc.perform(post("/api/recipes/{uuid}/upvote", recipe.id())).andExpect(status().isNoContent());
+
+        verify(recipeService).upvote(recipe.id(), OWNER_USER_ID);
+    }
+
+    @Test
+    @DisplayName("upvote returns 404 when the recipe is not visible")
+    void upvoteRecipeNotFound() throws Exception {
+        final var id = UUID.randomUUID().toString();
+
+        when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
+        when(recipeService.findVisibleById(id, OWNER_USER_ID)).thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/api/recipes/{uuid}/upvote", id)).andExpect(status().isNotFound());
+
+        verify(recipeService, never()).upvote(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    @DisplayName("remove upvote on a visible recipe")
+    void removeUpvoteRecipe() throws Exception {
+        final var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("soup")
+                .isPublic(true)
+                .build();
+
+        when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
+        when(recipeService.findVisibleById(recipe.id(), OWNER_USER_ID)).thenReturn(Optional.of(recipe));
+
+        mockMvc.perform(delete("/api/recipes/{uuid}/upvote", recipe.id())).andExpect(status().isNoContent());
+
+        verify(recipeService).removeUpvote(recipe.id(), OWNER_USER_ID);
+    }
+
+    @Test
+    @DisplayName("remove upvote returns 404 when the recipe is not visible")
+    void removeUpvoteRecipeNotFound() throws Exception {
+        final var id = UUID.randomUUID().toString();
+
+        when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
+        when(recipeService.findVisibleById(id, OWNER_USER_ID)).thenReturn(Optional.empty());
+
+        mockMvc.perform(delete("/api/recipes/{uuid}/upvote", id)).andExpect(status().isNotFound());
+
+        verify(recipeService, never()).removeUpvote(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+    }
+
     private PublicRecipeDto getNewSoupDto() {
         return PublicRecipeDto.builder().name("soup").build();
     }

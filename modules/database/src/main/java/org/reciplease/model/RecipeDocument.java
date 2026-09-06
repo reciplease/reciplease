@@ -2,7 +2,9 @@ package org.reciplease.model;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,6 +42,9 @@ public class RecipeDocument {
     @Builder.Default
     private List<RecipeIngredientDocument> ingredients = new ArrayList<>();
 
+    @Builder.Default
+    private Set<String> upvotedBy = new HashSet<>();
+
     @CreatedBy
     private String createdBy;
 
@@ -64,6 +69,7 @@ public class RecipeDocument {
                 .ingredients(recipe.recipeIngredients().stream()
                         .map(RecipeIngredientDocument::from)
                         .collect(Collectors.toList()))
+                .upvotedBy(recipe.upvotedBy() != null ? recipe.upvotedBy() : new HashSet<>())
                 .createdBy(recipe.createdBy())
                 .createdAt(recipe.createdAt())
                 .updatedBy(recipe.updatedBy())
@@ -79,6 +85,7 @@ public class RecipeDocument {
                 .description(description)
                 .sourceUrl(sourceUrl)
                 .steps(steps != null ? steps : new ArrayList<>())
+                .upvotedBy(upvotedBy != null ? upvotedBy : new HashSet<>())
                 .createdBy(createdBy)
                 .createdAt(createdAt)
                 .updatedBy(updatedBy)

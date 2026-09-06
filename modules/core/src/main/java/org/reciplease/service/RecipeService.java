@@ -73,6 +73,22 @@ public class RecipeService {
         return savedRecipe.recipeIngredients();
     }
 
+    public void upvote(final String recipeId, final String userId) {
+        ensureVisible(recipeId, userId);
+        recipeRepository.addUpvote(recipeId, userId);
+    }
+
+    public void removeUpvote(final String recipeId, final String userId) {
+        ensureVisible(recipeId, userId);
+        recipeRepository.removeUpvote(recipeId, userId);
+    }
+
+    private void ensureVisible(final String recipeId, final String userId) {
+        if (findVisibleById(recipeId, userId).isEmpty()) {
+            throw new IllegalArgumentException("Recipe does not exist");
+        }
+    }
+
     private Set<String> visibleOwnerIds(final String viewerId) {
         final var ownerIds = new HashSet<String>();
         if (viewerId == null) {

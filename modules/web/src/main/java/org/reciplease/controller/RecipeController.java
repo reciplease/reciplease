@@ -109,15 +109,41 @@ public class RecipeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(recipeIngredients);
     }
 
+    @PostMapping("{uuid}/upvote")
+    @PreAuthorize("hasRole('RECIPLEASE')")
+    @Operation(operationId = "upvoteRecipe")
+    public ResponseEntity<Void> upvote(@PathVariable final String uuid) {
+        final var viewerId = houseAccess.currentUserId();
+        if (recipeService.findVisibleById(uuid, viewerId).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        recipeService.upvote(uuid, viewerId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @DeleteMapping("{uuid}/upvote")
+    @PreAuthorize("hasRole('RECIPLEASE')")
+    @Operation(operationId = "removeRecipeUpvote")
+    public ResponseEntity<Void> removeUpvote(@PathVariable final String uuid) {
+        final var viewerId = houseAccess.currentUserId();
+        if (recipeService.findVisibleById(uuid, viewerId).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        recipeService.removeUpvote(uuid, viewerId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
     private boolean isOwner(final Recipe recipe) {
         return recipe.isOwnedBy(houseAccess.currentUserId());
     }
 
     private RecipeDto toDto(final Recipe recipe) {
+        final var viewerId = houseAccess.currentUserId();
         if (isOwner(recipe)) {
-            return RecipeDto.from(recipe, userSummary(recipe.createdBy()), userSummary(recipe.updatedBy()));
+            return RecipeDto.from(
+                    recipe, userSummary(recipe.createdBy()), userSummary(recipe.updatedBy()), viewerId);
         }
-        return RecipeDto.from(recipe);
+        return RecipeDto.from(recipe, viewerId);
     }
 
     private UserSummaryDto userSummary(final String userId) {

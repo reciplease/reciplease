@@ -1,6 +1,7 @@
 package org.reciplease.repository;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -159,5 +160,63 @@ class RecipeRepositoryTest {
                 .build());
 
         assertThat(recipeRepository.findVisibleById(stranger.id(), Set.of("viewer")), is(Optional.empty()));
+    }
+
+    @Test
+    void shouldAddUpvote() {
+        var recipe = recipeRepository.save(Recipe.builder()
+                .name("toast")
+                .isPublic(true)
+                .build());
+
+        var changed = recipeRepository.addUpvote(recipe.id(), "user-1");
+
+        assertThat(changed, is(true));
+        assertThat(recipeRepository.findById(recipe.id()).orElseThrow().upvoteCount(), is(1));
+    }
+
+    @Test
+    void shouldNotDuplicateAnExistingUpvote() {
+        var recipe = recipeRepository.save(Recipe.builder().name("toast").build());
+        recipeRepository.addUpvote(recipe.id(), "user-1");
+
+        var changed = recipeRepository.addUpvote(recipe.id(), "user-1");
+
+        assertThat(changed, is(false));
+        assertThat(recipeRepository.findById(recipe.id()).orElseThrow().upvoteCount(), is(1));
+    }
+
+    @Test
+    void shouldRemoveUpvote() {
+        var recipe = recipeRepository.save(Recipe.builder().name("toast").build());
+        recipeRepository.addUpvote(recipe.id(), "user-1");
+        recipeRepository.addUpvote(recipe.id(), "user-2");
+
+        var changed = recipeRepository.removeUpvote(recipe.id(), "user-1");
+
+        assertThat(changed, is(true));
+        var restored = recipeRepository.findById(recipe.id()).orElseThrow();
+        assertThat(restored.upvoteCount(), is(1));
+        assertThat(restored.isUpvotedBy("user-2"), is(true));
+    }
+
+    @Test
+    void shouldReturnFalseWhenRemovingANonExistentUpvote() {
+        var recipe = recipeRepository.save(Recipe.builder().name("toast").build());
+
+        var changed = recipeRepository.removeUpvote(recipe.id(), "user-1");
+
+        assertThat(changed, is(false));
+    }
+
+    @Test
+    void shouldSortVisibleRecipesByUpvotesDescending() {
+        var low = recipeRepository.save(Recipe.builder().name("toast").isPublic(true).build());
+        var high = recipeRepository.save(Recipe.builder().name("soup").isPublic(true).build());
+        recipeRepository.addUpvote(high.id(), "user-1");
+        recipeRepository.addUpvote(high.id(), "user-2");
+        recipeRepository.addUpvote(low.id(), "user-1");
+
+        assertThat(recipeRepository.findVisibleTo(Set.of()), contains(high, low));
     }
 }
