@@ -56,13 +56,13 @@ build:
 release:
 	@${BASH} scripts/git-release.sh
 
-.PHONY: image #: Create Docker image.
+.PHONY: image #: Create Docker image and push to GHCR.
 image:
-	@${BASH} scripts/gcp-docker-build.sh
+	@${BASH} scripts/ghcr-docker-build.sh
 
-.PHONY: deploy #: Deploy Docker image.
+.PHONY: deploy #: Deploy to Cloud Run (removed — use image to push to GHCR).
 deploy:
-	@${BASH} scripts/gcp-docker-deploy.sh
+	@echo "Cloud Run deploy has been removed (repo moving off GCP). Run 'make image' to build and push to GHCR."
 
 .PHONY: open #: Open application.
 open:
