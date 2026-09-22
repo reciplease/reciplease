@@ -43,10 +43,10 @@
       <artifactId>open-food-facts</artifactId>
     </dependency>
 
-    <!-- Secret Manager starter removed: secrets are now injected as Cloud Run
-         env vars via set-secrets, which Spring Boot relaxed binding picks up
-         automatically. The starter was interfering with MongoDB autoconfiguration
-         even with secretmanager.enabled=false. -->
+    <!-- Secret Manager starter removed: secrets are injected as plain env vars,
+         which Spring Boot relaxed binding picks up automatically. The starter
+         was interfering with MongoDB autoconfiguration even with
+         secretmanager.enabled=false. -->
   </dependencies>
 
   <build>

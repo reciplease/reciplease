@@ -60,10 +60,6 @@ release:
 image:
 	@${BASH} scripts/ghcr-docker-build.sh
 
-.PHONY: deploy #: Deploy to Cloud Run (removed — use image to push to GHCR).
-deploy:
-	@echo "Cloud Run deploy has been removed (repo moving off GCP). Run 'make image' to build and push to GHCR."
-
 .PHONY: open #: Open application.
 open:
 	@${OPEN} ${RECIPLEASE_URL}
