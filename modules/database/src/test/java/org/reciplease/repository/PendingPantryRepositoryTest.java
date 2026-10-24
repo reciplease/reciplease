@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reciplease.configuration.MongoAuditingConfig;
+import org.reciplease.migration.CreatePendingPantryScanIdUniqueIndex;
 import org.reciplease.model.PendingPantryItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
@@ -90,6 +91,57 @@ class PendingPantryRepositoryTest {
         var found = pendingPantryRepository.findAllByHouseId(HOUSE_ID);
 
         assertThat(found, contains(first, second));
+    }
+
+    @Test
+    @DisplayName("saving the same scanId twice for a house returns the original item instead of duplicating it")
+    void shouldBeIdempotentPerHouseAndScanId() {
+        new CreatePendingPantryScanIdUniqueIndex().execution(mongoTemplate);
+        var first = pendingPantryRepository.save(scanned(HOUSE_ID, "scan-1", new byte[] {1}));
+
+        var second = pendingPantryRepository.save(scanned(HOUSE_ID, "scan-1", new byte[] {2}));
+
+        assertThat(second, is(first));
+        assertThat(pendingPantryRepository.findAllByHouseId(HOUSE_ID), contains(first));
+    }
+
+    @Test
+    @DisplayName("the same scanId in a different house is a different item")
+    void shouldScopeScanIdToHouse() {
+        new CreatePendingPantryScanIdUniqueIndex().execution(mongoTemplate);
+        var mine = pendingPantryRepository.save(scanned(HOUSE_ID, "scan-1", new byte[] {1}));
+
+        var theirs = pendingPantryRepository.save(scanned("other-house", "scan-1", new byte[] {2}));
+
+        assertThat(theirs.id().equals(mine.id()), is(false));
+    }
+
+    @Test
+    @DisplayName("items without a scanId never collide with each other")
+    void shouldAllowManyItemsWithoutScanId() {
+        new CreatePendingPantryScanIdUniqueIndex().execution(mongoTemplate);
+
+        pendingPantryRepository.save(new PendingPantryItem(null, null, HOUSE_ID, new byte[] {1}, null, null));
+        pendingPantryRepository.save(new PendingPantryItem(null, null, HOUSE_ID, new byte[] {2}, null, null));
+
+        assertThat(pendingPantryRepository.findAllByHouseId(HOUSE_ID).size(), is(2));
+    }
+
+    @Test
+    @DisplayName("the unique index returns the winner when a concurrent save slips past the lookup")
+    void shouldFallBackToExistingItemOnDuplicateKey() {
+        new CreatePendingPantryScanIdUniqueIndex().execution(mongoTemplate);
+        var winner = pendingPantryRepository.save(scanned(HOUSE_ID, "scan-1", new byte[] {1}));
+        var loser = scanned(HOUSE_ID, "scan-1", new byte[] {2});
+
+        var raced = ((PendingPantryRepositoryImpl) pendingPantryRepository).insertOrFindExisting(loser);
+
+        assertThat(raced, is(winner));
+    }
+
+    private static PendingPantryItem scanned(final String houseId, final String scanId, final byte[] barcodeImage) {
+        return new PendingPantryItem(
+                null, null, houseId, barcodeImage, null, null, null, null, null, scanId);
     }
 
     @Test

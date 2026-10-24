@@ -23,6 +23,7 @@ public class PendingPantryItemDocument {
     private String id;
 
     private String houseId;
+    private String scanId;
     private byte[] barcodeImage;
     // Predates barcodeImage — a decoded barcode string from when capture scanned live instead of
     // taking a photo. Still named "barcode" in Mongo (the pre-existing field), read here under a
@@ -46,6 +47,7 @@ public class PendingPantryItemDocument {
         return PendingPantryItemDocument.builder()
                 .id(item.id())
                 .houseId(item.houseId())
+                .scanId(item.scanId())
                 .barcodeImage(item.barcodeImage())
                 .legacyBarcode(item.legacyBarcode())
                 .expirationImage(item.expirationImage())
@@ -66,6 +68,7 @@ public class PendingPantryItemDocument {
                 expirationImage,
                 measureImage,
                 createdAt,
-                updatedAt);
+                updatedAt,
+                scanId);
     }
 }

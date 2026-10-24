@@ -12,8 +12,10 @@ import org.reciplease.configuration.CurrentHouse;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseMember;
 import org.reciplease.configuration.HouseOwner;
+import org.reciplease.dto.BulkCreatePendingPantryRequest;
 import org.reciplease.dto.PantryItemDto;
 import org.reciplease.dto.PendingPantryItemDto;
+import org.reciplease.dto.PendingPantryReceiptDto;
 import org.reciplease.service.PendingPantryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +49,23 @@ public class PendingPantryController {
             @CurrentHouse final String houseId, @Valid @RequestBody final PendingPantryItemDto itemDto) {
         final var savedItem = pendingPantryService.save(itemDto.toEntity(houseId));
         return ResponseEntity.status(HttpStatus.CREATED).body(PendingPantryItemDto.from(savedItem));
+    }
+
+    @PostMapping("bulk")
+    @HouseOwner
+    @Operation(operationId = "createPendingPantryItems")
+    public ResponseEntity<List<PendingPantryReceiptDto>> createAll(
+            @CurrentHouse final String houseId, @Valid @RequestBody final BulkCreatePendingPantryRequest request) {
+        final var missingScanId = request.getItems().stream()
+                .anyMatch(item -> item.getScanId() == null || item.getScanId().isBlank());
+        if (missingScanId) {
+            return ResponseEntity.badRequest().build();
+        }
+        final var receipts = request.getItems().stream()
+                .map(item -> pendingPantryService.save(item.toEntity(houseId)))
+                .map(PendingPantryReceiptDto::from)
+                .collect(toList());
+        return ResponseEntity.ok(receipts);
     }
 
     @GetMapping

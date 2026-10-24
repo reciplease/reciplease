@@ -26,7 +26,8 @@ public record PendingPantryItem(
         byte[] expirationImage,
         byte[] measureImage,
         Instant createdAt,
-        Instant updatedAt)
+        Instant updatedAt,
+        String scanId)
         implements Audited, HouseScoped {
 
     public PendingPantryItem(
@@ -36,7 +37,30 @@ public record PendingPantryItem(
             final byte[] barcodeImage,
             final byte[] expirationImage,
             final byte[] measureImage) {
-        this(id, createdBy, houseId, barcodeImage, null, expirationImage, measureImage, null, null);
+        this(id, createdBy, houseId, barcodeImage, null, expirationImage, measureImage, null, null, null);
+    }
+
+    public PendingPantryItem(
+            final String id,
+            final String createdBy,
+            final String houseId,
+            final byte[] barcodeImage,
+            final String legacyBarcode,
+            final byte[] expirationImage,
+            final byte[] measureImage,
+            final Instant createdAt,
+            final Instant updatedAt) {
+        this(
+                id,
+                createdBy,
+                houseId,
+                barcodeImage,
+                legacyBarcode,
+                expirationImage,
+                measureImage,
+                createdAt,
+                updatedAt,
+                null);
     }
 
     public PendingPantryItem withId(final String id) {
@@ -49,7 +73,8 @@ public record PendingPantryItem(
                 expirationImage,
                 measureImage,
                 createdAt,
-                updatedAt);
+                updatedAt,
+                scanId);
     }
 
     // The generated record equals()/hashCode() would compare the image fields by array identity
@@ -70,7 +95,8 @@ public record PendingPantryItem(
                 && Arrays.equals(expirationImage, other.expirationImage)
                 && Arrays.equals(measureImage, other.measureImage)
                 && Objects.equals(createdAt, other.createdAt)
-                && Objects.equals(updatedAt, other.updatedAt);
+                && Objects.equals(updatedAt, other.updatedAt)
+                && Objects.equals(scanId, other.scanId);
     }
 
     @Override
@@ -84,6 +110,7 @@ public record PendingPantryItem(
                 Arrays.hashCode(expirationImage),
                 Arrays.hashCode(measureImage),
                 createdAt,
-                updatedAt);
+                updatedAt,
+                scanId);
     }
 }

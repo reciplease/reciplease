@@ -3,6 +3,7 @@ package org.reciplease.dto;
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +22,9 @@ public class PendingPantryItemDto {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
     String houseId;
 
+    @Size(max = 64)
+    String scanId;
+
     byte[] barcodeImage;
     // Read-only echo of a pre-existing decoded barcode for items captured before barcodeImage
     // existed — see PendingPantryItem.legacyBarcode. Never accepted on create (absent from
@@ -38,6 +42,7 @@ public class PendingPantryItemDto {
         return PendingPantryItemDto.builder()
                 .uuid(item.id())
                 .houseId(item.houseId())
+                .scanId(item.scanId())
                 .barcodeImage(item.barcodeImage())
                 .legacyBarcode(item.legacyBarcode())
                 .expirationImage(item.expirationImage())
@@ -53,6 +58,7 @@ public class PendingPantryItemDto {
     // Mongo saves are upserts — a caller-chosen id could overwrite an arbitrary document
     // (and, via complete()'s id reuse, even another house's pantry item).
     public PendingPantryItem toEntity(final String houseId) {
-        return new PendingPantryItem(null, null, houseId, barcodeImage, expirationImage, measureImage);
+        return new PendingPantryItem(
+                null, null, houseId, barcodeImage, null, expirationImage, measureImage, null, null, scanId);
     }
 }

@@ -166,6 +166,84 @@ class PendingPantryControllerTest {
     }
 
     @Test
+    @DisplayName("bulk create saves every item with its scanId and returns a receipt per item")
+    void shouldBulkCreatePendingItems() throws Exception {
+        var first = scannedItem("scan-1", barcodeImageBytes);
+        var second = scannedItem("scan-2", expirationImageBytes);
+        when(pendingPantryService.save(first)).thenReturn(first.withId("pending-1"));
+        when(pendingPantryService.save(second)).thenReturn(second.withId("pending-2"));
+
+        mockMvc.perform(post("/api/pantry/pending/bulk")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"items": [
+                                  {"scanId": "scan-1", "barcodeImage": "%s"},
+                                  {"scanId": "scan-2", "barcodeImage": "%s"}
+                                ]}""".formatted(barcodeImageBase64, expirationImageBase64)))
+                .andExpect(status().isOk())
+                .andExpect(content().json("""
+                        [
+                          {"scanId": "scan-1", "uuid": "pending-1"},
+                          {"scanId": "scan-2", "uuid": "pending-2"}
+                        ]""", true));
+    }
+
+    @Test
+    @DisplayName("bulk create rejects an item without a scanId, saving nothing")
+    void bulkCreateRequiresScanId() throws Exception {
+        mockMvc.perform(post("/api/pantry/pending/bulk")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"items": [
+                                  {"scanId": "scan-1"},
+                                  {"barcodeImage": "%s"}
+                                ]}""".formatted(barcodeImageBase64)))
+                .andExpect(status().isBadRequest());
+
+        verify(pendingPantryService, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("bulk create rejects an empty batch")
+    void bulkCreateRejectsEmptyBatch() throws Exception {
+        mockMvc.perform(post("/api/pantry/pending/bulk")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"items\": []}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("bulk create rejects an over-long scanId")
+    void bulkCreateRejectsOverlongScanId() throws Exception {
+        mockMvc.perform(post("/api/pantry/pending/bulk")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"items\": [{\"scanId\": \"%s\"}]}".formatted("x".repeat(65))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("bulk create is forbidden for read-only members")
+    @WithHouseMember
+    void bulkCreateForbiddenForReadOnly() throws Exception {
+        when(houseAccess.isOwner()).thenReturn(false);
+
+        mockMvc.perform(post("/api/pantry/pending/bulk")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"items\": [{\"scanId\": \"scan-1\"}]}"))
+                .andExpect(status().isForbidden());
+    }
+
+    private PendingPantryItem scannedItem(final String scanId, final byte[] barcodeImage) {
+        return new PendingPantryItem(
+                null, null, HOUSE_ID, barcodeImage, null, null, null, null, null, scanId);
+    }
+
+    @Test
     @DisplayName("should list the house's pending items")
     void shouldListPendingItems() throws Exception {
         var pending = new PendingPantryItem(PENDING_ID, null, HOUSE_ID, barcodeImageBytes, expirationImageBytes, null);
