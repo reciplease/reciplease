@@ -10,9 +10,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.reciplease.configuration.HouseAccess;
-import org.reciplease.dto.PublicRecipeDto;
 import org.reciplease.dto.RecipeDto;
 import org.reciplease.dto.RecipeIngredientDto;
+import org.reciplease.dto.RecipeRequest;
 import org.reciplease.dto.UserSummaryDto;
 import org.reciplease.model.Recipe;
 import org.reciplease.repository.UserRepository;
@@ -60,8 +60,8 @@ public class RecipeController {
     @PostMapping
     @PreAuthorize("hasRole('RECIPLEASE')")
     @Operation(operationId = "createRecipe")
-    public ResponseEntity<RecipeDto> create(@Valid @RequestBody final PublicRecipeDto recipeDto) {
-        final Recipe recipe = recipeService.create(houseAccess.currentUserId(), recipeDto.toEntity());
+    public ResponseEntity<RecipeDto> create(@Valid @RequestBody final RecipeRequest request) {
+        final Recipe recipe = recipeService.create(houseAccess.currentUserId(), request.toEntity());
         return ResponseEntity.status(HttpStatus.CREATED).body(toDto(recipe));
     }
 
@@ -69,13 +69,13 @@ public class RecipeController {
     @PreAuthorize("hasRole('RECIPLEASE')")
     @Operation(operationId = "updateRecipe")
     public ResponseEntity<RecipeDto> update(
-            @PathVariable final String uuid, @Valid @RequestBody final PublicRecipeDto recipeDto) {
+            @PathVariable final String uuid, @Valid @RequestBody final RecipeRequest request) {
         final var existing = recipeService.findById(uuid);
         if (existing.isEmpty() || !isOwner(existing.get())) {
             return ResponseEntity.notFound().build();
         }
 
-        final var updated = recipeService.update(uuid, recipeDto.toEntity());
+        final var updated = recipeService.update(uuid, request.toEntity());
         return ResponseEntity.ok(toDto(updated));
     }
 

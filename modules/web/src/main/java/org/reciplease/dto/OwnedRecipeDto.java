@@ -3,13 +3,7 @@ package org.reciplease.dto;
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.Nulls;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
-import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
@@ -39,26 +33,21 @@ public class OwnedRecipeDto implements RecipeDto {
     @Schema(requiredMode = REQUIRED)
     boolean isPublic = false;
 
-    @Size(max = 200)
-    @Schema(requiredMode = REQUIRED, maxLength = 200)
+    @Schema(requiredMode = REQUIRED)
     String name;
 
     @Schema(requiredMode = REQUIRED)
     String description;
 
-    @Pattern(regexp = "^$|^https?://.+")
-    @Schema(requiredMode = REQUIRED, pattern = "^$|^https?://.+")
+    @Schema(requiredMode = REQUIRED)
     String sourceUrl;
 
-    @PositiveOrZero
     @Schema(nullable = true)
     Integer prepTimeMinutes;
 
-    @PositiveOrZero
     @Schema(nullable = true)
     Integer cookTimeMinutes;
 
-    @Positive
     @Schema(nullable = true)
     Integer servings;
 
@@ -81,11 +70,9 @@ public class OwnedRecipeDto implements RecipeDto {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
     Instant updatedAt;
 
-    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
     int upvoteCount;
 
-    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
     boolean upvotedByCurrentUser;
 

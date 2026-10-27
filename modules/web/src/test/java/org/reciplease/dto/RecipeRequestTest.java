@@ -1,0 +1,124 @@
+package org.reciplease.dto;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+
+import jakarta.validation.Validator;
+import java.util.List;
+import java.util.Set;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.reciplease.model.RecipeIngredient;
+import org.reciplease.validation.ValidationTest;
+
+@ValidationTest
+class RecipeRequestTest {
+
+    @Test
+    @DisplayName("converts every writable field to an entity")
+    void toEntity() {
+        var request = RecipeRequest.builder()
+                .name("Pasta")
+                .description("Quick")
+                .sourceUrl("https://example.com/pasta")
+                .isPublic(true)
+                .prepTimeMinutes(5)
+                .cookTimeMinutes(40)
+                .servings(4)
+                .steps(List.of("Boil"))
+                .ingredients(Set.of(new RecipeIngredientDto("pasta", "g", 200d)))
+                .build();
+
+        var recipe = request.toEntity();
+
+        assertThat(recipe.name(), is("Pasta"));
+        assertThat(recipe.description(), is("Quick"));
+        assertThat(recipe.sourceUrl(), is("https://example.com/pasta"));
+        assertThat(recipe.isPublic(), is(true));
+        assertThat(recipe.prepTimeMinutes(), is(5));
+        assertThat(recipe.cookTimeMinutes(), is(40));
+        assertThat(recipe.servings(), is(4));
+        assertThat(recipe.steps(), contains("Boil"));
+        assertThat(recipe.recipeIngredients(), contains(new RecipeIngredient("pasta", "g", 200d)));
+    }
+
+    @Test
+    @DisplayName("an entity from a request has no id")
+    void toEntityHasNoId() {
+        assertThat(RecipeRequest.builder().name("Toast").build().toEntity().id(), is((String) null));
+    }
+
+    @Test
+    @DisplayName("defaults to private with no times or servings")
+    void defaults() {
+        var recipe = RecipeRequest.builder().name("Toast").build().toEntity();
+
+        assertThat(recipe.isPublic(), is(false));
+        assertThat(recipe.prepTimeMinutes(), is((Integer) null));
+        assertThat(recipe.cookTimeMinutes(), is((Integer) null));
+        assertThat(recipe.servings(), is((Integer) null));
+        assertThat(recipe.recipeIngredients(), is(empty()));
+    }
+
+    @Test
+    @DisplayName("ingredient measures are normalised to their short form")
+    void normalisesIngredientMeasures() {
+        var request = RecipeRequest.builder()
+                .name("Toast")
+                .ingredients(Set.of(new RecipeIngredientDto("bread", "ITEMS", 2d)))
+                .build();
+
+        assertThat(request.toEntity().recipeIngredients(), contains(new RecipeIngredient("bread", "item", 2d)));
+    }
+
+    @Test
+    @DisplayName("an empty sourceUrl is accepted")
+    void emptySourceUrlIsAccepted(final Validator validator) {
+        assertThat(
+                validator.validate(
+                        RecipeRequest.builder().name("Toast").sourceUrl("").build()),
+                is(empty()));
+    }
+
+    @Test
+    @DisplayName("an invalid sourceUrl is rejected")
+    void invalidSourceUrlIsRejected(final Validator validator) {
+        var request = RecipeRequest.builder()
+                .name("Toast")
+                .sourceUrl("not-a-valid-url")
+                .build();
+
+        assertThat(validator.validate(request), not(empty()));
+    }
+
+    @Test
+    @DisplayName("a name longer than 200 characters is rejected")
+    void overlongNameIsRejected(final Validator validator) {
+        assertThat(
+                validator.validate(RecipeRequest.builder().name("a".repeat(201)).build()), not(empty()));
+    }
+
+    @Test
+    @DisplayName("negative times and zero servings are rejected")
+    void invalidNumbersAreRejected(final Validator validator) {
+        assertThat(
+                validator.validate(RecipeRequest.builder()
+                        .name("Toast")
+                        .prepTimeMinutes(-1)
+                        .build()),
+                not(empty()));
+        assertThat(
+                validator.validate(RecipeRequest.builder()
+                        .name("Toast")
+                        .cookTimeMinutes(-1)
+                        .build()),
+                not(empty()));
+        assertThat(
+                validator.validate(
+                        RecipeRequest.builder().name("Toast").servings(0).build()),
+                not(empty()));
+    }
+}

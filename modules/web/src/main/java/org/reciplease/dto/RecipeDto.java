@@ -7,14 +7,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.reciplease.model.Recipe;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
         property = "owned",
-        defaultImpl = PublicRecipeDto.class,
         visible = true)
 @JsonSubTypes({
     @JsonSubTypes.Type(value = PublicRecipeDto.class, name = "false"),
@@ -85,25 +83,5 @@ public sealed interface RecipeDto permits PublicRecipeDto, OwnedRecipeDto {
             final UserSummaryDto updatedBy,
             final String viewerId) {
         return OwnedRecipeDto.from(recipe, createdBy, updatedBy, viewerId);
-    }
-
-    default Recipe toEntity() {
-        final var builder = Recipe.builder()
-                .id(getRecipeId())
-                .isPublic(isPublic())
-                .name(getName())
-                .description(getDescription())
-                .sourceUrl(getSourceUrl())
-                .prepTimeMinutes(getPrepTimeMinutes())
-                .cookTimeMinutes(getCookTimeMinutes())
-                .servings(getServings())
-                .steps(getSteps());
-
-        if (getIngredients() != null) {
-            builder.recipeIngredients(
-                    getIngredients().stream().map(RecipeIngredientDto::toModel).collect(Collectors.toSet()));
-        }
-
-        return builder.build();
     }
 }

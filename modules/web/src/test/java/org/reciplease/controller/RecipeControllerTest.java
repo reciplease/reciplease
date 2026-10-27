@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.MethodSecurityTestSupport;
 import org.reciplease.configuration.WithMockRecipleaseUser;
-import org.reciplease.dto.PublicRecipeDto;
 import org.reciplease.dto.RecipeDto;
+import org.reciplease.dto.RecipeRequest;
 import org.reciplease.dto.UserSummaryDto;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
@@ -149,9 +149,28 @@ class RecipeControllerTest {
     }
 
     @Test
+    @DisplayName("create new recipe ignores response-only fields sent by older clients")
+    void createRecipeIgnoresResponseOnlyFields() throws Exception {
+        final var body = """
+                {"name":"soup","description":"","sourceUrl":"","isPublic":false,"steps":[],"ingredients":[],
+                 "owned":false,"upvoteCount":3,"upvotedByCurrentUser":true,"recipeId":"someone-elses-id"}
+                """;
+
+        when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
+        when(recipeService.create(eq(OWNER_USER_ID), any(Recipe.class))).thenReturn(getSavedSoup());
+
+        mockMvc.perform(post("/api/recipes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+
+        verify(recipeService).create(eq(OWNER_USER_ID), argThat(recipe -> recipe.id() == null));
+    }
+
+    @Test
     @DisplayName("create new recipe rejects an invalid sourceUrl")
     void createRecipeRejectsInvalidSourceUrl() throws Exception {
-        final var invalidDto = PublicRecipeDto.builder()
+        final var invalidDto = RecipeRequest.builder()
                 .name("soup")
                 .sourceUrl("not-a-valid-url")
                 .build();
@@ -165,7 +184,7 @@ class RecipeControllerTest {
     @Test
     @DisplayName("create new recipe rejects a name longer than 200 characters")
     void createRecipeRejectsOverlongName() throws Exception {
-        final var invalidDto = PublicRecipeDto.builder().name("a".repeat(201)).build();
+        final var invalidDto = RecipeRequest.builder().name("a".repeat(201)).build();
 
         mockMvc.perform(post("/api/recipes")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -228,10 +247,7 @@ class RecipeControllerTest {
                 .createdBy(OWNER_USER_ID)
                 .build();
         final var updated = recipe.toBuilder().name("tomato soup").build();
-        final var updateDto = PublicRecipeDto.builder()
-                .recipeId(recipe.id())
-                .name("tomato soup")
-                .build();
+        final var updateDto = RecipeRequest.builder().name("tomato soup").build();
 
         when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
         when(recipeService.findById(recipe.id())).thenReturn(Optional.of(recipe));
@@ -252,10 +268,7 @@ class RecipeControllerTest {
                 .name("soup")
                 .createdBy("someone-else")
                 .build();
-        final var updateDto = PublicRecipeDto.builder()
-                .recipeId(recipe.id())
-                .name("tomato soup")
-                .build();
+        final var updateDto = RecipeRequest.builder().name("tomato soup").build();
 
         when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
         when(recipeService.findById(recipe.id())).thenReturn(Optional.of(recipe));
@@ -272,8 +285,7 @@ class RecipeControllerTest {
     @DisplayName("update recipe returns 404 when it does not exist")
     void updateRecipeNotFound() throws Exception {
         final var id = UUID.randomUUID().toString();
-        final var updateDto =
-                PublicRecipeDto.builder().recipeId(id).name("tomato soup").build();
+        final var updateDto = RecipeRequest.builder().name("tomato soup").build();
 
         when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
         when(recipeService.findById(id)).thenReturn(Optional.empty());
@@ -420,8 +432,8 @@ class RecipeControllerTest {
                 .removeUpvote(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
     }
 
-    private PublicRecipeDto getNewSoupDto() {
-        return PublicRecipeDto.builder().name("soup").build();
+    private RecipeRequest getNewSoupDto() {
+        return RecipeRequest.builder().name("soup").build();
     }
 
     private Recipe getSavedSoup() {

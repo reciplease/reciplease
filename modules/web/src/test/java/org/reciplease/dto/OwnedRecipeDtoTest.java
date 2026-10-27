@@ -1,19 +1,14 @@
 package org.reciplease.dto;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 
-import jakarta.validation.Validator;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reciplease.model.Recipe;
-import org.reciplease.validation.ValidationTest;
 
-@ValidationTest
 class OwnedRecipeDtoTest {
 
     @Test
@@ -66,25 +61,6 @@ class OwnedRecipeDtoTest {
     }
 
     @Test
-    @DisplayName("an invalid sourceUrl is rejected")
-    void invalidSourceUrlIsRejected(final Validator validator) {
-        var recipeDto = OwnedRecipeDto.builder()
-                .name("Toast")
-                .sourceUrl("not-a-valid-url")
-                .build();
-
-        assertThat(validator.validate(recipeDto), not(empty()));
-    }
-
-    @Test
-    @DisplayName("a name longer than 200 characters is rejected")
-    void overlongNameIsRejected(final Validator validator) {
-        var recipeDto = OwnedRecipeDto.builder().name("a".repeat(201)).build();
-
-        assertThat(validator.validate(recipeDto), not(empty()));
-    }
-
-    @Test
     @DisplayName("carries prep time, cook time and servings")
     void carriesTimesAndServings() {
         var recipe = Recipe.builder()
@@ -100,13 +76,5 @@ class OwnedRecipeDtoTest {
         assertThat(recipeDto.getPrepTimeMinutes(), is(5));
         assertThat(recipeDto.getCookTimeMinutes(), is(40));
         assertThat(recipeDto.getServings(), is(4));
-    }
-
-    @Test
-    @DisplayName("zero servings is rejected")
-    void zeroServingsIsRejected(final Validator validator) {
-        var recipeDto = OwnedRecipeDto.builder().name("Toast").servings(0).build();
-
-        assertThat(validator.validate(recipeDto), not(empty()));
     }
 }
