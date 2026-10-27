@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -26,6 +27,7 @@ import org.reciplease.model.Recipe;
 @Schema(name = "RecipeRequest")
 public class RecipeRequest {
 
+    @NotNull
     @Size(max = 200)
     @Schema(requiredMode = REQUIRED, maxLength = 200)
     String name;
@@ -55,9 +57,11 @@ public class RecipeRequest {
     @Schema(nullable = true)
     Integer servings;
 
+    @NotNull
     @Schema(requiredMode = REQUIRED)
     List<String> steps;
 
+    @NotNull
     @Schema(requiredMode = REQUIRED)
     Set<RecipeIngredientDto> ingredients;
 

@@ -75,9 +75,21 @@ class RecipeRequestTest {
     }
 
     @Test
+    @DisplayName("name, steps and ingredients are required")
+    void nameStepsAndIngredientsAreRequired(final Validator validator) {
+        var complete = validRequest();
+
+        assertThat(validator.validate(complete.build()), is(empty()));
+        assertThat(validator.validate(complete.name(null).build()), not(empty()));
+        assertThat(validator.validate(complete.name("Toast").steps(null).build()), not(empty()));
+        assertThat(
+                validator.validate(complete.steps(List.of()).ingredients(null).build()), not(empty()));
+    }
+
+    @Test
     @DisplayName("description and sourceUrl are optional")
     void descriptionAndSourceUrlAreOptional(final Validator validator) {
-        var request = RecipeRequest.builder().name("Toast").build();
+        var request = validRequest().build();
 
         assertThat(validator.validate(request), is(empty()));
         assertThat(request.toEntity().description(), is((String) null));
@@ -87,19 +99,13 @@ class RecipeRequestTest {
     @Test
     @DisplayName("an empty sourceUrl is accepted")
     void emptySourceUrlIsAccepted(final Validator validator) {
-        assertThat(
-                validator.validate(
-                        RecipeRequest.builder().name("Toast").sourceUrl("").build()),
-                is(empty()));
+        assertThat(validator.validate(validRequest().sourceUrl("").build()), is(empty()));
     }
 
     @Test
     @DisplayName("an invalid sourceUrl is rejected")
     void invalidSourceUrlIsRejected(final Validator validator) {
-        var request = RecipeRequest.builder()
-                .name("Toast")
-                .sourceUrl("not-a-valid-url")
-                .build();
+        var request = validRequest().sourceUrl("not-a-valid-url").build();
 
         assertThat(validator.validate(request), not(empty()));
     }
@@ -107,28 +113,18 @@ class RecipeRequestTest {
     @Test
     @DisplayName("a name longer than 200 characters is rejected")
     void overlongNameIsRejected(final Validator validator) {
-        assertThat(
-                validator.validate(RecipeRequest.builder().name("a".repeat(201)).build()), not(empty()));
+        assertThat(validator.validate(validRequest().name("a".repeat(201)).build()), not(empty()));
     }
 
     @Test
     @DisplayName("negative times and zero servings are rejected")
     void invalidNumbersAreRejected(final Validator validator) {
-        assertThat(
-                validator.validate(RecipeRequest.builder()
-                        .name("Toast")
-                        .prepTimeMinutes(-1)
-                        .build()),
-                not(empty()));
-        assertThat(
-                validator.validate(RecipeRequest.builder()
-                        .name("Toast")
-                        .cookTimeMinutes(-1)
-                        .build()),
-                not(empty()));
-        assertThat(
-                validator.validate(
-                        RecipeRequest.builder().name("Toast").servings(0).build()),
-                not(empty()));
+        assertThat(validator.validate(validRequest().prepTimeMinutes(-1).build()), not(empty()));
+        assertThat(validator.validate(validRequest().cookTimeMinutes(-1).build()), not(empty()));
+        assertThat(validator.validate(validRequest().servings(0).build()), not(empty()));
+    }
+
+    private static RecipeRequest.RecipeRequestBuilder validRequest() {
+        return RecipeRequest.builder().name("Toast").steps(List.of()).ingredients(Set.of());
     }
 }

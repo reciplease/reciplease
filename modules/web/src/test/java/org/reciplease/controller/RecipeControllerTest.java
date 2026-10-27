@@ -169,12 +169,47 @@ class RecipeControllerTest {
     }
 
     @Test
+    @DisplayName("create new recipe rejects a body without steps")
+    void createRecipeRejectsMissingSteps() throws Exception {
+        mockMvc.perform(post("/api/recipes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"soup\",\"ingredients\":[]}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("create new recipe rejects a body without ingredients")
+    void createRecipeRejectsMissingIngredients() throws Exception {
+        mockMvc.perform(post("/api/recipes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"soup\",\"steps\":[]}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("update recipe rejects a body without steps or ingredients instead of clearing them")
+    void updateRecipeRejectsMissingLists() throws Exception {
+        final var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("soup")
+                .createdBy(OWNER_USER_ID)
+                .build();
+
+        when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
+        when(recipeService.findById(recipe.id())).thenReturn(Optional.of(recipe));
+
+        mockMvc.perform(put("/api/recipes/{uuid}", recipe.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"tomato soup\"}"))
+                .andExpect(status().isBadRequest());
+
+        verify(recipeService, never()).update(any(), any());
+    }
+
+    @Test
     @DisplayName("create new recipe rejects an invalid sourceUrl")
     void createRecipeRejectsInvalidSourceUrl() throws Exception {
-        final var invalidDto = RecipeRequest.builder()
-                .name("soup")
-                .sourceUrl("not-a-valid-url")
-                .build();
+        final var invalidDto = soupRequest().sourceUrl("not-a-valid-url").build();
 
         mockMvc.perform(post("/api/recipes")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -185,7 +220,7 @@ class RecipeControllerTest {
     @Test
     @DisplayName("create new recipe rejects a name longer than 200 characters")
     void createRecipeRejectsOverlongName() throws Exception {
-        final var invalidDto = RecipeRequest.builder().name("a".repeat(201)).build();
+        final var invalidDto = soupRequest().name("a".repeat(201)).build();
 
         mockMvc.perform(post("/api/recipes")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -248,7 +283,7 @@ class RecipeControllerTest {
                 .createdBy(OWNER_USER_ID)
                 .build();
         final var updated = recipe.toBuilder().name("tomato soup").build();
-        final var updateDto = RecipeRequest.builder().name("tomato soup").build();
+        final var updateDto = soupRequest().name("tomato soup").build();
 
         when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
         when(recipeService.findById(recipe.id())).thenReturn(Optional.of(recipe));
@@ -269,7 +304,7 @@ class RecipeControllerTest {
                 .name("soup")
                 .createdBy("someone-else")
                 .build();
-        final var updateDto = RecipeRequest.builder().name("tomato soup").build();
+        final var updateDto = soupRequest().name("tomato soup").build();
 
         when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
         when(recipeService.findById(recipe.id())).thenReturn(Optional.of(recipe));
@@ -286,7 +321,7 @@ class RecipeControllerTest {
     @DisplayName("update recipe returns 404 when it does not exist")
     void updateRecipeNotFound() throws Exception {
         final var id = UUID.randomUUID().toString();
-        final var updateDto = RecipeRequest.builder().name("tomato soup").build();
+        final var updateDto = soupRequest().name("tomato soup").build();
 
         when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
         when(recipeService.findById(id)).thenReturn(Optional.empty());
@@ -434,7 +469,11 @@ class RecipeControllerTest {
     }
 
     private RecipeRequest getNewSoupDto() {
-        return RecipeRequest.builder().name("soup").build();
+        return soupRequest().build();
+    }
+
+    private RecipeRequest.RecipeRequestBuilder soupRequest() {
+        return RecipeRequest.builder().name("soup").steps(List.of()).ingredients(Set.of());
     }
 
     private Recipe getSavedSoup() {
