@@ -182,4 +182,62 @@ class PublicRecipeDtoTest {
 
         assertThat(validator.validate(recipeDto), not(empty()));
     }
+
+    @Test
+    @DisplayName("prep time, cook time and servings round-trip through DTO")
+    void timesAndServingsRoundTrip() {
+        var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("Pasta")
+                .prepTimeMinutes(5)
+                .cookTimeMinutes(40)
+                .servings(4)
+                .build();
+
+        var dto = PublicRecipeDto.from(recipe);
+        assertThat(dto.getPrepTimeMinutes(), is(5));
+        assertThat(dto.getCookTimeMinutes(), is(40));
+        assertThat(dto.getServings(), is(4));
+
+        var entity = dto.toEntity();
+        assertThat(entity.prepTimeMinutes(), is(5));
+        assertThat(entity.cookTimeMinutes(), is(40));
+        assertThat(entity.servings(), is(4));
+    }
+
+    @Test
+    @DisplayName("prep time, cook time and servings default to null")
+    void timesAndServingsDefaultToNull() {
+        var dto = PublicRecipeDto.from(Recipe.builder().name("Toast").build());
+
+        assertThat(dto.getPrepTimeMinutes(), is((Integer) null));
+        assertThat(dto.getCookTimeMinutes(), is((Integer) null));
+        assertThat(dto.getServings(), is((Integer) null));
+    }
+
+    @Test
+    @DisplayName("a negative prep time is rejected")
+    void negativePrepTimeIsRejected(final Validator validator) {
+        var recipeDto =
+                PublicRecipeDto.builder().name("Toast").prepTimeMinutes(-1).build();
+
+        assertThat(validator.validate(recipeDto), not(empty()));
+    }
+
+    @Test
+    @DisplayName("a negative cook time is rejected")
+    void negativeCookTimeIsRejected(final Validator validator) {
+        var recipeDto =
+                PublicRecipeDto.builder().name("Toast").cookTimeMinutes(-1).build();
+
+        assertThat(validator.validate(recipeDto), not(empty()));
+    }
+
+    @Test
+    @DisplayName("zero servings is rejected")
+    void zeroServingsIsRejected(final Validator validator) {
+        var recipeDto = PublicRecipeDto.builder().name("Toast").servings(0).build();
+
+        assertThat(validator.validate(recipeDto), not(empty()));
+    }
 }

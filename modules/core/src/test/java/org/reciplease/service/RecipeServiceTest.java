@@ -196,6 +196,32 @@ class RecipeServiceTest {
         }
 
         @Test
+        void shouldUpdateTimesAndServings() {
+            var existing = Recipe.builder()
+                    .id(UUID.randomUUID().toString())
+                    .name("Pasta")
+                    .prepTimeMinutes(1)
+                    .cookTimeMinutes(2)
+                    .servings(3)
+                    .build();
+            var updates = Recipe.builder()
+                    .name("Pasta")
+                    .prepTimeMinutes(5)
+                    .cookTimeMinutes(40)
+                    .servings(4)
+                    .build();
+
+            when(recipeRepository.findById(existing.id())).thenReturn(Optional.of(existing));
+            when(recipeRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+            var result = recipeService.update(existing.id(), updates);
+
+            assertThat(result.prepTimeMinutes(), is(5));
+            assertThat(result.cookTimeMinutes(), is(40));
+            assertThat(result.servings(), is(4));
+        }
+
+        @Test
         void shouldFail_recipeNotFound() {
             var id = UUID.randomUUID().toString();
             when(recipeRepository.findById(id)).thenReturn(Optional.empty());

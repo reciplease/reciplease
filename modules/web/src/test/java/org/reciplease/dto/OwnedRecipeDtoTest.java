@@ -83,4 +83,30 @@ class OwnedRecipeDtoTest {
 
         assertThat(validator.validate(recipeDto), not(empty()));
     }
+
+    @Test
+    @DisplayName("carries prep time, cook time and servings")
+    void carriesTimesAndServings() {
+        var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("Pasta")
+                .prepTimeMinutes(5)
+                .cookTimeMinutes(40)
+                .servings(4)
+                .build();
+
+        var recipeDto = OwnedRecipeDto.from(recipe, null, null);
+
+        assertThat(recipeDto.getPrepTimeMinutes(), is(5));
+        assertThat(recipeDto.getCookTimeMinutes(), is(40));
+        assertThat(recipeDto.getServings(), is(4));
+    }
+
+    @Test
+    @DisplayName("zero servings is rejected")
+    void zeroServingsIsRejected(final Validator validator) {
+        var recipeDto = OwnedRecipeDto.builder().name("Toast").servings(0).build();
+
+        assertThat(validator.validate(recipeDto), not(empty()));
+    }
 }

@@ -140,8 +140,7 @@ class PendingPantryRepositoryTest {
     }
 
     private static PendingPantryItem scanned(final String houseId, final String scanId, final byte[] barcodeImage) {
-        return new PendingPantryItem(
-                null, null, houseId, barcodeImage, null, null, null, null, null, scanId);
+        return new PendingPantryItem(null, null, houseId, barcodeImage, null, null, null, null, null, scanId);
     }
 
     @Test

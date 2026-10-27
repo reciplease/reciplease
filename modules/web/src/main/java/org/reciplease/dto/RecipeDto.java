@@ -14,6 +14,7 @@ import org.reciplease.model.Recipe;
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
         property = "owned",
+        defaultImpl = PublicRecipeDto.class,
         visible = true)
 @JsonSubTypes({
     @JsonSubTypes.Type(value = PublicRecipeDto.class, name = "false"),
@@ -40,6 +41,12 @@ public sealed interface RecipeDto permits PublicRecipeDto, OwnedRecipeDto {
     String getDescription();
 
     String getSourceUrl();
+
+    Integer getPrepTimeMinutes();
+
+    Integer getCookTimeMinutes();
+
+    Integer getServings();
 
     List<String> getSteps();
 
@@ -87,6 +94,9 @@ public sealed interface RecipeDto permits PublicRecipeDto, OwnedRecipeDto {
                 .name(getName())
                 .description(getDescription())
                 .sourceUrl(getSourceUrl())
+                .prepTimeMinutes(getPrepTimeMinutes())
+                .cookTimeMinutes(getCookTimeMinutes())
+                .servings(getServings())
                 .steps(getSteps());
 
         if (getIngredients() != null) {

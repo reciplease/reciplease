@@ -1,6 +1,9 @@
 package org.reciplease.controller;
 
 import static java.util.stream.Collectors.toList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -118,6 +121,31 @@ class RecipeControllerTest {
                         .content(json))
                 .andExpect(status().isCreated())
                 .andExpect(content().json(mapper.writeValueAsString(savedSoupDto), true));
+    }
+
+    @Test
+    @DisplayName("create new recipe accepts a body without the read-only and discriminator fields")
+    void createRecipeWithWritableFieldsOnly() throws Exception {
+        final var savedSoup = getSavedSoup();
+        final var body = """
+                {"name":"soup","description":"","sourceUrl":"","isPublic":false,"steps":[],"ingredients":[],
+                 "prepTimeMinutes":5,"cookTimeMinutes":40,"servings":4}
+                """;
+
+        when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
+        when(recipeService.create(eq(OWNER_USER_ID), any(Recipe.class))).thenReturn(savedSoup);
+
+        mockMvc.perform(post("/api/recipes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+
+        verify(recipeService)
+                .create(
+                        eq(OWNER_USER_ID),
+                        argThat(recipe -> recipe.prepTimeMinutes() == 5
+                                && recipe.cookTimeMinutes() == 40
+                                && recipe.servings() == 4));
     }
 
     @Test

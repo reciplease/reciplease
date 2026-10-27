@@ -53,6 +53,33 @@ class RecipeRepositoryTest {
     }
 
     @Test
+    void shouldPersistTimesAndServings() {
+        var saved = recipeRepository.save(Recipe.builder()
+                .name("pasta")
+                .prepTimeMinutes(5)
+                .cookTimeMinutes(40)
+                .servings(4)
+                .build());
+
+        var found = recipeRepository.findById(saved.id()).orElseThrow();
+
+        assertThat(found.prepTimeMinutes(), is(5));
+        assertThat(found.cookTimeMinutes(), is(40));
+        assertThat(found.servings(), is(4));
+    }
+
+    @Test
+    void shouldLeaveTimesAndServingsNullWhenAbsent() {
+        var saved = recipeRepository.save(Recipe.builder().name("toast").build());
+
+        var found = recipeRepository.findById(saved.id()).orElseThrow();
+
+        assertThat(found.prepTimeMinutes(), is((Integer) null));
+        assertThat(found.cookTimeMinutes(), is((Integer) null));
+        assertThat(found.servings(), is((Integer) null));
+    }
+
+    @Test
     void shouldFindAllSavedRecipes() {
         var toast = recipeRepository.save(Recipe.builder().name("toast").build());
         var soup = recipeRepository.save(Recipe.builder().name("soup").build());

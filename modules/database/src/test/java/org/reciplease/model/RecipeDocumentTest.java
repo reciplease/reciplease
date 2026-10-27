@@ -12,6 +12,42 @@ import org.junit.jupiter.api.Test;
 class RecipeDocumentTest {
 
     @Test
+    @DisplayName("prep time, cook time and servings round-trip through the document")
+    void timesAndServingsRoundTrip() {
+        var recipe = Recipe.builder()
+                .id("recipe-1")
+                .name("pasta")
+                .prepTimeMinutes(5)
+                .cookTimeMinutes(40)
+                .servings(4)
+                .build();
+
+        var document = RecipeDocument.from(recipe);
+
+        assertThat(document.getPrepTimeMinutes(), is(5));
+        assertThat(document.getCookTimeMinutes(), is(40));
+        assertThat(document.getServings(), is(4));
+
+        var roundTripped = document.toModel();
+
+        assertThat(roundTripped.prepTimeMinutes(), is(5));
+        assertThat(roundTripped.cookTimeMinutes(), is(40));
+        assertThat(roundTripped.servings(), is(4));
+    }
+
+    @Test
+    @DisplayName("a document without times or servings maps to null")
+    void missingTimesAndServingsAreNull() {
+        var document = RecipeDocument.builder().id("recipe-1").name("toast").build();
+
+        var recipe = document.toModel();
+
+        assertThat(recipe.prepTimeMinutes(), is((Integer) null));
+        assertThat(recipe.cookTimeMinutes(), is((Integer) null));
+        assertThat(recipe.servings(), is((Integer) null));
+    }
+
+    @Test
     @DisplayName("create document from entity")
     void fromModel() {
         var recipe = Recipe.builder()

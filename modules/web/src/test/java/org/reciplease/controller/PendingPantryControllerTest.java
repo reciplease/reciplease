@@ -239,8 +239,7 @@ class PendingPantryControllerTest {
     }
 
     private PendingPantryItem scannedItem(final String scanId, final byte[] barcodeImage) {
-        return new PendingPantryItem(
-                null, null, HOUSE_ID, barcodeImage, null, null, null, null, null, scanId);
+        return new PendingPantryItem(null, null, HOUSE_ID, barcodeImage, null, null, null, null, null, scanId);
     }
 
     @Test

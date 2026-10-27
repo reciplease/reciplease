@@ -35,6 +35,9 @@ public class RecipeDocument {
     private String name;
     private String description;
     private String sourceUrl;
+    private Integer prepTimeMinutes;
+    private Integer cookTimeMinutes;
+    private Integer servings;
 
     @Builder.Default
     private List<String> steps = new ArrayList<>();
@@ -65,6 +68,9 @@ public class RecipeDocument {
                 .name(recipe.name())
                 .description(recipe.description())
                 .sourceUrl(recipe.sourceUrl())
+                .prepTimeMinutes(recipe.prepTimeMinutes())
+                .cookTimeMinutes(recipe.cookTimeMinutes())
+                .servings(recipe.servings())
                 .steps(recipe.steps() != null ? recipe.steps() : new ArrayList<>())
                 .ingredients(recipe.recipeIngredients().stream()
                         .map(RecipeIngredientDocument::from)
@@ -84,6 +90,9 @@ public class RecipeDocument {
                 .name(name)
                 .description(description)
                 .sourceUrl(sourceUrl)
+                .prepTimeMinutes(prepTimeMinutes)
+                .cookTimeMinutes(cookTimeMinutes)
+                .servings(servings)
                 .steps(steps != null ? steps : new ArrayList<>())
                 .upvotedBy(upvotedBy != null ? upvotedBy : new HashSet<>())
                 .createdBy(createdBy)

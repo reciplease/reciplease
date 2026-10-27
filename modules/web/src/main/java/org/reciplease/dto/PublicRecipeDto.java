@@ -3,8 +3,12 @@ package org.reciplease.dto;
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.List;
@@ -46,6 +50,18 @@ public class PublicRecipeDto implements RecipeDto {
     @Schema(requiredMode = REQUIRED, pattern = "^$|^https?://.+")
     String sourceUrl;
 
+    @PositiveOrZero
+    @Schema(nullable = true)
+    Integer prepTimeMinutes;
+
+    @PositiveOrZero
+    @Schema(nullable = true)
+    Integer cookTimeMinutes;
+
+    @Positive
+    @Schema(nullable = true)
+    Integer servings;
+
     @Schema(requiredMode = REQUIRED)
     List<String> steps;
 
@@ -59,9 +75,11 @@ public class PublicRecipeDto implements RecipeDto {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
     Instant updatedAt;
 
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
     int upvoteCount;
 
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
     boolean upvotedByCurrentUser;
 
@@ -86,6 +104,9 @@ public class PublicRecipeDto implements RecipeDto {
                 .name(recipe.name())
                 .description(recipe.description())
                 .sourceUrl(recipe.sourceUrl())
+                .prepTimeMinutes(recipe.prepTimeMinutes())
+                .cookTimeMinutes(recipe.cookTimeMinutes())
+                .servings(recipe.servings())
                 .steps(recipe.steps())
                 .ingredients(recipe.recipeIngredients().stream()
                         .map(RecipeIngredientDto::from)

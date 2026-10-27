@@ -30,6 +30,9 @@ public final class Recipe implements Audited {
     private final String name;
     private final String description;
     private final String sourceUrl;
+    private final Integer prepTimeMinutes;
+    private final Integer cookTimeMinutes;
+    private final Integer servings;
 
     @Builder.Default
     private final List<String> steps = new ArrayList<>();
