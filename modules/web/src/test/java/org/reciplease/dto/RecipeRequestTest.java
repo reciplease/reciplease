@@ -75,6 +75,16 @@ class RecipeRequestTest {
     }
 
     @Test
+    @DisplayName("description and sourceUrl are optional")
+    void descriptionAndSourceUrlAreOptional(final Validator validator) {
+        var request = RecipeRequest.builder().name("Toast").build();
+
+        assertThat(validator.validate(request), is(empty()));
+        assertThat(request.toEntity().description(), is((String) null));
+        assertThat(request.toEntity().sourceUrl(), is((String) null));
+    }
+
+    @Test
     @DisplayName("an empty sourceUrl is accepted")
     void emptySourceUrlIsAccepted(final Validator validator) {
         assertThat(

@@ -1,8 +1,11 @@
 package org.reciplease.dto;
 
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.NOT_REQUIRED;
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
@@ -27,16 +30,17 @@ public class RecipeRequest {
     @Schema(requiredMode = REQUIRED, maxLength = 200)
     String name;
 
-    @Schema(requiredMode = REQUIRED)
+    @Schema(requiredMode = NOT_REQUIRED, nullable = true)
     String description;
 
     @Pattern(regexp = "^$|^https?://.+")
-    @Schema(requiredMode = REQUIRED, pattern = "^$|^https?://.+")
+    @Schema(requiredMode = NOT_REQUIRED, nullable = true, pattern = "^$|^https?://.+")
     String sourceUrl;
 
     @Getter(onMethod_ = @JsonProperty("isPublic"))
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @Builder.Default
-    @Schema(requiredMode = REQUIRED)
+    @Schema(requiredMode = NOT_REQUIRED)
     boolean isPublic = false;
 
     @PositiveOrZero

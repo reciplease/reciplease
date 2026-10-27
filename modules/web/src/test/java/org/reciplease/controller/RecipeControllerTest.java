@@ -128,7 +128,7 @@ class RecipeControllerTest {
     void createRecipeWithWritableFieldsOnly() throws Exception {
         final var savedSoup = getSavedSoup();
         final var body = """
-                {"name":"soup","description":"","sourceUrl":"","isPublic":false,"steps":[],"ingredients":[],
+                {"name":"soup","steps":[],"ingredients":[],
                  "prepTimeMinutes":5,"cookTimeMinutes":40,"servings":4}
                 """;
 
@@ -145,7 +145,8 @@ class RecipeControllerTest {
                         eq(OWNER_USER_ID),
                         argThat(recipe -> recipe.prepTimeMinutes() == 5
                                 && recipe.cookTimeMinutes() == 40
-                                && recipe.servings() == 4));
+                                && recipe.servings() == 4
+                                && !recipe.isPublic()));
     }
 
     @Test
