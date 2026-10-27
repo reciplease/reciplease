@@ -34,6 +34,6 @@ public class PantryAllocationDto {
     }
 
     public PantryAllocation toModel() {
-        return new PantryAllocation(pantryItemId, barcode, amount);
+        return new PantryAllocation(pantryItemId, null, amount);
     }
 }

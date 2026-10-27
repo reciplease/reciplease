@@ -13,6 +13,7 @@ import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.HouseMember;
 import org.reciplease.configuration.HouseOwner;
 import org.reciplease.dto.PantryItemDto;
+import org.reciplease.dto.PantryItemRequest;
 import org.reciplease.service.PantryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,8 +40,8 @@ public class PantryController {
     @HouseOwner
     @Operation(operationId = "createPantryItem")
     public ResponseEntity<PantryItemDto> create(
-            @CurrentHouse final String houseId, @Valid @RequestBody final PantryItemDto itemDto) {
-        final var savedItem = pantryService.save(itemDto.toEntity(houseId));
+            @CurrentHouse final String houseId, @Valid @RequestBody final PantryItemRequest itemRequest) {
+        final var savedItem = pantryService.save(itemRequest.toEntity(houseId));
         final var savedItemDto = PantryItemDto.from(savedItem);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedItemDto);
     }
@@ -51,14 +52,14 @@ public class PantryController {
     public ResponseEntity<PantryItemDto> update(
             @CurrentHouse final String houseId,
             @PathVariable final String uuid,
-            @Valid @RequestBody final PantryItemDto itemDto) {
+            @Valid @RequestBody final PantryItemRequest itemRequest) {
         final var existing = pantryService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
             return ResponseEntity.notFound().build();
         }
 
         return pantryService
-                .update(uuid, itemDto.toEntity(houseId))
+                .update(uuid, itemRequest.toEntity(houseId))
                 .map(PantryItemDto::from)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.noContent().build());

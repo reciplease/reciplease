@@ -10,5 +10,5 @@ import lombok.Value;
 public class BulkCreatePendingPantryRequest {
     @NotEmpty
     @Size(max = 50)
-    List<@Valid PendingPantryItemDto> items;
+    List<@Valid PendingPantryItemRequest> items;
 }

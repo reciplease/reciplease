@@ -50,15 +50,4 @@ public class PendingPantryItemDto {
                 .updatedAt(item.updatedAt())
                 .build();
     }
-
-    // houseId is supplied by the controller from the already-validated X-RCPLS-House-Id
-    // header, not trusted from the request body, so a member can't write into a house
-    // they don't belong to by spoofing the field. The body's uuid is untrusted for the
-    // same reason: READ_ONLY only affects the OpenAPI schema, Jackson still binds it, and
-    // Mongo saves are upserts — a caller-chosen id could overwrite an arbitrary document
-    // (and, via complete()'s id reuse, even another house's pantry item).
-    public PendingPantryItem toEntity(final String houseId) {
-        return new PendingPantryItem(
-                null, null, houseId, barcodeImage, null, expirationImage, measureImage, null, null, scanId);
-    }
 }

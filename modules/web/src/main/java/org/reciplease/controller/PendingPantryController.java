@@ -14,7 +14,9 @@ import org.reciplease.configuration.HouseMember;
 import org.reciplease.configuration.HouseOwner;
 import org.reciplease.dto.BulkCreatePendingPantryRequest;
 import org.reciplease.dto.PantryItemDto;
+import org.reciplease.dto.PantryItemRequest;
 import org.reciplease.dto.PendingPantryItemDto;
+import org.reciplease.dto.PendingPantryItemRequest;
 import org.reciplease.dto.PendingPantryReceiptDto;
 import org.reciplease.service.PendingPantryService;
 import org.springframework.http.HttpStatus;
@@ -46,8 +48,8 @@ public class PendingPantryController {
     @HouseOwner
     @Operation(operationId = "createPendingPantryItem")
     public ResponseEntity<PendingPantryItemDto> create(
-            @CurrentHouse final String houseId, @Valid @RequestBody final PendingPantryItemDto itemDto) {
-        final var savedItem = pendingPantryService.save(itemDto.toEntity(houseId));
+            @CurrentHouse final String houseId, @Valid @RequestBody final PendingPantryItemRequest itemRequest) {
+        final var savedItem = pendingPantryService.save(itemRequest.toEntity(houseId));
         return ResponseEntity.status(HttpStatus.CREATED).body(PendingPantryItemDto.from(savedItem));
     }
 
@@ -110,13 +112,13 @@ public class PendingPantryController {
     public ResponseEntity<PantryItemDto> complete(
             @CurrentHouse final String houseId,
             @PathVariable final String uuid,
-            @Valid @RequestBody final PantryItemDto itemDto) {
+            @Valid @RequestBody final PantryItemRequest itemRequest) {
         final var existing = pendingPantryService.findById(uuid);
         if (existing.isEmpty() || !houseAccess.belongsToHeaderHouse(existing.get())) {
             return ResponseEntity.notFound().build();
         }
 
-        final var savedItem = pendingPantryService.complete(uuid, itemDto.toEntity(houseId));
+        final var savedItem = pendingPantryService.complete(uuid, itemRequest.toEntity(houseId));
         return ResponseEntity.status(HttpStatus.CREATED).body(PantryItemDto.from(savedItem));
     }
 }

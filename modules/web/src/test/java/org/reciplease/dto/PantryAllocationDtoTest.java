@@ -2,7 +2,9 @@ package org.reciplease.dto;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
@@ -28,5 +30,19 @@ class PantryAllocationDtoTest {
                 PantryAllocationDto.builder().pantryItemId("item-1").amount(-1d).build();
 
         assertThat(validator.validate(dto), not(empty()));
+    }
+
+    @Test
+    @DisplayName("the barcode is snapshotted server-side, never taken from the request")
+    void toModelIgnoresBarcode() {
+        var dto = PantryAllocationDto.builder()
+                .pantryItemId("item-1")
+                .barcode("0123456789012")
+                .amount(2d)
+                .build();
+
+        assertThat(dto.toModel().barcode(), is(nullValue()));
+        assertThat(dto.toModel().pantryItemId(), is("item-1"));
+        assertThat(dto.toModel().amount(), is(2d));
     }
 }
