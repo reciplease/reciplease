@@ -11,7 +11,10 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.reciplease.model.ListMethod;
 import org.reciplease.model.RecipeIngredient;
+import org.reciplease.model.TableCell;
+import org.reciplease.model.TableMethod;
 import org.reciplease.validation.ValidationTest;
 
 @ValidationTest
@@ -28,7 +31,7 @@ class RecipeRequestTest {
                 .prepTimeMinutes(5)
                 .cookTimeMinutes(40)
                 .servings(4)
-                .steps(List.of("Boil"))
+                .method(new ListMethodDto(List.of("Boil")))
                 .ingredients(Set.of(new RecipeIngredientDto("pasta", "g", 200d)))
                 .build();
 
@@ -41,20 +44,20 @@ class RecipeRequestTest {
         assertThat(recipe.prepTimeMinutes(), is(5));
         assertThat(recipe.cookTimeMinutes(), is(40));
         assertThat(recipe.servings(), is(4));
-        assertThat(recipe.steps(), contains("Boil"));
+        assertThat(recipe.method(), is(new ListMethod(List.of("Boil"))));
         assertThat(recipe.recipeIngredients(), contains(new RecipeIngredient("pasta", "g", 200d)));
     }
 
     @Test
     @DisplayName("an entity from a request has no id")
     void toEntityHasNoId() {
-        assertThat(RecipeRequest.builder().name("Toast").build().toEntity().id(), is((String) null));
+        assertThat(validRequest().build().toEntity().id(), is((String) null));
     }
 
     @Test
     @DisplayName("defaults to private with no times or servings")
     void defaults() {
-        var recipe = RecipeRequest.builder().name("Toast").build().toEntity();
+        var recipe = validRequest().build().toEntity();
 
         assertThat(recipe.isPublic(), is(false));
         assertThat(recipe.prepTimeMinutes(), is((Integer) null));
@@ -66,8 +69,7 @@ class RecipeRequestTest {
     @Test
     @DisplayName("ingredient measures are normalised to their short form")
     void normalisesIngredientMeasures() {
-        var request = RecipeRequest.builder()
-                .name("Toast")
+        var request = validRequest()
                 .ingredients(Set.of(new RecipeIngredientDto("bread", "ITEMS", 2d)))
                 .build();
 
@@ -75,15 +77,50 @@ class RecipeRequestTest {
     }
 
     @Test
-    @DisplayName("name, steps and ingredients are required")
-    void nameStepsAndIngredientsAreRequired(final Validator validator) {
-        var complete = validRequest();
+    @DisplayName("name, a method and ingredients are required")
+    void nameMethodAndIngredientsAreRequired(final Validator validator) {
+        assertThat(validator.validate(validRequest().build()), is(empty()));
+        assertThat(validator.validate(validRequest().name(null).build()), not(empty()));
+        assertThat(validator.validate(validRequest().method(null).build()), not(empty()));
+        assertThat(validator.validate(validRequest().ingredients(null).build()), not(empty()));
+    }
 
-        assertThat(validator.validate(complete.build()), is(empty()));
-        assertThat(validator.validate(complete.name(null).build()), not(empty()));
-        assertThat(validator.validate(complete.name("Toast").steps(null).build()), not(empty()));
+    @Test
+    @DisplayName("a list method needs its steps")
+    void listMethodNeedsSteps(final Validator validator) {
         assertThat(
-                validator.validate(complete.steps(List.of()).ingredients(null).build()), not(empty()));
+                validator.validate(
+                        validRequest().method(new ListMethodDto(null)).build()),
+                not(empty()));
+    }
+
+    @Test
+    @DisplayName("a table method converts to a table and needs its cells")
+    void tableMethodConvertsToTable(final Validator validator) {
+        var request = validRequest()
+                .method(new TableMethodDto(
+                        List.of(new TableCellDto("toast", List.of(new TableCellDto("bread", List.of()))))))
+                .build();
+
+        assertThat(validator.validate(request), is(empty()));
+        assertThat(
+                request.toEntity().method(),
+                is(new TableMethod(List.of(new TableCell("toast", List.of(TableCell.row("bread")))))));
+        assertThat(
+                validator.validate(
+                        validRequest().method(new TableMethodDto(null)).build()),
+                not(empty()));
+    }
+
+    @Test
+    @DisplayName("a blank cell anywhere in the tree is rejected")
+    void blankNestedCellIsRejected(final Validator validator) {
+        var request = validRequest()
+                .method(new TableMethodDto(
+                        List.of(new TableCellDto("toast", List.of(new TableCellDto(" ", List.of()))))))
+                .build();
+
+        assertThat(validator.validate(request), not(empty()));
     }
 
     @Test
@@ -125,6 +162,9 @@ class RecipeRequestTest {
     }
 
     private static RecipeRequest.RecipeRequestBuilder validRequest() {
-        return RecipeRequest.builder().name("Toast").steps(List.of()).ingredients(Set.of());
+        return RecipeRequest.builder()
+                .name("Toast")
+                .method(new ListMethodDto(List.of()))
+                .ingredients(Set.of());
     }
 }

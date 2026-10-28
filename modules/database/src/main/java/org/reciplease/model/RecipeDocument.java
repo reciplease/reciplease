@@ -42,6 +42,8 @@ public class RecipeDocument {
     @Builder.Default
     private List<String> steps = new ArrayList<>();
 
+    private List<TableCellDocument> cells;
+
     @Builder.Default
     private List<RecipeIngredientDocument> ingredients = new ArrayList<>();
 
@@ -61,8 +63,17 @@ public class RecipeDocument {
     private Instant updatedAt;
 
     public static RecipeDocument from(final Recipe recipe) {
-        return RecipeDocument.builder()
-                .id(recipe.id())
+        final var builder =
+                switch (recipe.method()) {
+                    case ListMethod list -> RecipeDocument.builder().steps(list.steps());
+                    case TableMethod table ->
+                        RecipeDocument.builder()
+                                .steps(null)
+                                .cells(table.cells().stream()
+                                        .map(TableCellDocument::from)
+                                        .toList());
+                };
+        return builder.id(recipe.id())
                 .createdBy(recipe.createdBy())
                 .isPublic(recipe.isPublic())
                 .name(recipe.name())
@@ -71,7 +82,6 @@ public class RecipeDocument {
                 .prepTimeMinutes(recipe.prepTimeMinutes())
                 .cookTimeMinutes(recipe.cookTimeMinutes())
                 .servings(recipe.servings())
-                .steps(recipe.steps() != null ? recipe.steps() : new ArrayList<>())
                 .ingredients(recipe.recipeIngredients().stream()
                         .map(RecipeIngredientDocument::from)
                         .collect(Collectors.toList()))
@@ -93,7 +103,7 @@ public class RecipeDocument {
                 .prepTimeMinutes(prepTimeMinutes)
                 .cookTimeMinutes(cookTimeMinutes)
                 .servings(servings)
-                .steps(steps != null ? steps : new ArrayList<>())
+                .method(toMethod())
                 .upvotedBy(upvotedBy != null ? upvotedBy : new HashSet<>())
                 .createdBy(createdBy)
                 .createdAt(createdAt)
@@ -104,5 +114,13 @@ public class RecipeDocument {
             ingredients.stream().map(RecipeIngredientDocument::toModel).forEach(recipe::addIngredient);
         }
         return recipe;
+    }
+
+    private RecipeMethod toMethod() {
+        if (cells != null) {
+            return new TableMethod(
+                    cells.stream().map(TableCellDocument::toModel).toList());
+        }
+        return new ListMethod(steps);
     }
 }

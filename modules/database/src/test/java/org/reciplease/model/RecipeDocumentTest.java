@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -54,7 +55,7 @@ class RecipeDocumentTest {
                 .id("recipe-1")
                 .name("toast")
                 .description("A staple")
-                .steps(List.of("Toast it"))
+                .method(new ListMethod(List.of("Toast it")))
                 .createdBy("user-1")
                 .updatedBy("user-2")
                 .build()
@@ -66,19 +67,46 @@ class RecipeDocumentTest {
         assertThat(document.getName(), is("toast"));
         assertThat(document.getDescription(), is("A staple"));
         assertThat(document.getSteps(), is(List.of("Toast it")));
+        assertThat(document.getCells(), is(nullValue()));
         assertThat(document.getIngredients().getFirst().toModel(), is(new RecipeIngredient("bread", "ITEMS", 2d)));
         assertThat(document.getCreatedBy(), is("user-1"));
         assertThat(document.getUpdatedBy(), is("user-2"));
     }
 
     @Test
-    @DisplayName("creates document with empty steps when entity steps is null")
-    void fromModelWithNullSteps() {
-        var recipe = Recipe.builder().id("recipe-1").name("toast").steps(null).build();
+    @DisplayName("creates document with empty steps by default")
+    void fromModelWithDefaultMethod() {
+        var recipe = Recipe.builder().id("recipe-1").name("toast").build();
 
         var document = RecipeDocument.from(recipe);
 
         assertThat(document.getSteps(), is(empty()));
+    }
+
+    @Test
+    @DisplayName("a table method is stored as cells and round-trips without steps")
+    void tableMethodRoundTrips() {
+        var table = new TableMethod(List.of(new TableCell(
+                "spread", List.of(new TableCell("toast", List.of(TableCell.row("bread"))), TableCell.row("butter")))));
+        var recipe = Recipe.builder().id("recipe-1").name("toast").method(table).build();
+
+        var document = RecipeDocument.from(recipe);
+
+        assertThat(document.getSteps(), is(nullValue()));
+        assertThat(document.toModel().method(), is(table));
+    }
+
+    @Test
+    @DisplayName("cells win over steps when a document carries both")
+    void cellsWinOverSteps() {
+        var document = RecipeDocument.builder()
+                .id("recipe-1")
+                .name("toast")
+                .steps(List.of("Toast it"))
+                .cells(List.of(TableCellDocument.from(TableCell.row("bread"))))
+                .build();
+
+        assertThat(document.toModel().method(), is(new TableMethod(List.of(TableCell.row("bread")))));
     }
 
     @Test
@@ -99,7 +127,7 @@ class RecipeDocumentTest {
         assertThat(recipe.id(), is("recipe-1"));
         assertThat(recipe.name(), is("toast"));
         assertThat(recipe.description(), is("A staple"));
-        assertThat(recipe.steps(), is(List.of("Toast it")));
+        assertThat(recipe.method(), is(new ListMethod(List.of("Toast it"))));
         assertThat(recipe.recipeIngredients(), contains(new RecipeIngredient("bread", "ITEMS", 2d)));
         assertThat(recipe.createdBy(), is("user-1"));
         assertThat(recipe.updatedBy(), is("user-2"));
@@ -117,7 +145,7 @@ class RecipeDocumentTest {
 
         var recipe = document.toModel();
 
-        assertThat(recipe.steps(), is(empty()));
+        assertThat(recipe.method(), is(new ListMethod(List.of())));
         assertThat(recipe.recipeIngredients(), is(empty()));
     }
 }

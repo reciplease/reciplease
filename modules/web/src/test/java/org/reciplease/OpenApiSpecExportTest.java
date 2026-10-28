@@ -1,6 +1,12 @@
 package org.reciplease;
 
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.nio.file.Files;
@@ -120,6 +126,52 @@ class OpenApiSpecExportTest {
 
     @MockitoBean
     private RefreshTokenService refreshTokenService;
+
+    @Test
+    void recipeMethodIsAUnionOfListAndTable() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath(
+                        "$.components.schemas.RecipeMethod.oneOf[*].$ref",
+                        containsInAnyOrder("#/components/schemas/ListMethod", "#/components/schemas/TableMethod")))
+                .andExpect(jsonPath("$.components.schemas.ListMethod.required", contains("steps")))
+                .andExpect(jsonPath("$.components.schemas.ListMethod.properties", not(hasKey("cells"))))
+                .andExpect(jsonPath("$.components.schemas.TableMethod.required", contains("cells")))
+                .andExpect(jsonPath("$.components.schemas.TableMethod.properties", not(hasKey("steps"))))
+                .andExpect(jsonPath("$.components.schemas.RecipeRequest.required", hasItem("method")))
+                .andExpect(jsonPath("$.components.schemas.RecipeRequest.properties", not(hasKey("steps"))))
+                .andExpect(jsonPath("$.components.schemas.Recipe.required", hasItem("method")));
+    }
+
+    @Test
+    void recipeSchemaUsesOwnershipObject() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.components.schemas.Recipe").exists())
+                .andExpect(jsonPath("$.components.schemas.Recipe.properties.ownership.$ref")
+                        .value("#/components/schemas/Ownership"))
+                .andExpect(jsonPath("$.components.schemas.Recipe.properties.ownership.type")
+                        .doesNotExist())
+                .andExpect(jsonPath("$.components.schemas.Recipe.required", not(hasItem("ownership"))))
+                .andExpect(
+                        jsonPath("$.components.schemas.Recipe.properties.owned").doesNotExist())
+                .andExpect(jsonPath("$.components.schemas.Recipe.discriminator").doesNotExist())
+                .andExpect(jsonPath("$.components.schemas.PublicRecipe").doesNotExist())
+                .andExpect(jsonPath("$.components.schemas.OwnedRecipe").doesNotExist())
+                .andExpect(jsonPath("$.components.schemas.RecipeDto").doesNotExist())
+                .andExpect(jsonPath("$.components.schemas.Ownership.properties.createdBy")
+                        .exists())
+                .andExpect(jsonPath("$.components.schemas.Ownership.properties.updatedBy")
+                        .exists())
+                .andExpect(jsonPath("$.paths['/api/recipes'].get.responses['200'].content['*/*'].schema.type")
+                        .value("array"))
+                .andExpect(jsonPath("$.paths['/api/recipes'].get.responses['200'].content['*/*'].schema.items.$ref")
+                        .value("#/components/schemas/Recipe"))
+                .andExpect(jsonPath("$.paths['/api/recipes/{uuid}'].get.responses['200'].content['*/*'].schema.$ref")
+                        .value("#/components/schemas/Recipe"))
+                .andExpect(jsonPath("$.components.schemas.PlannedMeal.properties.recipe.$ref")
+                        .value("#/components/schemas/Recipe"));
+    }
 
     @Test
     void exportsTheLiveSpecToTargetOpenapiJson() throws Exception {

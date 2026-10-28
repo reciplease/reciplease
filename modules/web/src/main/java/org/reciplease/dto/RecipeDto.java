@@ -1,87 +1,93 @@
 package org.reciplease.dto;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
-import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.reciplease.model.Recipe;
 
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "owned",
-        visible = true)
-@JsonSubTypes({
-    @JsonSubTypes.Type(value = PublicRecipeDto.class, name = "false"),
-    @JsonSubTypes.Type(value = OwnedRecipeDto.class, name = "true")
-})
-// swagger-core would otherwise leave the discriminator mapping's values ("true"/"false", from
-// @JsonSubTypes' names) unmapped to the differently-named PublicRecipe/OwnedRecipe schemas —
-// spell the mapping out explicitly so generated clients (e.g. openapi-typescript) can narrow
-// the union correctly.
-@Schema(
-        discriminatorProperty = "owned",
-        discriminatorMapping = {
-            @DiscriminatorMapping(value = "false", schema = PublicRecipeDto.class),
-            @DiscriminatorMapping(value = "true", schema = OwnedRecipeDto.class)
-        })
-public sealed interface RecipeDto permits PublicRecipeDto, OwnedRecipeDto {
+@Schema(name = "Recipe")
+public record RecipeDto(
+        @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
+        String recipeId,
 
-    String getRecipeId();
+        @JsonProperty("isPublic") @Schema(requiredMode = REQUIRED)
+        boolean isPublic,
 
-    boolean isPublic();
+        @Schema(requiredMode = REQUIRED) String name,
+        @Schema(requiredMode = REQUIRED) String description,
+        @Schema(requiredMode = REQUIRED) String sourceUrl,
+        @Schema(nullable = true) Integer prepTimeMinutes,
+        @Schema(nullable = true) Integer cookTimeMinutes,
+        @Schema(nullable = true) Integer servings,
+        @Schema(requiredMode = REQUIRED) RecipeMethodDto method,
+        @Schema(requiredMode = REQUIRED) Set<RecipeIngredientDto> ingredients,
 
-    String getName();
+        @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
+        Instant updatedAt,
 
-    String getDescription();
+        @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
+        int upvoteCount,
 
-    String getSourceUrl();
+        @Schema(accessMode = Schema.AccessMode.READ_ONLY, requiredMode = REQUIRED)
+        boolean upvotedByCurrentUser,
 
-    Integer getPrepTimeMinutes();
+        @JsonInclude(JsonInclude.Include.NON_NULL) OwnershipDto ownership) {
 
-    Integer getCookTimeMinutes();
-
-    Integer getServings();
-
-    List<String> getSteps();
-
-    Set<RecipeIngredientDto> getIngredients();
-
-    Instant getUpdatedAt();
-
-    int getUpvoteCount();
-
-    boolean isUpvotedByCurrentUser();
-
-    /** True for {@link OwnedRecipeDto} — the discriminant clients narrow the union on. */
-    default boolean isOwned() {
-        return false;
+    public static RecipeDto publicView(final Recipe recipe) {
+        return publicView(recipe, null);
     }
 
-    /** Public view: no owner or user info. */
-    static RecipeDto from(final Recipe recipe) {
-        return PublicRecipeDto.from(recipe);
+    public static RecipeDto publicView(final Recipe recipe, final String viewerId) {
+        return new RecipeDto(
+                recipe.id(),
+                recipe.isPublic(),
+                recipe.name(),
+                recipe.description(),
+                recipe.sourceUrl(),
+                recipe.prepTimeMinutes(),
+                recipe.cookTimeMinutes(),
+                recipe.servings(),
+                RecipeMethodDto.from(recipe.method()),
+                recipe.recipeIngredients().stream()
+                        .map(RecipeIngredientDto::from)
+                        .collect(Collectors.toSet()),
+                recipe.updatedAt(),
+                recipe.upvoteCount(),
+                recipe.isUpvotedBy(viewerId),
+                null);
     }
 
-    /** Public view for a specific viewer (upvote state reflected). */
-    static RecipeDto from(final Recipe recipe, final String viewerId) {
-        return PublicRecipeDto.from(recipe, viewerId);
+    public static RecipeDto ownerView(
+            final Recipe recipe, final UserSummaryDto createdBy, final UserSummaryDto updatedBy) {
+        return ownerView(recipe, createdBy, updatedBy, null);
     }
 
-    /** Owner view, for the recipe's owner only. */
-    static RecipeDto from(final Recipe recipe, final UserSummaryDto createdBy, final UserSummaryDto updatedBy) {
-        return OwnedRecipeDto.from(recipe, createdBy, updatedBy);
-    }
-
-    /** Owner view for a specific viewer (upvote state reflected). */
-    static RecipeDto from(
+    public static RecipeDto ownerView(
             final Recipe recipe,
             final UserSummaryDto createdBy,
             final UserSummaryDto updatedBy,
             final String viewerId) {
-        return OwnedRecipeDto.from(recipe, createdBy, updatedBy, viewerId);
+        return new RecipeDto(
+                recipe.id(),
+                recipe.isPublic(),
+                recipe.name(),
+                recipe.description(),
+                recipe.sourceUrl(),
+                recipe.prepTimeMinutes(),
+                recipe.cookTimeMinutes(),
+                recipe.servings(),
+                RecipeMethodDto.from(recipe.method()),
+                recipe.recipeIngredients().stream()
+                        .map(RecipeIngredientDto::from)
+                        .collect(Collectors.toSet()),
+                recipe.updatedAt(),
+                recipe.upvoteCount(),
+                recipe.isUpvotedBy(viewerId),
+                new OwnershipDto(createdBy, updatedBy));
     }
 }

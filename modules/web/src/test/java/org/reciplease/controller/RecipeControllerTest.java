@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
@@ -23,11 +24,14 @@ import org.junit.jupiter.api.Test;
 import org.reciplease.configuration.HouseAccess;
 import org.reciplease.configuration.MethodSecurityTestSupport;
 import org.reciplease.configuration.WithMockRecipleaseUser;
+import org.reciplease.dto.ListMethodDto;
 import org.reciplease.dto.RecipeDto;
 import org.reciplease.dto.RecipeRequest;
 import org.reciplease.dto.UserSummaryDto;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
+import org.reciplease.model.TableCell;
+import org.reciplease.model.TableMethod;
 import org.reciplease.model.User;
 import org.reciplease.repository.UserRepository;
 import org.reciplease.service.RecipeService;
@@ -79,22 +83,25 @@ class RecipeControllerTest {
     @DisplayName("get recipe by ID as the owner returns the owned view")
     void recipeAsOwner() throws Exception {
         final var soup = getSoup();
-        final var soupDto = RecipeDto.from(soup, null, null);
+        final var soupDto = RecipeDto.ownerView(soup, null, null, OWNER_USER_ID);
 
         when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
         when(recipeService.findVisibleById(soup.id(), OWNER_USER_ID)).thenReturn(Optional.of(soup));
 
         mockMvc.perform(get("/api/recipes/{uuid}", soup.id()))
                 .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(soupDto), true));
+                .andExpect(content().json(mapper.writeValueAsString(soupDto), true))
+                .andExpect(jsonPath("$.ownership").exists())
+                .andExpect(jsonPath("$.owned").doesNotExist());
     }
 
     @Test
     @DisplayName("get all recipes")
     void allRecipes() throws Exception {
         final var recipes = List.of(getToast(), getSoup());
-        final var recipeDtoList =
-                recipes.stream().map(r -> RecipeDto.from(r, null, null)).collect(toList());
+        final var recipeDtoList = recipes.stream()
+                .map(r -> RecipeDto.ownerView(r, null, null, OWNER_USER_ID))
+                .collect(toList());
 
         when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
         when(recipeService.findVisibleTo(OWNER_USER_ID)).thenReturn(recipes);
@@ -109,7 +116,7 @@ class RecipeControllerTest {
     void createRecipe() throws Exception {
         final var newSoupDto = getNewSoupDto();
         final var savedSoup = getSavedSoup();
-        final var savedSoupDto = RecipeDto.from(savedSoup, null, null);
+        final var savedSoupDto = RecipeDto.ownerView(savedSoup, null, null, OWNER_USER_ID);
 
         when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
         when(recipeService.create(OWNER_USER_ID, newSoupDto.toEntity())).thenReturn(savedSoup);
@@ -120,7 +127,9 @@ class RecipeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isCreated())
-                .andExpect(content().json(mapper.writeValueAsString(savedSoupDto), true));
+                .andExpect(content().json(mapper.writeValueAsString(savedSoupDto), true))
+                .andExpect(jsonPath("$.ownership").exists())
+                .andExpect(jsonPath("$.owned").doesNotExist());
     }
 
     @Test
@@ -128,7 +137,7 @@ class RecipeControllerTest {
     void createRecipeWithWritableFieldsOnly() throws Exception {
         final var savedSoup = getSavedSoup();
         final var body = """
-                {"name":"soup","steps":[],"ingredients":[],
+                {"name":"soup","method":{"steps":[]},"ingredients":[],
                  "prepTimeMinutes":5,"cookTimeMinutes":40,"servings":4}
                 """;
 
@@ -153,7 +162,7 @@ class RecipeControllerTest {
     @DisplayName("create new recipe ignores response-only fields sent by older clients")
     void createRecipeIgnoresResponseOnlyFields() throws Exception {
         final var body = """
-                {"name":"soup","description":"","sourceUrl":"","isPublic":false,"steps":[],"ingredients":[],
+                {"name":"soup","description":"","sourceUrl":"","isPublic":false,"method":{"steps":[]},"ingredients":[],
                  "owned":false,"upvoteCount":3,"upvotedByCurrentUser":true,"recipeId":"someone-elses-id"}
                 """;
 
@@ -169,11 +178,62 @@ class RecipeControllerTest {
     }
 
     @Test
-    @DisplayName("create new recipe rejects a body without steps")
-    void createRecipeRejectsMissingSteps() throws Exception {
+    @DisplayName("create new recipe accepts a table method")
+    void createTableRecipe() throws Exception {
+        final var body = """
+                {"name":"toast","ingredients":[],
+                 "method":{"cells":[{"text":"toast","inputs":[{"text":"bread","inputs":[]}]}]}}
+                """;
+
+        when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
+        when(recipeService.create(eq(OWNER_USER_ID), any(Recipe.class))).thenReturn(getSavedSoup());
+
+        mockMvc.perform(post("/api/recipes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+
+        verify(recipeService)
+                .create(
+                        eq(OWNER_USER_ID),
+                        argThat(recipe -> recipe.method()
+                                .equals(new TableMethod(
+                                        List.of(new TableCell("toast", List.of(TableCell.row("bread"))))))));
+    }
+
+    @Test
+    @DisplayName("create new recipe rejects a method with both steps and cells")
+    void createRecipeRejectsStepsAndCells() throws Exception {
+        mockMvc.perform(post("/api/recipes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"soup\",\"ingredients\":[],\"method\":{\"steps\":[],\"cells\":[]}}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("create new recipe rejects a body without a method")
+    void createRecipeRejectsMissingMethod() throws Exception {
         mockMvc.perform(post("/api/recipes")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"soup\",\"ingredients\":[]}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("create new recipe rejects the old top-level steps without a method")
+    void createRecipeRejectsTopLevelSteps() throws Exception {
+        mockMvc.perform(post("/api/recipes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"soup\",\"ingredients\":[],\"steps\":[]}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("create new recipe rejects an empty method")
+    void createRecipeRejectsEmptyMethod() throws Exception {
+        mockMvc.perform(post("/api/recipes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"soup\",\"ingredients\":[],\"method\":{}}"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -182,12 +242,12 @@ class RecipeControllerTest {
     void createRecipeRejectsMissingIngredients() throws Exception {
         mockMvc.perform(post("/api/recipes")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"soup\",\"steps\":[]}"))
+                        .content("{\"name\":\"soup\",\"method\":{\"steps\":[]}}"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    @DisplayName("update recipe rejects a body without steps or ingredients instead of clearing them")
+    @DisplayName("update recipe rejects a body without a method or ingredients instead of clearing them")
     void updateRecipeRejectsMissingLists() throws Exception {
         final var recipe = Recipe.builder()
                 .id(UUID.randomUUID().toString())
@@ -293,7 +353,10 @@ class RecipeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(RecipeDto.from(updated, null, null)), true));
+                .andExpect(content()
+                        .json(
+                                mapper.writeValueAsString(RecipeDto.ownerView(updated, null, null, OWNER_USER_ID)),
+                                true));
     }
 
     @Test
@@ -341,10 +404,11 @@ class RecipeControllerTest {
                 .build();
         final var ownerUser = new User(OWNER_USER_ID, "alice");
         final var updatedBy = new User("user-2", "bob");
-        final var expectedDto = RecipeDto.from(
+        final var expectedDto = RecipeDto.ownerView(
                 soup,
                 UserSummaryDto.builder().userId(OWNER_USER_ID).handle("alice").build(),
-                UserSummaryDto.builder().userId("user-2").handle("bob").build());
+                UserSummaryDto.builder().userId("user-2").handle("bob").build(),
+                OWNER_USER_ID);
 
         when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
         when(recipeService.findVisibleById(soup.id(), OWNER_USER_ID)).thenReturn(Optional.of(soup));
@@ -353,7 +417,9 @@ class RecipeControllerTest {
 
         mockMvc.perform(get("/api/recipes/{uuid}", soup.id()))
                 .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(expectedDto), true));
+                .andExpect(content().json(mapper.writeValueAsString(expectedDto), true))
+                .andExpect(jsonPath("$.ownership.createdBy.handle").value("alice"))
+                .andExpect(jsonPath("$.owned").doesNotExist());
     }
 
     @Test
@@ -363,14 +429,16 @@ class RecipeControllerTest {
                 .createdBy("someone-else")
                 .updatedBy("user-2")
                 .build();
-        final var expectedDto = RecipeDto.from(soup);
+        final var expectedDto = RecipeDto.publicView(soup, OWNER_USER_ID);
 
         when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
         when(recipeService.findVisibleById(soup.id(), OWNER_USER_ID)).thenReturn(Optional.of(soup));
 
         mockMvc.perform(get("/api/recipes/{uuid}", soup.id()))
                 .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(expectedDto), true));
+                .andExpect(content().json(mapper.writeValueAsString(expectedDto), true))
+                .andExpect(jsonPath("$.ownership").doesNotExist())
+                .andExpect(jsonPath("$.owned").doesNotExist());
 
         verify(userRepository, never()).findById(org.mockito.ArgumentMatchers.any());
     }
@@ -473,7 +541,10 @@ class RecipeControllerTest {
     }
 
     private RecipeRequest.RecipeRequestBuilder soupRequest() {
-        return RecipeRequest.builder().name("soup").steps(List.of()).ingredients(Set.of());
+        return RecipeRequest.builder()
+                .name("soup")
+                .method(new ListMethodDto(List.of()))
+                .ingredients(Set.of());
     }
 
     private Recipe getSavedSoup() {

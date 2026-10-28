@@ -140,9 +140,10 @@ public class RecipeController {
     private RecipeDto toDto(final Recipe recipe) {
         final var viewerId = houseAccess.currentUserId();
         if (isOwner(recipe)) {
-            return RecipeDto.from(recipe, userSummary(recipe.createdBy()), userSummary(recipe.updatedBy()), viewerId);
+            return RecipeDto.ownerView(
+                    recipe, userSummary(recipe.createdBy()), userSummary(recipe.updatedBy()), viewerId);
         }
-        return RecipeDto.from(recipe, viewerId);
+        return RecipeDto.publicView(recipe, viewerId);
     }
 
     private UserSummaryDto userSummary(final String userId) {

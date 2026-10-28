@@ -48,7 +48,7 @@ public class PlannedMealDto {
                 .plannedMealId(plannedMeal.id())
                 .houseId(plannedMeal.houseId())
                 .name(plannedMeal.name())
-                .recipe(recipe == null ? null : RecipeDto.from(recipe))
+                .recipe(recipe == null ? null : RecipeDto.publicView(recipe))
                 .date(plannedMeal.date())
                 .items(plannedMeal.items().stream()
                         .map(PlannedIngredientDto::from)

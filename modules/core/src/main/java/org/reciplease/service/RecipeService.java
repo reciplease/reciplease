@@ -52,7 +52,7 @@ public class RecipeService {
                 .prepTimeMinutes(updates.prepTimeMinutes())
                 .cookTimeMinutes(updates.cookTimeMinutes())
                 .servings(updates.servings())
-                .steps(updates.steps())
+                .method(updates.method())
                 .recipeIngredients(updates.recipeIngredients())
                 .isPublic(updates.isPublic())
                 .build();

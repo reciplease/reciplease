@@ -5,14 +5,16 @@ import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.Nulls;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -58,8 +60,11 @@ public class RecipeRequest {
     Integer servings;
 
     @NotNull
+    @Valid
+    @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
+    @JsonSubTypes({@JsonSubTypes.Type(ListMethodDto.class), @JsonSubTypes.Type(TableMethodDto.class)})
     @Schema(requiredMode = REQUIRED)
-    List<String> steps;
+    RecipeMethodDto method;
 
     @NotNull
     @Schema(requiredMode = REQUIRED)
@@ -74,7 +79,7 @@ public class RecipeRequest {
                 .prepTimeMinutes(prepTimeMinutes)
                 .cookTimeMinutes(cookTimeMinutes)
                 .servings(servings)
-                .steps(steps);
+                .method(method.toModel());
 
         if (ingredients != null) {
             builder.recipeIngredients(

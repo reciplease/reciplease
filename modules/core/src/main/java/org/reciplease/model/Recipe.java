@@ -1,7 +1,6 @@
 package org.reciplease.model;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +34,7 @@ public final class Recipe implements Audited {
     private final Integer servings;
 
     @Builder.Default
-    private final List<String> steps = new ArrayList<>();
+    private final RecipeMethod method = new ListMethod(List.of());
 
     @Builder.Default
     private final Set<RecipeIngredient> recipeIngredients = new HashSet<>();

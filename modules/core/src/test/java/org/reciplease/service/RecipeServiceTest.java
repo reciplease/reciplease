@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.reciplease.model.House;
 import org.reciplease.model.HouseMembership;
 import org.reciplease.model.HouseRole;
+import org.reciplease.model.ListMethod;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
 import org.reciplease.repository.HouseRepository;
@@ -175,7 +176,7 @@ class RecipeServiceTest {
             var updates = Recipe.builder()
                     .name("Fancy toast")
                     .description("New description")
-                    .steps(List.of("Toast it"))
+                    .method(new ListMethod(List.of("Toast it")))
                     .isPublic(true)
                     .build()
                     .addIngredient("bread", "ITEMS", 2d);
@@ -190,7 +191,7 @@ class RecipeServiceTest {
             assertThat(result.createdBy(), is("owner"));
             assertThat(result.name(), is("Fancy toast"));
             assertThat(result.description(), is("New description"));
-            assertThat(result.steps(), is(List.of("Toast it")));
+            assertThat(result.method(), is(new ListMethod(List.of("Toast it"))));
             assertThat(result.isPublic(), is(true));
             assertThat(result.recipeIngredients(), contains(new RecipeIngredient("bread", "ITEMS", 2d)));
         }
