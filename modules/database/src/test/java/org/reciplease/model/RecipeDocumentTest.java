@@ -97,6 +97,44 @@ class RecipeDocumentTest {
     }
 
     @Test
+    @DisplayName("cell duration and hands-off round-trip, including on nested inputs")
+    void cellDurationAndHandsOffRoundTrip() {
+        var table = new TableMethod(List.of(new TableCell(
+                "roast",
+                List.of(
+                        new TableCell("rest", List.of(), new CellDuration(10, 10), true),
+                        new TableCell("prep", List.of(), null, false)),
+                new CellDuration(45, 60),
+                true)));
+        var recipe = Recipe.builder().id("recipe-1").name("roast").method(table).build();
+
+        var document = RecipeDocument.from(recipe);
+
+        assertThat(document.getCells().getFirst().duration(), is(new CellDurationDocument(45, 60)));
+        assertThat(document.getCells().getFirst().handsOff(), is(true));
+        assertThat(document.toModel().method(), is(table));
+    }
+
+    @Test
+    @DisplayName("a stored cell without duration or hands-off loads as no duration and not hands-off")
+    void legacyCellLoadsWithDefaults() {
+        var legacy =
+                new TableCellDocument("toast", List.of(new TableCellDocument("bread", null, null, null)), null, null);
+        var document = RecipeDocument.builder()
+                .id("recipe-1")
+                .name("toast")
+                .cells(List.of(legacy))
+                .build();
+
+        var cell = ((TableMethod) document.toModel().method()).cells().getFirst();
+
+        assertThat(cell.duration(), is(nullValue()));
+        assertThat(cell.handsOff(), is(false));
+        assertThat(cell.inputs().getFirst().duration(), is(nullValue()));
+        assertThat(cell.inputs().getFirst().handsOff(), is(false));
+    }
+
+    @Test
     @DisplayName("cells win over steps when a document carries both")
     void cellsWinOverSteps() {
         var document = RecipeDocument.builder()

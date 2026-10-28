@@ -66,7 +66,7 @@ class RecipeDtoTest {
         assertThat(
                 json,
                 containsString(
-                        "\"method\":{\"cells\":[{\"text\":\"toast\",\"inputs\":[{\"text\":\"bread\",\"inputs\":[]}]}]}"));
+                        "\"method\":{\"cells\":[{\"text\":\"toast\",\"inputs\":[{\"text\":\"bread\",\"inputs\":[],\"handsOff\":false}],\"handsOff\":false}]}"));
         assertThat(json, not(containsString("\"steps\"")));
     }
 

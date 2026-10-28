@@ -8,12 +8,18 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reciplease.configuration.MongoAuditingConfig;
+import org.reciplease.model.CellDuration;
 import org.reciplease.model.Recipe;
+import org.reciplease.model.TableCell;
+import org.reciplease.model.TableMethod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.context.annotation.Import;
@@ -77,6 +83,36 @@ class RecipeRepositoryTest {
         assertThat(found.prepTimeMinutes(), is((Integer) null));
         assertThat(found.cookTimeMinutes(), is((Integer) null));
         assertThat(found.servings(), is((Integer) null));
+    }
+
+    @Test
+    void shouldPersistCellDurationAndHandsOff() {
+        var table = new TableMethod(List.of(new TableCell(
+                "roast",
+                List.of(new TableCell("rest", List.of(), new CellDuration(10, 10), true)),
+                new CellDuration(45, 60),
+                true)));
+        var saved = recipeRepository.save(
+                Recipe.builder().name("roast").method(table).build());
+
+        var found = recipeRepository.findById(saved.id()).orElseThrow();
+
+        assertThat(found.method(), is(table));
+    }
+
+    @Test
+    void shouldLoadStoredCellsWithoutDurationOrHandsOff() {
+        var legacyCell = new Document("text", "toast").append("inputs", List.of(new Document("text", "bread")));
+        mongoTemplate
+                .getCollection("recipes")
+                .insertOne(new Document("_id", new ObjectId())
+                        .append("name", "toast")
+                        .append("cells", List.of(legacyCell)));
+
+        var found = recipeRepository.findAll().getFirst();
+
+        assertThat(
+                found.method(), is(new TableMethod(List.of(new TableCell("toast", List.of(TableCell.row("bread")))))));
     }
 
     @Test

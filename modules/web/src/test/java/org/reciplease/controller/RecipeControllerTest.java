@@ -28,6 +28,7 @@ import org.reciplease.dto.ListMethodDto;
 import org.reciplease.dto.RecipeDto;
 import org.reciplease.dto.RecipeRequest;
 import org.reciplease.dto.UserSummaryDto;
+import org.reciplease.model.CellDuration;
 import org.reciplease.model.Recipe;
 import org.reciplease.model.RecipeIngredient;
 import org.reciplease.model.TableCell;
@@ -199,6 +200,146 @@ class RecipeControllerTest {
                         argThat(recipe -> recipe.method()
                                 .equals(new TableMethod(
                                         List.of(new TableCell("toast", List.of(TableCell.row("bread"))))))));
+    }
+
+    @Test
+    @DisplayName("create new recipe keeps cell duration and handsOff, nested inputs included")
+    void createTableRecipeWithDuration() throws Exception {
+        final var body = """
+                {"name":"roast","ingredients":[],
+                 "method":{"cells":[{"text":"roast","handsOff":true,"duration":{"minMinutes":45,"maxMinutes":60},
+                   "inputs":[{"text":"rest","inputs":[],"duration":{"minMinutes":10,"maxMinutes":10}}]}]}}
+                """;
+
+        when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
+        when(recipeService.create(eq(OWNER_USER_ID), any(Recipe.class))).thenReturn(getSavedSoup());
+
+        mockMvc.perform(post("/api/recipes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+
+        verify(recipeService)
+                .create(
+                        eq(OWNER_USER_ID),
+                        argThat(recipe -> recipe.method()
+                                .equals(new TableMethod(List.of(new TableCell(
+                                        "roast",
+                                        List.of(new TableCell("rest", List.of(), new CellDuration(10, 10), false)),
+                                        new CellDuration(45, 60),
+                                        true))))));
+    }
+
+    @Test
+    @DisplayName("create new recipe rejects a cell duration whose max is below its min")
+    void createTableRecipeRejectsInvalidRange() throws Exception {
+        final var body = """
+                {"name":"roast","ingredients":[],
+                 "method":{"cells":[{"text":"roast","inputs":[],"duration":{"minMinutes":60,"maxMinutes":45}}]}}
+                """;
+
+        mockMvc.perform(post("/api/recipes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verify(recipeService, never()).create(any(), any());
+    }
+
+    @Test
+    @DisplayName("create new recipe rejects a negative cell duration and a half-specified one")
+    void createTableRecipeRejectsNegativeAndPartialDuration() throws Exception {
+        final var negative = """
+                {"name":"roast","ingredients":[],
+                 "method":{"cells":[{"text":"roast","inputs":[],"duration":{"minMinutes":-1,"maxMinutes":5}}]}}
+                """;
+        final var partial = """
+                {"name":"roast","ingredients":[],
+                 "method":{"cells":[{"text":"roast","inputs":[],"duration":{"minMinutes":5}}]}}
+                """;
+
+        for (final var body : List.of(negative, partial)) {
+            mockMvc.perform(post("/api/recipes")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    .andExpect(status().isBadRequest());
+        }
+    }
+
+    @Test
+    @DisplayName("update recipe round-trips a cell duration and handsOff into the response")
+    void updateTableRecipeRoundTripsDuration() throws Exception {
+        final var cell = new TableCell("bake", List.of(TableCell.row("dough")), new CellDuration(20, 25), true);
+        final var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("bread")
+                .createdBy(OWNER_USER_ID)
+                .build();
+        final var updated =
+                recipe.toBuilder().method(new TableMethod(List.of(cell))).build();
+        final var body = """
+                {"name":"bread","ingredients":[],
+                 "method":{"cells":[{"text":"bake","handsOff":true,"duration":{"minMinutes":20,"maxMinutes":25},
+                   "inputs":[{"text":"dough","inputs":[]}]}]}}
+                """;
+
+        when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
+        when(recipeService.findById(recipe.id())).thenReturn(Optional.of(recipe));
+        when(recipeService.update(eq(recipe.id()), any(Recipe.class))).thenReturn(updated);
+
+        mockMvc.perform(put("/api/recipes/{uuid}", recipe.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.method.cells[0].duration.minMinutes").value(20))
+                .andExpect(jsonPath("$.method.cells[0].duration.maxMinutes").value(25))
+                .andExpect(jsonPath("$.method.cells[0].handsOff").value(true))
+                .andExpect(jsonPath("$.method.cells[0].inputs[0].handsOff").value(false))
+                .andExpect(jsonPath("$.method.cells[0].inputs[0].duration").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("update recipe rejects an invalid cell duration")
+    void updateTableRecipeRejectsInvalidRange() throws Exception {
+        final var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("bread")
+                .createdBy(OWNER_USER_ID)
+                .build();
+        final var body = """
+                {"name":"bread","ingredients":[],
+                 "method":{"cells":[{"text":"bake","inputs":[],"duration":{"minMinutes":30,"maxMinutes":20}}]}}
+                """;
+
+        when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
+        when(recipeService.findById(recipe.id())).thenReturn(Optional.of(recipe));
+
+        mockMvc.perform(put("/api/recipes/{uuid}", recipe.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verify(recipeService, never()).update(any(), any());
+    }
+
+    @Test
+    @DisplayName("get recipe returns cell duration and handsOff")
+    void getTableRecipeWithDuration() throws Exception {
+        final var recipe = Recipe.builder()
+                .id(UUID.randomUUID().toString())
+                .name("bread")
+                .createdBy(OWNER_USER_ID)
+                .method(new TableMethod(List.of(new TableCell("bake", List.of(), new CellDuration(20, 20), true))))
+                .build();
+
+        when(houseAccess.currentUserId()).thenReturn(OWNER_USER_ID);
+        when(recipeService.findVisibleById(recipe.id(), OWNER_USER_ID)).thenReturn(Optional.of(recipe));
+
+        mockMvc.perform(get("/api/recipes/{uuid}", recipe.id()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.method.cells[0].duration.minMinutes").value(20))
+                .andExpect(jsonPath("$.method.cells[0].duration.maxMinutes").value(20))
+                .andExpect(jsonPath("$.method.cells[0].handsOff").value(true));
     }
 
     @Test

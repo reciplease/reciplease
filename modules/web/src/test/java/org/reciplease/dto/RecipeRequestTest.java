@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.reciplease.model.CellDuration;
 import org.reciplease.model.ListMethod;
 import org.reciplease.model.RecipeIngredient;
 import org.reciplease.model.TableCell;
@@ -98,8 +99,8 @@ class RecipeRequestTest {
     @DisplayName("a table method converts to a table and needs its cells")
     void tableMethodConvertsToTable(final Validator validator) {
         var request = validRequest()
-                .method(new TableMethodDto(
-                        List.of(new TableCellDto("toast", List.of(new TableCellDto("bread", List.of()))))))
+                .method(new TableMethodDto(List.of(new TableCellDto(
+                        "toast", List.of(new TableCellDto("bread", List.of(), null, false)), null, false))))
                 .build();
 
         assertThat(validator.validate(request), is(empty()));
@@ -113,11 +114,35 @@ class RecipeRequestTest {
     }
 
     @Test
+    @DisplayName("an invalid cell duration anywhere in the tree rejects the request")
+    void invalidCellDurationIsRejected(final Validator validator) {
+        var request = validRequest()
+                .method(new TableMethodDto(
+                        List.of(new TableCellDto("toast", List.of(), new CellDurationDto(9, 1), false))))
+                .build();
+
+        assertThat(validator.validate(request), not(empty()));
+    }
+
+    @Test
+    @DisplayName("cell duration and handsOff reach the entity")
+    void cellDurationReachesEntity() {
+        var request = validRequest()
+                .method(new TableMethodDto(
+                        List.of(new TableCellDto("toast", List.of(), new CellDurationDto(5, 10), true))))
+                .build();
+
+        assertThat(
+                request.toEntity().method(),
+                is(new TableMethod(List.of(new TableCell("toast", List.of(), new CellDuration(5, 10), true)))));
+    }
+
+    @Test
     @DisplayName("a blank cell anywhere in the tree is rejected")
     void blankNestedCellIsRejected(final Validator validator) {
         var request = validRequest()
-                .method(new TableMethodDto(
-                        List.of(new TableCellDto("toast", List.of(new TableCellDto(" ", List.of()))))))
+                .method(new TableMethodDto(List.of(new TableCellDto(
+                        "toast", List.of(new TableCellDto(" ", List.of(), null, false)), null, false))))
                 .build();
 
         assertThat(validator.validate(request), not(empty()));

@@ -144,6 +144,29 @@ class OpenApiSpecExportTest {
     }
 
     @Test
+    void tableCellHasOptionalDurationAndRequiredHandsOff() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.components.schemas.TableCell.properties.duration.$ref")
+                        .value("#/components/schemas/CellDuration"))
+                .andExpect(jsonPath("$.components.schemas.TableCell.properties.duration.type")
+                        .doesNotExist())
+                .andExpect(jsonPath("$.components.schemas.TableCell.properties.duration.nullable")
+                        .doesNotExist())
+                .andExpect(jsonPath("$.components.schemas.TableCell.properties.handsOff.type")
+                        .value("boolean"))
+                .andExpect(jsonPath("$.components.schemas.TableCell.required", hasItem("handsOff")))
+                .andExpect(jsonPath("$.components.schemas.TableCell.required", not(hasItem("duration"))))
+                .andExpect(jsonPath(
+                        "$.components.schemas.CellDuration.required", containsInAnyOrder("minMinutes", "maxMinutes")))
+                .andExpect(jsonPath("$.components.schemas.CellDuration.properties.minMinutes.type")
+                        .value("integer"))
+                .andExpect(jsonPath("$.components.schemas.CellDuration.properties.maxMinutes.type")
+                        .value("integer"))
+                .andExpect(jsonPath("$.components.schemas.CellDuration.properties", not(hasKey("rangeOrdered"))));
+    }
+
+    @Test
     void recipeSchemaUsesOwnershipObject() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
