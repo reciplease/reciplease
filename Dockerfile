@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=eclipse-temurin:25-jdk
+ARG BASE_IMAGE=amazoncorretto:25-headless
 
 FROM ${BASE_IMAGE} as builder
 WORKDIR /builder
@@ -20,4 +20,4 @@ COPY --from=builder /builder/extracted/application/ ./
 # The `tools` extractor emits a thin launcher (application/application.jar) whose
 # manifest Class-Path references the sibling dependency layers, so run it with
 # `-jar` rather than invoking JarLauncher on a hand-built classpath.
-ENTRYPOINT ["java", "-XX:-UseBASE64Intrinsics", "-Djava.security.egd=file:/dev/./urandom", "-jar", "application.jar"]
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "application.jar"]
