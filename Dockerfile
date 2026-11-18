@@ -20,6 +20,4 @@ COPY --from=builder /builder/extracted/application/ ./
 # The `tools` extractor emits a thin launcher (application/application.jar) whose
 # manifest Class-Path references the sibling dependency layers, so run it with
 # `-jar` rather than invoking JarLauncher on a hand-built classpath.
-# Interim mitigation for Java4Shell (CVE-2026-114938). Remove once the base image
-# is on a JDK >= 25.0.5.1.
 ENTRYPOINT ["java", "-XX:-UseBASE64Intrinsics", "-Djava.security.egd=file:/dev/./urandom", "-jar", "application.jar"]
