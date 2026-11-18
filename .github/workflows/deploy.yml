@@ -3,6 +3,9 @@ name: Build and push image to GHCR
 on:
   push:
     branches: [ main ]
+  schedule:
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
 
 env:
   MVN: mvn
@@ -50,6 +53,7 @@ jobs:
         run: make init
 
       - name: Release version
+        if: github.event_name == 'push'
         run: make git-init release
 
       - name: Build with Maven
